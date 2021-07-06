@@ -2,13 +2,13 @@
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-const system = require('./system');
+const system = require('./lib/system');
 
 yargs(hideBin(process.argv))
   .scriptName('snapp')
   .usage('Usage: $0 <cmd> [options]')
   .command(
-    ['sys', 'system'],
+    ['system', 'sys'],
     'Show system info to provide with issue reports.',
     {},
     () => system()
