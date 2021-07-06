@@ -8,9 +8,10 @@ yargs(hideBin(process.argv))
   .scriptName('snapp')
   .usage('Usage: $0 <cmd> [options]')
   .command(
-    'system',
+    ['sys', 'system'],
     'Show system info to provide with issue reports.',
-    system()
+    {},
+    () => system()
   )
   .alias('h', 'help')
   .alias('v', 'version')
