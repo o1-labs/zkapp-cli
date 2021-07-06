@@ -1,0 +1,3 @@
+# Snapp CLI
+
+WIP
