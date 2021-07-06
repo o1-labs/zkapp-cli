@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "description": "CLI to create a SNAPP (Snark App) for Mina Protocol.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "keywords": [
     "mina",
     "snapps",
@@ -15,7 +13,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "envinfo": "^7.8.1",
-    "jest": "^27.0.6",
     "yargs": "^17.0.1"
   }
 }
