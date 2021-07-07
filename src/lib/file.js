@@ -5,9 +5,12 @@ const _red = chalk.red;
 const _green = chalk.green;
 const _i = chalk.italic;
 
-// Create `foo.js` and `foo.test.js` in current directory. Warn if already
-// exists and do NOT overwrite.
-// TODO: Handle if user provides path/to/name.
+/**
+ * Create `foo.js` and `foo.test.js` in current directory. Warn if dir already
+ * exists and do NOT overwrite.
+ * @param {string} name Desired file name.
+ * @return {void}
+ */
 module.exports = async function (name) {
   const fileName = `${name}.js`;
   const testName = `${name}.test.js`;
