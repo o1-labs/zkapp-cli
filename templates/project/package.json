@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
-    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch"
+    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
+    "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage"
   },
   "keywords": [],
   "author": "",
