@@ -2,9 +2,9 @@
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-const system = require('../lib/system');
-const project = require('../lib/project');
 const file = require('../lib/file');
+const project = require('../lib/project');
+const system = require('../lib/system');
 
 yargs(hideBin(process.argv))
   .scriptName('snap')
