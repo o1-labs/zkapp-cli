@@ -24,4 +24,5 @@ yargs(hideBin(process.argv))
   .command(['system', 'sys', 's'], 'Show system info.', {}, () => system())
   .alias('h', 'help')
   .alias('v', 'version')
+  .strict()
   .demandCommand(1, 'Please provide a command.').argv;
