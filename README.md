@@ -6,8 +6,8 @@ WIP. Not ready for use. File & project templates need to be added when SnarkyJS 
 
 ```sh
 git clone https://github.com/jasongitmail/snapp-cli.git
-npm i
 cd snapp-cli
+npm i
 npm link
 ```
 
