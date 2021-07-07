@@ -10,19 +10,20 @@ yargs(hideBin(process.argv))
   .scriptName('snap')
   .usage('Usage: $0 <command> [options]')
   .command(
-    ['project <name>', 'proj <name>', 'p <name>'],
-    'Create a new project.',
-    {},
+    ['project [name]', 'proj [name]', 'p [name]'],
+    'Create a new project',
+    { name: { demand: true, string: true, hidden: true } },
     (argv) => project(argv.name)
   )
+
   .command(
-    ['file <name>', 'f <name>'],
-    'Create a new file & test.',
-    {},
+    ['file [name]', 'f [name]'],
+    'Create a new file & test',
+    { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
-  .command(['system', 'sys', 's'], 'Show system info.', {}, () => system())
+  .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
   .alias('h', 'help')
   .alias('v', 'version')
-  .strict()
+  .strict() // err if too many args
   .demandCommand(1, 'Please provide a command.').argv;
