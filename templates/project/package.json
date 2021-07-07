@@ -1,0 +1,17 @@
+{
+  "name": "PROJECT_NAME",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "jest": "^27.0.6"
+  }
+}
