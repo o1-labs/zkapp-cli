@@ -25,5 +25,17 @@ yargs(hideBin(process.argv))
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
   .alias('h', 'help')
   .alias('v', 'version')
-  .strict() // err if too many args
-  .demandCommand(1, 'Please provide a command.').argv;
+  .demandCommand(1, 'Please provide a command.')
+  .strict() // disallow superfluous args
+  .epilog(
+    `Note:
+  You can use "snapp" or "snap". Both CLI aliases are provided.
+
+
+    █▄ ▄█ █ █▄ █ ▄▀▄
+    █ ▀ █ █ █ ▀█ █▀█
+
+     MINA Protocol
+
+  `
+  ).argv;
