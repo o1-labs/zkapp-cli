@@ -38,7 +38,7 @@ module.exports = async function (name) {
 
   // TODO: Finish templates when SnarkyJS is ready.
   const fileContent = ``;
-  const testContent = `import ${name} from '${fileName}';\n`;
+  const testContent = `import ${name} from './${fileName}';\n`;
 
   fs.writeFileSync(fileName, fileContent, 'utf8');
   fs.writeFileSync(testName, testContent, 'utf8');
