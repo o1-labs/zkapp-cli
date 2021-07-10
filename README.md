@@ -42,3 +42,9 @@ This will create a directory containing a new project template.
 For consistency, we suggest using `main` as the default branch, by convention.
 
 The project template comes with a Github Actions CI workflow that will run your tests (named as `*.test.js`) whenever you push a commit or open a pull request on your project when hosted on Github.
+
+### Create a new file
+
+    snapp file <name>
+
+This will create `name.js` and `name.test.js`.
