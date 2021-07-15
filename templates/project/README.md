@@ -14,3 +14,7 @@ npm run testw # watch mode
 ```sh
 npm run coverage
 ```
+
+## License
+
+[Apache-2.0](LICENSE)

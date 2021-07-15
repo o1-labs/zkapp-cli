@@ -53,3 +53,7 @@ This will create `name.js` and `name.test.js`.
 This will output system info such as your NodeJS version, NPM version, Yarn
 version, `snapp-cli` version, etc. Please include this if submitting a bug
 report for this repo, so we can better troubleshoot.
+
+## License
+
+[Apache-2.0](LICENSE)
