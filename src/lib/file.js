@@ -12,8 +12,14 @@ const _i = chalk.italic;
  * @return {void}
  */
 module.exports = async function (name) {
-  const fileName = `${name}.js`;
-  const testName = `${name}.test.js`;
+  // If we're in the project root, create files in `/src`. Otherwise, create
+  // wherever the user is because they could be in `/src/foo`, etc).
+  let fileName = `src/${name}.js`;
+  let testName = `src/${name}.test.js`;
+  if (!fs.existsSync('src')) {
+    fileName = fileName.replace('src/', '');
+    testName = testName.replace('src/', '');
+  }
 
   let fileExists = true;
   try {
