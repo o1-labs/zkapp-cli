@@ -21,20 +21,16 @@ module.exports = async function (name) {
     testName = testName.replace('src/', '');
   }
 
-  let fileExists = true;
-  try {
-    fs.accessSync(fileName, fs.constants.F_OK);
+  let fileExists = false;
+  if (fs.existsSync(fileName)) {
+    fileExists = true;
     console.error(_red(`"${_i(fileName)}" already exists`));
-  } catch (err) {
-    fileExists = false;
   }
 
-  let testExists = true;
-  try {
-    fs.accessSync(testName, fs.constants.F_OK);
+  let testExists = false;
+  if (fs.existsSync(testName)) {
+    testExists = true;
     console.error(_red(`"${_i(testName)}" already exists`));
-  } catch (err) {
-    testExists = false;
   }
 
   if (fileExists || testExists) {
