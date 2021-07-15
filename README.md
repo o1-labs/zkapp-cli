@@ -50,9 +50,9 @@ This will create `name.js` and `name.test.js`.
 
     snapp system
 
-This will output system info such as your NodeJS version, NPM version, Yarn
-version, `snapp-cli` version, etc. Please include this if submitting a bug
-report for this repo, so we can better troubleshoot.
+This will output system info such as your NodeJS version, NPM version,
+`snapp-cli` version, etc. Please include this if submitting a bug report for
+`snapp-cli`, for easier troubleshooting.
 
 ## License
 
