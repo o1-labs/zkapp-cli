@@ -15,6 +15,12 @@ npm run testw # watch mode
 npm run coverage
 ```
 
+## How to build
+
+```sh
+npm run build
+```
+
 ## License
 
 [Apache-2.0](LICENSE)
