@@ -33,7 +33,7 @@ module.exports = function (name) {
       spin0.succeed(_green('Clone project template'));
 
       // Set dir for shell commands. Doesn't change user's dir in their CLI.
-      shell.cd(`${name}`);
+      shell.cd(name);
 
       const shellExecAsync = util.promisify(shell.exec);
 
@@ -52,15 +52,18 @@ module.exports = function (name) {
         );
         spin2.succeed(_green('Initialize Git repo'));
       }
-
-      const steps =
+      const str =
+        `\nSuccess!\n` +
+        `\nNext steps:` +
         `\n  cd ${name}` +
         `\n  git remote add origin <your-repo-url>` +
         `\n  git push -u origin main`;
 
-      console.log(_green(`\nNext steps: ${steps}`));
+      console.log(_green(str));
     })
     .catch((err) => {
+      spin0.fail('Clone project template');
+
       if (err.code === 'DEST_NOT_EMPTY') {
         console.error(
           _red('Destination directory is not empty. Not proceeding.')

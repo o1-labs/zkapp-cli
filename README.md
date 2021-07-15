@@ -20,29 +20,32 @@ Both `snapp` and `snap` work. Aliases are provided for both.
 
 ### Create a new project
 
-    snap project myproj  # or path/to/myproj
+    snapp project myproj  # or path/to/myproj
 
     ✔ Clone project template
     ✔ NPM install
     ✔ Initialize Git repo
+
+    Success!
 
     Next steps:
       cd myproj
       git remote add origin <your-repo-url>
       git push -u origin main
 
-This will create a directory containing a new project template.
+This command creates a directory containing a new project template, fully set up
+& ready for local development.
 
 - See the included [README](templates/project/README.md) for usage instructions.
   All usual commands will be available: `npm run build`, `npm run test`,
   `npm run coverage`, etc.
-- A Git repo using `main` as the default branch will be initialized in the
-  project dir automatically. For consistency, we use `main` as the default git
-  branch, by convention.
+- A Git repo will be initialized in the
+  project directory automatically. For consistency, we use `main` as the default
+  Git branch, by convention.
 - A [Github Actions CI workflow](templates/project/.github/workflows/ci.yml) is
-  included. If you push your project to Github, you'll have continuous
-  integration automatically. Github Actions will run your tests (named as
-  `*.test.js`) whenever you push a commit or open a pull request.
+  also included. If you push your project to Github, Github Actions will run
+  your tests (named as `*.test.js`) automatically, whenever you push a commit or
+  open a pull request.
 
 ### Create a new file
 
