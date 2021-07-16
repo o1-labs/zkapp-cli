@@ -53,6 +53,10 @@ This command creates a directory containing a new project template, fully set up
 
 This will create `name.js` and `name.test.js`.
 
+For convenience, running this command in your project's root directory will
+create the files in the `src/` dir automatically. Otherwise, the files will be
+created in your terminal's current working directory.
+
 ### Show system info
 
     snapp system
