@@ -7,3 +7,6 @@ coverage
 
 # System
 .DS_Store
+
+# Project
+build/*.js
