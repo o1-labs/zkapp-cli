@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const degit = require('degit');
 const ora = require('ora');
-const shell = require('shelljs');
+const sh = require('shelljs');
 const util = require('util');
 
 const _green = chalk.green;
@@ -15,9 +15,9 @@ const _red = chalk.red;
  * @return {void}
  */
 module.exports = function (name) {
-  const emitter = degit('o1-labs/snapp-cli/templates/project#main', {
-    cache: true, // enabled to support offline usage
-    force: false,
+  const emitter = degit('github:o1-labs/snapp-cli/templates/project#main', {
+    cache: true, // enable to support offline use
+    force: false, // throw err if dest is not empty
   });
 
   emitter.on('err', (err) => {
@@ -25,33 +25,42 @@ module.exports = function (name) {
     console.error(_red('Error: ' + err.code));
   });
 
-  const spin0 = ora('Clone project template...').start();
+  const spinner = ora('Clone project template...').start();
 
   emitter
     .clone(name)
     .then(async () => {
-      spin0.succeed(_green('Clone project template'));
+      spinner.succeed(_green('Clone project template'));
 
       // Set dir for shell commands. Doesn't change user's dir in their CLI.
-      shell.cd(name);
+      sh.cd(name);
 
-      const shellExecAsync = util.promisify(shell.exec);
+      const shExec = util.promisify(sh.exec);
 
-      const spin1 = ora('NPM install...').start();
-      try {
-        await shellExecAsync('npm ci --silent');
-        spin1.succeed(_green('NPM install'));
-      } catch (err) {
-        spin1.fail();
+      {
+        const step = 'NPM install';
+        const spin = ora(`${step}...`).start();
+        try {
+          await shExec('npm ci --silent');
+          spin.succeed(_green(step));
+        } catch (err) {
+          spin.fail(step);
+        }
       }
 
-      if (shell.which('git')) {
-        const spin2 = ora('Initialize Git repo...').start();
-        shell.exec(
-          `git init -q && git branch -m main && git add . && git commit -m 'Init commit' -q`
-        );
-        spin2.succeed(_green('Initialize Git repo'));
+      if (sh.which('git')) {
+        const step = 'Initialize Git repo';
+        const spin = ora(`${step}...`).start();
+        try {
+          await shExec(
+            `git init -q && git branch -m main && git add . && git commit -m 'Init commit' -q`
+          );
+          spin.succeed(_green(step));
+        } catch (err) {
+          spin.fail(step);
+        }
       }
+
       const str =
         `\nSuccess!\n` +
         `\nNext steps:` +
@@ -62,7 +71,7 @@ module.exports = function (name) {
       console.log(_green(str));
     })
     .catch((err) => {
-      spin0.fail('Clone project template');
+      spinner.fail('Clone project template');
 
       if (err.code === 'DEST_NOT_EMPTY') {
         console.error(
