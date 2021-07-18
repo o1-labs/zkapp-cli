@@ -6,6 +6,3 @@ node_modules
 
 # System
 .DS_Store
-
-# Project
-templates/project/package-lock.json
