@@ -8,7 +8,9 @@
     "snapp-cli": "./src/bin/index.js",
     "snap-cli": "./src/bin/index.js"
   },
-  "scripts": {},
+  "scripts": {
+    "postinstall": "node src/postinstall"
+  },
   "keywords": [
     "mina",
     "snapps",
