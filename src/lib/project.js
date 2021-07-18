@@ -39,7 +39,7 @@ module.exports = function (name) {
 
       const spin1 = ora('NPM install...').start();
       try {
-        await shellExecAsync('npm install --silent');
+        await shellExecAsync('npm ci --silent');
         spin1.succeed(_green('NPM install'));
       } catch (err) {
         spin1.fail();
