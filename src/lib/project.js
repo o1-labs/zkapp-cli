@@ -15,7 +15,7 @@ const _red = chalk.red;
  * @return {void}
  */
 module.exports = function (name) {
-  const emitter = degit('jasongitmail/snapp-cli/templates/project#main', {
+  const emitter = degit('o1-labs/snapp-cli/templates/project#main', {
     cache: true, // enabled to support offline usage
     force: false,
   });
