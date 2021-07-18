@@ -2,7 +2,7 @@
   "name": "PROJECT_NAME",
   "version": "0.1.0",
   "description": "",
-  "main": "src/index.ts",
+  "main": "build/index.js",
   "type": "module",
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
