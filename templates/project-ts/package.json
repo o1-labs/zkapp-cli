@@ -14,10 +14,13 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "jest": "^27.0.6",
     "typescript": "^4.3.5"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.24"
+    "@types/jest": "^26.0.24",
+    "husky": "^7.0.1",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
+    "pretty-quick": "^3.1.1"
   }
 }
