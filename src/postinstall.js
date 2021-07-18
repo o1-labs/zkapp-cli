@@ -5,11 +5,13 @@
 const fs = require('fs');
 const sh = require('shelljs');
 const util = require('util');
+const degit = require('degit');
 
 const shExec = util.promisify(sh.exec);
 
 (async () => {
   await warmNpmCache();
+  await warmDegitCache();
 })();
 
 /**
@@ -48,10 +50,30 @@ async function warmNpmCache() {
   }
 
   try {
-    const cmd = `npm cache add ${toCache.join(' ')}`;
-    console.log(`    ${cmd}`);
-    await shExec(cmd);
+    await shExec(`npm cache add ${toCache.join(' ')}`);
     console.log('    Done.');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/**
+ * Warm degit to be used offline for *any* project templates, stored anywhere
+ * within the target repo.
+ */
+async function warmDegitCache() {
+  console.log('  Warm degit cache for project template.');
+
+  const emitter = degit('github:o1-labs/snapp-cli#main', {
+    cache: false, // Do not read from cache, but will warm the cache.
+    force: true,
+  });
+
+  try {
+    const TEMP_DIR = `.degit-tmp-cache-warmer`;
+    await emitter.clone(TEMP_DIR);
+    console.log('    Done.');
+    await shExec(`rm -rf ${TEMP_DIR}`);
   } catch (err) {
     console.error(err);
   }
