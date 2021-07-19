@@ -1,4 +1,4 @@
-# Mina SNAPP Template
+# Mina SNAPP: PROJECT_NAME
 
 This template currently supports ES6 JavaScript. TypeScript is on the road map.
 
