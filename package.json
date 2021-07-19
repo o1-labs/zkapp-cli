@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "description": "CLI to create a SNAPP (Snark App) for Mina Protocol.",
   "bin": {
-    "snapp": "./src/bin/index.js",
-    "snap": "./src/bin/index.js",
-    "snapp-cli": "./src/bin/index.js",
-    "snap-cli": "./src/bin/index.js"
+    "snapp": "./src/bin/index",
+    "snap": "./src/bin/index",
+    "snapp-cli": "./src/bin/index",
+    "snap-cli": "./src/bin/index"
   },
   "scripts": {
-    "postinstall": "node src/postinstall"
+    "postinstall": "node src/postinstall",
+    "prepare": "husky install"
   },
   "keywords": [
     "mina",
@@ -25,5 +26,13 @@
     "ora": "^5.4.1",
     "shelljs": "^0.8.4",
     "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "husky": "^7.0.1",
+    "lint-staged": "^11.0.1",
+    "prettier": "^2.3.2"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
