@@ -45,10 +45,14 @@ module.exports = function (name) {
       }
 
       await step('Initialize Git repo', 'git init -q && git branch -m main');
-      await step('NPM install', 'npm ci --silent');
+
+      // `/dev/null` is the only way to silence Husky's install log msg.
+      await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
+
+      // `-n` (no verify) skips Husky's pre-commit hooks.
       await step(
         'Git init commit',
-        `git add . && git commit -m 'Init commit' -q`
+        `git add . && git commit -m 'Init commit' -q -n`
       );
 
       const str =
