@@ -23,8 +23,10 @@ Both `snapp` and `snap` work. Aliases are provided for both.
     snapp project myproj  # or path/to/myproj
 
     ✔ Clone project template
-    ✔ NPM install
     ✔ Initialize Git repo
+    ✔ NPM install
+    ✔ Set project name
+    ✔ Git init commit
 
     Success!
 

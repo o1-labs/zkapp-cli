@@ -103,7 +103,7 @@ async function step(step, cmd) {
  * @param {string} projDir Full path to terminal dir + path/to/name
  */
 async function setProjectName(projDir) {
-  const step = 'Replace project name';
+  const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
   const name = projDir.split('/').pop();
