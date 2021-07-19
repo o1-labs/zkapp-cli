@@ -128,7 +128,8 @@ function replaceInFile(file, a, b) {
 function titleCase(str) {
   return str
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase());
+    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+    .join(' ');
 }
 
 function kebabCase(str) {
