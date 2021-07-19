@@ -9,8 +9,7 @@
     "snap-cli": "./src/bin/index"
   },
   "scripts": {
-    "postinstall": "node src/postinstall",
-    "prepare": "husky install"
+    "postinstall": "node src/postinstall"
   },
   "keywords": [
     "mina",

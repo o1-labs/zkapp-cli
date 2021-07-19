@@ -8,8 +8,7 @@
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
     "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
     "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage",
-    "build": "tsc -p tsconfig.json",
-    "prepare": "husky install"
+    "build": "tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
