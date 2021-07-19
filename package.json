@@ -2,6 +2,14 @@
   "name": "snapp-cli",
   "version": "0.1.0",
   "description": "CLI to create a SNAPP (Snark App) for Mina Protocol.",
+  "author": "O(1) Labs",
+  "license": "Apache-2.0",
+  "keywords": [
+    "mina",
+    "snapps",
+    "snapp",
+    "snap"
+  ],
   "bin": {
     "snapp": "./src/bin/index",
     "snap": "./src/bin/index",
@@ -13,13 +21,6 @@
     "postinstall": "node src/postinstall",
     "format": "prettier --write --ignore-unknown **/*"
   },
-  "keywords": [
-    "mina",
-    "snapps",
-    "snapp",
-    "snap"
-  ],
-  "license": "Apache-2.0",
   "dependencies": {
     "chalk": "^4.1.1",
     "degit": "^2.8.4",

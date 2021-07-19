@@ -2,6 +2,9 @@
   "name": "PROJECT_NAME",
   "version": "0.1.0",
   "description": "",
+  "author": "",
+  "license": "Apache-2.0",
+  "keywords": [],
   "main": "src/index.js",
   "type": "module",
   "scripts": {
@@ -12,9 +15,6 @@
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install"
   },
-  "keywords": [],
-  "author": "",
-  "license": "Apache-2.0",
   "devDependencies": {
     "husky": "^7.0.1",
     "jest": "^27.0.6",
