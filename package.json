@@ -10,7 +10,8 @@
   },
   "scripts": {
     "prepare": "husky install",
-    "postinstall": "node src/postinstall"
+    "postinstall": "node src/postinstall",
+    "format": "prettier --write --ignore-unknown **/*"
   },
   "keywords": [
     "mina",
