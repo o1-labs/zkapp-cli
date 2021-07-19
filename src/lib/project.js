@@ -6,6 +6,7 @@ const util = require('util');
 
 const _green = chalk.green;
 const _red = chalk.red;
+const shExec = util.promisify(sh.exec);
 
 /**
  * Create a new SNAPP project with recommended dir structure, Prettier config,
@@ -35,31 +36,20 @@ module.exports = function (name) {
       // Set dir for shell commands. Doesn't change user's dir in their CLI.
       sh.cd(name);
 
-      const shExec = util.promisify(sh.exec);
-
-      {
-        const step = 'NPM install';
-        const spin = ora(`${step}...`).start();
-        try {
-          await shExec('npm ci --silent');
-          spin.succeed(_green(step));
-        } catch (err) {
-          spin.fail(step);
-        }
+      // Git must be initialized before running `npm install` b/c Husky runs a
+      // `prepare` NPM script to set up its pre-commit hook within `.git` during
+      // installation. Otherwise Husky will throw an error.
+      if (!sh.which('git')) {
+        console.error(_red('Please ensure Git is installed, then try again.'));
+        return;
       }
 
-      if (sh.which('git')) {
-        const step = 'Initialize Git repo';
-        const spin = ora(`${step}...`).start();
-        try {
-          await shExec(
-            `git init -q && git branch -m main && git add . && git commit -m 'Init commit' -q`
-          );
-          spin.succeed(_green(step));
-        } catch (err) {
-          spin.fail(step);
-        }
-      }
+      await step('Initialize Git repo', 'git init -q && git branch -m main');
+      await step('NPM install', 'npm ci --silent');
+      await step(
+        'Git init commit',
+        `git add . && git commit -m 'Init commit' -q`
+      );
 
       const str =
         `\nSuccess!\n` +
@@ -83,3 +73,13 @@ module.exports = function (name) {
       }
     });
 };
+
+async function step(step, cmd) {
+  const spin = ora(`${step}...`).start();
+  try {
+    await shExec(cmd);
+    spin.succeed(_green(step));
+  } catch (err) {
+    spin.fail(step);
+  }
+}
