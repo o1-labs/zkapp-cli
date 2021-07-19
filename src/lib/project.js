@@ -108,7 +108,7 @@ async function setProjectName(projDir) {
 
   const name = projDir.split('/').pop();
   replaceInFile(projDir + '/README.md', 'PROJECT_NAME', titleCase(name));
-  replaceInFile(projDir + '/package.json', 'PROJECT_NAME', kebabCase(name));
+  replaceInFile(projDir + '/package.json', 'package-name', kebabCase(name));
 
   spin.succeed(_green(step));
 }
