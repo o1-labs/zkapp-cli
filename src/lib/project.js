@@ -16,7 +16,7 @@ const shExec = util.promisify(sh.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {void}
  */
-module.exports = function (name) {
+function project(name) {
   const emitter = degit('github:o1-labs/snapp-cli/templates/project#main', {
     cache: true, // enable to support offline use
     force: false, // throw err if dest is not empty
@@ -80,7 +80,7 @@ module.exports = function (name) {
         console.error(_red('Error: ' + err.code));
       }
     });
-};
+}
 
 /**
  * Helper for any steps that need to call a shell command.
@@ -128,10 +128,19 @@ function replaceInFile(file, a, b) {
 function titleCase(str) {
   return str
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+    .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
     .join(' ');
 }
 
 function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
 }
+
+module.exports = {
+  project,
+  step,
+  setProjectName,
+  replaceInFile,
+  titleCase,
+  kebabCase,
+};

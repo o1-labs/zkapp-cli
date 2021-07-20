@@ -2,9 +2,9 @@
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-const file = require('../lib/file');
-const project = require('../lib/project');
-const system = require('../lib/system');
+const { file } = require('../lib/file');
+const { project } = require('../lib/project');
+const { system } = require('../lib/system');
 const chalk = require('chalk');
 
 const _g = chalk.green;

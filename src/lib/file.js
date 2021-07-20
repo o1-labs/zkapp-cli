@@ -11,7 +11,7 @@ const _i = chalk.italic;
  * @param {string} name Desired file name.
  * @return {void}
  */
-module.exports = async function (name) {
+async function file(name) {
   // If we're in the project root, create files in `/src`. Otherwise, create
   // wherever the user is because they could be in `/src/foo`, etc).
   let fileName = `src/${name}.js`;
@@ -50,4 +50,6 @@ module.exports = async function (name) {
 
   console.log(`${_green('Created ' + fileName)}`);
   console.log(`${_green('Created ' + testName)}`);
-};
+}
+
+module.exports = { file };

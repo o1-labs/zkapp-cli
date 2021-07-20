@@ -1,6 +1,6 @@
 const envinfo = require('envinfo');
 
-module.exports = function () {
+function system() {
   console.log('Please include the following when submitting a Github issue:');
   envinfo
     .run(
@@ -12,4 +12,6 @@ module.exports = function () {
       { showNotFound: true }
     )
     .then((env) => console.log(env));
-};
+}
+
+module.exports = { system };

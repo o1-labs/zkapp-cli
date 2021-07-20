@@ -19,6 +19,9 @@
   "scripts": {
     "prepare": "husky install",
     "postinstall": "node src/postinstall",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest src/**/*.js --silent",
+    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest src/**/*.js --watch --silent",
+    "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage",
     "format": "prettier --write --ignore-unknown **/*"
   },
   "dependencies": {
@@ -31,6 +34,7 @@
   },
   "devDependencies": {
     "husky": "^7.0.1",
+    "jest": "^27.0.6",
     "lint-staged": "^11.0.1",
     "prettier": "^2.3.2"
   },
