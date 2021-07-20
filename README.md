@@ -25,7 +25,7 @@ Both `snapp` and `snap` work. Aliases are provided for both.
 ### Create a new project
 
 ```sh
-snapp project myproj  # or path/to/myproj
+snapp project my-proj  # or path/to/my-proj
 
 ✔ Clone project template
 ✔ Initialize Git repo
@@ -36,7 +36,7 @@ snapp project myproj  # or path/to/myproj
 Success!
 
 Next steps:
-  cd myproj
+  cd my-proj
   git remote add origin <your-repo-url>
   git push -u origin main
 ```
