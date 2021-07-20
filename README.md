@@ -5,35 +5,41 @@ SnarkyJS is ready.
 
 ## Installation (during development)
 
-    git clone https://github.com/jasongitmail/snapp-cli.git
-    cd snapp-cli
-    npm i
-    npm link
+```sh
+git clone https://github.com/jasongitmail/snapp-cli.git
+cd snapp-cli
+npm i
+npm link
+```
 
 This will make the command available globally on your system.
 
 ## Usage
 
-    snapp --help
+```sh
+snapp --help
+```
 
 Both `snapp` and `snap` work. Aliases are provided for both.
 
 ### Create a new project
 
-    snapp project myproj  # or path/to/myproj
+```sh
+snapp project myproj  # or path/to/myproj
 
-    ✔ Clone project template
-    ✔ Initialize Git repo
-    ✔ NPM install
-    ✔ Set project name
-    ✔ Git init commit
+✔ Clone project template
+✔ Initialize Git repo
+✔ NPM install
+✔ Set project name
+✔ Git init commit
 
-    Success!
+Success!
 
-    Next steps:
-      cd myproj
-      git remote add origin <your-repo-url>
-      git push -u origin main
+Next steps:
+  cd myproj
+  git remote add origin <your-repo-url>
+  git push -u origin main
+```
 
 This command creates a directory containing a new project template, fully set up
 & ready for local development.
@@ -53,7 +59,9 @@ This command creates a directory containing a new project template, fully set up
 
 ### Create a new file
 
-    snapp file <name>
+```sh
+snapp file <name>
+```
 
 This will create `name.js` and `name.test.js`.
 
@@ -63,7 +71,9 @@ created in your terminal's current working directory.
 
 ### Show system info
 
-    snapp system
+```sh
+snapp system
+```
 
 This will output system info such as your NodeJS version, NPM version,
 `snapp-cli` version, etc. Please include this if submitting a bug report for
