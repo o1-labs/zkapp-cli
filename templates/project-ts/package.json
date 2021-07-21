@@ -8,8 +8,8 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
-    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest **/*.js",
+    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch **/*.js",
     "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage",
     "build": "tsc -p tsconfig.json",
     "prepare": "husky install",
