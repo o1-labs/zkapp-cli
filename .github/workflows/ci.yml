@@ -14,7 +14,7 @@ jobs:
       - name: Set up NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
       - name: Git checkout
         uses: actions/checkout@v2
       - name: NPM ci, build, & test
