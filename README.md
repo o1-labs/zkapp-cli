@@ -3,6 +3,10 @@
 WIP. Not ready for use. File & project templates need to be updated when
 SnarkyJS is ready.
 
+## Dependencies
+
+NodeJS `16.x` or `14.x`. We actively test using these versions.
+
 ## Installation (during development)
 
 ```sh
