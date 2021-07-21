@@ -2,6 +2,12 @@
 
 This template uses TypeScript.
 
+## How to build
+
+```sh
+npm run build
+```
+
 ## How to run tests
 
 ```sh
@@ -13,12 +19,6 @@ npm run testw # watch mode
 
 ```sh
 npm run coverage
-```
-
-## How to build
-
-```sh
-npm run build
 ```
 
 ## License
