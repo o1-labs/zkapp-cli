@@ -1,37 +1,35 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const chalk = require('chalk');
+const path = require('path');
 
 const _red = chalk.red;
 const _green = chalk.green;
 const _i = chalk.italic;
 
 /**
- * Create `foo.js` and `foo.test.js` in current directory. Warn if dir already
- * exists and do NOT overwrite.
- * @param {string} name Desired file name.
+ * Create `foo.js` and `foo.test.js` in current directory. Warn if destination
+ * already exists and do NOT overwrite.
+ * @param {string} _path Desired file name or `path/to/name`
  * @return {void}
  */
-async function file(name) {
-  // If we're in the project root, create files in `/src`. Otherwise, create
-  // wherever the user is because they could be in `/src/foo`, etc).
-  let fileName = `src/${name}.js`;
-  let testName = `src/${name}.test.js`;
-  if (!fs.existsSync('src')) {
-    fileName = fileName.replace('src/', '');
-    testName = testName.replace('src/', '');
+async function file(_path) {
+  let { fullPath, userPath, userName } = parsePath(process.cwd(), _path);
+
+  // If we're in root dir, and the user didn't specify `src` as part of their
+  // `path/to/name`, add it automatically for convenience.
+  if (fs.existsSync('package.json') && !userPath.startsWith('src')) {
+    userPath = path.join('src', userPath);
   }
 
-  let fileExists = false;
-  if (fs.existsSync(fileName)) {
-    fileExists = true;
-    console.error(_red(`"${_i(fileName)}" already exists`));
-  }
+  // TODO: Check if project is TS or JS
+  const isTs = false;
 
-  let testExists = false;
-  if (fs.existsSync(testName)) {
-    testExists = true;
-    console.error(_red(`"${_i(testName)}" already exists`));
-  }
+  const ext = isTs ? 'ts' : 'js';
+  const fileName = path.join(userPath, `${userName}.${ext}`);
+  const testName = path.join(userPath, `${userName}.test.${ext}`);
+
+  const fileExists = pathExists(fileName);
+  const testExists = pathExists(testName);
 
   if (fileExists || testExists) {
     console.log(
@@ -43,13 +41,44 @@ async function file(name) {
 
   // TODO: Finish templates when SnarkyJS is ready.
   const fileContent = ``;
-  const testContent = `import ${name} from './${fileName}';\n`;
+  const testContent = `import ${userName} from './${userName}';\n`;
 
-  fs.writeFileSync(fileName, fileContent, 'utf8');
-  fs.writeFileSync(testName, testContent, 'utf8');
+  // Recursively creates path to file, if needed.
+  fs.outputFileSync(fileName, fileContent);
+  fs.outputFileSync(testName, testContent);
 
   console.log(`${_green('Created ' + fileName)}`);
   console.log(`${_green('Created ' + testName)}`);
 }
 
-module.exports = { file };
+/**
+ * parsePath() parses cwd & user's desired name with optional path.
+ * @param {string} cwd   Current working directory. E.g. process.cwd().
+ * @param {string} _path User's desired filename with optional path.
+ *                       E.g. `path/to/name` or `name` (with no path).
+ */
+function parsePath(cwd, _path) {
+  const fullPath = path.join(cwd, _path);
+
+  const parts = _path.split('/');
+  const userName = parts.pop();
+
+  const userPath = parts.length ? path.join(...parts) : '';
+
+  return {
+    fullPath,
+    userPath,
+    userName,
+  };
+}
+
+function pathExists(path) {
+  let exists;
+  if (fs.existsSync(path)) {
+    exists = true;
+    console.error(_red(`"${_i(path)}" already exists`));
+  }
+  return exists;
+}
+
+module.exports = { file, parsePath };
