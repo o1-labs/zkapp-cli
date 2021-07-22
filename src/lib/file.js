@@ -72,6 +72,11 @@ function parsePath(cwd, _path) {
   };
 }
 
+/**
+ * Check if file already exists.
+ * @param {string} path  File name or `path/to/name`.
+ * @return {boolean}
+ */
 function pathExists(path) {
   let exists;
   if (fs.existsSync(path)) {
@@ -81,4 +86,4 @@ function pathExists(path) {
   return exists;
 }
 
-module.exports = { file, parsePath };
+module.exports = { file, parsePath, pathExists };

@@ -1,4 +1,5 @@
-const { file, parsePath } = require('./file');
+const { describe } = require('yargs');
+const { file, parsePath, pathExists } = require('./file');
 
 describe('file.js', () => {
   describe('file()', () => {
@@ -22,5 +23,9 @@ describe('file.js', () => {
       expect(userName).toEqual('name');
       expect(userPath).toEqual('path/to');
     });
+  });
+
+  describe('pathExists()', () => {
+    it.todo();
   });
 });
