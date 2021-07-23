@@ -1,4 +1,3 @@
-const { describe } = require('yargs');
 const { file, parsePath, pathExists } = require('./file');
 
 describe('file.js', () => {
@@ -26,6 +25,6 @@ describe('file.js', () => {
   });
 
   describe('pathExists()', () => {
-    it.todo();
+    it.todo('should be correct');
   });
 });
