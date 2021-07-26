@@ -17,7 +17,7 @@ const shExec = util.promisify(sh.exec);
  * @return {void}
  */
 function project(name) {
-  const emitter = degit('github:o1-labs/snapp-cli/templates/project#main', {
+  const emitter = degit('github:o1-labs/snapp-cli/templates/project-ts#main', {
     cache: true, // enable to support offline use
     force: false, // throw err if dest is not empty
   });
