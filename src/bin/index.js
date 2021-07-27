@@ -5,6 +5,7 @@ const { hideBin } = require('yargs/helpers');
 const { file } = require('../lib/file');
 const { project } = require('../lib/project');
 const { system } = require('../lib/system');
+const { example } = require('../lib/example');
 const chalk = require('chalk');
 
 const _g = chalk.green;
@@ -39,6 +40,12 @@ yargs(hideBin(process.argv))
     'Create a new file & test',
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
+  )
+  .command(
+    ['example [name]', 'e [name]'],
+    'Create an example project',
+    { name: { demand: true, string: true, hidden: true } },
+    async (argv) => await example(argv.name)
   )
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
   .alias('h', 'help')
