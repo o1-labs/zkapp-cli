@@ -37,9 +37,8 @@ function project(name) {
       // Set dir for shell commands. Doesn't change user's dir in their CLI.
       sh.cd(name);
 
-      // Git must be initialized before running `npm install` b/c Husky runs a
-      // `prepare` NPM script to set up its pre-commit hook within `.git` during
-      // installation. Otherwise Husky will throw an error.
+      // Git must be initialized before running `npm install` b/c Husky runs an
+      // NPM `prepare` script to set up its pre-commit hook within `.git`.
       if (!sh.which('git')) {
         console.error(_red('Please ensure Git is installed, then try again.'));
         return;

@@ -1,5 +1,4 @@
 const chalk = require('chalk');
-const degit = require('degit');
 const fs = require('fs');
 const ora = require('ora');
 const sh = require('shelljs');
@@ -17,74 +16,80 @@ const shExec = util.promisify(sh.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {void}
  */
-async function example(name) {
-  const emitter = degit('github:o1-labs/snapp-cli/templates/project-ts#main', {
-    cache: true, // enable to support offline use
-    force: false, // throw err if dest is not empty
-  });
+async function example(example) {
+  const dir = findUniqueDir(example);
+  const lang = 'ts';
 
-  emitter.on('err', (err) => {
-    console.error(err.message);
-    console.error(_red('Error: ' + err.code));
-  });
+  if (!(await fetchProjectTemplate(dir, lang))) return;
+  if (!(await extractExample(example, dir, lang))) return;
 
-  name = findUniqueDir(name);
+  // Set dir for shell commands. Doesn't change user's dir in their CLI.
+  sh.cd(dir);
 
-  const spinner = ora('Clone project template...').start();
+  // Git must be initialized before running `npm install` b/c Husky runs an
+  // NPM `prepare` script to set up its pre-commit hook within `.git`.
+  if (!sh.which('git')) {
+    console.error(_red('Please ensure Git is installed, then try again.'));
+    return;
+  }
 
-  emitter
-    .clone(name)
-    .then(async () => {
-      spinner.succeed(_green('Clone project template'));
+  await step('Initialize Git repo', 'git init -q && git branch -m main');
 
-      // Set dir for shell commands. Doesn't change user's dir in their CLI.
-      sh.cd(name);
+  // `/dev/null` is the only way to silence Husky's install log msg.
+  await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
 
-      // Git must be initialized before running `npm install` b/c Husky runs a
-      // `prepare` NPM script to set up its pre-commit hook within `.git` during
-      // installation. Otherwise Husky will throw an error.
-      if (!sh.which('git')) {
-        console.error(_red('Please ensure Git is installed, then try again.'));
-        return;
-      }
+  // process.cwd() is full path to user's terminal + path/to/name.
+  await setProjectName(process.cwd());
 
-      await step('Initialize Git repo', 'git init -q && git branch -m main');
+  // `-n` (no verify) skips Husky's pre-commit hooks.
+  await step(
+    'Git init commit',
+    `git add . && git commit -m 'Init commit' -q -n`
+  );
 
-      // `/dev/null` is the only way to silence Husky's install log msg.
-      await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
+  const str =
+    `\nSuccess!\n` +
+    `\nNext steps:` +
+    `\n  cd ${dir}` +
+    `\n  git remote add origin <your-repo-url>` +
+    `\n  git push -u origin main`;
 
-      // process.cwd() is full path to user's terminal + path/to/name.
-      await setProjectName(process.cwd());
+  console.log(_green(str));
+}
 
-      if (!(await extractExample('sudoku', 'js'))) return;
+/**
+ * Fetch an example & place in the `src` directory.
+ * @param {string} example Name of the destination dir.
+ * @param {string} lang    ts or js
+ * @returns {boolean}      True if successful; false if not.
+ */
+async function fetchProjectTemplate(name, lang) {
+  const projectName = lang === 'ts' ? 'project-ts' : 'project';
+  const step = 'Fetch project template';
+  const spin = ora(`${step}...`).start();
 
-      // `-n` (no verify) skips Husky's pre-commit hooks.
-      await step(
-        'Git init commit',
-        `git add . && git commit -m 'Init commit' -q -n`
-      );
+  try {
+    const src = 'github:o1-labs/snapp-cli#main';
+    await gittar.fetch(src);
 
-      const str =
-        `\nSuccess!\n` +
-        `\nNext steps:` +
-        `\n  cd ${name}` +
-        `\n  git remote add origin <your-repo-url>` +
-        `\n  git push -u origin main`;
-
-      console.log(_green(str));
-    })
-    .catch((err) => {
-      spinner.fail('Clone project template');
-
-      if (err.code === 'DEST_NOT_EMPTY') {
-        console.error(
-          _red('Destination directory is not empty. Not proceeding.')
-        );
-      } else {
-        console.error(err.message);
-        console.error(_red('Error: ' + err.code));
-      }
+    // Note: Extract will overwrite any existing dir's contents. But we're
+    // using an always-unique name.
+    const TEMP = '.gittar-temp-dir';
+    await gittar.extract(src, TEMP, {
+      filter(path) {
+        return path.includes(`templates/${projectName}/`);
+      },
     });
+
+    sh.mv('' + TEMP + `/templates/${projectName}`, name);
+    sh.rm('-r', TEMP);
+    spin.succeed(_green(step));
+    return true;
+  } catch (err) {
+    spin.fail(step);
+    console.error(err);
+    return false;
+  }
 }
 
 /**
@@ -143,38 +148,38 @@ function kebabCase(str) {
 
 /**
  * Fetch an example & place in the `src` directory.
- * @param {string} example Name of the example
+ * @param {string} example Name of the example, as found in our Github repo.
+ * @param {string} name    Destination dir name.
  * @param {string} lang    ts or js
  * @returns {boolean}      True if successful; false if not.
  */
-async function extractExample(example, lang) {
+async function extractExample(example, name, lang) {
   const step = 'Extract example';
   const spin = ora(`${step}...`).start();
 
   try {
     const src = 'github:o1-labs/snapp-cli#main';
-    await gittar.fetch(src);
 
     // Note: Extract will overwrite any existing dir's contents. That's ok here.
-    const dest = 'TEMP';
-    await gittar.extract(src, dest, {
+    const TEMP = '.gittar-temp-dir';
+    await gittar.extract(src, TEMP, {
       filter(path) {
         return path.includes(`examples/${example}/${lang}/src`);
       },
     });
 
-    // Example not found. Delete the proj template to clean up.
-    if (isEmpty(dest)) {
+    // Example not found. Delete the project template & temp dir to clean up.
+    if (isEmpty(TEMP)) {
       spin.fail(step);
       console.error(_red('Example not found'));
-      sh.rm('-r', process.cwd());
+      sh.rm('-r', `${process.cwd()}/${name}`, TEMP);
       return false;
     }
 
-    // Delete proj template's `src` & move the example's `src` into its place.
-    sh.rm('-r', 'src');
-    sh.mv('' + dest + `/examples/${example}/${lang}/src`, 'src');
-    sh.rm('-r', dest);
+    // Delete the project template's `src` & use the example's `src` instead.
+    sh.rm('-r', `${name}/src`);
+    sh.mv(`${TEMP}/examples/${example}/${lang}/src`, `${name}/src`);
+    sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
   } catch (err) {
