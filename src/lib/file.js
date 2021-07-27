@@ -22,9 +22,9 @@ async function file(_path) {
   }
 
   // TODO: Check if project is TS or JS
-  const isTs = false;
+  const ts = true;
 
-  const ext = isTs ? 'ts' : 'js';
+  const ext = ts ? 'ts' : 'js';
   const fileName = path.join(userPath, `${userName}.${ext}`);
   const testName = path.join(userPath, `${userName}.test.${ext}`);
 
