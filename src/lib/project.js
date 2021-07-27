@@ -1,9 +1,9 @@
 const chalk = require('chalk');
-const degit = require('degit');
 const fs = require('fs');
 const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
+const gittar = require('gittar');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -16,69 +16,84 @@ const shExec = util.promisify(sh.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {void}
  */
-function project(name) {
-  const emitter = degit('github:o1-labs/snapp-cli/templates/project-ts#main', {
-    cache: true, // enable to support offline use
-    force: false, // throw err if dest is not empty
-  });
+async function project(name) {
+  const lang = 'ts';
 
-  emitter.on('err', (err) => {
-    console.error(err.message);
-    console.error(_red('Error: ' + err.code));
-  });
+  if (fs.existsSync(name)) {
+    console.error(_red(`Directory already exists. Not proceeding`));
+    return;
+  }
 
-  const spinner = ora('Clone project template...').start();
+  if (!(await fetchProjectTemplate(name, lang))) return;
 
-  emitter
-    .clone(name)
-    .then(async () => {
-      spinner.succeed(_green('Clone project template'));
+  // Set dir for shell commands. Doesn't change user's dir in their CLI.
+  sh.cd(name);
 
-      // Set dir for shell commands. Doesn't change user's dir in their CLI.
-      sh.cd(name);
+  // Git must be initialized before running `npm install` b/c Husky runs an
+  // NPM `prepare` script to set up its pre-commit hook within `.git`.
+  if (!sh.which('git')) {
+    console.error(_red('Please ensure Git is installed, then try again.'));
+    return;
+  }
 
-      // Git must be initialized before running `npm install` b/c Husky runs an
-      // NPM `prepare` script to set up its pre-commit hook within `.git`.
-      if (!sh.which('git')) {
-        console.error(_red('Please ensure Git is installed, then try again.'));
-        return;
-      }
+  await step('Initialize Git repo', 'git init -q && git branch -m main');
 
-      await step('Initialize Git repo', 'git init -q && git branch -m main');
+  // `/dev/null` is the only way to silence Husky's install log msg.
+  await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
 
-      // `/dev/null` is the only way to silence Husky's install log msg.
-      await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
+  // process.cwd() is full path to user's terminal + path/to/name.
+  await setProjectName(process.cwd());
 
-      // process.cwd() is full path to user's terminal + path/to/name.
-      await setProjectName(process.cwd());
+  // `-n` (no verify) skips Husky's pre-commit hooks.
+  await step(
+    'Git init commit',
+    `git add . && git commit -m 'Init commit' -q -n`
+  );
 
-      // `-n` (no verify) skips Husky's pre-commit hooks.
-      await step(
-        'Git init commit',
-        `git add . && git commit -m 'Init commit' -q -n`
-      );
+  const str =
+    `\nSuccess!\n` +
+    `\nNext steps:` +
+    `\n  cd ${name}` +
+    `\n  git remote add origin <your-repo-url>` +
+    `\n  git push -u origin main`;
 
-      const str =
-        `\nSuccess!\n` +
-        `\nNext steps:` +
-        `\n  cd ${name}` +
-        `\n  git remote add origin <your-repo-url>` +
-        `\n  git push -u origin main`;
+  console.log(_green(str));
+}
 
-      console.log(_green(str));
-    })
-    .catch((err) => {
-      spinner.fail('Clone project template');
+/**
+ * Fetch project template.
+ * @param {string} example Name of the destination dir.
+ * @param {string} lang    ts or js
+ * @returns {boolean}      True if successful; false if not.
+ */
+async function fetchProjectTemplate(name, lang) {
+  const projectName = lang === 'ts' ? 'project-ts' : 'project';
+  const step = 'Fetch project template';
+  const spin = ora(`${step}...`).start();
 
-      if (err.code === 'DEST_NOT_EMPTY') {
-        console.error(
-          _red('Destination directory is not empty. Not proceeding.')
-        );
-      } else {
-        console.error(err.message);
-        console.error(_red('Error: ' + err.code));
-      }
+  try {
+    const src = 'github:o1-labs/snapp-cli#main';
+    await gittar.fetch(src);
+
+    // Note: Extract will overwrite any existing dir's contents. Ensure
+    // destination does not exist before this.
+    const TEMP = '.gittar-temp-dir';
+    await gittar.extract(src, TEMP, {
+      filter(path) {
+        return path.includes(`templates/${projectName}/`);
+      },
     });
+
+    sh.mkdir('-p', name); // create path/to/dir if needed.
+    sh.cp('-r', `${TEMP}/templates/${projectName}/.`, name);
+    sh.rm('-r', TEMP);
+    spin.succeed(_green(step));
+    return true;
+  } catch (err) {
+    spin.fail(step);
+    console.error(err);
+    return false;
+  }
 }
 
 /**

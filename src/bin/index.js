@@ -33,7 +33,7 @@ yargs(hideBin(process.argv))
     ['project [name]', 'proj [name]', 'p [name]'],
     'Create a new project',
     { name: { demand: true, string: true, hidden: true } },
-    (argv) => project(argv.name)
+    async (argv) => await project(argv.name)
   )
   .command(
     ['file [name]', 'f [name]'],

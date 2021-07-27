@@ -58,7 +58,7 @@ async function example(example) {
 }
 
 /**
- * Fetch an example & place in the `src` directory.
+ * Fetch project template.
  * @param {string} example Name of the destination dir.
  * @param {string} lang    ts or js
  * @returns {boolean}      True if successful; false if not.
@@ -81,7 +81,7 @@ async function fetchProjectTemplate(name, lang) {
       },
     });
 
-    sh.mv('' + TEMP + `/templates/${projectName}`, name);
+    sh.mv(`${TEMP}/templates/${projectName}`, name);
     sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
