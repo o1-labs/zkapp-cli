@@ -61,6 +61,17 @@ This command creates a directory containing a new project template, fully set up
   pre-commit hooks. This requires no configuration and occurs automatically
   when you commit to Git--e.g. `git commit -m 'feat: add awesome feature'`.
 
+### Create an example project
+
+```sh
+snapp example <name>
+```
+
+Where `name` is one of the names found in the [example directory](examples).
+
+Examples are based on the project template & only contain changes within
+the `src` directory. So feel free to use one of these as your project base.
+
 ### Create a new file
 
 ```sh
