@@ -54,9 +54,7 @@ yargs(hideBin(process.argv))
   .epilog(
     // _r is a hack to force the terminal to retain a line break below
     _r(
-      `Note:
-  You can use "snapp" or "snap". Both CLI aliases are provided.
-
+      `
 
     █▄ ▄█ █ █▄ █ ▄▀▄
     █ ▀ █ █ █ ▀█ █▀█

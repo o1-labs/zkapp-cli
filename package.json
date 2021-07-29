@@ -12,9 +12,7 @@
   ],
   "bin": {
     "snapp": "./src/bin/index",
-    "snap": "./src/bin/index",
-    "snapp-cli": "./src/bin/index",
-    "snap-cli": "./src/bin/index"
+    "snapp-cli": "./src/bin/index"
   },
   "scripts": {
     "prepare": "husky install",
