@@ -27,3 +27,7 @@ jobs:
           npm test
         env:
           CI: true
+      - name: Publish to NPM if version has changed
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
