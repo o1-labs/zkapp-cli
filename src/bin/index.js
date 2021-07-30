@@ -13,7 +13,7 @@ const _r = chalk.reset;
 const _red = chalk.red;
 
 yargs(hideBin(process.argv))
-  .scriptName(_g('snap'))
+  .scriptName(_g('snapp'))
   .usage('Usage: $0 <command> [options]')
   .strict() // disallow superfluous args
 
