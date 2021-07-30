@@ -7,10 +7,16 @@ SnarkyJS is ready.
 
 NodeJS `16.x` or `14.x`. We actively test using these versions.
 
-## Installation (during development)
+## Installation
 
 ```sh
-git clone https://github.com/jasongitmail/snapp-cli.git
+npm install -g snapp-cli
+```
+
+## Installation (for development of Snapp CLI)
+
+```sh
+git clone https://github.com/o1-labs/snapp-cli.git
 cd snapp-cli
 npm i
 npm link
@@ -23,8 +29,6 @@ This will make the command available globally on your system.
 ```sh
 snapp --help
 ```
-
-Both `snapp` and `snap` work. Aliases are provided for both.
 
 ### Create a new project
 
@@ -75,7 +79,7 @@ the `src` directory. So feel free to use one of these as your project base.
 ### Create a new file
 
 ```sh
-snapp file <name>
+snapp file <name>  # or path/to/name
 ```
 
 This will create `name.js` and `name.test.js`.
