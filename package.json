@@ -17,8 +17,8 @@
   "scripts": {
     "prepare": "husky install",
     "postinstall": "node src/postinstall",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest src/**/*.js --silent",
-    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest src/**/*.js --watch --silent",
+    "test": "node --experimental-vm-modules ./node_modules/.bin/jest --silent",
+    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch --silent",
     "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage",
     "format": "prettier --write --ignore-unknown **/*"
   },
@@ -29,9 +29,11 @@
     "gittar": "^0.1.1",
     "ora": "^5.4.1",
     "shelljs": "^0.8.4",
+    "ts-jest": "^27.0.4",
     "yargs": "^17.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.24",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "lint-staged": "^11.0.1",
@@ -41,5 +43,13 @@
     "**/*": [
       "prettier --write --ignore-unknown"
     ]
+  },
+  "jest": {
+    "testMatch": [
+      "*/**/?(*.)+(test).+(ts|js)"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "ts-jest"
+    }
   }
 }
