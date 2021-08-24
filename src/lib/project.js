@@ -24,17 +24,18 @@ async function project(name) {
     return;
   }
 
-  if (!(await fetchProjectTemplate(name, lang))) return;
-
-  // Set dir for shell commands. Doesn't change user's dir in their CLI.
-  sh.cd(name);
-
   // Git must be initialized before running `npm install` b/c Husky runs an
   // NPM `prepare` script to set up its pre-commit hook within `.git`.
+  // Check before fetching project template, to not leave crud on user's system.
   if (!sh.which('git')) {
     console.error(_red('Please ensure Git is installed, then try again.'));
     return;
   }
+
+  if (!(await fetchProjectTemplate(name, lang))) return;
+
+  // Set dir for shell commands. Doesn't change user's dir in their CLI.
+  sh.cd(name);
 
   await step('Initialize Git repo', 'git init -q && git branch -m main');
 
