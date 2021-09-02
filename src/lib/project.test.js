@@ -19,15 +19,11 @@ describe('project.js', () => {
 
   describe('setProjectName()', () => {
     it('README.md contains target text to replace', () => {
-      const readmeJs = fs.readFileSync('templates/project/README.md');
-      expect(readmeJs.includes('Mina SNAPP: PROJECT_NAME')).toBeTruthy();
       const readmeTs = fs.readFileSync('templates/project-ts/README.md');
       expect(readmeTs.includes('Mina SNAPP: PROJECT_NAME')).toBeTruthy();
     });
 
     it('package.json contains target text to replace', () => {
-      const readmeJs = fs.readFileSync('templates/project/package.json');
-      expect(readmeJs.includes('package-name')).toBeTruthy();
       const readmeTs = fs.readFileSync('templates/project-ts/package.json');
       expect(readmeTs.includes('package-name')).toBeTruthy();
     });
