@@ -23,26 +23,14 @@ async function warmNpmCache() {
   console.log('  Warm NPM cache for project template deps.');
 
   // cwd is the root dir where snapp-cli's package.json is located.
-  const jsProj = fs.readFileSync('templates/project/package.json', 'utf8');
   const tsProj = fs.readFileSync('templates/project-ts/package.json', 'utf8');
-
-  let jsProjDeps = {
-    ...JSON.parse(jsProj).dependencies,
-    ...JSON.parse(jsProj).devDependencies,
-  };
 
   let tsProjDeps = {
     ...JSON.parse(tsProj).dependencies,
     ...JSON.parse(tsProj).devDependencies,
   };
 
-  for (prop in tsProjDeps) {
-    if (jsProjDeps[prop] && jsProjDeps[prop] === tsProjDeps[prop]) {
-      delete tsProjDeps[prop];
-    }
-  }
-
-  const allUniqueDeps = { ...jsProjDeps, ...tsProjDeps };
+  const allUniqueDeps = { ...tsProjDeps };
 
   let toCache = [];
   for (const pkgName in allUniqueDeps) {
