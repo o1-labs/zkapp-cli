@@ -37,7 +37,7 @@ async function project(name) {
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   sh.cd(name);
 
-  await step('Initialize Git repo', 'git init -q && git branch -m main');
+  await step('Initialize Git repo', 'git init -q');
 
   // `/dev/null` is the only way to silence Husky's install log msg.
   await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
@@ -48,7 +48,7 @@ async function project(name) {
   // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
     'Git init commit',
-    `git add . && git commit -m 'Init commit' -q -n`
+    `git add . && git commit -m 'Init commit' -q -n && git branch -m main`
   );
 
   const str =
