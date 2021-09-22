@@ -38,7 +38,9 @@ async function warmNpmCache() {
   }
 
   try {
-    await shExec(`npm cache add ${toCache.join(' ')}`);
+    toCache.forEach(async (pkgName) => {
+      await shExec(`npm cache add ${pkgName}`);
+    });
     console.log('    Done.');
   } catch (err) {
     console.error(err);
