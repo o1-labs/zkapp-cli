@@ -1,6 +1,6 @@
 {
   "name": "snapp-cli",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "CLI to create a SNAPP (Snark App) for Mina Protocol.",
   "author": "O(1) Labs",
   "license": "Apache-2.0",
@@ -20,9 +20,9 @@
   "scripts": {
     "prepare": "husky install",
     "postinstall": "node src/postinstall",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest --silent",
-    "testw": "node --experimental-vm-modules ./node_modules/.bin/jest --watch --silent",
-    "coverage": "node --experimental-vm-modules ./node_modules/.bin/jest --coverage",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --silent",
+    "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
+    "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*"
   },
   "dependencies": {
