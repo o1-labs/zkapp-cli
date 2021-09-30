@@ -4,6 +4,7 @@ const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
+const path = require('path');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -121,7 +122,7 @@ async function setProjectName(projDir) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
-  const name = projDir.split('/').pop();
+  const name = projDir.split(path.sep).pop();
   replaceInFile(projDir + '/README.md', 'PROJECT_NAME', titleCase(name));
   replaceInFile(projDir + '/package.json', 'package-name', kebabCase(name));
 

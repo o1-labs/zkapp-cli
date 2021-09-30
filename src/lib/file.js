@@ -60,7 +60,7 @@ async function file(_path) {
 function parsePath(cwd, _path) {
   const fullPath = path.join(cwd, _path);
 
-  const parts = _path.split('/');
+  const parts = _path.split(path.sep);
   const userName = parts.pop();
 
   const userPath = parts.length ? path.join(...parts) : '';
