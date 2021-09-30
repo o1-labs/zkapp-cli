@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const fs = require('fs');
+const path = require('path');
 const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
@@ -18,6 +19,7 @@ const shExec = util.promisify(sh.exec);
  */
 async function project(name) {
   const lang = 'ts';
+  const isWindows = process.platform === 'win32';
 
   if (fs.existsSync(name)) {
     console.error(_red(`Directory already exists. Not proceeding`));
@@ -39,8 +41,11 @@ async function project(name) {
 
   await step('Initialize Git repo', 'git init -q');
 
-  // `/dev/null` is the only way to silence Husky's install log msg.
-  await step('NPM install', 'npm ci --silent > "/dev/null" 2>&1');
+  // `/dev/null` on linux or 'NUL' on windows is the only way to silence Husky's install log msg.
+  await step(
+    'NPM install',
+    `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+  );
 
   // process.cwd() is full path to user's terminal + path/to/name.
   await setProjectName(process.cwd());
@@ -48,7 +53,7 @@ async function project(name) {
   // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
     'Git init commit',
-    `git add . && git commit -m 'Init commit' -q -n && git branch -m main`
+    `git add . && git commit -m "Init commit" -q -n && git branch -m main`
   );
 
   const str =
@@ -86,7 +91,11 @@ async function fetchProjectTemplate(name, lang) {
     });
 
     sh.mkdir('-p', name); // create path/to/dir if needed.
-    sh.cp('-r', `${TEMP}/templates/${projectName}/.`, name);
+    sh.cp(
+      '-r',
+      `${path.join(TEMP, 'templates', projectName)}${path.sep}.`,
+      name
+    );
     sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
@@ -121,9 +130,17 @@ async function setProjectName(projDir) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
-  const name = projDir.split('/').pop();
-  replaceInFile(projDir + '/README.md', 'PROJECT_NAME', titleCase(name));
-  replaceInFile(projDir + '/package.json', 'package-name', kebabCase(name));
+  const name = projDir.split(path.sep).pop();
+  replaceInFile(
+    path.join(projDir, 'README.md'),
+    'PROJECT_NAME',
+    titleCase(name)
+  );
+  replaceInFile(
+    path.join(projDir, 'package.json'),
+    'package-name',
+    kebabCase(name)
+  );
 
   spin.succeed(_green(step));
 }

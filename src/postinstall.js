@@ -3,6 +3,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
@@ -23,7 +24,10 @@ async function warmNpmCache() {
   console.log('  Warm NPM cache for project template deps.');
 
   // cwd is the root dir where snapp-cli's package.json is located.
-  const tsProj = fs.readFileSync('templates/project-ts/package.json', 'utf8');
+  const tsProj = fs.readFileSync(
+    path.join('templates', 'project-ts', 'package.json'),
+    'utf8'
+  );
 
   let tsProjDeps = {
     ...JSON.parse(tsProj).dependencies,

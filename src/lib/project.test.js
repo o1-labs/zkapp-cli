@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 let {
   project,
   step,
@@ -19,12 +20,16 @@ describe('project.js', () => {
 
   describe('setProjectName()', () => {
     it('README.md contains target text to replace', () => {
-      const readmeTs = fs.readFileSync('templates/project-ts/README.md');
+      const readmeTs = fs.readFileSync(
+        path.join('templates', 'project-ts', 'README.md')
+      );
       expect(readmeTs.includes('Mina SNAPP: PROJECT_NAME')).toBeTruthy();
     });
 
     it('package.json contains target text to replace', () => {
-      const readmeTs = fs.readFileSync('templates/project-ts/package.json');
+      const readmeTs = fs.readFileSync(
+        path.join('templates', 'project-ts', 'package.json')
+      );
       expect(readmeTs.includes('package-name')).toBeTruthy();
     });
 
@@ -36,10 +41,13 @@ describe('project.js', () => {
       fs.writeFileSync(DIR + '/README.md', README);
       fs.writeFileSync(DIR + '/package.json', PKG);
       setProjectName(DIR);
-      const readmeAfter = fs.readFileSync(DIR + '/README.md', 'utf8');
+      const readmeAfter = fs.readFileSync(path.join(DIR, 'README.md'), 'utf8');
       expect(readmeAfter.includes('Temp Fixture Proj')).toBeTruthy();
       expect(readmeAfter.includes('PROJECT_NAME')).toBeFalsy();
-      const packageAfter = fs.readFileSync(DIR + '/package.json', 'utf8');
+      const packageAfter = fs.readFileSync(
+        path.join(DIR, 'package.json'),
+        'utf8'
+      );
       expect(packageAfter.includes('temp-fixture-proj')).toBeTruthy();
       expect(packageAfter.includes('package-name')).toBeFalsy();
       fs.rmSync(DIR, { recursive: true });
