@@ -53,7 +53,7 @@ async function project(name) {
   // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
     'Git init commit',
-    `git add . && git commit -m "Init commit" -q -n && git branch -m main`
+    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
   );
 
   const str =
