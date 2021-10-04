@@ -57,7 +57,13 @@ async function example(example) {
     `\nNext steps:` +
     `\n  cd ${dir}` +
     `\n  git remote add origin <your-repo-url>` +
-    `\n  git push -u origin main`;
+    `\n  git push -u origin main` +
+    `\n` +
+    `\nTo run the example:` +
+    `\n  cd ${dir}` +
+    `\n  npm run test` +
+    `\n  npm run build` +
+    `\n  npm run start`;
 
   console.log(_green(str));
 }
