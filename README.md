@@ -1,28 +1,30 @@
 # Snapp CLI
 
-WIP. Not ready for use. File & project templates need to be updated when
-SnarkyJS is ready.
+Snapp CLI allows you to scaffold, write, test, & deploy SNAPPs (Snark Apps) for
+[Mina](https://minaprotocol.com/) using the recommended best practices.
+
+To get started, please read this README, followed by [Mina's SNAPP
+docs](https://docs.minaprotocol.com/) for a step-by-step guide.
 
 ## Dependencies
 
-NodeJS `16.x` or `14.x`. We actively test using these versions.
+- NodeJS 14+
+- NPM 6+
+- Git 2+
+
+If you have an older version installed, we suggest installing a newer version
+using the package manager for your system: [Homebrew](https://brew.sh/) (Mac),
+[Chocolatey](https://chocolatey.org/) (Windows), or apt/yum/etc (Linux). On
+Linux, you may need to install a recent NodeJS version via NodeSource
+([deb](https://github.com/nodesource/distributions#debinstall) or
+[rpm](https://github.com/nodesource/distributions#rpminstall)), as recommended
+by the NodeJS Project.
 
 ## Installation
 
 ```sh
 npm install -g snapp-cli
 ```
-
-## Installation (for development of Snapp CLI)
-
-```sh
-git clone https://github.com/o1-labs/snapp-cli.git
-cd snapp-cli
-npm i
-npm link
-```
-
-This will make the command available globally on your system.
 
 ## Usage
 
@@ -35,7 +37,7 @@ snapp --help
 ```sh
 snapp project my-proj  # or path/to/my-proj
 
-✔ Clone project template
+✔ Fetch project template
 ✔ Initialize Git repo
 ✔ NPM install
 ✔ Set project name
