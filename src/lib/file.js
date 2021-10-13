@@ -39,8 +39,7 @@ async function file(_path) {
     return;
   }
 
-  // TODO: Add SnarkyJS import to fileContent, when it's ready.
-  const fileContent = ``;
+  const fileContent = `import { Field } from '@o1labs/snarkyjs/server';\n`;
   const testContent = `import ${userName} from './${userName}';
 
 describe('${userName}.js', () => {
