@@ -39,9 +39,16 @@ async function file(_path) {
     return;
   }
 
-  // TODO: Finish templates when SnarkyJS is ready.
+  // TODO: Add SnarkyJS import to fileContent, when it's ready.
   const fileContent = ``;
-  const testContent = `import ${userName} from './${userName}';\n`;
+  const testContent = `import ${userName} from './${userName}';
+
+describe('${userName}.js', () => {
+  describe('${userName}()', () => {
+    it.todo('should be correct');
+  });
+});
+`;
 
   // Recursively creates path to file, if needed.
   fs.outputFileSync(fileName, fileContent);
