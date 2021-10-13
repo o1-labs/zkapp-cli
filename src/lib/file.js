@@ -39,8 +39,7 @@ async function file(_path) {
     return;
   }
 
-  // TODO: Finish templates when SnarkyJS is ready.
-  const fileContent = ``;
+  const fileContent = `import { Field } from '@o1labs/snarkyjs/server';`;
   const testContent = `import ${userName} from './${userName}';\n`;
 
   // Recursively creates path to file, if needed.
