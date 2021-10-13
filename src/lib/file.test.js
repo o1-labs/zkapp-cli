@@ -9,17 +9,17 @@ describe('file.js', () => {
 
   describe('parsePath()', () => {
     it('should be correct when given `name`', () => {
-      const { fullPath, userName, userPath } = parsePath('/Users/Foo/', 'name');
+      const { fullPath, projName, userPath } = parsePath('/Users/Foo/', 'name');
       const expectedFullPath = isWindows
         ? '\\Users\\Foo\\name'
         : '/Users/Foo/name';
       expect(fullPath).toEqual(expectedFullPath);
-      expect(userName).toEqual('name');
+      expect(projName).toEqual('name');
       expect(userPath).toEqual('');
     });
 
     it('should be correct when given `path/to/name`', () => {
-      const { fullPath, userName, userPath } = parsePath(
+      const { fullPath, projName, userPath } = parsePath(
         '/Users/Foo/',
         'path/to/name'
       );
@@ -28,7 +28,7 @@ describe('file.js', () => {
         : '/Users/Foo/path/to/name';
       const expectedUserPath = isWindows ? 'path\\to' : 'path/to';
       expect(fullPath).toEqual(expectedFullPath);
-      expect(userName).toEqual('name');
+      expect(projName).toEqual('name');
       expect(userPath).toEqual(expectedUserPath);
     });
   });
