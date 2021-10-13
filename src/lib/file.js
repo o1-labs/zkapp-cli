@@ -13,7 +13,7 @@ const _i = chalk.italic;
  * @return {void}
  */
 async function file(_path) {
-  let { fullPath, userPath, userName } = parsePath(process.cwd(), _path);
+  let { userPath, projName } = parsePath(process.cwd(), _path);
 
   // If we're in root dir, and the user didn't specify `src` as part of their
   // `path/to/name`, add it automatically for convenience.
@@ -25,8 +25,8 @@ async function file(_path) {
   const ts = true;
 
   const ext = ts ? 'ts' : 'js';
-  const fileName = path.join(userPath, `${userName}.${ext}`);
-  const testName = path.join(userPath, `${userName}.test.${ext}`);
+  const fileName = path.join(userPath, `${projName}.${ext}`);
+  const testName = path.join(userPath, `${projName}.test.${ext}`);
 
   const fileExists = pathExists(fileName);
   const testExists = pathExists(testName);
@@ -41,10 +41,10 @@ async function file(_path) {
 
   // TODO: Add SnarkyJS import to fileContent, when it's ready.
   const fileContent = ``;
-  const testContent = `import ${userName} from './${userName}';
+  const testContent = `import ${projName} from './${projName}';
 
-describe('${userName}.js', () => {
-  describe('${userName}()', () => {
+describe('${projName}.js', () => {
+  describe('${projName}()', () => {
     it.todo('should be correct');
   });
 });
@@ -68,14 +68,14 @@ function parsePath(cwd, _path) {
   const fullPath = path.join(cwd, _path);
 
   const parts = _path.split(path.sep);
-  const userName = parts.pop();
+  const projName = parts.pop();
 
   const userPath = parts.length ? path.join(...parts) : '';
 
   return {
     fullPath,
+    projName,
     userPath,
-    userName,
   };
 }
 
