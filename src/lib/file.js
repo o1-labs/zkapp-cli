@@ -39,7 +39,7 @@ async function file(_path) {
     return;
   }
 
-  const fileContent = `import { Field } from '@o1labs/snarkyjs/server';\n`;
+  const fileContent = `// import { Field } from '@o1labs/snarkyjs/server';\n`;
   const testContent = `import ${userName} from './${userName}';
 
 describe('${userName}.js', () => {
