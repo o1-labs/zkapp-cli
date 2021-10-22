@@ -8,7 +8,7 @@ docs](https://docs.minaprotocol.com/) for a step-by-step guide.
 
 ## Dependencies
 
-- NodeJS 14+
+- NodeJS 12+
 - NPM 6+
 - Git 2+
 
