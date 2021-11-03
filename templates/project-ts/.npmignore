@@ -1,7 +1,5 @@
-# NodeJS
-node_modules
-build
-coverage
+# TypeScript files
+src
 
 # Editor
 .vscode
