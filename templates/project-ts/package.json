@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "keywords": [],
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "scripts": {
     "test": "jest",
     "testw": "jest --watch",
