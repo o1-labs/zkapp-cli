@@ -1,1 +1,1 @@
-console.log('sudo example JS');
+console.log('sudoku example JS');
