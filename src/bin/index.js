@@ -59,7 +59,7 @@ yargs(hideBin(process.argv))
     █▄ ▄█ █ █▄ █ ▄▀▄
     █ ▀ █ █ █ ▀█ █▀█
 
-     MINA Protocol
+     Mina Protocol
       `
     )
   ).argv;
