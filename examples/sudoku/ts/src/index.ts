@@ -1,1 +1,1 @@
-console.log('sudo example TS');
+console.log('sudoku example TS');
