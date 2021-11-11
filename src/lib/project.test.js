@@ -23,7 +23,7 @@ describe('project.js', () => {
       const readmeTs = fs.readFileSync(
         path.join('templates', 'project-ts', 'README.md')
       );
-      expect(readmeTs.includes('Mina SNAPP: PROJECT_NAME')).toBeTruthy();
+      expect(readmeTs.includes('Mina Snapp: PROJECT_NAME')).toBeTruthy();
     });
 
     it('package.json contains target text to replace', () => {

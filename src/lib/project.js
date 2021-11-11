@@ -11,7 +11,7 @@ const _red = chalk.red;
 const shExec = util.promisify(sh.exec);
 
 /**
- * Create a new SNAPP project with recommended dir structure, Prettier config,
+ * Create a new snapp project with recommended dir structure, Prettier config,
  * testing lib, etc. Warns if already exists and does NOT overwrite.
  * @param {string} name  Desired dir name or path. Will recursively create
  *                       dirs without overwriting existing content, if needed.
