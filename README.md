@@ -1,9 +1,9 @@
 # Snapp CLI
 
-Snapp CLI allows you to scaffold, write, test, & deploy SNAPPs (Snark Apps) for
-[Mina](https://minaprotocol.com/) using the recommended best practices.
+Snapp CLI allows you to scaffold, write, test, & deploy snapps ("snark apps") for
+[Mina](https://minaprotocol.com/) using recommended best practices.
 
-To get started, please read this README, followed by [Mina's SNAPP
+To get started, please read this README, followed by [Mina's snapp
 docs](https://docs.minaprotocol.com/) for a step-by-step guide.
 
 ## Dependencies

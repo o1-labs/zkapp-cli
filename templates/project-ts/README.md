@@ -1,4 +1,4 @@
-# Mina SNAPP: PROJECT_NAME
+# Mina Snapp: PROJECT_NAME
 
 This template uses TypeScript.
 

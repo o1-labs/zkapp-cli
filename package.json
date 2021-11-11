@@ -1,7 +1,7 @@
 {
   "name": "snapp-cli",
   "version": "0.1.26",
-  "description": "CLI to create a SNAPP (Snark App) for Mina Protocol.",
+  "description": "CLI to create a snapp (\"snark app\") for Mina Protocol.",
   "author": "O(1) Labs",
   "license": "Apache-2.0",
   "engines": {
