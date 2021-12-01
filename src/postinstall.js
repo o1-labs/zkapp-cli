@@ -29,14 +29,14 @@ async function warmNpmCache() {
     'utf8'
   );
 
-  let tsProjDeps = {
+  const tsProjDeps = {
     ...JSON.parse(tsProj).dependencies,
     ...JSON.parse(tsProj).devDependencies,
   };
 
   const allUniqueDeps = { ...tsProjDeps };
 
-  let toCache = [];
+  const toCache = [];
   for (const pkgName in allUniqueDeps) {
     toCache.push(`${pkgName}@${allUniqueDeps[pkgName]}`);
   }
