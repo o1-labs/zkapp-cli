@@ -2,13 +2,24 @@
   "compilerOptions": {
     "target": "ES2019",
     "module": "ES2020",
+    "lib": ["dom", "esnext"],
     "outDir": "./build",
-    "rootDir": "./src",
-    "declaration": true,
+    "rootDir": ".",
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "importHelpers": true,
+    "declaration": true,
+    "sourceMap": false,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
   },
+  "include": ["./src"],
   "exclude": ["./src/**/*.test.ts"]
 }
