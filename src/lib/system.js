@@ -7,7 +7,7 @@ function system() {
       {
         System: ['OS', 'CPU'],
         Binaries: ['Node', 'npm', 'Yarn'],
-        npmPackages: ['@o1labs/snarkyjs-web'],
+        npmPackages: ['snarkyjs'],
         npmGlobalPackages: ['snapp-cli'],
       },
       { showNotFound: true }
