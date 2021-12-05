@@ -9,9 +9,9 @@
   "types": "build/src/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "jest",
-    "testw": "jest --watch",
-    "coverage": "jest --coverage",
+    "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest",
+    "testw": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --watch",
+    "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --coverage",
     "build": "tsc -p tsconfig.json",
     "prepare": "husky install",
     "format": "prettier --write --ignore-unknown **/*"
@@ -19,11 +19,13 @@
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "husky": "^7.0.1",
-    "jest": "^27.0.6",
+    "jest": "^27.3.1",
     "lint-staged": "^11.0.1",
     "prettier": "^2.3.2",
-    "ts-jest": "^27.0.4",
-    "typescript": "^4.3.5",
+    "ts-jest": "^27.0.7",
+    "typescript": "^4.5.2",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
     "snarkyjs": "^0.1.11"
   },
   "lint-staged": {
