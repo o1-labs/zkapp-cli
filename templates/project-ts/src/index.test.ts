@@ -6,8 +6,8 @@ describe('index.ts', () => {
     beforeAll(async () => {
       await isReady;
     });
-    afterAll(() => {
-      shutdown();
+    afterAll(async () => {
+      await shutdown();
     });
     it('should be correct', async () => {
       console.log(Field.random());
