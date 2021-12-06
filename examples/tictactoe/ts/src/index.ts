@@ -15,6 +15,7 @@ import {
   shutdown,
   Optional,
   Signature,
+  isReady,
 } from 'snarkyjs';
 
 class Board {
@@ -221,13 +222,13 @@ class TicTacToe extends SmartContract {
 }
 
 export async function main() {
-  console.log('main');
+  await isReady;
+
   const Local = Mina.LocalBlockchain();
   Mina.setActiveInstance(Local);
 
   const player1 = Local.testAccounts[0].privateKey;
   const player2 = Local.testAccounts[1].privateKey;
-  console.log('got testing account');
 
   const snappPrivkey = PrivateKey.random();
   const snappPubkey = snappPrivkey.toPublicKey();
@@ -251,13 +252,14 @@ export async function main() {
     .send()
     .wait();
 
-  // debug
+  // initial state
   let b = await Mina.getAccount(snappPubkey);
-  console.log('init state');
+  console.log('initial state of the snapp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
     console.log('state', i, ':', b.snapp.appState[i].toString());
   }
 
+  console.log('\ninitial board');
   new Board(b.snapp.appState[0]).print_state();
 
   // play
@@ -278,9 +280,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  console.log('after first move');
   new Board(b.snapp.appState[0]).print_state();
-  console.log('did someone win?', b.snapp.appState[6].toString());
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
@@ -298,9 +298,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  console.log('after second move');
   new Board(b.snapp.appState[0]).print_state();
-  console.log('did someone win?', b.snapp.appState[6].toString());
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
@@ -317,9 +315,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  console.log('after third move');
   new Board(b.snapp.appState[0]).print_state();
-  console.log('did someone win?', b.snapp.appState[6].toString());
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
@@ -336,9 +332,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  console.log('after fourth move');
   new Board(b.snapp.appState[0]).print_state();
-  console.log('did someone win?', b.snapp.appState[6].toString());
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
@@ -355,7 +349,6 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  console.log('after fifth move');
   new Board(b.snapp.appState[0]).print_state();
   console.log('did someone win?', b.snapp.appState[6].toString());
 
