@@ -81,7 +81,7 @@ async function fetchProjectTemplate(name, lang) {
 
   try {
     const src = 'github:o1-labs/snapp-cli#main';
-    await gittar.fetch(src);
+    await gittar.fetch(src, { force: true });
 
     // Note: Extract will overwrite any existing dir's contents. But we're
     // using an always-unique name.
