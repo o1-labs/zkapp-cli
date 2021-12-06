@@ -13,6 +13,7 @@
     "testw": "jest --watch",
     "coverage": "jest --coverage",
     "build": "tsc -p tsconfig.json",
+    "exec": "tsc -p tsconfig.json && node build/src/index.js",
     "prepare": "husky install",
     "format": "prettier --write --ignore-unknown **/*"
   },
