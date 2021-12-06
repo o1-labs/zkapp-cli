@@ -5,8 +5,8 @@ describe('index.ts', () => {
     beforeAll(async () => {
       await isReady;
     });
-    afterAll(() => {
-      shutdown();
+    afterAll(async () => {
+      await shutdown();
     });
     it('should be correct', async () => {
       expect(Field(1).add(1)).toEqual(Field(2));
