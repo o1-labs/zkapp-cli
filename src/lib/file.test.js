@@ -1,6 +1,5 @@
+const path = require('path');
 const { file, parsePath, pathExists } = require('./file');
-
-const isWindows = process.platform === 'win32';
 
 describe('file.js', () => {
   describe('file()', () => {
@@ -10,9 +9,7 @@ describe('file.js', () => {
   describe('parsePath()', () => {
     it('should be correct when given `name`', () => {
       const { fullPath, projName, userPath } = parsePath('/Users/Foo/', 'name');
-      const expectedFullPath = isWindows
-        ? '\\Users\\Foo\\name'
-        : '/Users/Foo/name';
+      const expectedFullPath = path.join('/Users', 'Foo', 'name');
       expect(fullPath).toEqual(expectedFullPath);
       expect(projName).toEqual('name');
       expect(userPath).toEqual('');
@@ -23,10 +20,8 @@ describe('file.js', () => {
         '/Users/Foo/',
         'path/to/name'
       );
-      const expectedFullPath = isWindows
-        ? '\\Users\\Foo\\path\\to\\name'
-        : '/Users/Foo/path/to/name';
-      const expectedUserPath = isWindows ? 'path\\to' : 'path/to';
+      const expectedFullPath = path.join('/Users', 'Foo', 'path', 'to', 'name');
+      const expectedUserPath = path.join('path', 'to');
       expect(fullPath).toEqual(expectedFullPath);
       expect(projName).toEqual('name');
       expect(userPath).toEqual(expectedUserPath);
