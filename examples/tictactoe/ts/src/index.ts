@@ -21,15 +21,15 @@ import {
 class Board {
   board: Optional<Bool>[][];
 
-  constructor(serialized_board: Field) {
-    const bits = serialized_board.toBits();
+  constructor(serializedBoard: Field) {
+    const bits = serializedBoard.toBits();
     let board = [];
     for (let i = 0; i < 3; i++) {
       let row = [];
       for (let j = 0; j < 3; j++) {
-        const is_played = bits[i * 3 + j];
+        const isPlayed = bits[i * 3 + j];
         const player = bits[i * 3 + j + 9];
-        row.push(new Optional(is_played, player));
+        row.push(new Optional(isPlayed, player));
       }
       board.push(row);
     }
@@ -37,22 +37,22 @@ class Board {
   }
 
   serialize(): Field {
-    let is_played = [];
+    let isPlayed = [];
     let player = [];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
-        is_played.push(this.board[i][j].isSome);
+        isPlayed.push(this.board[i][j].isSome);
         player.push(this.board[i][j].value);
       }
     }
-    return Field.ofBits(is_played.concat(player));
+    return Field.ofBits(isPlayed.concat(player));
   }
 
-  update(x: Field, y: Field, player_token: Bool) {
+  update(x: Field, y: Field, playerToken: Bool) {
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         // is this the cell the player wants to play?
-        const to_update = Circuit.if(
+        const toUpdate = Circuit.if(
           x.equals(new Field(i)).and(y.equals(new Field(j))),
           new Bool(true),
           new Bool(false)
@@ -60,22 +60,22 @@ class Board {
 
         // make sure we can play there
         Circuit.if(
-          to_update,
+          toUpdate,
           this.board[i][j].isSome,
           new Bool(false)
         ).assertEquals(false);
 
         // copy the board (or update if this is the cell the player wants to play)
         this.board[i][j] = Circuit.if(
-          to_update,
-          new Optional(new Bool(true), player_token),
+          toUpdate,
+          new Optional(new Bool(true), playerToken),
           this.board[i][j]
         );
       }
     }
   }
 
-  print_state() {
+  printState() {
     for (let i = 0; i < 3; i++) {
       let row = '| ';
       for (let j = 0; j < 3; j++) {
@@ -91,7 +91,7 @@ class Board {
     console.log('---\n');
   }
 
-  check_winner(): Bool {
+  checkWinner(): Bool {
     let won = new Bool(false);
 
     // check rows
@@ -216,7 +216,7 @@ class TicTacToe extends SmartContract {
     this.board.set(board.serialize());
 
     // 6. did I just win? If so, update the state as well
-    const won = board.check_winner();
+    const won = board.checkWinner();
     this.gameDone.set(won);
   }
 }
@@ -260,7 +260,7 @@ export async function main() {
   }
 
   console.log('\ninitial board');
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
@@ -280,7 +280,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
@@ -298,7 +298,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
@@ -315,7 +315,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
@@ -332,7 +332,7 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
@@ -349,10 +349,10 @@ export async function main() {
 
   // debug
   b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).print_state();
+  new Board(b.snapp.appState[0]).printState();
   console.log('did someone win?', b.snapp.appState[6].toString());
 
-  //
+  // cleanup
   shutdown();
 }
 
