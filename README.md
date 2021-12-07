@@ -8,7 +8,7 @@ docs](https://docs.minaprotocol.com/) for a step-by-step guide.
 
 ## Dependencies
 
-- NodeJS 14+
+- NodeJS 16+ (or 14 using `--experimental-wasm-threads`)
 - NPM 6+
 - Git 2+
 
