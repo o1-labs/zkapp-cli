@@ -15,7 +15,8 @@ const _red = chalk.red;
 yargs(hideBin(process.argv))
   .scriptName(_g('snapp'))
   .usage('Usage: $0 <command> [options]')
-  .strict() // disallow superfluous args
+  .strictCommands()
+  .strictOptions()
 
   // https://github.com/yargs/yargs/issues/199
   // https://github.com/yargs/yargs/blob/master/locales/en.json
