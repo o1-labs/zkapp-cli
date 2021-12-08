@@ -78,6 +78,12 @@ Where `name` is one of the names found in the [example directory](examples).
 Examples are based on the project template & only contain changes within
 the `src` directory. So feel free to use one of these as your project base.
 
+Once you're in an example folder, you can run the example with the following command:
+
+```sh
+npm run build && node ./build/src/index.js
+```
+
 ### Create a new file
 
 ```sh
