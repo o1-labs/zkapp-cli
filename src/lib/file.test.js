@@ -8,7 +8,10 @@ describe('file.js', () => {
 
   describe('parsePath()', () => {
     it('should be correct when given `name`', () => {
-      const { fullPath, projName, userPath } = parsePath('/Users/Foo/', 'name');
+      const { fullPath, projName, userPath } = parsePath(
+        path.join('/Users', 'Foo'),
+        'name'
+      );
       const expectedFullPath = path.join('/Users', 'Foo', 'name');
       expect(fullPath).toEqual(expectedFullPath);
       expect(projName).toEqual('name');
@@ -17,8 +20,8 @@ describe('file.js', () => {
 
     it('should be correct when given `path/to/name`', () => {
       const { fullPath, projName, userPath } = parsePath(
-        '/Users/Foo/',
-        'path/to/name'
+        path.join('/Users', 'Foo'),
+        path.join('path', 'to', 'name')
       );
       const expectedFullPath = path.join('/Users', 'Foo', 'path', 'to', 'name');
       const expectedUserPath = path.join('path', 'to');
