@@ -52,18 +52,10 @@ class Board {
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         // is this the cell the player wants to play?
-        const toUpdate = Circuit.if(
-          x.equals(new Field(i)).and(y.equals(new Field(j))),
-          new Bool(true),
-          new Bool(false)
-        );
+        const toUpdate = x.equals(new Field(i)).and(y.equals(new Field(j)));
 
         // make sure we can play there
-        Circuit.if(
-          toUpdate,
-          this.board[i][j].isSome,
-          new Bool(false)
-        ).assertEquals(false);
+        toUpdate.and(this.board[i][j].isSome).assertEquals(false);
 
         // copy the board (or update if this is the cell the player wants to play)
         this.board[i][j] = Circuit.if(
@@ -101,7 +93,7 @@ class Board {
       row = row.and(this.board[i][2].isSome);
       row = row.and(this.board[i][0].value.equals(this.board[i][1].value));
       row = row.and(this.board[i][1].value.equals(this.board[i][2].value));
-      won = Circuit.if(row, new Bool(true), won);
+      won = won.or(row);
     }
 
     // check cols
@@ -111,7 +103,7 @@ class Board {
       col = col.and(this.board[2][i].isSome);
       col = col.and(this.board[0][i].value.equals(this.board[1][i].value));
       col = col.and(this.board[1][i].value.equals(this.board[2][i].value));
-      won = Circuit.if(col, new Bool(true), won);
+      won = won.or(col);
     }
 
     // check diagonals
@@ -120,14 +112,14 @@ class Board {
     diag1 = diag1.and(this.board[2][2].isSome);
     diag1 = diag1.and(this.board[0][0].value.equals(this.board[1][1].value));
     diag1 = diag1.and(this.board[1][1].value.equals(this.board[2][2].value));
-    won = Circuit.if(diag1, new Bool(true), won);
+    won = won.or(diag1);
 
     let diag2 = this.board[0][2].isSome;
     diag2 = diag2.and(this.board[1][1].isSome);
     diag2 = diag2.and(this.board[0][2].isSome);
     diag2 = diag2.and(this.board[0][2].value.equals(this.board[1][1].value));
     diag2 = diag2.and(this.board[1][1].value.equals(this.board[2][0].value));
-    won = Circuit.if(diag2, new Bool(true), won);
+    won = won.or(diag2);
 
     //
     return won;
@@ -137,14 +129,15 @@ class Board {
 class TicTacToe extends SmartContract {
   // The board is serialized as a single field element
   @state(Field) board: State<Field>;
-  // player 1's public key
-  @state(PublicKey) player1: State<PublicKey>;
-  // player 2's public key
-  @state(PublicKey) player2: State<PublicKey>;
   // false -> player 1 | true -> player 2
   @state(Bool) nextPlayer: State<Bool>;
   // defaults to false, set to true when a player wins
   @state(Bool) gameDone: State<Bool>;
+
+  // player 1's public key
+  player1: PublicKey;
+  // player 2's public key
+  player2: PublicKey;
 
   // initialization
   constructor(
@@ -160,8 +153,8 @@ class TicTacToe extends SmartContract {
     this.gameDone = State.init(new Bool(false));
 
     // set the public key of the players
-    this.player1 = State.init(player1);
-    this.player2 = State.init(player2);
+    this.player1 = player1;
+    this.player2 = player2;
   }
 
   // board:
@@ -187,19 +180,16 @@ class TicTacToe extends SmartContract {
     signature.verify(pubkey, [x, y]).assertEquals(true);
 
     // ensure player is valid
-    const player1 = await this.player1.get();
-    const player2 = await this.player2.get();
-    Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertEquals(true);
+    Bool.or(
+      pubkey.equals(this.player1),
+      pubkey.equals(this.player2)
+    ).assertEquals(true);
 
     // 3. Make sure that its our turn,
     //    and set the state for the next player
 
     // get player token
-    const player = Circuit.if(
-      pubkey.equals(player1),
-      new Bool(false),
-      new Bool(true)
-    );
+    const player = pubkey.equals(this.player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
     const nextPlayer = await this.nextPlayer.get();
@@ -212,6 +202,15 @@ class TicTacToe extends SmartContract {
     let board = new Board(await this.board.get());
 
     // 5. update the board (and the state) with our move
+    x.equals(Field.zero)
+      .or(x.equals(Field.one))
+      .or(x.equals(new Field(2)))
+      .assertEquals(true);
+    y.equals(Field.zero)
+      .or(y.equals(Field.one))
+      .or(y.equals(new Field(2)))
+      .assertEquals(true);
+
     board.update(x, y, player);
     this.board.set(board.serialize());
 
@@ -350,7 +349,7 @@ export async function main() {
   // debug
   b = await Mina.getAccount(snappPubkey);
   new Board(b.snapp.appState[0]).printState();
-  console.log('did someone win?', b.snapp.appState[6].toString());
+  console.log('did someone win?', b.snapp.appState[2].toString());
 
   // cleanup
   shutdown();
