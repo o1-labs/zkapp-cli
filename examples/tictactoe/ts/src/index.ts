@@ -267,7 +267,7 @@ export async function main() {
     const x = Field.zero;
     const y = Field.zero;
     const signature = Signature.create(player1, [x, y]);
-    snappInstance.play(
+    await snappInstance.play(
       player1.toPublicKey(),
       signature,
       Field.zero,
@@ -288,7 +288,7 @@ export async function main() {
     const x = Field.one;
     const y = Field.zero;
     const signature = Signature.create(player2, [x, y]);
-    snappInstance
+    await snappInstance
       .play(player2.toPublicKey(), signature, Field.one, Field.zero)
       .catch((e) => console.log(e));
   })
@@ -305,7 +305,7 @@ export async function main() {
     const x = Field.one;
     const y = Field.one;
     const signature = Signature.create(player1, [x, y]);
-    snappInstance
+    await snappInstance
       .play(player1.toPublicKey(), signature, Field.one, Field.one)
       .catch((e) => console.log(e));
   })
@@ -322,7 +322,7 @@ export async function main() {
     const x = two;
     const y = Field.one;
     const signature = Signature.create(player2, [x, y]);
-    snappInstance
+    await snappInstance
       .play(player2.toPublicKey(), signature, two, Field.one)
       .catch((e) => console.log(e));
   })
@@ -339,7 +339,7 @@ export async function main() {
     const x = two;
     const y = two;
     const signature = Signature.create(player1, [x, y]);
-    snappInstance
+    await snappInstance
       .play(player1.toPublicKey(), signature, two, two)
       .catch((e) => console.log(e));
   })
