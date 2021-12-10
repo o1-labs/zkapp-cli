@@ -17,7 +17,7 @@
     "format": "prettier --write --ignore-unknown **/*"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.24",
+    "@types/jest": "^27.0.3",
     "husky": "^7.0.1",
     "jest": "^27.3.1",
     "lint-staged": "^11.0.1",
