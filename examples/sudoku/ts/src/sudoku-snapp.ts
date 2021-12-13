@@ -137,8 +137,9 @@ async function submitSolution(solution: number[][]) {
   });
   try {
     await tx.send().wait();
+    return true;
   } catch (err) {
-    console.log('Solution rejected!');
+    return false;
   }
 }
 
