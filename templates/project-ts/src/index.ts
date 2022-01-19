@@ -16,16 +16,13 @@ import {
  * When the 'update' method is called, the Add contract adds Field(2) to its 'num' contract state.
  */
 export default class Add extends SmartContract {
-  @state(Field) num: State<Field>;
+  @state(Field) num = State<Field>();
 
-  constructor(
-    initialBalance: UInt64,
-    address: PublicKey,
-    num: Field = Field(1)
-  ) {
-    super(address);
+  // initialization
+  deploy(initialBalance: UInt64, num: Field = Field(1)) {
+    super.deploy();
     this.balance.addInPlace(initialBalance);
-    this.num = State.init(num);
+    this.num.set(num);
   }
 
   @method async update() {

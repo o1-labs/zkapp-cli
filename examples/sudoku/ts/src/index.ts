@@ -16,12 +16,12 @@ let noSolution = cloneSudoku(solution);
 noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting solution...');
-await submitSolution(noSolution);
+await submitSolution(sudoku, noSolution);
 console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
 
 // submit the actual solution
 console.log('Submitting solution...');
-await submitSolution(solution);
+await submitSolution(sudoku, solution);
 console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
 
 shutdown();

@@ -22,7 +22,7 @@ describe('sudoku', () => {
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    let accepted = await submitSolution(solution);
+    let accepted = await submitSolution(sudoku, solution);
     expect(accepted).toBe(true);
 
     let { isSolved } = await getSnappState();
@@ -39,7 +39,7 @@ describe('sudoku', () => {
     let noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    let accepted = await submitSolution(noSolution);
+    let accepted = await submitSolution(sudoku, noSolution);
     expect(accepted).toBe(false);
 
     let { isSolved } = await getSnappState();

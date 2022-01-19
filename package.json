@@ -33,6 +33,7 @@
     "gittar": "^0.1.1",
     "ora": "^5.4.1",
     "shelljs": "^0.8.4",
+    "snarkyjs": "^0.2.0",
     "yargs": "^17.2.0"
   },
   "devDependencies": {
