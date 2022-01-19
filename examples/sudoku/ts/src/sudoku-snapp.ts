@@ -3,7 +3,6 @@ import {
   CircuitValue,
   Field,
   SmartContract,
-  PublicKey,
   method,
   PrivateKey,
   Mina,
