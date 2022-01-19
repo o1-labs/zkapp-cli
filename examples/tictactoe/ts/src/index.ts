@@ -128,33 +128,19 @@ class Board {
 
 class TicTacToe extends SmartContract {
   // The board is serialized as a single field element
-  @state(Field) board: State<Field>;
+  @state(Field) board = State<Field>();
   // false -> player 1 | true -> player 2
-  @state(Bool) nextPlayer: State<Bool>;
+  @state(Bool) nextPlayer = State<Bool>();
   // defaults to false, set to true when a player wins
-  @state(Bool) gameDone: State<Bool>;
-
-  // player 1's public key
-  player1: PublicKey;
-  // player 2's public key
-  player2: PublicKey;
+  @state(Bool) gameDone = State<Bool>();
 
   // initialization
-  constructor(
-    initialBalance: UInt64,
-    address: PublicKey,
-    player1: PublicKey,
-    player2: PublicKey
-  ) {
-    super(address);
+  deploy(initialBalance: UInt64) {
+    super.deploy();
     this.balance.addInPlace(initialBalance);
-    this.board = State.init(Field.zero);
-    this.nextPlayer = State.init(new Bool(false)); // player 1 starts
-    this.gameDone = State.init(new Bool(false));
-
-    // set the public key of the players
-    this.player1 = player1;
-    this.player2 = player2;
+    this.board.set(Field.zero);
+    this.nextPlayer.set(new Bool(false)); // player 1 starts
+    this.gameDone.set(new Bool(false));
   }
 
   // board:
@@ -167,7 +153,9 @@ class TicTacToe extends SmartContract {
     pubkey: PublicKey,
     signature: Signature,
     x: Field,
-    y: Field
+    y: Field,
+    player1: PublicKey,
+    player2: PublicKey
   ) {
     // 1. if the game is already finished, abort.
     const finished = await this.gameDone.get();
@@ -180,16 +168,13 @@ class TicTacToe extends SmartContract {
     signature.verify(pubkey, [x, y]).assertEquals(true);
 
     // ensure player is valid
-    Bool.or(
-      pubkey.equals(this.player1),
-      pubkey.equals(this.player2)
-    ).assertEquals(true);
+    Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertEquals(true);
 
     // 3. Make sure that its our turn,
     //    and set the state for the next player
 
     // get player token
-    const player = pubkey.equals(this.player2); // player 1 is false, player 2 is true
+    const player = pubkey.equals(player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
     const nextPlayer = await this.nextPlayer.get();
@@ -228,25 +213,22 @@ export async function main() {
 
   const player1 = Local.testAccounts[0].privateKey;
   const player2 = Local.testAccounts[1].privateKey;
+  const player1Public = player1.toPublicKey();
+  const player2Public = player2.toPublicKey();
 
   const snappPrivkey = PrivateKey.random();
   const snappPubkey = snappPrivkey.toPublicKey();
 
   // Create a new instance of the contract
   console.log('\n\n====== DEPLOYING ======\n\n');
-  let snappInstance: TicTacToe;
+  let snappInstance = new TicTacToe(snappPubkey);
   await Mina.transaction(player1, async () => {
     // player2 sends 1000000000 to the new snapp account
     const amount = UInt64.fromNumber(1000000000);
     const p = await Party.createSigned(player2);
     p.body.delta = Int64.fromUnsigned(amount).neg();
 
-    snappInstance = new TicTacToe(
-      amount,
-      snappPubkey,
-      player1.toPublicKey(),
-      player2.toPublicKey()
-    );
+    snappInstance.deploy(amount);
   })
     .send()
     .wait();
@@ -268,10 +250,12 @@ export async function main() {
     const y = Field.zero;
     const signature = Signature.create(player1, [x, y]);
     await snappInstance.play(
-      player1.toPublicKey(),
+      player1Public,
       signature,
       Field.zero,
-      Field.zero
+      Field.zero,
+      player1Public,
+      player2Public
     );
   })
     .send()
@@ -289,7 +273,14 @@ export async function main() {
     const y = Field.zero;
     const signature = Signature.create(player2, [x, y]);
     await snappInstance
-      .play(player2.toPublicKey(), signature, Field.one, Field.zero)
+      .play(
+        player2Public,
+        signature,
+        Field.one,
+        Field.zero,
+        player1Public,
+        player2Public
+      )
       .catch((e) => console.log(e));
   })
     .send()
@@ -306,7 +297,14 @@ export async function main() {
     const y = Field.one;
     const signature = Signature.create(player1, [x, y]);
     await snappInstance
-      .play(player1.toPublicKey(), signature, Field.one, Field.one)
+      .play(
+        player1Public,
+        signature,
+        Field.one,
+        Field.one,
+        player1Public,
+        player2Public
+      )
       .catch((e) => console.log(e));
   })
     .send()
@@ -323,7 +321,14 @@ export async function main() {
     const y = Field.one;
     const signature = Signature.create(player2, [x, y]);
     await snappInstance
-      .play(player2.toPublicKey(), signature, two, Field.one)
+      .play(
+        player2Public,
+        signature,
+        two,
+        Field.one,
+        player1Public,
+        player2Public
+      )
       .catch((e) => console.log(e));
   })
     .send()
@@ -340,7 +345,7 @@ export async function main() {
     const y = two;
     const signature = Signature.create(player1, [x, y]);
     await snappInstance
-      .play(player1.toPublicKey(), signature, two, two)
+      .play(player1Public, signature, two, two, player1Public, player2Public)
       .catch((e) => console.log(e));
   })
     .send()
