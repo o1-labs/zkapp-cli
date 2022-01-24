@@ -2,19 +2,25 @@
   "name": "package-name",
   "version": "0.1.4",
   "description": "",
-  "author": "",
-  "license": "Apache-2.0",
   "keywords": [],
+  "license": "Apache-2.0",
+  "author": "",
+  "type": "module",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
-  "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest",
-    "testw": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --watch",
-    "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --coverage",
     "build": "tsc -p tsconfig.json",
+    "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --coverage",
+    "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
-    "format": "prettier --write --ignore-unknown **/*"
+    "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest",
+    "testw": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --watch"
+  },
+  "lint-staged": {
+    "**/*": [
+      "eslint src/* --fix",
+      "prettier --write --ignore-unknown"
+    ]
   },
   "dependencies": {
     "snarkyjs": "^0.2.0"
@@ -23,14 +29,9 @@
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
     "@types/jest": "^27.0.3",
-    "eslint": "^7.32.0",    
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.3",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.2.0",
+    "eslint": "^8.7.0",
     "eslint-plugin-snarkyjs": "^0.1.0",
     "husky": "^7.0.1",
     "jest": "^27.3.1",
@@ -38,11 +39,5 @@
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.7",
     "typescript": "^4.5.2"
-  },
-  "lint-staged": {
-    "**/*": [
-      "eslint src/* --fix",
-      "prettier --write --ignore-unknown"
-    ]
   }
 }
