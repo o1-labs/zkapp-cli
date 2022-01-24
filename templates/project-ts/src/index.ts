@@ -1,12 +1,4 @@
-import {
-  Field,
-  PublicKey,
-  SmartContract,
-  state,
-  State,
-  method,
-  UInt64,
-} from 'snarkyjs';
+import { Field, SmartContract, state, State, method, UInt64 } from 'snarkyjs';
 
 /**
  * Basic Example
