@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const ora = require('ora');
 const sh = require('shelljs');
@@ -35,6 +35,9 @@ async function project(name) {
   }
 
   if (!(await fetchProjectTemplate(name, lang))) return;
+
+  // Create a keys dir because we excluded it from Git
+  fs.ensureDirSync(`${name}/keys`);
 
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   sh.cd(name);
@@ -152,7 +155,7 @@ async function setProjectName(projDir) {
  * @param {string} b    New text.
  */
 function replaceInFile(file, a, b) {
-  content = fs.readFileSync(file, 'utf8');
+  let content = fs.readFileSync(file, 'utf8');
   content = content.replace(a, b);
   fs.writeFileSync(file, content);
 }
