@@ -1,6 +1,6 @@
 {
   "name": "snapp-cli",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "CLI to create a snapp (\"snark app\") for Mina Protocol.",
   "keywords": [
     "mina",
@@ -36,12 +36,16 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
+    "enquirer": "^2.3.6",
     "envinfo": "^7.8.1",
+    "find-npm-prefix": "^1.0.2",
     "fs-extra": "^10.0.0",
     "gittar": "^0.1.1",
+    "graphql.js": "^0.6.8",
     "ora": "^5.4.1",
     "shelljs": "^0.8.4",
     "snarkyjs": "^0.2.0",
+    "table": "^6.8.0",
     "yargs": "^17.2.0"
   },
   "devDependencies": {

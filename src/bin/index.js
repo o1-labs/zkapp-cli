@@ -2,10 +2,11 @@
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-const { file } = require('../lib/file');
 const { project } = require('../lib/project');
-const { system } = require('../lib/system');
+const { file } = require('../lib/file');
+// const { deploy } = require('../lib/deploy');
 const { example } = require('../lib/example');
+const { system } = require('../lib/system');
 const chalk = require('chalk');
 
 const _g = chalk.green;
@@ -42,6 +43,22 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
+  // .command(
+  //   ['deploy [network]'],
+  //   'Deploy or redeploy a snapp',
+  //   {
+  //     network: { demand: true, string: true, hidden: true },
+  //     y: {
+  //       alias: 'yes',
+  //       boolean: true,
+  //       demand: false,
+  //       hidden: false,
+  //       description:
+  //         'Respond `yes` to all confirmation prompts.\nAllows running non-interactively within a script.',
+  //     },
+  //   },
+  //   async (argv) => await deploy(argv)
+  // )
   .command(
     ['example [name]', 'e [name]'],
     'Create an example project',
