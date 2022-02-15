@@ -63,9 +63,14 @@ This command creates a directory containing a new project template, fully set up
   also included. If you push your project to Github, Github Actions will run
   your tests (named as `*.test.js`) automatically, whenever you push a commit or
   open a pull request.
-- Code style consistency is automatically enforced via Prettier using Git
-  pre-commit hooks. This requires no configuration and occurs automatically
-  when you commit to Git--e.g. `git commit -m 'feat: add awesome feature'`.
+- Code style consistency using Prettier and linting using ES Lint are
+  automatically enforced using Git pre-commit hooks. This requires no
+  configuration and occurs automatically when you commit to Git--e.g. `git
+  commit -m 'feat: add awesome feature'`.
+- To skip all checks in the Git pre-commit hook (not recommended), you can pass
+  the `-n` flag to Git--e.g. `git commit -m 'a bad commit' -n`. But we'd
+  recommend avoiding this and resolving any errors which exist in your project
+  until the pre-commit hook passes.
 
 ### Create an example project
 
