@@ -4,6 +4,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const { project } = require('../lib/project');
 const { file } = require('../lib/file');
+// const { config } = require('../lib/config');
 // const { deploy } = require('../lib/deploy');
 const { example } = require('../lib/example');
 const { system } = require('../lib/system');
@@ -43,6 +44,7 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
+  // .command(['config'], 'Add a new network & key pair', {}, config)
   // .command(
   //   ['deploy [network]'],
   //   'Deploy or redeploy a snapp',
