@@ -22,7 +22,7 @@ async function config() {
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a snapp project.`;
+      str = `config.json not found. Make sure you're in a zkApp project.`;
     } else {
       str = 'Unable to read config.json.';
       console.error(err);
@@ -146,7 +146,7 @@ async function config() {
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com?address=${encodeURIComponent(
       keyPair.publicKey
     )}` +
-    `\n  - To deploy, run: \`snapp deploy ${network}\``;
+    `\n  - To deploy, run: \`zk deploy ${network}\``;
 
   log(green(str));
 }

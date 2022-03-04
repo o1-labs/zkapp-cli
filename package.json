@@ -1,18 +1,19 @@
 {
-  "name": "snapp-cli",
-  "version": "0.1.30",
-  "description": "CLI to create a snapp (\"snark app\") for Mina Protocol.",
+  "name": "zkapp-cli",
+  "version": "0.2.0",
+  "description": "CLI to create a zkApp (\"zero-knowledge app\") for Mina Protocol.",
   "keywords": [
+    "cli",
     "mina",
-    "snapps",
-    "snapp",
-    "snap"
+    "zkapp",
+    "dapp"
   ],
   "license": "Apache-2.0",
   "author": "O(1) Labs",
   "bin": {
-    "snapp": "./src/bin/index.js",
-    "snapp-cli": "./src/bin/index.js"
+    "zk": "./src/bin/index.js",
+    "zkapp": "./src/bin/index.js",
+    "zkapp-cli": "./src/bin/index.js"
   },
   "scripts": {
     "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
@@ -46,7 +47,8 @@
     "shelljs": "^0.8.4",
     "snarkyjs": "^0.2.0",
     "table": "^6.8.0",
-    "yargs": "^17.2.0"
+    "yargs": "^17.2.0",
+    "zkapp-cli": "^0.1.30"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",

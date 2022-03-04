@@ -23,7 +23,7 @@ describe('project.js', () => {
       const readmeTs = fs.readFileSync(
         path.join('templates', 'project-ts', 'README.md')
       );
-      expect(readmeTs.includes('Mina Snapp: PROJECT_NAME')).toBeTruthy();
+      expect(readmeTs.includes('Mina zkApp: PROJECT_NAME')).toBeTruthy();
     });
 
     it('package.json contains target text to replace', () => {
@@ -35,7 +35,7 @@ describe('project.js', () => {
 
     it('should replace text in README.md & package.json', () => {
       const DIR = 'temp-fixture-proj';
-      const README = '# Mina Snapps: PROJECT_NAME\n more stuff\n and more';
+      const README = '# Mina zkApp: PROJECT_NAME\n more stuff\n and more';
       const PKG = `{"name": "package-name","version": "0.1.0"}`;
       fs.mkdirSync('temp-fixture-proj', { recursive: true });
       fs.writeFileSync(DIR + '/README.md', README);
@@ -57,7 +57,7 @@ describe('project.js', () => {
   describe('replaceInFile()', () => {
     it('should replace target content in a file', () => {
       const file = 'tmp-fixture-file';
-      const str = '# Mina Snapps: PROJECT_NAME\n more stuff';
+      const str = '# Mina zkApp: PROJECT_NAME\n more stuff';
       fs.writeFileSync(file, str);
       replaceInFile(file, 'PROJECT_NAME', 'Foo Bar');
       const result = fs.readFileSync(file, 'utf8');
