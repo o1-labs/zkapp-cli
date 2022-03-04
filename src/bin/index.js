@@ -15,7 +15,7 @@ const _r = chalk.reset;
 const _red = chalk.red;
 
 yargs(hideBin(process.argv))
-  .scriptName(_g('snapp'))
+  .scriptName(_g('zk'))
   .usage('Usage: $0 <command> [options]')
   .strictCommands()
   .strictOptions()
@@ -47,7 +47,7 @@ yargs(hideBin(process.argv))
   // .command(['config'], 'Add a new network & key pair', {}, config)
   // .command(
   //   ['deploy [network]'],
-  //   'Deploy or redeploy a snapp',
+  //   'Deploy or redeploy a zkApp',
   //   {
   //     network: { demand: true, string: true, hidden: true },
   //     y: {

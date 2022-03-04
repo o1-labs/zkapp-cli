@@ -1,13 +1,14 @@
 {
   "name": "package-name",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "",
   "author": "",
   "license": "Apache-2.0",
   "keywords": [
-    "mina-snapp",
+    "mina-zkapp",
     "mina-zk-app",
-    "mina-dapp"
+    "mina-dapp",
+    "zkapp"
   ],
   "type": "module",
   "main": "build/src/index.js",

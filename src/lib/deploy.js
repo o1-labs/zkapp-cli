@@ -27,7 +27,7 @@ async function deploy({ network, yes }) {
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a snapp project.`;
+      str = `config.json not found. Make sure you're in a zkApp project.`;
     } else {
       str = 'Unable to read config.json.';
       console.error(err);
@@ -40,7 +40,7 @@ async function deploy({ network, yes }) {
 
   if (!config.networks[network]) {
     log(red('Network name not found in config.json.'));
-    log(red('You can add a network by running `snapp config`.'));
+    log(red('You can add a network by running `zk config`.'));
     return;
   }
 
@@ -128,12 +128,12 @@ async function deploy({ network, yes }) {
   });
 
   await step('Build transaction', async () => {
-    // TODO: BLOCKED Build the snapp tx.
+    // TODO: BLOCKED Build the zkApp tx.
   });
 
   await step('Sign transaction', async () => {
     // const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
-    // TODO: BLOCKED Sign the snapp tx.
+    // TODO: BLOCKED Sign the zkApp tx.
   });
 
   const settings = [

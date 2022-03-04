@@ -11,7 +11,7 @@ const _red = chalk.red;
 const shExec = util.promisify(sh.exec);
 
 /**
- * Create a new snapp project with recommended dir structure, Prettier config,
+ * Create a new zkApp project with recommended dir structure, Prettier config,
  * testing lib, etc. Warns if already exists and does NOT overwrite.
  * @param {string} name  Desired dir name or path. Will recursively create
  *                       dirs without overwriting existing content, if needed.
@@ -81,7 +81,7 @@ async function fetchProjectTemplate(name, lang) {
   const spin = ora(`${step}...`).start();
 
   try {
-    const src = 'github:o1-labs/snapp-cli#main';
+    const src = 'github:o1-labs/zkapp-cli#main';
     await gittar.fetch(src);
 
     // Note: Extract will overwrite any existing dir's contents. Ensure
@@ -126,7 +126,7 @@ async function step(step, cmd) {
 
 /**
  * Step to replace placeholder names in the project with the properly-formatted
- * version of the user-supplied name as specified via `snapp project <name>`
+ * version of the user-supplied name as specified via `zk project <name>`
  * @param {string} projDir Full path to terminal dir + path/to/name
  */
 async function setProjectName(projDir) {
