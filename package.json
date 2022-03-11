@@ -47,8 +47,7 @@
     "shelljs": "^0.8.4",
     "snarkyjs": "^0.2.0",
     "table": "^6.8.0",
-    "yargs": "^17.2.0",
-    "zkapp-cli": "^0.1.30"
+    "yargs": "^17.2.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
