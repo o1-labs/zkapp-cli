@@ -1,4 +1,4 @@
-import { deploy, submitSolution, getSnappState } from './sudoku-snapp.js';
+import { deploy, submitSolution, getZkState } from './sudoku-zkapp.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { shutdown } from 'snarkyjs';
 
@@ -6,7 +6,7 @@ let sudoku = generateSudoku(0.5);
 
 console.log('Deploying Sudoku...');
 await deploy(sudoku);
-console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
+console.log('Is the sudoku solved?', (await getZkState()).isSolved);
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -17,11 +17,11 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting solution...');
 await submitSolution(sudoku, noSolution);
-console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
+console.log('Is the sudoku solved?', (await getZkState()).isSolved);
 
 // submit the actual solution
 console.log('Submitting solution...');
 await submitSolution(sudoku, solution);
-console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
+console.log('Is the sudoku solved?', (await getZkState()).isSolved);
 
 shutdown();

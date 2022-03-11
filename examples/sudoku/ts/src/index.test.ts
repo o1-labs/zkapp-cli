@@ -1,4 +1,4 @@
-import { deploy, submitSolution, getSnappState } from './sudoku-snapp';
+import { deploy, submitSolution, getZkState } from './sudoku-zkapp';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
 import { shutdown } from 'snarkyjs';
 
@@ -11,7 +11,7 @@ describe('sudoku', () => {
     let sudoku = generateSudoku(0.5);
     await deploy(sudoku);
 
-    let state = await getSnappState();
+    let state = await getZkState();
     expect(state).toBeDefined();
     expect(state.isSolved).toBe(false);
   });
@@ -25,7 +25,7 @@ describe('sudoku', () => {
     let accepted = await submitSolution(sudoku, solution);
     expect(accepted).toBe(true);
 
-    let { isSolved } = await getSnappState();
+    let { isSolved } = await getZkState();
     expect(isSolved).toBe(true);
   });
 
@@ -42,7 +42,7 @@ describe('sudoku', () => {
     let accepted = await submitSolution(sudoku, noSolution);
     expect(accepted).toBe(false);
 
-    let { isSolved } = await getSnappState();
+    let { isSolved } = await getZkState();
     expect(isSolved).toBe(false);
   });
 });

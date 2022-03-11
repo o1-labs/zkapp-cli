@@ -15,7 +15,7 @@ import {
   Party,
 } from 'snarkyjs';
 
-export { deploy, submitSolution, getSnappState };
+export { deploy, submitSolution, getZkState };
 
 await isReady;
 
@@ -32,7 +32,7 @@ class Sudoku extends CircuitValue {
   }
 }
 
-class SudokuSnapp extends SmartContract {
+class ZkSudoku extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
@@ -109,24 +109,24 @@ Mina.setActiveInstance(Local);
 const account1 = Local.testAccounts[0].privateKey;
 const account2 = Local.testAccounts[1].privateKey;
 
-const snappPrivkey = PrivateKey.random();
-let snappAddress = snappPrivkey.toPublicKey();
+const zkPrivkey = PrivateKey.random();
+let zkAddress = zkPrivkey.toPublicKey();
 
 async function deploy(sudoku: number[][]) {
   let tx = Mina.transaction(account1, async () => {
     const initialBalance = UInt64.fromNumber(1000000);
     const p = await Party.createSigned(account2);
     p.balance.subInPlace(initialBalance);
-    let snapp = new SudokuSnapp(snappAddress);
-    snapp.deploy(initialBalance, new Sudoku(sudoku));
+    let zk = new ZkSudoku(zkAddress);
+    zk.deploy(initialBalance, new Sudoku(sudoku));
   });
   await tx.send().wait();
 }
 
 async function submitSolution(sudoku: number[][], solution: number[][]) {
   let tx = Mina.transaction(account2, async () => {
-    let snapp = new SudokuSnapp(snappAddress);
-    await snapp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    let zk = new ZkSudoku(zkAddress);
+    await zk.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
   });
   try {
     await tx.send().wait();
@@ -136,10 +136,11 @@ async function submitSolution(sudoku: number[][], solution: number[][]) {
   }
 }
 
-async function getSnappState() {
-  let snappState = (await Mina.getAccount(snappAddress)).snapp.appState;
-  let sudokuHash = fieldToHex(snappState[0]);
-  let isSolved = snappState[1].equals(true).toBoolean();
+async function getZkState() {
+  // TODO: `snapp` and possibly `appState` should be changed in SnarkyJS before merging
+  let zkState = (await Mina.getAccount(zkAddress)).snapp.appState;
+  let sudokuHash = fieldToHex(zkState[0]);
+  let isSolved = zkState[1].equals(true).toBoolean();
   return { sudokuHash, isSolved };
 }
 
