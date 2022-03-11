@@ -162,7 +162,7 @@ class TicTacToe extends SmartContract {
     finished.assertEquals(false);
 
     // 2. ensure that we know the private key associated to the public key
-    //    and that our public key is known to the snapp
+    //    and that our public key is known to the zkapp
 
     // ensure player owns the associated private key
     signature.verify(pubkey, [x, y]).assertEquals(true);
@@ -216,27 +216,28 @@ export async function main() {
   const player1Public = player1.toPublicKey();
   const player2Public = player2.toPublicKey();
 
-  const snappPrivkey = PrivateKey.random();
-  const snappPubkey = snappPrivkey.toPublicKey();
+  const zkPrivkey = PrivateKey.random();
+  const zkPubkey = zkPrivkey.toPublicKey();
 
   // Create a new instance of the contract
   console.log('\n\n====== DEPLOYING ======\n\n');
-  let snappInstance = new TicTacToe(snappPubkey);
+  let zkInstance = new TicTacToe(zkPubkey);
   await Mina.transaction(player1, async () => {
-    // player2 sends 1000000000 to the new snapp account
+    // player2 sends 1000000000 to the new zkapp account
     const amount = UInt64.fromNumber(1000000000);
     const p = await Party.createSigned(player2);
     p.body.delta = Int64.fromUnsigned(amount).neg();
 
-    snappInstance.deploy(amount);
+    zkInstance.deploy(amount);
   })
     .send()
     .wait();
 
   // initial state
-  let b = await Mina.getAccount(snappPubkey);
-  console.log('initial state of the snapp');
+  let b = await Mina.getAccount(zkPubkey);
+  console.log('initial state of the zkapp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
+  // TODO: All references of `snapp` and possibly `appState` should be changed in SnarkyJS before merging
     console.log('state', i, ':', b.snapp.appState[i].toString());
   }
 
@@ -249,7 +250,7 @@ export async function main() {
     const x = Field.zero;
     const y = Field.zero;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance.play(
+    await zkInstance.play(
       player1Public,
       signature,
       Field.zero,
@@ -262,7 +263,7 @@ export async function main() {
     .wait();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
+  b = await Mina.getAccount(zkPubkey);
   new Board(b.snapp.appState[0]).printState();
 
   // play
@@ -272,7 +273,7 @@ export async function main() {
     const x = Field.one;
     const y = Field.zero;
     const signature = Signature.create(player2, [x, y]);
-    await snappInstance
+    await zkInstance
       .play(
         player2Public,
         signature,
@@ -287,7 +288,7 @@ export async function main() {
     .wait();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
+  b = await Mina.getAccount(zkPubkey);
   new Board(b.snapp.appState[0]).printState();
 
   // play
@@ -296,7 +297,7 @@ export async function main() {
     const x = Field.one;
     const y = Field.one;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance
+    await zkInstance
       .play(
         player1Public,
         signature,
@@ -311,7 +312,7 @@ export async function main() {
     .wait();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
+  b = await Mina.getAccount(zkPubkey);
   new Board(b.snapp.appState[0]).printState();
 
   // play
@@ -320,7 +321,7 @@ export async function main() {
     const x = two;
     const y = Field.one;
     const signature = Signature.create(player2, [x, y]);
-    await snappInstance
+    await zkInstance
       .play(
         player2Public,
         signature,
@@ -335,7 +336,7 @@ export async function main() {
     .wait();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
+  b = await Mina.getAccount(zkPubkey);
   new Board(b.snapp.appState[0]).printState();
 
   // play
@@ -344,7 +345,7 @@ export async function main() {
     const x = two;
     const y = two;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance
+    await zkInstance
       .play(player1Public, signature, two, two, player1Public, player2Public)
       .catch((e) => console.log(e));
   })
@@ -352,7 +353,7 @@ export async function main() {
     .wait();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
+  b = await Mina.getAccount(zkPubkey);
   new Board(b.snapp.appState[0]).printState();
   console.log('did someone win?', b.snapp.appState[2].toString());
 
