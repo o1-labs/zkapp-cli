@@ -1,5 +1,6 @@
 const sh = require('child_process').execSync;
 const fs = require('fs-extra');
+const path = require('path');
 const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
@@ -10,6 +11,11 @@ const { step } = require('./helpers');
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
+const snarky = require('snarkyjs');
+const Client = require('mina-signer');
+
+const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
+
 /**
  * Deploy a smart contract to the specified network. If no network param is
  * provided, yargs will tell the user that the network param is required.
@@ -18,6 +24,8 @@ const log = console.log;
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
+  await snarky.isReady;
+
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -123,18 +131,50 @@ async function deploy({ network, yes }) {
     );
   }
 
-  await step('Generate verification key', async () => {
-    // TODO: BLOCKED Generate the verification key.
+  const buildFile = await exportSmartContract(
+    `${DIR}/build/**/*.js`,
+    contractName
+  );
+
+  let smartContractClass = await import(`${DIR}/build/src/${buildFile}`);
+  let zkApp = smartContractClass.default;
+
+  // TODO: Do we save the zkappKey anywhere?
+  let zkappKey = snarky.PrivateKey.random();
+  let zkappAddress = zkappKey.toPublicKey();
+
+  let verificationKey = await step('Generate verification key', async () => {
+    let { verificationKey } = await snarky.compile(zkApp, zkappAddress);
+    return verificationKey;
   });
 
-  await step('Build transaction', async () => {
-    // TODO: BLOCKED Build the zkApp tx.
+  let partiesJsonDeploy = await step('Build transaction', async () => {
+    return await snarky.deploy(zkApp, {
+      zkappKey,
+      verificationKey,
+    });
   });
 
-  await step('Sign transaction', async () => {
-    // const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
-    // TODO: BLOCKED Sign the zkApp tx.
+  let signedPayment = await step('Sign transaction', async () => {
+    const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
+    const accountData = await snarky.getAccount(
+      GraphQLEndpoint,
+      'B62qmQDtbNTymWXdZAcp4JHjfhmWmuqHjwc6BamUEvD8KhFpMui2K1Z' // TODO: Repalce this later. Currently using to get a dummy nonce from the network.
+    );
+
+    let client = new Client({ network: 'testnet' });
+    let feePayerDeploy = {
+      feePayer: client.derivePublicKey(privateKey),
+      fee: `${1_000_000_000}`, // TODO: Make fee configurable. Should we just make a step for the user to specify?
+      nonce: accountData?.data?.account?.nonce ?? 0,
+    };
+    return client.signTransaction(
+      { parties: JSON.parse(partiesJsonDeploy), feePayer: feePayerDeploy },
+      privateKey
+    );
   });
+
+  log(signedPayment);
 
   const settings = [
     [bold('Network'), reset(network)],
@@ -223,6 +263,7 @@ async function deploy({ network, yes }) {
     `\n  ${txUrl}`;
 
   log(green(str));
+  await snarky.shutdown();
 }
 
 /**
@@ -266,6 +307,72 @@ function chooseSmartContract(config, deploy, network) {
   // If 2+ smartContract classes exist in build.json, return falsy.
   // We'll need to ask the user which they want to use for this network.
   return '';
+}
+
+/**
+ * Find and copy the specified SmartContract class to be deployed
+ * into a temporary file. Adds a `default export` statement to the
+ * specified class so it can then be imported to compile and deploy.
+ * @param {string} buildPath The glob pattern--e.g. `build/**\/*.js`
+ * @param {string} contractName The contract to deploy
+ * @returns {string} Name of the newly built file
+ */
+async function exportSmartContract(buildPath, contractName) {
+  const files = await glob(buildPath);
+  for (const file of files) {
+    const contract = fs.readFileSync(file, 'utf-8');
+
+    let exportStatement = await findExportStatement(contractName, file);
+    let exportedContract = await addDefaultExportToContract(
+      contractName,
+      contract,
+      exportStatement
+    );
+
+    const buildDir = path.dirname(file);
+    const buildFile = `build.${path.basename(file)}`;
+    // Write to a temporary file in the build directory. We use a temporary
+    // file so we can later file when we attempt to deploy it to the network
+    // without making unexpected changes to the original file.
+    fs.writeFileSync(path.join(buildDir, buildFile), exportedContract, 'utf8');
+    return buildFile;
+  }
+}
+
+async function findExportStatement(contractName, contractFileData) {
+  // Find the SmartContract class that is specified to be deployed
+  let results = contractFileData.matchAll(
+    new RegExp(
+      `(\\w*\\s*\\w*\\s?)class ${contractName} extends SmartContract`,
+      'gi'
+    )
+  );
+  results = Array.from(results) ?? [];
+  results = results.flat();
+  return results.length >= 2 ? results[1] : undefined;
+}
+
+async function addDefaultExportToContract(
+  contractName,
+  contractFileData,
+  exportStatement
+) {
+  if (exportStatement) {
+    // Replace any existing export statement with `export default`
+    return contractFileData.replace(
+      new RegExp(
+        `${exportStatement}class ${contractName} extends SmartContract`,
+        'gi'
+      ),
+      `\nexport default class ${contractName} extends SmartContract`
+    );
+  } else {
+    // If there is no export statement, add an `export default` to the class
+    return contractFileData.replace(
+      new RegExp(`class ${contractName} extends SmartContract`, 'gi'),
+      `export default class ${contractName} extends SmartContract`
+    );
+  }
 }
 
 module.exports = {
