@@ -11,7 +11,7 @@ const { step } = require('./helpers');
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
-const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
+const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to fetch network information
 
 /**
  * Deploy a smart contract to the specified network. If no network param is
@@ -21,10 +21,8 @@ const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
-  const { PrivateKey, compile, deploy, getAccount, isReady, shutdown } =
-    await import('snarkyjs');
+  const { PrivateKey, compile, deploy, getAccount } = await import('snarkyjs');
   const Client = (await import('mina-signer')).default;
-  await isReady;
 
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
@@ -131,16 +129,42 @@ async function deploy({ network, yes }) {
     );
   }
 
-  const buildFile = await exportSmartContract(
+  // Find the users file to import the smart contract from
+  let smartContractFile = await findSmartContractToDeploy(
     `${DIR}/build/**/*.js`,
     contractName
   );
 
-  let smartContractClass = await import(`${DIR}/build/src/${buildFile}`);
-  let zkApp = smartContractClass.default;
+  let smartContractImports;
+  try {
+    smartContractImports = await import(
+      `${DIR}/build/src/${smartContractFile}`
+    );
+  } catch (_) {
+    log(
+      red(
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please make sure your config.json has the correct smart contract values.`
+      )
+    );
+    return;
+  }
 
-  // TODO: Do we save the zkappKey anywhere?
-  let zkappKey = PrivateKey.random();
+  // Attempt to import the smart contract class to deploy from the users file. If we cannot find the named export
+  // we check for default in case the user used that instead. If neither are found, log an error message and return early.
+  if (!(contractName in smartContractImports)) {
+    if (!('default' in smartContractImports)) {
+      log(
+        red(
+          `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please add an export statment to your "${contractName}" smart contract class and try again.`
+        )
+      );
+      return;
+    }
+    contractName = 'default';
+  }
+
+  let zkApp = smartContractImports[contractName];
+  let zkappKey = PrivateKey.random(); // TODO: Do we save the zkappKey anywhere?
   let zkappAddress = zkappKey.toPublicKey();
 
   let verificationKey = await step('Generate verification key', async () => {
@@ -159,7 +183,7 @@ async function deploy({ network, yes }) {
     const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
     const accountData = await getAccount(
       GraphQLEndpoint,
-      'B62qmQDtbNTymWXdZAcp4JHjfhmWmuqHjwc6BamUEvD8KhFpMui2K1Z' // TODO: Repalce this later. Currently using to get a dummy nonce from the network.
+      'B62qmQDtbNTymWXdZAcp4JHjfhmWmuqHjwc6BamUEvD8KhFpMui2K1Z' // TODO: Replace this later. Currently using to get a dummy nonce from the network.
     );
 
     let client = new Client({ network: 'testnet' });
@@ -263,7 +287,6 @@ async function deploy({ network, yes }) {
     `\n  ${txUrl}`;
 
   log(green(str));
-  await shutdown();
 }
 
 /**
@@ -310,73 +333,24 @@ function chooseSmartContract(config, deploy, network) {
 }
 
 /**
- * Find and copy the specified SmartContract class to be deployed
- * into a temporary file. Adds a `default export` statement to the
- * specified class so it can then be imported to compile and deploy.
- * @param {string} buildPath The glob pattern--e.g. `build/**\/*.js`
- * @param {string} contractName The contract to deploy
- * @returns {string} Name of the newly built file
+ * Find the file name of the smart contract to be deployed.
+ * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
+ * @param {string}    contractName The user-specified contract name to deploy.
+ * @returns {string}  The file name of the user-specified smart contract.
  */
-async function exportSmartContract(buildPath, contractName) {
+async function findSmartContractToDeploy(buildPath, contractName) {
   const files = await glob(buildPath);
+  const re = new RegExp(`class ${contractName} extends SmartContract`, 'gi');
   for (const file of files) {
     const contract = fs.readFileSync(file, 'utf-8');
-
-    let exportedContract = await addDefaultExportToContract(
-      contractName,
-      contract
-    );
-
-    const buildDir = path.dirname(file);
-    const buildFile = `build.${path.basename(file)}`;
-    // Write to a temporary file in the build directory. We use a temporary
-    // file so we can later file when we attempt to deploy it to the network
-    // without making unexpected changes to the original file.
-    fs.writeFileSync(path.join(buildDir, buildFile), exportedContract, 'utf8');
-    return buildFile;
+    if (re.test(contract)) {
+      return path.basename(file);
+    }
   }
-}
-
-async function addDefaultExportToContract(contractName, contractFileData) {
-  let exportStatement = await getExportStatementFromContract(
-    contractName,
-    contractFileData
-  );
-  if (exportStatement) {
-    // Replace any existing export statement with `export default`
-    return contractFileData.replace(
-      new RegExp(
-        `${exportStatement}class ${contractName} extends SmartContract`,
-        'gi'
-      ),
-      `\nexport default class ${contractName} extends SmartContract`
-    );
-  } else {
-    // If there is no export statement, add an `export default` to the class
-    return contractFileData.replace(
-      new RegExp(`class ${contractName} extends SmartContract`, 'gi'),
-      `export default class ${contractName} extends SmartContract`
-    );
-  }
-}
-
-async function getExportStatementFromContract(contractName, contractFileData) {
-  // Find the SmartContract class that is specified to be deployed
-  let results = contractFileData.matchAll(
-    new RegExp(
-      `(\\w*\\s*\\w*\\s?)class ${contractName} extends SmartContract`,
-      'gi'
-    )
-  );
-  results = Array.from(results) ?? [];
-  results = results.flat();
-  return results.length >= 2 ? results[1] : undefined;
 }
 
 module.exports = {
   deploy,
   findSmartContracts,
   chooseSmartContract,
-  addDefaultExportToContract,
-  getExportStatementFromContract,
 };

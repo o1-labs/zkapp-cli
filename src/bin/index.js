@@ -6,6 +6,7 @@ const { project } = require('../lib/project');
 const { file } = require('../lib/file');
 // const { config } = require('../lib/config');
 // const { deploy } = require('../lib/deploy');
+// const { isReady, shutdown } = require('snarkyjs');
 const { example } = require('../lib/example');
 const { system } = require('../lib/system');
 const chalk = require('chalk');
@@ -59,7 +60,11 @@ yargs(hideBin(process.argv))
   //         'Respond `yes` to all confirmation prompts.\nAllows running non-interactively within a script.',
   //     },
   //   },
-  //   async (argv) => await deploy(argv)
+  //   async (argv) => {
+  //     await isReady;
+  //     deploy(argv);
+  //     await shutdown();
+  //   }
   // )
   .command(
     ['example [name]', 'e [name]'],
