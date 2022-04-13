@@ -124,16 +124,16 @@ async function config() {
   const { network, url } = response;
   if (!network || !url) return;
 
-  let keyPair = {};
-  await step(`Create key pair at keys/${network}.json`, async () => {
-    // TODO: BLOCKED Generate public/private key pair.
-    keyPair = {
-      publicKey: 'temp-abc123',
-      privateKey: 'temp-xyz987',
-    };
-
-    fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
-  });
+  const keyPair = await step(
+    `Create key pair at keys/${network}.json`,
+    async () => {
+      const Client = (await import('mina-signer')).default;
+      const client = new Client({ network: 'testnet' });
+      let keyPair = client.genKeys();
+      fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
+      return keyPair;
+    }
+  );
 
   await step(`Add network to config.json`, async () => {
     config.networks[network] = { url, keyPath: `keys/${network}.json` };
