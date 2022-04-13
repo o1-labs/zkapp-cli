@@ -11,9 +11,6 @@ const { step } = require('./helpers');
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
-const snarky = require('snarkyjs');
-const Client = require('mina-signer');
-
 const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
 
 /**
@@ -24,6 +21,8 @@ const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
+  const snarky = await import('snarkyjs');
+  const Client = (await import('mina-signer')).default;
   await snarky.isReady;
 
   // Get project root, so the CLI command can be run anywhere inside their proj.
@@ -322,7 +321,13 @@ async function exportSmartContract(buildPath, contractName) {
   for (const file of files) {
     const contract = fs.readFileSync(file, 'utf-8');
 
-    let exportStatement = await findExportStatement(contractName, file);
+    let exportStatement = await getExportStatementFromContract(
+      contractName,
+      file
+    );
+    if (!exportStatement) {
+      continue;
+    }
     let exportedContract = await addDefaultExportToContract(
       contractName,
       contract,
@@ -339,7 +344,7 @@ async function exportSmartContract(buildPath, contractName) {
   }
 }
 
-async function findExportStatement(contractName, contractFileData) {
+async function getExportStatementFromContract(contractName, contractFileData) {
   // Find the SmartContract class that is specified to be deployed
   let results = contractFileData.matchAll(
     new RegExp(
