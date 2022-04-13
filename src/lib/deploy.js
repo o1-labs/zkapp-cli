@@ -21,9 +21,10 @@ const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql';
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
-  const snarky = await import('snarkyjs');
+  const { PrivateKey, compile, deploy, getAccount, isReady, shutdown } =
+    await import('snarkyjs');
   const Client = (await import('mina-signer')).default;
-  await snarky.isReady;
+  await isReady;
 
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
@@ -139,16 +140,16 @@ async function deploy({ network, yes }) {
   let zkApp = smartContractClass.default;
 
   // TODO: Do we save the zkappKey anywhere?
-  let zkappKey = snarky.PrivateKey.random();
+  let zkappKey = PrivateKey.random();
   let zkappAddress = zkappKey.toPublicKey();
 
   let verificationKey = await step('Generate verification key', async () => {
-    let { verificationKey } = await snarky.compile(zkApp, zkappAddress);
+    let { verificationKey } = await compile(zkApp, zkappAddress);
     return verificationKey;
   });
 
   let partiesJsonDeploy = await step('Build transaction', async () => {
-    return await snarky.deploy(zkApp, {
+    return await deploy(zkApp, {
       zkappKey,
       verificationKey,
     });
@@ -156,7 +157,7 @@ async function deploy({ network, yes }) {
 
   let signedPayment = await step('Sign transaction', async () => {
     const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
-    const accountData = await snarky.getAccount(
+    const accountData = await getAccount(
       GraphQLEndpoint,
       'B62qmQDtbNTymWXdZAcp4JHjfhmWmuqHjwc6BamUEvD8KhFpMui2K1Z' // TODO: Repalce this later. Currently using to get a dummy nonce from the network.
     );
@@ -262,7 +263,7 @@ async function deploy({ network, yes }) {
     `\n  ${txUrl}`;
 
   log(green(str));
-  await snarky.shutdown();
+  await shutdown();
 }
 
 /**
@@ -321,17 +322,9 @@ async function exportSmartContract(buildPath, contractName) {
   for (const file of files) {
     const contract = fs.readFileSync(file, 'utf-8');
 
-    let exportStatement = await getExportStatementFromContract(
-      contractName,
-      file
-    );
-    if (!exportStatement) {
-      continue;
-    }
     let exportedContract = await addDefaultExportToContract(
       contractName,
-      contract,
-      exportStatement
+      contract
     );
 
     const buildDir = path.dirname(file);
@@ -344,24 +337,11 @@ async function exportSmartContract(buildPath, contractName) {
   }
 }
 
-async function getExportStatementFromContract(contractName, contractFileData) {
-  // Find the SmartContract class that is specified to be deployed
-  let results = contractFileData.matchAll(
-    new RegExp(
-      `(\\w*\\s*\\w*\\s?)class ${contractName} extends SmartContract`,
-      'gi'
-    )
+async function addDefaultExportToContract(contractName, contractFileData) {
+  let exportStatement = await getExportStatementFromContract(
+    contractName,
+    contractFileData
   );
-  results = Array.from(results) ?? [];
-  results = results.flat();
-  return results.length >= 2 ? results[1] : undefined;
-}
-
-async function addDefaultExportToContract(
-  contractName,
-  contractFileData,
-  exportStatement
-) {
   if (exportStatement) {
     // Replace any existing export statement with `export default`
     return contractFileData.replace(
@@ -380,8 +360,23 @@ async function addDefaultExportToContract(
   }
 }
 
+async function getExportStatementFromContract(contractName, contractFileData) {
+  // Find the SmartContract class that is specified to be deployed
+  let results = contractFileData.matchAll(
+    new RegExp(
+      `(\\w*\\s*\\w*\\s?)class ${contractName} extends SmartContract`,
+      'gi'
+    )
+  );
+  results = Array.from(results) ?? [];
+  results = results.flat();
+  return results.length >= 2 ? results[1] : undefined;
+}
+
 module.exports = {
   deploy,
   findSmartContracts,
   chooseSmartContract,
+  addDefaultExportToContract,
+  getExportStatementFromContract,
 };
