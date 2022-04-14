@@ -194,16 +194,36 @@ async function deploy({ network, yes }) {
     });
   });
 
+  // Get the transaction fee amount to deploy specified by the user
+  let response = await prompt({
+    type: 'input',
+    name: 'fee',
+    message: (state) => {
+      const style = state.submitted && !state.cancelled ? green : reset;
+      return style('Set transaction fee to deploy (in MINA):');
+    },
+    validate: (val) => {
+      console.log('VAL', val);
+      if (!val) return red('Fee is required.');
+      if (isNaN(val)) return red('Fee must be a number.');
+      return true;
+    },
+    result: (val) => val.trim().replace(/ /, ''),
+  });
+
+  const { fee } = response;
+  if (!fee) return;
+
   let signedPayment = await step('Sign transaction', async () => {
     const Client = await (await import('mina-signer')).default;
     let client = new Client({ network: 'testnet' });
-    let feePayer = client.derivePublicKey(privateKey); // TODO: Use the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
+    let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
 
     const accountData = await getAccount(GraphQLEndpoint, feePayer);
 
     let feePayerDeploy = {
       feePayer,
-      fee: `${1_000_000_000}`, // TODO: Make fee configurable. Should we just make a step for the user to specify?
+      fee: `${fee}000000000`, // add 9 zeros -- in nanomina (1 billion = 1.0 mina)
       nonce: accountData?.data?.account?.nonce ?? 0,
     };
     return client.signTransaction(
