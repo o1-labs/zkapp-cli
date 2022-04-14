@@ -400,9 +400,9 @@ function toFieldFromString(s) {
 }
 
 /**
- * Returns the specified private key in a format that can be used by the `mina-signer`
- * @param {string} privateKey A private key created by SnarkyJS
- * @returns A private key that can be used by the mina-signer
+ * Returns a private key created by `mina-signer` in a format that can be used by SnarkyJS
+ * @param {string} privateKey A private key created by `mina-signer`
+ * @returns A private key that can be used by SnarkyJS
  */
 function createSnarkyPrivateKey(privateKey) {
   let fieldKey = toFieldFromString(privateKey).toBits();
