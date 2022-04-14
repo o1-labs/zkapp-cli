@@ -8,6 +8,14 @@ const glob = require('fast-glob');
 const { step } = require('./helpers');
 // const graphql = require('graphql.js');
 
+const {
+  Field,
+  PrivateKey,
+  compile,
+  deploy: snarkyDeploy,
+  getAccount,
+} = require('snarkyjs');
+
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
@@ -21,9 +29,6 @@ const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
-  const { PrivateKey, compile, deploy, getAccount } = await import('snarkyjs');
-  const Client = (await import('mina-signer')).default;
-
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -150,22 +155,32 @@ async function deploy({ network, yes }) {
   }
 
   // Attempt to import the smart contract class to deploy from the users file. If we cannot find the named export
-  // we check for default in case the user used that instead. If neither are found, log an error message and return early.
+  // log an error message and return early.
   if (!(contractName in smartContractImports)) {
-    if (!('default' in smartContractImports)) {
-      log(
-        red(
-          `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please add an export statment to your "${contractName}" smart contract class and try again.`
-        )
-      );
-      return;
-    }
-    contractName = 'default';
+    log(
+      red(
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please add an export statment to your "${contractName}" smart contract class and try again.`
+      )
+    );
+    return;
   }
 
-  let zkApp = smartContractImports[contractName];
-  let zkappKey = PrivateKey.random(); // TODO: Do we save the zkappKey anywhere?
-  let zkappAddress = zkappKey.toPublicKey();
+  // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkapp.
+  let privateKey;
+  try {
+    privateKey = fs.readJSONSync(`${DIR}/keys/${network}.json`).privateKey;
+  } catch (_) {
+    log(
+      red(
+        `  Failed to find the the zkapp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
+      )
+    );
+    return;
+  }
+
+  let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
+  let zkappKey = createSnarkyPrivateKey(privateKey); //  The private key of the zkApp
+  let zkappAddress = zkappKey.toPublicKey(); //  The public key of the zkApp
 
   let verificationKey = await step('Generate verification key', async () => {
     let { verificationKey } = await compile(zkApp, zkappAddress);
@@ -173,22 +188,21 @@ async function deploy({ network, yes }) {
   });
 
   let partiesJsonDeploy = await step('Build transaction', async () => {
-    return await deploy(zkApp, {
+    return await snarkyDeploy(zkApp, {
       zkappKey,
       verificationKey,
     });
   });
 
   let signedPayment = await step('Sign transaction', async () => {
-    const { privateKey } = fs.readJSONSync(`${DIR}/keys/${network}.json`);
-    const accountData = await getAccount(
-      GraphQLEndpoint,
-      'B62qmQDtbNTymWXdZAcp4JHjfhmWmuqHjwc6BamUEvD8KhFpMui2K1Z' // TODO: Replace this later. Currently using to get a dummy nonce from the network.
-    );
-
+    const Client = await (await import('mina-signer')).default;
     let client = new Client({ network: 'testnet' });
+    let feePayer = client.derivePublicKey(privateKey); // TODO: Use the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
+
+    const accountData = await getAccount(GraphQLEndpoint, feePayer);
+
     let feePayerDeploy = {
-      feePayer: client.derivePublicKey(privateKey),
+      feePayer,
       fee: `${1_000_000_000}`, // TODO: Make fee configurable. Should we just make a step for the user to specify?
       nonce: accountData?.data?.account?.nonce ?? 0,
     };
@@ -347,6 +361,32 @@ async function findSmartContractToDeploy(buildPath, contractName) {
       return path.basename(file);
     }
   }
+}
+
+/**
+ * Returns a field element from the specified string.
+ * @param {string} s The string to convert to a Field element
+ * @returns A Field element
+ */
+function toFieldFromString(s) {
+  let bits = [];
+  for (let i = 0; i < s.length; ++i) {
+    const c = s.charCodeAt(i);
+    for (let j = 0; j < 8; ++j) {
+      bits.push(((c >> j) & 1) === 1);
+    }
+  }
+  return Field.ofBits(bits);
+}
+
+/**
+ * Returns the specified private key in a format that can be used by the `mina-signer`
+ * @param {string} privateKey A private key created by SnarkyJS
+ * @returns A private key that can be used by the mina-signer
+ */
+function createSnarkyPrivateKey(privateKey) {
+  let fieldKey = toFieldFromString(privateKey).toBits();
+  return PrivateKey.ofBits(fieldKey);
 }
 
 module.exports = {
