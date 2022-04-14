@@ -128,7 +128,7 @@ async function config() {
     `Create key pair at keys/${network}.json`,
     async () => {
       const Client = (await import('mina-signer')).default;
-      const client = new Client({ network: 'testnet' });
+      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
       fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
       return keyPair;

@@ -9,7 +9,6 @@ const { step } = require('./helpers');
 // const graphql = require('graphql.js');
 
 const {
-  Field,
   PrivateKey,
   compile,
   deploy: snarkyDeploy,
@@ -179,7 +178,7 @@ async function deploy({ network, yes }) {
   }
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
-  let zkappKey = createSnarkyPrivateKey(privateKey); //  The private key of the zkApp
+  let zkappKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkappAddress = zkappKey.toPublicKey(); //  The public key of the zkApp
 
   let verificationKey = await step('Generate verification key', async () => {
@@ -216,7 +215,7 @@ async function deploy({ network, yes }) {
 
   let signedPayment = await step('Sign transaction', async () => {
     const Client = await (await import('mina-signer')).default;
-    let client = new Client({ network: 'testnet' });
+    let client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
     let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
 
     const accountData = await getAccount(GraphQLEndpoint, feePayer);
@@ -381,32 +380,6 @@ async function findSmartContractToDeploy(buildPath, contractName) {
       return path.basename(file);
     }
   }
-}
-
-/**
- * Returns a field element from the specified string.
- * @param {string} s The string to convert to a Field element
- * @returns A Field element
- */
-function toFieldFromString(s) {
-  let bits = [];
-  for (let i = 0; i < s.length; ++i) {
-    const c = s.charCodeAt(i);
-    for (let j = 0; j < 8; ++j) {
-      bits.push(((c >> j) & 1) === 1);
-    }
-  }
-  return Field.ofBits(bits);
-}
-
-/**
- * Returns a private key created by `mina-signer` in a format that can be used by SnarkyJS
- * @param {string} privateKey A private key created by `mina-signer`
- * @returns A private key that can be used by SnarkyJS
- */
-function createSnarkyPrivateKey(privateKey) {
-  let fieldKey = toFieldFromString(privateKey).toBits();
-  return PrivateKey.ofBits(fieldKey);
 }
 
 module.exports = {
