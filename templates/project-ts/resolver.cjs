@@ -3,13 +3,18 @@ module.exports = (request, options) => {
     ...options,
     packageFilter: (pkg) => {
       // When importing snarkyjs, we specify the Node ESM import as Jest by default imports the web version
-      let snarkyNodeESM;
       if (pkg.name === 'snarkyjs') {
-        snarkyNodeESM = pkg.exports.node.import;
+        return {
+          ...pkg,
+          main: pkg.exports.node.import,
+        };
+      }
+      if (pkg.name === 'node-fetch') {
+        return { ...pkg, main: pkg.main };
       }
       return {
         ...pkg,
-        main: snarkyNodeESM ? snarkyNodeESM : pkg.module || pkg.main,
+        main: pkg.module || pkg.main,
       };
     },
   });
