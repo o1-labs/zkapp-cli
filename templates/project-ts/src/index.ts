@@ -1,4 +1,4 @@
-import { Field, SmartContract, state, State, method, UInt64 } from 'snarkyjs';
+import { Field, SmartContract, state, State, method } from 'snarkyjs';
 
 /**
  * Basic Example
@@ -11,14 +11,13 @@ export default class Add extends SmartContract {
   @state(Field) num = State<Field>();
 
   // initialization
-  deploy(initialBalance: UInt64, num: Field = Field(1)) {
-    super.deploy();
-    this.balance.addInPlace(initialBalance);
-    this.num.set(num);
+  deploy(args: unknown) {
+    super.deploy(args);
+    this.num.set(Field(1));
   }
 
-  @method async update() {
-    const currentState = await this.num.get();
+  @method update() {
+    const currentState = this.num.get();
     const newState = currentState.add(2);
     newState.assertEquals(currentState.add(2));
     this.num.set(newState);
