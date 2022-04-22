@@ -13,7 +13,6 @@ import {
   Poseidon,
   UInt64,
   Party,
-  compile,
   Permissions,
 } from 'snarkyjs';
 
@@ -113,14 +112,13 @@ const snappPrivkey = PrivateKey.random();
 let snappAddress = snappPrivkey.toPublicKey();
 
 async function deploy(sudoku: number[][]) {
-  let { verificationKey } = await compile(SmartContract, snappAddress);
   let tx = Mina.transaction(account1, () => {
     const initialBalance = UInt64.fromNumber(1000000);
     const p = Party.createSigned(account2);
     p.balance.subInPlace(initialBalance);
     let snapp = new SudokuSnapp(snappAddress);
     let sudokuInstance = new Sudoku(sudoku);
-    snapp.deploy({ verificationKey, zkappKey: snappPrivkey });
+    snapp.deploy({ zkappKey: snappPrivkey });
     snapp.balance.addInPlace(initialBalance);
     snapp.sudokuHash.set(sudokuInstance.hash());
     snapp.isSolved.set(Bool(false));
