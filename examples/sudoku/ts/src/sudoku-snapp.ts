@@ -13,6 +13,7 @@ import {
   Poseidon,
   UInt64,
   Party,
+  Permissions,
 } from 'snarkyjs';
 
 export { deploy, submitSolution, getSnappState };
@@ -36,17 +37,15 @@ class SudokuSnapp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
-  deploy(initialBalance: UInt64, sudoku: Sudoku) {
-    super.deploy();
-    this.balance.addInPlace(initialBalance);
-    this.sudokuHash.set(sudoku.hash());
-    this.isSolved.set(Bool(false));
+  deploy(args: any) {
+    super.deploy(args);
+    this.self.update.permissions.setValue({
+      ...Permissions.default(),
+      editState: Permissions.proofOrSignature(),
+    });
   }
 
-  @method async submitSolution(
-    sudokuInstance: Sudoku,
-    solutionInstance: Sudoku
-  ) {
+  @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
     let sudoku = sudokuInstance.value;
     let solution = solutionInstance.value;
 
@@ -95,7 +94,7 @@ class SudokuSnapp extends SmartContract {
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
-    let sudokuHash = await this.sudokuHash.get(); // get the hash from the blockchain
+    let sudokuHash = this.sudokuHash.get(); // get the hash from the blockchain
     sudokuInstance.hash().assertEquals(sudokuHash);
 
     // all checks passed => the sudoku is solved!
@@ -113,20 +112,26 @@ const snappPrivkey = PrivateKey.random();
 let snappAddress = snappPrivkey.toPublicKey();
 
 async function deploy(sudoku: number[][]) {
-  let tx = Mina.transaction(account1, async () => {
+  let tx = Mina.transaction(account1, () => {
     const initialBalance = UInt64.fromNumber(1000000);
-    const p = await Party.createSigned(account2);
+    const p = Party.createSigned(account2);
     p.balance.subInPlace(initialBalance);
     let snapp = new SudokuSnapp(snappAddress);
-    snapp.deploy(initialBalance, new Sudoku(sudoku));
+    let sudokuInstance = new Sudoku(sudoku);
+    snapp.deploy({ zkappKey: snappPrivkey });
+    snapp.balance.addInPlace(initialBalance);
+    snapp.sudokuHash.set(sudokuInstance.hash());
+    snapp.isSolved.set(Bool(false));
   });
   await tx.send().wait();
 }
 
 async function submitSolution(sudoku: number[][], solution: number[][]) {
-  let tx = Mina.transaction(account2, async () => {
+  let tx = Mina.transaction(account2, () => {
     let snapp = new SudokuSnapp(snappAddress);
-    await snapp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    snapp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    snapp.self.sign(snappPrivkey);
+    snapp.self.body.incrementNonce = Bool(true);
   });
   try {
     await tx.send().wait();
@@ -137,7 +142,7 @@ async function submitSolution(sudoku: number[][], solution: number[][]) {
 }
 
 async function getSnappState() {
-  let snappState = (await Mina.getAccount(snappAddress)).snapp.appState;
+  let snappState = (await Mina.getAccount(snappAddress)).zkapp.appState;
   let sudokuHash = fieldToHex(snappState[0]);
   let isSolved = snappState[1].equals(true).toBoolean();
   return { sudokuHash, isSolved };
