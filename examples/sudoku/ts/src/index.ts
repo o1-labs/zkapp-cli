@@ -15,8 +15,12 @@ if (solution === undefined) throw Error('cannot happen');
 let noSolution = cloneSudoku(solution);
 noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-console.log('Submitting solution...');
-await submitSolution(sudoku, noSolution);
+console.log('Submitting wrong solution...');
+try {
+  await submitSolution(sudoku, noSolution);
+} catch {
+  //
+}
 console.log('Is the sudoku solved?', (await getSnappState()).isSolved);
 
 // submit the actual solution
