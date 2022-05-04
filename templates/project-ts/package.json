@@ -18,7 +18,7 @@
     "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --coverage",
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
-    "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest",
+    "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --config=jest/jest.config.js",
     "testw": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --watch",
     "lint": "npx eslint src/* --fix"
   },
