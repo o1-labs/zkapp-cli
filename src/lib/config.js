@@ -4,6 +4,7 @@ const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const { step } = require('./helpers');
 const { green, red, bold, gray, reset } = require('chalk');
+const Client = require('mina-signer');
 
 const log = console.log;
 
@@ -127,7 +128,6 @@ async function config() {
   const keyPair = await step(
     `Create key pair at keys/${network}.json`,
     async () => {
-      const Client = (await import('mina-signer')).default;
       const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
       fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
@@ -143,7 +143,7 @@ async function config() {
   const str =
     `\nSuccess!\n` +
     `\nNext steps:` +
-    `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com?address=${encodeURIComponent(
+    `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/qanets?address=${encodeURIComponent(
       keyPair.publicKey
     )}` +
     `\n  - To deploy, run: \`zk deploy ${network}\``;
