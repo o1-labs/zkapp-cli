@@ -45,7 +45,7 @@
     "graphql.js": "^0.6.8",
     "ora": "^5.4.1",
     "shelljs": "^0.8.4",
-    "snarkyjs": "^0.3.0",
+    "snarkyjs": "^0.3.1",
     "table": "^6.8.0",
     "yargs": "^17.2.0"
   },

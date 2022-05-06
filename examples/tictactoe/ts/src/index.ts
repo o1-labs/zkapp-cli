@@ -7,7 +7,6 @@ import {
   method,
   PrivateKey,
   UInt64,
-  Int64,
   Bool,
   Circuit,
   Mina,
@@ -16,6 +15,7 @@ import {
   Optional,
   Signature,
   isReady,
+  Permissions,
 } from 'snarkyjs';
 
 class Board {
@@ -134,10 +134,13 @@ class TicTacToe extends SmartContract {
   // defaults to false, set to true when a player wins
   @state(Bool) gameDone = State<Bool>();
 
-  // initialization
-  deploy(initialBalance: UInt64) {
-    super.deploy();
-    this.balance.addInPlace(initialBalance);
+  deploy(args: { zkappKey: PrivateKey; initialBalance: UInt64 }) {
+    super.deploy(args);
+    this.self.update.permissions.setValue({
+      ...Permissions.default(),
+      editState: Permissions.proofOrSignature(),
+    });
+    this.balance.addInPlace(args.initialBalance);
     this.board.set(Field.zero);
     this.nextPlayer.set(new Bool(false)); // player 1 starts
     this.gameDone.set(new Bool(false));
@@ -149,7 +152,7 @@ class TicTacToe extends SmartContract {
   // 0 | x  x  x
   // 1 | x  x  x
   // 2 | x  x  x
-  @method async play(
+  @method play(
     pubkey: PublicKey,
     signature: Signature,
     x: Field,
@@ -158,11 +161,11 @@ class TicTacToe extends SmartContract {
     player2: PublicKey
   ) {
     // 1. if the game is already finished, abort.
-    const finished = await this.gameDone.get();
+    const finished = this.gameDone.get();
     finished.assertEquals(false);
 
     // 2. ensure that we know the private key associated to the public key
-    //    and that our public key is known to the snapp
+    //    and that our public key is known to the zkApp
 
     // ensure player owns the associated private key
     signature.verify(pubkey, [x, y]).assertEquals(true);
@@ -177,14 +180,14 @@ class TicTacToe extends SmartContract {
     const player = pubkey.equals(player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
-    const nextPlayer = await this.nextPlayer.get();
+    const nextPlayer = this.nextPlayer.get();
     nextPlayer.assertEquals(player);
 
     // set the next player
     this.nextPlayer.set(player.not());
 
     // 4. get and deserialize the board
-    let board = new Board(await this.board.get());
+    let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
     x.equals(Field.zero)
@@ -216,40 +219,40 @@ export async function main() {
   const player1Public = player1.toPublicKey();
   const player2Public = player2.toPublicKey();
 
-  const snappPrivkey = PrivateKey.random();
-  const snappPubkey = snappPrivkey.toPublicKey();
+  const zkAppPrivkey = PrivateKey.random();
+  const zkAppPubkey = zkAppPrivkey.toPublicKey();
 
   // Create a new instance of the contract
   console.log('\n\n====== DEPLOYING ======\n\n');
-  let snappInstance = new TicTacToe(snappPubkey);
-  await Mina.transaction(player1, async () => {
-    // player2 sends 1000000000 to the new snapp account
-    const amount = UInt64.fromNumber(1000000000);
-    const p = await Party.createSigned(player2);
-    p.body.delta = Int64.fromUnsigned(amount).neg();
+  let zkAppInstance = new TicTacToe(zkAppPubkey);
 
-    snappInstance.deploy(amount);
-  })
-    .send()
-    .wait();
+  Local.transaction(player1, () => {
+    // player2 sends 1000000000 to the new zkApp account
+    const initialBalance = UInt64.fromNumber(1000000000);
+    const p = Party.createSigned(player1, { isSameAsFeePayer: true });
+    p.balance.subInPlace(initialBalance.add(Mina.accountCreationFee()));
+    zkAppInstance.deploy({ initialBalance, zkappKey: zkAppPrivkey });
+  }).send();
+
+  console.log('after transaction');
 
   // initial state
-  let b = await Mina.getAccount(snappPubkey);
-  console.log('initial state of the snapp');
+  let b = await Mina.getAccount(zkAppPubkey);
+  console.log('initial state of the zkApp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
-    console.log('state', i, ':', b.snapp.appState[i].toString());
+    console.log('state', i, ':', b.zkapp.appState[i].toString());
   }
 
   console.log('\ninitial board');
-  new Board(b.snapp.appState[0]).printState();
+  new Board(b.zkapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
-  await Mina.transaction(player1, async () => {
+  await Local.transaction(player1, async () => {
     const x = Field.zero;
     const y = Field.zero;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance.play(
+    zkAppInstance.play(
       player1Public,
       signature,
       Field.zero,
@@ -257,104 +260,106 @@ export async function main() {
       player1Public,
       player2Public
     );
-  })
-    .send()
-    .wait();
+    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.self.body.incrementNonce = Bool(true);
+  }).send();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).printState();
+  b = await Mina.getAccount(zkAppPubkey);
+  new Board(b.zkapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
-  const two = new Field(2);
-  await Mina.transaction(player1, async () => {
+  await Local.transaction(player1, async () => {
     const x = Field.one;
     const y = Field.zero;
     const signature = Signature.create(player2, [x, y]);
-    await snappInstance
-      .play(
-        player2Public,
-        signature,
-        Field.one,
-        Field.zero,
-        player1Public,
-        player2Public
-      )
-      .catch((e) => console.log(e));
-  })
-    .send()
-    .wait();
+    zkAppInstance.play(
+      player2Public,
+      signature,
+      Field.one,
+      Field.zero,
+      player1Public,
+      player2Public
+    );
+    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.self.body.incrementNonce = Bool(true);
+  }).send();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).printState();
+  b = await Mina.getAccount(zkAppPubkey);
+  new Board(b.zkapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
-  await Mina.transaction(player1, async () => {
+  await Local.transaction(player1, async () => {
     const x = Field.one;
     const y = Field.one;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance
-      .play(
-        player1Public,
-        signature,
-        Field.one,
-        Field.one,
-        player1Public,
-        player2Public
-      )
-      .catch((e) => console.log(e));
-  })
-    .send()
-    .wait();
+    zkAppInstance.play(
+      player1Public,
+      signature,
+      Field.one,
+      Field.one,
+      player1Public,
+      player2Public
+    );
+    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.self.body.incrementNonce = Bool(true);
+  }).send();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).printState();
+  b = await Mina.getAccount(zkAppPubkey);
+  new Board(b.zkapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
-  await Mina.transaction(player2, async () => {
+  const two = new Field(2);
+  await Local.transaction(player2, async () => {
     const x = two;
     const y = Field.one;
     const signature = Signature.create(player2, [x, y]);
-    await snappInstance
-      .play(
-        player2Public,
-        signature,
-        two,
-        Field.one,
-        player1Public,
-        player2Public
-      )
-      .catch((e) => console.log(e));
-  })
-    .send()
-    .wait();
+    zkAppInstance.play(
+      player2Public,
+      signature,
+      two,
+      Field.one,
+      player1Public,
+      player2Public
+    );
+    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.self.body.incrementNonce = Bool(true);
+  }).send();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).printState();
+  b = await Mina.getAccount(zkAppPubkey);
+  new Board(b.zkapp.appState[0]).printState();
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
-  await Mina.transaction(player1, async () => {
+  await Local.transaction(player1, async () => {
     const x = two;
     const y = two;
     const signature = Signature.create(player1, [x, y]);
-    await snappInstance
-      .play(player1Public, signature, two, two, player1Public, player2Public)
-      .catch((e) => console.log(e));
-  })
-    .send()
-    .wait();
+    zkAppInstance.play(
+      player1Public,
+      signature,
+      two,
+      two,
+      player1Public,
+      player2Public
+    );
+    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.self.body.incrementNonce = Bool(true);
+  }).send();
 
   // debug
-  b = await Mina.getAccount(snappPubkey);
-  new Board(b.snapp.appState[0]).printState();
-  console.log('did someone win?', b.snapp.appState[2].toString());
+  b = await Mina.getAccount(zkAppPubkey);
+  new Board(b.zkapp.appState[0]).printState();
+  console.log(
+    'did someone win?',
+    b.zkapp.appState[2].toString() ? 'Player 1!' : 'Player 2!'
+  );
 
   // cleanup
   shutdown();
