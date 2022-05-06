@@ -6,19 +6,21 @@ const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const glob = require('fast-glob');
 const { step } = require('./helpers');
-// const graphql = require('graphql.js');
+const fetch = require('node-fetch');
 
+const Client = require('mina-signer');
 const {
+  isReady,
+  shutdown,
   PrivateKey,
   compile,
   deploy: snarkyDeploy,
-  getAccount,
 } = require('snarkyjs');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
-const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to fetch network information
+const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
  * Deploy a smart contract to the specified network. If no network param is
@@ -28,6 +30,8 @@ const GraphQLEndpoint = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
+  await isReady;
+
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -147,7 +151,7 @@ async function deploy({ network, yes }) {
   } catch (_) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please make sure your config.json has the correct smart contract values.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
       )
     );
     return;
@@ -158,7 +162,7 @@ async function deploy({ network, yes }) {
   if (!(contractName in smartContractImports)) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please add an export statment to your "${contractName}" smart contract class and try again.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n Check that you have exported your smart contract class using a named export and try again.`
       )
     );
     return;
@@ -178,19 +182,21 @@ async function deploy({ network, yes }) {
   }
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
-  let zkappKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
-  let zkappAddress = zkappKey.toPublicKey(); //  The public key of the zkApp
+  let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
+  let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
   let verificationKey = await step('Generate verification key', async () => {
-    let { verificationKey } = await compile(zkApp, zkappAddress);
+    let { verificationKey } = await compile(zkApp, zkAppAddress);
     return verificationKey;
   });
 
   let partiesJsonDeploy = await step('Build transaction', async () => {
-    return await snarkyDeploy(zkApp, {
-      zkappKey,
-      verificationKey,
-    });
+    return JSON.parse(
+      await snarkyDeploy(zkApp, {
+        zkappKey: zkAppPrivateKey,
+        verificationKey,
+      })
+    );
   });
 
   // Get the transaction fee amount to deploy specified by the user
@@ -202,7 +208,6 @@ async function deploy({ network, yes }) {
       return style('Set transaction fee to deploy (in MINA):');
     },
     validate: (val) => {
-      console.log('VAL', val);
       if (!val) return red('Fee is required.');
       if (isNaN(val)) return red('Fee must be a number.');
       return true;
@@ -213,25 +218,27 @@ async function deploy({ network, yes }) {
   const { fee } = response;
   if (!fee) return;
 
+  const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+
   let signedPayment = await step('Sign transaction', async () => {
-    const Client = await (await import('mina-signer')).default;
     let client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
     let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
 
-    const accountData = await getAccount(GraphQLEndpoint, feePayer);
+    const accountQuery = getAccountQuery(feePayer);
+    const response = await sendGraphQL(graphQLEndpoint, accountQuery);
 
     let feePayerDeploy = {
       feePayer,
       fee: `${fee}000000000`, // add 9 zeros -- in nanomina (1 billion = 1.0 mina)
-      nonce: accountData?.data?.account?.nonce ?? 0,
+      nonce: response?.data?.account?.nonce ?? 0,
+      memo: '',
     };
+
     return client.signTransaction(
-      { parties: JSON.parse(partiesJsonDeploy), feePayer: feePayerDeploy },
+      { parties: partiesJsonDeploy, feePayer: feePayerDeploy },
       privateKey
     );
   });
-
-  log(signedPayment);
 
   const settings = [
     [bold('Network'), reset(network)],
@@ -293,24 +300,23 @@ async function deploy({ network, yes }) {
   if (!(confirm === 'yes' || confirm === 'y')) return;
 
   // Send tx to the relayer.
-  const txId = await step('Send to network', async () => {
-    // const graph = graphql(config.networks[network].url);
-    // const result = await graph(``, {}); // TODO: BLOCKED Write query
-    // return result;
-
-    // TODO: ~Remove demo data below.
-    // throw new Error('something wrong occurred');
-    return 'abc123456';
+  const txn = await step('Send to network', async () => {
+    const zkAppMutation = sendZkAppQuery(signedPayment.data.parties);
+    try {
+      return (await sendGraphQL(graphQLEndpoint, zkAppMutation)).data.sendZkapp
+        .zkapp;
+    } catch (error) {
+      return error;
+    }
   });
 
-  if (!txId) {
+  if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
     log(red('  Failed to send transaction to relayer. Please try again.'));
     return;
   }
 
-  const txUrl = `https://minaexplorer.com/transaction/${txId}`;
-
+  const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.hash}`; // TODO: Make this configurable
   const str =
     `\nSuccess! Deploy transaction sent.` +
     `\n` +
@@ -320,6 +326,7 @@ async function deploy({ network, yes }) {
     `\n  ${txUrl}`;
 
   log(green(str));
+  await shutdown();
 }
 
 /**
@@ -380,6 +387,75 @@ async function findSmartContractToDeploy(buildPath, contractName) {
       return path.basename(file);
     }
   }
+}
+
+async function sendGraphQL(graphQLEndpoint, query) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, 20000); // Default to use 20s as a timeout
+  let response;
+  try {
+    let body = JSON.stringify({ operationName: null, query, variables: {} });
+    response = await fetch(graphQLEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      signal: controller.signal,
+    });
+    const responseJson = await response.json();
+    if (!response.ok) {
+      return {
+        kind: 'error',
+        statusCode: response.status,
+        statusText: response.statusText,
+        message: responseJson.errors,
+      };
+    }
+    return responseJson;
+  } catch (error) {
+    clearTimeout(timer);
+    return {
+      kind: 'error',
+      message: error,
+    };
+  }
+}
+
+function sendZkAppQuery(partiesJson) {
+  return `
+  mutation {
+    sendZkapp(input: {
+      parties: ${removeJsonQuotes(partiesJson)}
+    }) { zkapp
+      {
+        id
+        hash
+        failureReason {
+          index
+          failures
+        }
+      }
+    }
+  }`;
+}
+
+function getAccountQuery(publicKey) {
+  return `
+  query {
+    account(publicKey: "${publicKey}") {
+      publicKey
+      nonce
+    }
+  }`;
+}
+
+function removeJsonQuotes(json) {
+  // source: https://stackoverflow.com/a/65443215
+  let cleaned = JSON.stringify(JSON.parse(json), null, 2);
+  return cleaned.replace(/^[\t ]*"[^:\n\r]+(?<!\\)":/gm, (match) =>
+    match.replace(/"/g, '')
+  );
 }
 
 module.exports = {
