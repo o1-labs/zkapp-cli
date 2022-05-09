@@ -1,4 +1,11 @@
-import { Field, SmartContract, state, State, method } from 'snarkyjs';
+import {
+  Field,
+  PrivateKey,
+  SmartContract,
+  state,
+  State,
+  method,
+} from 'snarkyjs';
 
 /**
  * Basic Example
@@ -11,7 +18,10 @@ export class Add extends SmartContract {
   @state(Field) num = State<Field>();
 
   // initialization
-  deploy(args: unknown) {
+  deploy(args: {
+    verificationKey?: string | undefined;
+    zkappKey?: PrivateKey | undefined;
+  }) {
     super.deploy(args);
     this.num.set(Field(1));
   }
