@@ -12,11 +12,20 @@ import {
   Mina,
   Party,
   shutdown,
-  Optional,
   Signature,
   isReady,
   Permissions,
 } from 'snarkyjs';
+
+class Optional<T> {
+  isSome: Bool;
+  value: T;
+
+  constructor(isSome: Bool, value: T) {
+    this.isSome = isSome;
+    this.value = value;
+  }
+}
 
 class Board {
   board: Optional<Bool>[][];
@@ -226,13 +235,14 @@ export async function main() {
   console.log('\n\n====== DEPLOYING ======\n\n');
   let zkAppInstance = new TicTacToe(zkAppPubkey);
 
-  Local.transaction(player1, () => {
+  let txn = await Local.transaction(player1, () => {
     // player2 sends 1000000000 to the new zkApp account
     const initialBalance = UInt64.fromNumber(1000000000);
     const p = Party.createSigned(player1, { isSameAsFeePayer: true });
     p.balance.subInPlace(initialBalance.add(Mina.accountCreationFee()));
     zkAppInstance.deploy({ initialBalance, zkappKey: zkAppPrivkey });
-  }).send();
+  });
+  await txn.send().wait();
 
   console.log('after transaction');
 
@@ -240,15 +250,15 @@ export async function main() {
   let b = await Mina.getAccount(zkAppPubkey);
   console.log('initial state of the zkApp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
-    console.log('state', i, ':', b.zkapp.appState[i].toString());
+    console.log('state', i, ':', b.zkapp?.appState[i].toString());
   }
 
   console.log('\ninitial board');
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
-  await Local.transaction(player1, async () => {
+  txn = await Local.transaction(player1, async () => {
     const x = Field.zero;
     const y = Field.zero;
     const signature = Signature.create(player1, [x, y]);
@@ -262,15 +272,16 @@ export async function main() {
     );
     zkAppInstance.sign(zkAppPrivkey);
     zkAppInstance.self.body.incrementNonce = Bool(true);
-  }).send();
+  });
+  txn.send().wait();
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
-  await Local.transaction(player1, async () => {
+  txn = await Local.transaction(player1, async () => {
     const x = Field.one;
     const y = Field.zero;
     const signature = Signature.create(player2, [x, y]);
@@ -284,15 +295,16 @@ export async function main() {
     );
     zkAppInstance.sign(zkAppPrivkey);
     zkAppInstance.self.body.incrementNonce = Bool(true);
-  }).send();
+  });
+  txn.send().wait();
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
-  await Local.transaction(player1, async () => {
+  txn = await Local.transaction(player1, async () => {
     const x = Field.one;
     const y = Field.one;
     const signature = Signature.create(player1, [x, y]);
@@ -306,16 +318,17 @@ export async function main() {
     );
     zkAppInstance.sign(zkAppPrivkey);
     zkAppInstance.self.body.incrementNonce = Bool(true);
-  }).send();
+  });
+  txn.send().wait();
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
   const two = new Field(2);
-  await Local.transaction(player2, async () => {
+  txn = await Local.transaction(player2, async () => {
     const x = two;
     const y = Field.one;
     const signature = Signature.create(player2, [x, y]);
@@ -329,15 +342,16 @@ export async function main() {
     );
     zkAppInstance.sign(zkAppPrivkey);
     zkAppInstance.self.body.incrementNonce = Bool(true);
-  }).send();
+  });
+  await txn.send().wait();
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
-  await Local.transaction(player1, async () => {
+  txn = await Local.transaction(player1, async () => {
     const x = two;
     const y = two;
     const signature = Signature.create(player1, [x, y]);
@@ -351,14 +365,15 @@ export async function main() {
     );
     zkAppInstance.sign(zkAppPrivkey);
     zkAppInstance.self.body.incrementNonce = Bool(true);
-  }).send();
+  });
+  await txn.send().wait();
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp.appState[0]).printState();
+  new Board(b.zkapp?.appState?.[0]!).printState();
   console.log(
     'did someone win?',
-    b.zkapp.appState[2].toString() ? 'Player 1!' : 'Player 2!'
+    b.zkapp?.appState[2].toString() ? 'Player 1!' : 'Player 2!'
   );
 
   // cleanup
