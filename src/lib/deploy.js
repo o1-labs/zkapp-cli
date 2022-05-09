@@ -9,13 +9,7 @@ const { step } = require('./helpers');
 const fetch = require('node-fetch');
 
 const Client = require('mina-signer');
-const {
-  isReady,
-  shutdown,
-  PrivateKey,
-  compile,
-  deploy: snarkyDeploy,
-} = require('snarkyjs');
+const { isReady, shutdown, PrivateKey } = require('snarkyjs');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
@@ -30,8 +24,6 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * @return {void}          Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
-  await isReady;
-
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -181,18 +173,25 @@ async function deploy({ network, yes }) {
     return;
   }
 
+  let smartContractIsReady = smartContractImports['isReady'];
+  let smartContractShutdown = smartContractImports['shutdown'];
+  let smartContractDeploy = smartContractImports['deploy'];
+
+  await isReady;
+  await smartContractIsReady;
+
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
   let verificationKey = await step('Generate verification key', async () => {
-    let { verificationKey } = await compile(zkApp, zkAppAddress);
+    let { verificationKey } = await zkApp.compile(zkAppAddress);
     return verificationKey;
   });
 
   let partiesJsonDeploy = await step('Build transaction', async () => {
     return JSON.parse(
-      await snarkyDeploy(zkApp, {
+      await smartContractDeploy(zkApp, {
         zkappKey: zkAppPrivateKey,
         verificationKey,
       })
@@ -218,22 +217,40 @@ async function deploy({ network, yes }) {
   const { fee } = response;
   if (!fee) return;
 
+  let client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
+  let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
+
+  const accountQuery = getAccountQuery(feePayer);
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+  let nonce = 0;
+  response = await sendGraphQL(graphQLEndpoint, accountQuery);
 
+  if (response?.data?.account?.nonce) {
+    nonce = response.data.account.nonce;
+  } else {
+    let response = await prompt({
+      type: 'input',
+      name: 'nonce',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Please confirm the nonce of the account:');
+      },
+      validate: (val) => {
+        if (!val) return red('Nonce is required.');
+        if (isNaN(val)) return red('Nonce must be a number.');
+        return true;
+      },
+      result: (val) => val.trim().replace(/ /, ''),
+    });
+    nonce = response.nonce;
+  }
   let signedPayment = await step('Sign transaction', async () => {
-    let client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-    let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
-
-    const accountQuery = getAccountQuery(feePayer);
-    const response = await sendGraphQL(graphQLEndpoint, accountQuery);
-
     let feePayerDeploy = {
       feePayer,
+      nonce,
       fee: `${fee}000000000`, // add 9 zeros -- in nanomina (1 billion = 1.0 mina)
-      nonce: response?.data?.account?.nonce ?? 0,
       memo: '',
     };
-
     return client.signTransaction(
       { parties: partiesJsonDeploy, feePayer: feePayerDeploy },
       privateKey
@@ -327,6 +344,7 @@ async function deploy({ network, yes }) {
 
   log(green(str));
   await shutdown();
+  await smartContractShutdown();
 }
 
 /**
