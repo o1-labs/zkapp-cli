@@ -8,9 +8,6 @@ const glob = require('fast-glob');
 const { step } = require('./helpers');
 const fetch = require('node-fetch');
 
-const Client = require('mina-signer');
-const { isReady, shutdown, PrivateKey } = require('snarkyjs');
-
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
@@ -136,6 +133,10 @@ async function deploy({ network, yes }) {
   );
 
   let smartContractImports;
+  // import snarkyjs from the user directory
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
+    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
+  );
   try {
     smartContractImports = await import(
       `${DIR}/build/src/${smartContractFile}`
@@ -173,12 +174,7 @@ async function deploy({ network, yes }) {
     return;
   }
 
-  let smartContractIsReady = smartContractImports['isReady'];
-  let smartContractShutdown = smartContractImports['shutdown'];
-  let smartContractDeploy = smartContractImports['deploy'];
-
   await isReady;
-  await smartContractIsReady;
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
@@ -187,15 +183,6 @@ async function deploy({ network, yes }) {
   let verificationKey = await step('Generate verification key', async () => {
     let { verificationKey } = await zkApp.compile(zkAppAddress);
     return verificationKey;
-  });
-
-  let partiesJsonDeploy = await step('Build transaction', async () => {
-    return JSON.parse(
-      await smartContractDeploy(zkApp, {
-        zkappKey: zkAppPrivateKey,
-        verificationKey,
-      })
-    );
   });
 
   // Get the transaction fee amount to deploy specified by the user
@@ -214,19 +201,18 @@ async function deploy({ network, yes }) {
     result: (val) => val.trim().replace(/ /, ''),
   });
 
-  const { fee } = response;
+  let { fee } = response;
   if (!fee) return;
+  fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
-  let client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-  let feePayer = client.derivePublicKey(privateKey); // TODO: Using the zkapp private key to deploy. Should make the 'fee payer' configurable by the user.
-
-  const accountQuery = getAccountQuery(feePayer);
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+  const zkAppAddressBase58 = zkAppAddress.toBase58();
+  const accountQuery = getAccountQuery(zkAppAddressBase58);
   let nonce = 0;
   response = await sendGraphQL(graphQLEndpoint, accountQuery);
 
   if (response?.data?.account?.nonce) {
-    nonce = response.data.account.nonce;
+    nonce = Number(response.data.account.nonce);
   } else {
     let response = await prompt({
       type: 'input',
@@ -242,19 +228,22 @@ async function deploy({ network, yes }) {
       },
       result: (val) => val.trim().replace(/ /, ''),
     });
-    nonce = response.nonce;
+    nonce = Number(response.nonce);
   }
-  let signedPayment = await step('Sign transaction', async () => {
-    let feePayerDeploy = {
-      feePayer,
-      nonce,
-      fee: `${Number(fee) * 1e9}`, // in nanomina (1 billion = 1.0 mina)
-      memo: '',
-    };
-    return client.signTransaction(
-      { parties: partiesJsonDeploy, feePayer: feePayerDeploy },
-      privateKey
+
+  let transactionJson = await step('Build transaction', async () => {
+    addCachedAccount({ publicKey: zkAppAddressBase58, nonce });
+    let tx = await Mina.transaction(
+      { feePayerKey: zkAppPrivateKey, fee },
+      () => {
+        let zkapp = new zkApp(zkAppAddress);
+        zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
+        // hack: manually increment nonce
+        let nonce = zkapp.self.body.accountPrecondition.nonce.lower.add(1);
+        zkapp.self.body.accountPrecondition.nonce.assertBetween(nonce, nonce);
+      }
     );
+    return tx.sign().toJSON();
   });
 
   const settings = [
@@ -318,7 +307,7 @@ async function deploy({ network, yes }) {
 
   // Send tx to the relayer.
   const txn = await step('Send to network', async () => {
-    const zkAppMutation = sendZkAppQuery(signedPayment.data.parties);
+    const zkAppMutation = sendZkAppQuery(transactionJson);
     try {
       return (await sendGraphQL(graphQLEndpoint, zkAppMutation)).data.sendZkapp
         .zkapp;
@@ -344,7 +333,6 @@ async function deploy({ network, yes }) {
 
   log(green(str));
   await shutdown();
-  await smartContractShutdown();
 }
 
 /**
