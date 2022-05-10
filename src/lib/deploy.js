@@ -150,8 +150,8 @@ async function deploy({ network, yes }) {
     return;
   }
 
-  // Attempt to import the smart contract class to deploy from the users file. If we cannot find the named export
-  // log an error message and return early.
+  // Attempt to import the smart contract class to deploy from the user's file.
+  // If we cannot find the named export log an error message and return early.
   if (!(contractName in smartContractImports)) {
     log(
       red(
@@ -161,14 +161,14 @@ async function deploy({ network, yes }) {
     return;
   }
 
-  // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkapp.
+  // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
   let privateKey;
   try {
     privateKey = fs.readJSONSync(`${DIR}/keys/${network}.json`).privateKey;
   } catch (_) {
     log(
       red(
-        `  Failed to find the the zkapp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
+        `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
     return;
@@ -180,10 +180,13 @@ async function deploy({ network, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
-  let verificationKey = await step('Generate verification key', async () => {
-    let { verificationKey } = await zkApp.compile(zkAppAddress);
-    return verificationKey;
-  });
+  let verificationKey = await step(
+    'Generate verification key (takes 1-2 min)',
+    async () => {
+      let { verificationKey } = await zkApp.compile(zkAppAddress);
+      return verificationKey;
+    }
+  );
 
   // Get the transaction fee amount to deploy specified by the user
   let response = await prompt({
@@ -211,6 +214,7 @@ async function deploy({ network, yes }) {
   let nonce = 0;
   response = await sendGraphQL(graphQLEndpoint, accountQuery);
 
+  // If fetching the nonce does not work, we ask the user to specify a nonce value manually
   if (response?.data?.account?.nonce) {
     nonce = Number(response.data.account.nonce);
   } else {
