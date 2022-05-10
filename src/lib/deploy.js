@@ -21,7 +21,7 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * provided, yargs will tell the user that the network param is required.
  * @param {string} network Network name to deploy to.
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
- * @return {void}          Sends tx to a relayer, if confirmed by user.
+ * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
  */
 async function deploy({ network, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
@@ -351,7 +351,7 @@ async function deploy({ network, yes }) {
  * Find the user-specified class names for every instance of `SmartContract`
  * in the build dir.
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
- * @returns {array}     The user-specified class names--e.g. ['Foo', 'Bar']
+ * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
  */
 async function findSmartContracts(path) {
   const files = await glob(path);
@@ -394,7 +394,7 @@ function chooseSmartContract(config, deploy, network) {
  * Find the file name of the smart contract to be deployed.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
  * @param {string}    contractName The user-specified contract name to deploy.
- * @returns {string}  The file name of the user-specified smart contract.
+ * @returns {Promise<string>}      The file name of the user-specified smart contract.
  */
 async function findSmartContractToDeploy(buildPath, contractName) {
   const files = await glob(buildPath);

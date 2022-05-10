@@ -3,8 +3,10 @@ const { green, red } = require('chalk');
 
 /**
  * Helper for any steps for a consistent UX.
+ * @template T
  * @param {string} step  Name of step to show user.
- * @param {function} fn  An async function to execute.
+ * @param {() => Promise<T>} fn  An async function to execute.
+ * @returns {Promise<T>}
  */
 async function step(str, fn) {
   const spin = ora(`${str}...`).start();

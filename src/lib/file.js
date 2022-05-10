@@ -10,7 +10,7 @@ const _i = chalk.italic;
  * Create `foo.js` and `foo.test.js` in current directory. Warn if destination
  * already exists and do NOT overwrite.
  * @param {string} _path Desired file name or `path/to/name`
- * @return {void}
+ * @return {Promise<void>}
  */
 async function file(_path) {
   let { userPath, projName } = parsePath(process.cwd(), _path);
@@ -63,6 +63,7 @@ describe('${projName}.js', () => {
  * @param {string} cwd   Current working directory. E.g. process.cwd().
  * @param {string} _path User's desired filename with optional path.
  *                       E.g. `path/to/name` or `name` (with no path).
+ * @returns {{fullPath: string, projName: string, userPath: string}}
  */
 function parsePath(cwd, _path) {
   const fullPath = path.join(cwd, _path);
