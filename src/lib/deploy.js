@@ -248,7 +248,7 @@ async function deploy({ network, yes }) {
     let feePayerDeploy = {
       feePayer,
       nonce,
-      fee: `${fee}000000000`, // add 9 zeros -- in nanomina (1 billion = 1.0 mina)
+      fee: `${Number(fee) * 1e9}`, // in nanomina (1 billion = 1.0 mina)
       memo: '',
     };
     return client.signTransaction(
