@@ -15,7 +15,7 @@ const shExec = util.promisify(sh.exec);
  * testing lib, etc. Warns if already exists and does NOT overwrite.
  * @param {string} name  Desired dir name or path. Will recursively create
  *                       dirs without overwriting existing content, if needed.
- * @return {void}
+ * @return {Promise<void>}
  */
 async function project(name) {
   const lang = 'ts';
@@ -71,9 +71,9 @@ async function project(name) {
 
 /**
  * Fetch project template.
- * @param {string} example Name of the destination dir.
- * @param {string} lang    ts or js
- * @returns {boolean}      True if successful; false if not.
+ * @param {string} example     Name of the destination dir.
+ * @param {string} lang        ts or js
+ * @returns {Promise<boolean>} True if successful; false if not.
  */
 async function fetchProjectTemplate(name, lang) {
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
@@ -113,6 +113,7 @@ async function fetchProjectTemplate(name, lang) {
  * Helper for any steps that need to call a shell command.
  * @param {string} step Name of step to show user
  * @param {string} cmd  Shell command to execute.
+ * @returns {Promise<void>}
  */
 async function step(step, cmd) {
   const spin = ora(`${step}...`).start();
@@ -128,6 +129,7 @@ async function step(step, cmd) {
  * Step to replace placeholder names in the project with the properly-formatted
  * version of the user-supplied name as specified via `zk project <name>`
  * @param {string} projDir Full path to terminal dir + path/to/name
+ * @returns {Promise<void>}
  */
 async function setProjectName(projDir) {
   const step = 'Set project name';
