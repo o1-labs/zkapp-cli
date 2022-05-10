@@ -11,7 +11,7 @@ const log = console.log;
 /**
  * Show existing networks in `config.json` and allow a user to add a new
  * network and url--and generate a key pair for it.
- * @returns {void}
+ * @returns {Promise<void>}
  */
 async function config() {
   // Get project root, so the CLI command can be run anywhere inside their proj.
