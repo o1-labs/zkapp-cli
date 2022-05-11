@@ -219,28 +219,7 @@ async function deploy({ network, yes }) {
     }
   );
 
-  let fee;
-  if (yes) {
-    // If running in non-interactive mode, get the transaction fee amount from the user's config file
-    fee = config.networks[network]?.fee;
-  } else {
-    // If running in interactive mode, get the transaction fee amount from the user's input
-    let feeResponse = await prompt({
-      type: 'input',
-      name: 'fee',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set transaction fee to deploy (in MINA):');
-      },
-      validate: (val) => {
-        if (!val) return red('Fee is required.');
-        if (isNaN(val)) return red('Fee must be a number.');
-        return true;
-      },
-      result: (val) => val.trim().replace(/ /, ''),
-    });
-    fee = feeResponse.fee;
-  }
+  let { fee } = config.networks[network];
   if (!fee) {
     log(
       red(
