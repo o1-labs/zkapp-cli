@@ -39,6 +39,37 @@ async function deploy({ network, yes }) {
     return;
   }
 
+  if (!network) {
+    const networks = Object.keys(config?.networks);
+    if (!networks.length) {
+      log(red('No network aliases found in config.json.'));
+      log(red('Run `zk config` to add a network alias, then try again.'));
+      return;
+    }
+
+    const res = await prompt({
+      type: 'select',
+      name: 'network',
+      choices: networks,
+      message: (state) => {
+        // Makes the step text green upon success, else uses reset.
+        const style =
+          state.submitted && !state.cancelled ? state.styles.success : reset;
+        return style('Which network alias would you like to deploy to?');
+      },
+      prefix: (state) => {
+        // Shows a cyan question mark when not submitted.
+        // Shows a green check mark if submitted.
+        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
+        if (!state.submitted) return state.symbols.question;
+        return !state.cancelled
+          ? state.symbols.check
+          : red(state.symbols.cross);
+      },
+    });
+    network = res.network;
+  }
+
   network = network.toLowerCase();
 
   if (!config.networks[network]) {

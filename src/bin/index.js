@@ -49,7 +49,7 @@ yargs(hideBin(process.argv))
     ['deploy [network]'],
     'Deploy or redeploy a zkApp',
     {
-      network: { demand: true, string: true, hidden: true },
+      network: { demand: false, string: true, hidden: true },
       y: {
         alias: 'yes',
         boolean: true,
