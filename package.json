@@ -1,6 +1,6 @@
 {
   "name": "zkapp-cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CLI to create a zkApp (\"zero-knowledge app\") for Mina Protocol.",
   "keywords": [
     "cli",
@@ -39,6 +39,7 @@
     "chalk": "^4.1.2",
     "enquirer": "^2.3.6",
     "envinfo": "^7.8.1",
+    "fast-glob": "^3.2.11",
     "find-npm-prefix": "^1.0.2",
     "fs-extra": "^10.0.0",
     "gittar": "^0.1.1",
