@@ -132,6 +132,7 @@ async function config() {
       validate: (val) => {
         if (!val) return red('Fee is required.');
         if (isNaN(val)) return red('Fee must be a number.');
+        if (val < 0) return red("Fee can't be negative.");
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
