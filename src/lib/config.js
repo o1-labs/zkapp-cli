@@ -124,9 +124,7 @@ async function config() {
       name: 'fee',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style(
-          'Set default transaction fee to deploy a zkApp (in MINA):'
-        );
+        return style('Set transaction fee to use when deploying (in MINA):');
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
