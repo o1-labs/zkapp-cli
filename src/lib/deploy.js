@@ -211,7 +211,7 @@ async function deploy({ network, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
-  let verificationKey = await step(
+  const verificationKey = await step(
     'Generate verification key (takes 1-2 min)',
     async () => {
       let { verificationKey } = await zkApp.compile(zkAppAddress);
@@ -219,42 +219,62 @@ async function deploy({ network, yes }) {
     }
   );
 
-  // Get the transaction fee amount to deploy specified by the user
-  let response = await prompt({
-    type: 'input',
-    name: 'fee',
-    message: (state) => {
-      const style = state.submitted && !state.cancelled ? green : reset;
-      return style('Set transaction fee to deploy (in MINA):');
-    },
-    validate: (val) => {
-      if (!val) return red('Fee is required.');
-      if (isNaN(val)) return red('Fee must be a number.');
-      return true;
-    },
-    result: (val) => val.trim().replace(/ /, ''),
-  });
-
-  let { fee } = response;
-  if (!fee) return;
+  let fee;
+  if (yes) {
+    // If running in non-interactive mode, get the transaction fee amount from the user's config file
+    fee = config.networks[network]?.fee;
+  } else {
+    // If running in interactive mode, get the transaction fee amount from the user's input
+    let feeResponse = await prompt({
+      type: 'input',
+      name: 'fee',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Set transaction fee to deploy (in MINA):');
+      },
+      validate: (val) => {
+        if (!val) return red('Fee is required.');
+        if (isNaN(val)) return red('Fee must be a number.');
+        return true;
+      },
+      result: (val) => val.trim().replace(/ /, ''),
+    });
+    fee = feeResponse.fee;
+  }
+  if (!fee) {
+    log(
+      red(
+        `  Failed to find the deploy fee amount.\n  Please make sure your config.json has the correct 'fee' property.`
+      )
+    );
+    return;
+  }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
   const zkAppAddressBase58 = zkAppAddress.toBase58();
   const accountQuery = getAccountQuery(zkAppAddressBase58);
-  let nonce = 0;
-  response = await sendGraphQL(graphQLEndpoint, accountQuery);
+  const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
 
-  // If fetching the nonce does not work, we ask the user to specify a nonce value manually
-  if (response?.data?.account?.nonce) {
-    nonce = Number(response.data.account.nonce);
-  } else {
-    let response = await prompt({
+  let nonce = 0;
+  if (yes && !accountResponse?.data?.account?.nonce) {
+    // If running in non-interactive mode and no nonce is found, show an error message and return early
+    log(
+      red(
+        `  Failed to find the account nonce.\n  Please run in interactive mode and specify an account nonce.`
+      )
+    );
+    return;
+  } else if (!yes && !accountResponse?.data?.account?.nonce) {
+    // If running in interactive mode and no nonce is found, ask for the user's input
+    let nonceResponse = await prompt({
       type: 'input',
       name: 'nonce',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Please confirm the nonce of the account:');
+        return style(
+          'Could not find account nonce. Please confirm the nonce of the account:'
+        );
       },
       validate: (val) => {
         if (!val) return red('Nonce is required.');
@@ -263,7 +283,10 @@ async function deploy({ network, yes }) {
       },
       result: (val) => val.trim().replace(/ /, ''),
     });
-    nonce = Number(response.nonce);
+    nonce = Number(nonceResponse.nonce);
+  } else {
+    // Account nonce value is found from the network
+    nonce = Number(accountResponse.data.account.nonce);
   }
 
   let transactionJson = await step('Build transaction', async () => {
