@@ -227,6 +227,7 @@ async function deploy({ network, yes }) {
       validate: (val) => {
         if (!val) return red('Nonce is required.');
         if (isNaN(val)) return red('Nonce must be a number.');
+        if (val < 0) return red("Nonce can't be negative.");
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
