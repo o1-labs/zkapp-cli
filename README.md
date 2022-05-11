@@ -62,7 +62,7 @@ Next steps:
 This command creates a directory containing a new project template, fully set up
 & ready for local development.
 
-- See the included [README](templates/project/README.md) for usage instructions.
+- See the included [README](templates/project-ts/README.md) for usage instructions.
   All usual commands will be available: `npm run build`, `npm run test`,
   `npm run coverage`, etc.
 - A Git repo will be initialized in the project directory automatically. For
