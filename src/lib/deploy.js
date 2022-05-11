@@ -192,7 +192,7 @@ async function deploy({ network, yes }) {
   if (!fee) {
     log(
       red(
-        `  Failed to find the deploy fee amount.\n  Please make sure your config.json has the correct 'fee' property.`
+        `  The "fee" property is not specified for this network alias in config.json. Please update your config.json and try again.`
       )
     );
     return;
