@@ -119,11 +119,28 @@ async function config() {
       },
       result: (val) => val.trim().replace(/ /, ''),
     },
+    {
+      type: 'input',
+      name: 'fee',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style(
+          'Set default transaction fee to deploy a zkApp (in MINA):'
+        );
+      },
+      prefix: formatPrefixSymbol,
+      validate: (val) => {
+        if (!val) return red('Fee is required.');
+        if (isNaN(val)) return red('Fee must be a number.');
+        return true;
+      },
+      result: (val) => val.trim().replace(/ /, ''),
+    },
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { network, url } = response;
-  if (!network || !url) return;
+  const { network, url, fee } = response;
+  if (!network || !url || !fee) return;
 
   const keyPair = await step(
     `Create key pair at keys/${network}.json`,
@@ -136,7 +153,7 @@ async function config() {
   );
 
   await step(`Add network to config.json`, async () => {
-    config.networks[network] = { url, keyPath: `keys/${network}.json` };
+    config.networks[network] = { url, keyPath: `keys/${network}.json`, fee };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
