@@ -247,6 +247,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the account nonce.\n  Please run in interactive mode and specify an account nonce.`
       )
     );
+    await shutdown();
     return;
   } else if (!yes && !accountResponse?.data?.account?.nonce) {
     // If running in interactive mode and no nonce is found, ask for the user's input
