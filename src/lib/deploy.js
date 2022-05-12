@@ -204,6 +204,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -228,6 +229,7 @@ async function deploy({ network, yes }) {
         `  The "fee" property is not specified for this network alias in config.json. Please update your config.json and try again.`
       )
     );
+    await shutdown();
     return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
