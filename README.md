@@ -62,12 +62,12 @@ Next steps:
 This command creates a directory containing a new project template, fully set up
 & ready for local development.
 
-- See the included [README](templates/project/README.md) for usage instructions.
+- See the included [README](templates/project-ts/README.md) for usage instructions.
   All usual commands will be available: `npm run build`, `npm run test`,
   `npm run coverage`, etc.
 - A Git repo will be initialized in the project directory automatically. For
   consistency, we use `main` as the default Git branch, by convention.
-- A [Github Actions CI workflow](templates/project/.github/workflows/ci.yml) is
+- A [Github Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is
   also included. If you push your project to Github, Github Actions will run
   your tests (named as `*.test.js`) automatically, whenever you push a commit or
   open a pull request.
