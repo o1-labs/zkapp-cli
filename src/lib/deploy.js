@@ -355,6 +355,7 @@ async function deploy({ network, yes }) {
       return (await sendGraphQL(graphQLEndpoint, zkAppMutation)).data.sendZkapp
         .zkapp;
     } catch (error) {
+      await shutdown();
       return error;
     }
   });
@@ -362,6 +363,7 @@ async function deploy({ network, yes }) {
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
     log(red('  Failed to send transaction to relayer. Please try again.'));
+    await shutdown();
     return;
   }
 
