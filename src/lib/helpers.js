@@ -6,7 +6,6 @@ const { green, red } = require('chalk');
  * @template T
  * @param {string} step  Name of step to show user.
  * @param {() => Promise<T>} fn  An async function to execute.
- * @param {() => Promise<T>} fn  An async function to execute.
  * @returns {Promise<T>}
  */
 async function step(str, fn) {
