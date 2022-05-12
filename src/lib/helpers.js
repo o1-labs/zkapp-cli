@@ -6,6 +6,7 @@ const { green, red } = require('chalk');
  * @template T
  * @param {string} step  Name of step to show user.
  * @param {() => Promise<T>} fn  An async function to execute.
+ * @param {() => Promise<T>} fn  An async function to execute.
  * @returns {Promise<T>}
  */
 async function step(str, fn) {
@@ -17,6 +18,7 @@ async function step(str, fn) {
   } catch (err) {
     spin.fail(str);
     console.error('  ' + red(err)); // maintain expected indentation
+    process.exit();
   }
 }
 
