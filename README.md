@@ -67,7 +67,7 @@ This command creates a directory containing a new project template, fully set up
   `npm run coverage`, etc.
 - A Git repo will be initialized in the project directory automatically. For
   consistency, we use `main` as the default Git branch, by convention.
-- A [Github Actions CI workflow](templates/project/.github/workflows/ci.yml) is
+- A [Github Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is
   also included. If you push your project to Github, Github Actions will run
   your tests (named as `*.test.js`) automatically, whenever you push a commit or
   open a pull request.
