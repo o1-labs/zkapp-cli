@@ -178,6 +178,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -189,6 +190,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Check that you have exported your smart contract class using a named export and try again.`
       )
     );
+    await shutdown();
     return;
   }
 
