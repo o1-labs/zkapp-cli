@@ -164,6 +164,10 @@ async function deploy({ network, yes }) {
   );
 
   let smartContractImports;
+  // import snarkyjs from the user directory
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
+    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
+  );
 
   try {
     smartContractImports = await import(
@@ -175,6 +179,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -186,6 +191,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Check that you have exported your smart contract class using a named export and try again.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -199,13 +205,9 @@ async function deploy({ network, yes }) {
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
+    await shutdown();
     return;
   }
-
-  // import snarkyjs from the user directory
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
-    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
-  );
 
   await isReady;
 
