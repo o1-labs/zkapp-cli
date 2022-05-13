@@ -168,6 +168,7 @@ async function deploy({ network, yes }) {
   let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
     `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
   );
+
   try {
     smartContractImports = await import(
       `${DIR}/build/src/${smartContractFile}`
@@ -178,6 +179,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -189,6 +191,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n Check that you have exported your smart contract class using a named export and try again.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -202,6 +205,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
+    await shutdown();
     return;
   }
 
@@ -226,6 +230,7 @@ async function deploy({ network, yes }) {
         `  The "fee" property is not specified for this network alias in config.json. Please update your config.json and try again.`
       )
     );
+    await shutdown();
     return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
@@ -243,6 +248,7 @@ async function deploy({ network, yes }) {
         `  Failed to find the account nonce.\n  Please run in interactive mode and specify an account nonce.`
       )
     );
+    await shutdown();
     return;
   } else if (!yes && !accountResponse?.data?.account?.nonce) {
     // If running in interactive mode and no nonce is found, ask for the user's input
@@ -350,6 +356,7 @@ async function deploy({ network, yes }) {
       return (await sendGraphQL(graphQLEndpoint, zkAppMutation)).data.sendZkapp
         .zkapp;
     } catch (error) {
+      await shutdown();
       return error;
     }
   });
@@ -357,6 +364,7 @@ async function deploy({ network, yes }) {
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
     log(red('  Failed to send transaction to relayer. Please try again.'));
+    await shutdown();
     return;
   }
 
