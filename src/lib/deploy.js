@@ -214,7 +214,6 @@ async function deploy({ network, yes }) {
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
-  const zkAppAddressBase58 = zkAppAddress.toBase58();
 
   const verificationKey = await step(
     'Generate verification key (takes 1-2 min)',
@@ -237,13 +236,13 @@ async function deploy({ network, yes }) {
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+  const zkAppAddressBase58 = zkAppAddress.toBase58();
   const accountQuery = getAccountQuery(zkAppAddressBase58);
   const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
 
   let nonce = 0;
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
-    console.log(accountResponse);
     log(
       red(
         `  Failed to find the specified account in the ledger using the specified URL.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
@@ -252,7 +251,7 @@ async function deploy({ network, yes }) {
     await shutdown();
     return;
   } else if (!yes && !accountResponse?.data?.account?.nonce) {
-    // If running in interactive mode and no account is found, ask for the user's input, show an error message and return early
+    // If running in interactive mode and no account is found, ask for the user's input
     let nonceResponse = await prompt({
       type: 'input',
       name: 'nonce',
@@ -506,7 +505,7 @@ function getErrorMessage(errors) {
     '  Failed to send transaction to relayer. Please try again.';
   for (const error of errors) {
     if (error.message.includes('Invalid_nonce')) {
-      errorMessage = `  Failed to send transaction to the relayer. An invalid nonce value of was specified. Please try again.`;
+      errorMessage = `  Failed to send transaction to the relayer. An invalid account nonce was specified. Please try again.`;
       break;
     }
   }
