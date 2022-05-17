@@ -245,7 +245,7 @@ async function deploy({ network, yes }) {
     // No account is found, show an error message and return early
     log(
       red(
-        `  Failed to find the specified account in the ledger using the specified URL.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
+        `  Failed to find the fee payer's account on chain.\n Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
       )
     );
     await shutdown();
