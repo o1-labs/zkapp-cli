@@ -214,6 +214,7 @@ async function deploy({ network, yes }) {
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
+  const zkAppAddressBase58 = zkAppAddress.toBase58();
 
   const verificationKey = await step(
     'Generate verification key (takes 1-2 min)',
@@ -236,22 +237,22 @@ async function deploy({ network, yes }) {
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
-  const zkAppAddressBase58 = zkAppAddress.toBase58();
   const accountQuery = getAccountQuery(zkAppAddressBase58);
   const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
 
   let nonce = 0;
-  if (yes && !accountResponse?.data?.account?.nonce) {
-    // If running in non-interactive mode and no nonce is found, show an error message and return early
+  if (!accountResponse?.data?.account) {
+    // No account is found, show an error message and return early
+    console.log(accountResponse);
     log(
       red(
-        `  Failed to find the account nonce.\n  Please run in interactive mode and specify an account nonce.`
+        `  Failed to find the specified account in the ledger using the specified URL.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
       )
     );
     await shutdown();
     return;
   } else if (!yes && !accountResponse?.data?.account?.nonce) {
-    // If running in interactive mode and no nonce is found, ask for the user's input
+    // If running in interactive mode and no account is found, ask for the user's input, show an error message and return early
     let nonceResponse = await prompt({
       type: 'input',
       name: 'nonce',
@@ -353,22 +354,20 @@ async function deploy({ network, yes }) {
   const txn = await step('Send to network', async () => {
     const zkAppMutation = sendZkAppQuery(transactionJson);
     try {
-      return (await sendGraphQL(graphQLEndpoint, zkAppMutation)).data.sendZkapp
-        .zkapp;
+      return await sendGraphQL(graphQLEndpoint, zkAppMutation);
     } catch (error) {
-      await shutdown();
       return error;
     }
   });
 
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
-    log(red('  Failed to send transaction to relayer. Please try again.'));
+    log(red(getErrorMessage(txn.message ?? [])));
     await shutdown();
     return;
   }
 
-  const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.hash}`; // TODO: Make this configurable
+  const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.data.sendZkapp.zkapp.hash}`; // TODO: Make the network configurable
   const str =
     `\nSuccess! Deploy transaction sent.` +
     `\n` +
@@ -456,7 +455,7 @@ async function sendGraphQL(graphQLEndpoint, query) {
       signal: controller.signal,
     });
     const responseJson = await response.json();
-    if (!response.ok) {
+    if (!response.ok || responseJson?.errors) {
       return {
         kind: 'error',
         statusCode: response.status,
@@ -500,6 +499,18 @@ function getAccountQuery(publicKey) {
       nonce
     }
   }`;
+}
+
+function getErrorMessage(errors) {
+  let errorMessage =
+    '  Failed to send transaction to relayer. Please try again.';
+  for (const error of errors) {
+    if (error.message.includes('Invalid_nonce')) {
+      errorMessage = `  Failed to send transaction to the relayer. An invalid nonce value of was specified. Please try again.`;
+      break;
+    }
+  }
+  return errorMessage;
 }
 
 function removeJsonQuotes(json) {
