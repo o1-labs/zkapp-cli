@@ -157,6 +157,37 @@ async function deploy({ network, yes }) {
     );
   }
 
+  // import snarkyjs from the user directory
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
+    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
+  );
+
+  const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+  const { data: nodeStatus } = await sendGraphQL(
+    graphQLEndpoint,
+    `query {
+      syncStatus
+    }`
+  );
+
+  if (!nodeStatus || nodeStatus.syncStatus === 'OFFLINE') {
+    log(
+      red(
+        `  Transaction relayer node is offline. Please try again or use a different "url" for this network alias in your config.json`
+      )
+    );
+    await shutdown();
+    return;
+  } else if (nodeStatus.syncStatus !== 'SYNCED') {
+    log(
+      red(
+        `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n Please try again when the node is synced or use a different "url" for this network alias in your config.json`
+      )
+    );
+    await shutdown();
+    return;
+  }
+
   // Find the users file to import the smart contract from
   let smartContractFile = await findSmartContractToDeploy(
     `${DIR}/build/**/*.js`,
@@ -164,11 +195,6 @@ async function deploy({ network, yes }) {
   );
 
   let smartContractImports;
-  // import snarkyjs from the user directory
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
-    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
-  );
-
   try {
     smartContractImports = await import(
       `${DIR}/build/src/${smartContractFile}`
@@ -235,7 +261,6 @@ async function deploy({ network, yes }) {
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
-  const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
   const zkAppAddressBase58 = zkAppAddress.toBase58();
   const accountQuery = getAccountQuery(zkAppAddressBase58);
   const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
