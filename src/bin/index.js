@@ -29,6 +29,9 @@ yargs(hideBin(process.argv))
     'Unknown argument: %s': {
       one: _red('Unknown argument: %s'),
     },
+    'Unknown command: %s': {
+      one: _red('Unknown command: %s'),
+    },
   })
   .demandCommand(1, _red('Please provide a command.'))
 
