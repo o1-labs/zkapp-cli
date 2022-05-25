@@ -110,7 +110,7 @@ async function config() {
       name: 'url',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set URL to deploy to:');
+        return style('Set the Mina GraphQL API URL to deploy to:');
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
