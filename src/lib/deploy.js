@@ -275,26 +275,6 @@ async function deploy({ network, yes }) {
     );
     await shutdown();
     return;
-  } else if (!yes && !accountResponse?.data?.account?.nonce) {
-    // If running in interactive mode and no account is found, ask for the user's input
-    let nonceResponse = await prompt({
-      type: 'input',
-      name: 'nonce',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style(
-          'Could not find account nonce. Please confirm the nonce of the account:'
-        );
-      },
-      validate: (val) => {
-        if (!val) return red('Nonce is required.');
-        if (isNaN(val)) return red('Nonce must be a number.');
-        if (val < 0) return red("Nonce can't be negative.");
-        return true;
-      },
-      result: (val) => val.trim().replace(/ /, ''),
-    });
-    nonce = Number(nonceResponse.nonce);
   } else {
     // Account nonce value is found from the network
     nonce = Number(accountResponse.data.account.nonce);
@@ -519,7 +499,6 @@ function getAccountQuery(publicKey) {
   return `
   query {
     account(publicKey: "${publicKey}") {
-      publicKey
       nonce
     }
   }`;
