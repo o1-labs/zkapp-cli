@@ -21,7 +21,6 @@
     "postinstall": "node src/postinstall",
     "prepare": "husky install",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --silent",
-    "test:all": "./runTests.sh",
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent"
   },
   "lint-staged": {
