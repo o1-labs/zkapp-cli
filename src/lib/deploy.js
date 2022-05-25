@@ -181,7 +181,7 @@ async function deploy({ network, yes }) {
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
     log(
       red(
-        `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n Please try again when the node is synced or use a different "url" for this network alias in your config.json`
+        `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this network alias in your config.json`
       )
     );
     await shutdown();
@@ -202,7 +202,7 @@ async function deploy({ network, yes }) {
   } catch (_) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
       )
     );
     await shutdown();
@@ -214,7 +214,7 @@ async function deploy({ network, yes }) {
   if (!(contractName in smartContractImports)) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n Check that you have exported your smart contract class using a named export and try again.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
       )
     );
     await shutdown();
@@ -270,7 +270,7 @@ async function deploy({ network, yes }) {
     // No account is found, show an error message and return early
     log(
       red(
-        `  Failed to find the fee payer's account on chain.\n Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
+        `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
       )
     );
     await shutdown();
