@@ -2,6 +2,7 @@ import {
   matrixProp,
   CircuitValue,
   Field,
+  DeployArgs,
   SmartContract,
   method,
   PrivateKey,
@@ -35,6 +36,15 @@ class Sudoku extends CircuitValue {
 export class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
+
+  deploy(args: DeployArgs) {
+    super.deploy(args);
+    this.self.update.permissions.setValue({
+      ...Permissions.default(),
+      editState: Permissions.proofOrSignature(),
+    });
+    this.isSolved.set(Bool(false));
+  }
 
   @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
     let sudoku = sudokuInstance.value;
