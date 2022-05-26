@@ -1,4 +1,4 @@
-import { deploy, submitSolution, getZkAppState } from './sudoku-zkapp';
+import { deploy, submitSolution, getZkAppState } from './';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
 import { shutdown } from 'snarkyjs';
 
