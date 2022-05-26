@@ -21,88 +21,85 @@ import {
   Permissions,
 } from 'snarkyjs';
 
-async function main() {
-  // setup
-  const Local = Mina.LocalBlockchain();
-  Mina.setActiveInstance(Local);
-  const account1 = Local.testAccounts[0].privateKey;
-  let sudoku = generateSudoku(0.5);
-  const zkAppPrivateKey = PrivateKey.random();
-  let zkAppAddress = zkAppPrivateKey.toPublicKey();
+export { deploy, submitSolution, getZkAppState };
 
-  // create an instance of the smart contract
-  console.log('Deploying Sudoku...');
+const Local = Mina.LocalBlockchain();
+Mina.setActiveInstance(Local);
+const account1 = Local.testAccounts[0].privateKey;
+let sudoku = generateSudoku(0.5);
+const zkAppPrivateKey = PrivateKey.random();
+let zkAppAddress = zkAppPrivateKey.toPublicKey();
 
-  let zkAppInstance = new SudokuZkApp(zkAppAddress);
-  let sudokuInstance = new Sudoku(sudoku);
+// create an instance of the smart contract
+console.log('Deploying Sudoku...');
+await deploy(sudoku);
 
-  let txn = await Local.transaction(account1, () => {
+console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
+
+let solution = solveSudoku(sudoku);
+if (solution === undefined) throw Error('cannot happen');
+
+// submit a wrong solution
+let noSolution = cloneSudoku(solution);
+noSolution[0][0] = (noSolution[0][0] % 9) + 1;
+
+console.log('Submitting wrong solution...');
+try {
+  await submitSolution(sudoku, noSolution);
+} catch {
+  console.log('There was an error submitting the solution');
+}
+console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
+
+// submit the actual solution
+console.log('Submitting solution...');
+await submitSolution(sudoku, solution);
+console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
+
+// cleanup
+await shutdown();
+
+// helpers
+async function deploy(sudoku: number[][]) {
+  let txn = await Mina.transaction(account1, () => {
     Party.fundNewAccount(account1);
+    let zkAppInstance = new SudokuZkApp(zkAppAddress);
+    let sudokuInstance = new Sudoku(sudoku);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
     zkAppInstance.setPermissions({
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
-
     zkAppInstance.sudokuHash.set(sudokuInstance.hash());
     zkAppInstance.isSolved.set(Bool(false));
   });
-
   await txn.send().wait();
+}
 
-  console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
-
-  let solution = solveSudoku(sudoku);
-  if (solution === undefined) throw Error('cannot happen');
-
-  // submit a wrong solution
-  let noSolution = cloneSudoku(solution);
-  noSolution[0][0] = (noSolution[0][0] % 9) + 1;
-
-  console.log('Submitting wrong solution...');
+async function submitSolution(sudoku: number[][], solution: number[][]) {
+  let tx = await Mina.transaction(account1, () => {
+    let zkApp = new SudokuZkApp(zkAppAddress);
+    zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    zkApp.self.sign(zkAppPrivateKey);
+    zkApp.self.body.incrementNonce = Bool(true);
+  });
   try {
-    await submitSolution(sudoku, noSolution);
-  } catch {
-    console.log('There was an error submitting the solution');
-  }
-  console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
-
-  // submit the actual solution
-  console.log('Submitting solution...');
-  await submitSolution(sudoku, solution);
-  console.log('Is the sudoku solved?', (await getZkAppState()).isSolved);
-
-  // cleanup
-  shutdown();
-
-  // helpers
-  async function submitSolution(sudoku: number[][], solution: number[][]) {
-    let tx = await Mina.transaction(account1, () => {
-      let zkApp = new SudokuZkApp(zkAppAddress);
-      zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
-      zkApp.self.sign(zkAppPrivateKey);
-      zkApp.self.body.incrementNonce = Bool(true);
-    });
-    try {
-      await tx.send().wait();
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  async function getZkAppState() {
-    let zkAppState = Mina.getAccount(zkAppAddress).zkapp?.appState;
-    if (zkAppState === undefined)
-      throw Error('Account does not have zkApp state.');
-    let sudokuHash = fieldToHex(zkAppState?.[0]);
-    let isSolved = zkAppState[1].equals(true).toBoolean();
-    return { sudokuHash, isSolved };
-  }
-
-  function fieldToHex(field: Field) {
-    return BigInt(field.toString()).toString(16);
+    await tx.send().wait();
+    return true;
+  } catch (err) {
+    return false;
   }
 }
 
-main();
+async function getZkAppState() {
+  let zkAppState = Mina.getAccount(zkAppAddress).zkapp?.appState;
+  if (zkAppState === undefined)
+    throw Error('Account does not have zkApp state.');
+  let sudokuHash = fieldToHex(zkAppState?.[0]);
+  let isSolved = zkAppState[1].equals(true).toBoolean();
+  return { sudokuHash, isSolved };
+}
+
+function fieldToHex(field: Field) {
+  return BigInt(field.toString()).toString(16);
+}
