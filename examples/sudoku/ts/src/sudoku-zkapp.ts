@@ -32,7 +32,7 @@ class Sudoku extends CircuitValue {
   }
 }
 
-class SudokuZkApp extends SmartContract {
+export class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
