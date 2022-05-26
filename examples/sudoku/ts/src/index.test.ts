@@ -4,7 +4,9 @@ import { shutdown } from 'snarkyjs';
 
 describe('sudoku', () => {
   afterAll(async () => {
-    await shutdown();
+    setTimeout(async () => {
+      await shutdown();
+    }, 0);
   });
 
   it('generates and deploys sudoku', async () => {
