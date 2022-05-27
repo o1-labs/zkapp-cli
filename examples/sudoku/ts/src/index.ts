@@ -80,7 +80,7 @@ async function submitSolution(sudoku: number[][], solution: number[][]) {
   let tx = await Mina.transaction(account1, () => {
     let zkApp = new SudokuZkApp(zkAppAddress);
     zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
-    zkApp.self.sign(zkAppPrivateKey);
+    zkApp.sign(zkAppPrivateKey);
     zkApp.self.body.incrementNonce = Bool(true);
   });
   try {
