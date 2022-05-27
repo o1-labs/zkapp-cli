@@ -11,7 +11,13 @@ import {
   isReady,
   Poseidon,
   Permissions,
+  Mina,
+  Party,
+  PrivateKey,
+  PublicKey,
 } from 'snarkyjs';
+
+export { deploy, submitSolution, getZkAppState, createLocalBlockchain };
 
 await isReady;
 
@@ -99,7 +105,70 @@ export class SudokuZkApp extends SmartContract {
 }
 
 // helpers
+function createLocalBlockchain(): PrivateKey {
+  let Local = Mina.LocalBlockchain();
+  Mina.setActiveInstance(Local);
+
+  const account = Local.testAccounts[0].privateKey;
+  return account;
+}
+
+async function deploy(
+  sudoku: number[][],
+  account: PrivateKey,
+  zkAppAddress: PublicKey,
+  zkAppPrivateKey: PrivateKey
+) {
+  let tx = await Mina.transaction(account, () => {
+    Party.fundNewAccount(account);
+    let zkApp = new SudokuZkApp(zkAppAddress);
+    let sudokuInstance = new Sudoku(sudoku);
+    zkApp.deploy({ zkappKey: zkAppPrivateKey });
+    zkApp.setPermissions({
+      ...Permissions.default(),
+      editState: Permissions.proofOrSignature(),
+    });
+    zkApp.sudokuHash.set(sudokuInstance.hash());
+    zkApp.isSolved.set(Bool(false));
+  });
+  await tx.send().wait();
+}
+
+async function submitSolution(
+  sudoku: number[][],
+  solution: number[][],
+  account: PrivateKey,
+  zkAppAddress: PublicKey,
+  zkAppPrivateKey: PrivateKey
+) {
+  let tx = await Mina.transaction(account, () => {
+    let zkApp = new SudokuZkApp(zkAppAddress);
+    zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    zkApp.sign(zkAppPrivateKey);
+    zkApp.self.body.incrementNonce = Bool(true);
+  });
+  try {
+    await tx.send().wait();
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function getZkAppState(zkAppAddress: PublicKey) {
+  let zkAppState = Mina.getAccount(zkAppAddress).zkapp?.appState;
+  if (zkAppState === undefined)
+    throw Error('Account does not have zkApp state.');
+  let sudokuHash = fieldToHex(zkAppState?.[0]);
+  let isSolved = zkAppState[1].equals(true).toBoolean();
+  return { sudokuHash, isSolved };
+}
+
 function divmod(k: number, n: number) {
   let q = Math.floor(k / n);
   return [q, k - q * n];
+}
+
+function fieldToHex(field: Field) {
+  return BigInt(field.toString()).toString(16);
 }
