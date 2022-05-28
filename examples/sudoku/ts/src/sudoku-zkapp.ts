@@ -21,7 +21,7 @@ export { deploy, submitSolution, getZkAppState, createLocalBlockchain };
 
 await isReady;
 
-export class Sudoku extends CircuitValue {
+class Sudoku extends CircuitValue {
   @matrixProp(Field, 9, 9) value: Field[][];
 
   constructor(value: number[][]) {

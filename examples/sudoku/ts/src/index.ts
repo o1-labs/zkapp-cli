@@ -20,9 +20,9 @@ import { PrivateKey, shutdown } from 'snarkyjs';
 
 // setup
 const account = createLocalBlockchain();
-let sudoku = generateSudoku(0.5);
+const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
-let zkAppAddress = zkAppPrivateKey.toPublicKey();
+const zkAppAddress = zkAppPrivateKey.toPublicKey();
 
 // create an instance of the smart contract
 console.log('Deploying Sudoku...');
