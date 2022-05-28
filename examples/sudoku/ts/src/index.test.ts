@@ -61,14 +61,19 @@ describe('sudoku', () => {
     let noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    let accepted = await submitSolution(
-      sudoku,
-      noSolution,
-      account,
-      zkAppAddress,
-      zkAppPrivateKey
-    );
-    expect(accepted).toBe(false);
+    expect.assertions(1);
+    try {
+      await submitSolution(
+        sudoku,
+        noSolution,
+        account,
+        zkAppAddress,
+        zkAppPrivateKey
+      );
+    } catch (e) {
+      // A row, column  or 3x3 square will not have full range 1-9
+      // This will cause an assert.
+    }
 
     let { isSolved } = await getZkAppState(zkAppAddress);
     expect(isSolved).toBe(false);
