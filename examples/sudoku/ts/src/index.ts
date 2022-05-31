@@ -28,10 +28,7 @@ const zkAppAddress = zkAppPrivateKey.toPublicKey();
 console.log('Deploying Sudoku...');
 await deploy(sudoku, account, zkAppAddress, zkAppPrivateKey);
 
-console.log(
-  'Is the sudoku solved?',
-  (await getZkAppState(zkAppAddress)).isSolved
-);
+console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -52,18 +49,12 @@ try {
 } catch {
   console.log('There was an error submitting the solution');
 }
-console.log(
-  'Is the sudoku solved?',
-  (await getZkAppState(zkAppAddress)).isSolved
-);
+console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
 
 // submit the actual solution
 console.log('Submitting solution...');
 await submitSolution(sudoku, solution, account, zkAppAddress, zkAppPrivateKey);
-console.log(
-  'Is the sudoku solved?',
-  (await getZkAppState(zkAppAddress)).isSolved
-);
+console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
 
 // cleanup
 shutdown();
