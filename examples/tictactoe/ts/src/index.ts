@@ -17,15 +17,13 @@ import { TicTacToe, Board } from './tictactoe.js';
 async function playTicTacToe() {
   await isReady;
 
-  const accounts = createLocalBlockchain();
-  const player1 = accounts[0];
-  const player2 = accounts[1];
+  const [player1, player2] = createLocalBlockchain();
   const player1Public = player1.toPublicKey();
   const player2Public = player2.toPublicKey();
 
   const zkAppPrivkey = PrivateKey.random();
   const zkAppPubkey = zkAppPrivkey.toPublicKey();
-  let zkAppInstance = new TicTacToe(zkAppPubkey);
+  const zkAppInstance = new TicTacToe(zkAppPubkey);
 
   // Create a new instance of the contract
   console.log('\n\n====== DEPLOYING ======\n\n');
