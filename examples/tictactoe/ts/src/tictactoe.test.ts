@@ -17,10 +17,7 @@ describe('tictactoe', () => {
 
   beforeEach(async () => {
     await isReady;
-    const players = createLocalBlockchain();
-    player1 = players[0];
-    player2 = players[1];
-
+    [player1, player2] = createLocalBlockchain();
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     return;
