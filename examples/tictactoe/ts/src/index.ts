@@ -13,7 +13,6 @@
 import {
   Field,
   PrivateKey,
-  Bool,
   Mina,
   Party,
   shutdown,
@@ -73,7 +72,6 @@ async function main() {
       player2Public
     );
     zkAppInstance.sign(zkAppPrivkey);
-    zkAppInstance.self.body.incrementNonce = Bool(true);
   });
   txn.send().wait();
 
@@ -96,7 +94,6 @@ async function main() {
       player2Public
     );
     zkAppInstance.sign(zkAppPrivkey);
-    zkAppInstance.self.body.incrementNonce = Bool(true);
   });
   txn.send().wait();
 
@@ -119,7 +116,6 @@ async function main() {
       player2Public
     );
     zkAppInstance.sign(zkAppPrivkey);
-    zkAppInstance.self.body.incrementNonce = Bool(true);
   });
   txn.send().wait();
 
@@ -143,7 +139,6 @@ async function main() {
       player2Public
     );
     zkAppInstance.sign(zkAppPrivkey);
-    zkAppInstance.self.body.incrementNonce = Bool(true);
   });
   await txn.send().wait();
 
@@ -166,7 +161,6 @@ async function main() {
       player2Public
     );
     zkAppInstance.sign(zkAppPrivkey);
-    zkAppInstance.self.body.incrementNonce = Bool(true);
   });
   await txn.send().wait();
 
