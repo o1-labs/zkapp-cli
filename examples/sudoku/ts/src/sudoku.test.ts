@@ -3,7 +3,7 @@ import {
   submitSolution,
   getZkAppState,
   createLocalBlockchain,
-} from './sudoku-zkapp';
+} from './sudoku';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
 import { isReady, shutdown, PrivateKey, PublicKey } from 'snarkyjs';
 

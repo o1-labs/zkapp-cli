@@ -14,8 +14,8 @@ import {
   submitSolution,
   getZkAppState,
   createLocalBlockchain,
-} from './sudoku-zkapp.js';
-import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
+} from './sudoku';
+import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
 import { PrivateKey, shutdown } from 'snarkyjs';
 
 // setup
