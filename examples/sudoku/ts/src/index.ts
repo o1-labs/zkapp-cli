@@ -66,4 +66,4 @@ console.log(
 );
 
 // cleanup
-await shutdown();
+shutdown();

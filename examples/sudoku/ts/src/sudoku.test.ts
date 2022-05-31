@@ -18,8 +18,8 @@ describe('sudoku', () => {
   });
 
   afterAll(async () => {
-    setTimeout(async () => {
-      await shutdown();
+    setTimeout(() => {
+      shutdown();
     }, 0);
   });
 
