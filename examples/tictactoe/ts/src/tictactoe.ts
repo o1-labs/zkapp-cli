@@ -9,11 +9,11 @@ import {
   SmartContract,
   state,
   method,
-  PrivateKey,
   Bool,
   Circuit,
   Signature,
   Permissions,
+  DeployArgs,
 } from 'snarkyjs';
 
 class Optional<T> {
@@ -142,7 +142,7 @@ export class TicTacToe extends SmartContract {
   // defaults to false, set to true when a player wins
   @state(Bool) gameDone = State<Bool>();
 
-  deploy(args: { zkappKey: PrivateKey }) {
+  deploy(args: DeployArgs) {
     super.deploy(args);
     this.self.update.permissions.setValue({
       ...Permissions.default(),
