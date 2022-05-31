@@ -148,6 +148,9 @@ export class TicTacToe extends SmartContract {
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
+  }
+
+  @method init() {
     this.board.set(Field.zero);
     this.nextPlayer.set(new Bool(false)); // player 1 starts
     this.gameDone.set(new Bool(false));
