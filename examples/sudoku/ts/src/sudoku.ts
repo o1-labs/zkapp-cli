@@ -145,7 +145,6 @@ async function submitSolution(
     let zkApp = new SudokuZkApp(zkAppAddress);
     zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
     zkApp.sign(zkAppPrivateKey);
-    zkApp.self.body.incrementNonce = Bool(true);
   });
   try {
     await tx.send().wait();
@@ -155,7 +154,7 @@ async function submitSolution(
   }
 }
 
-async function getZkAppState(zkAppAddress: PublicKey) {
+function getZkAppState(zkAppAddress: PublicKey) {
   let zkAppState = Mina.getAccount(zkAppAddress).zkapp?.appState;
   if (zkAppState === undefined)
     throw Error('Account does not have zkApp state.');
