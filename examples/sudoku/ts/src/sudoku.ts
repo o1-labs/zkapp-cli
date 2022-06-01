@@ -38,13 +38,17 @@ export class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
+  @method init(sudokuInstance: Sudoku) {
+    this.sudokuHash.set(sudokuInstance.hash());
+    this.isSolved.set(Bool(false));
+  }
+
   deploy(args: DeployArgs) {
     super.deploy(args);
     this.self.update.permissions.setValue({
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
-    this.isSolved.set(Bool(false));
   }
 
   @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
