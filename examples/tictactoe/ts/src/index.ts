@@ -17,6 +17,7 @@ import {
   Permissions,
 } from 'snarkyjs';
 
+// testing example cache
 class Optional<T> {
   isSome: Bool;
   value: T;

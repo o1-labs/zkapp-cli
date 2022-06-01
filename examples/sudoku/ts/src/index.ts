@@ -2,6 +2,7 @@ import { deploy, submitSolution, getZkAppState } from './sudoku-zkapp.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { shutdown } from 'snarkyjs';
 
+//testing example cache t
 let sudoku = generateSudoku(0.5);
 
 console.log('Deploying Sudoku...');
