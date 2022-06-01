@@ -14,8 +14,9 @@ import {
   submitSolution,
   getZkAppState,
   createLocalBlockchain,
-} from './sudoku';
-import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
+  SudokuZkApp,
+} from './sudoku.js';
+import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { PrivateKey, shutdown } from 'snarkyjs';
 
 // setup
@@ -23,12 +24,13 @@ const account = createLocalBlockchain();
 const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppAddress = zkAppPrivateKey.toPublicKey();
-
 // create an instance of the smart contract
-console.log('Deploying Sudoku...');
-await deploy(sudoku, account, zkAppAddress, zkAppPrivateKey);
+const zkAppInstance = new SudokuZkApp(zkAppAddress);
 
-console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
+console.log('Deploying Sudoku...');
+await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+
+console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -49,12 +51,12 @@ try {
 } catch {
   console.log('There was an error submitting the solution');
 }
-console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
+console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
 
 // submit the actual solution
 console.log('Submitting solution...');
 await submitSolution(sudoku, solution, account, zkAppAddress, zkAppPrivateKey);
-console.log('Is the sudoku solved?', getZkAppState(zkAppAddress).isSolved);
+console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
 
 // cleanup
-shutdown();
+await shutdown();
