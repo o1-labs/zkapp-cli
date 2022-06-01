@@ -82,7 +82,7 @@ async function fetchProjectTemplate(name, lang) {
 
   try {
     const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src);
+    await gittar.fetch(src, { force: true });
 
     // Note: Extract will overwrite any existing dir's contents. Ensure
     // destination does not exist before this.
