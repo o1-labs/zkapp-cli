@@ -3,38 +3,46 @@ import {
   submitSolution,
   getZkAppState,
   createLocalBlockchain,
+  SudokuZkApp,
 } from './sudoku';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
 import { isReady, shutdown, PrivateKey, PublicKey } from 'snarkyjs';
 
 describe('sudoku', () => {
-  let account: PrivateKey, zkAppAddress: PublicKey, zkAppPrivateKey: PrivateKey;
+  let zkAppInstance: SudokuZkApp,
+    zkAppPrivateKey: PrivateKey,
+    zkAppAddress: PublicKey,
+    sudoku: number[][],
+    account: PrivateKey;
+
   beforeEach(async () => {
     await isReady;
     account = createLocalBlockchain();
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
+    zkAppInstance = new SudokuZkApp(zkAppAddress);
+    sudoku = generateSudoku(0.5);
     return;
   });
 
   afterAll(async () => {
-    setTimeout(() => {
-      shutdown();
-    }, 0);
+    setTimeout(shutdown, 0);
   });
 
   it('generates and deploys sudoku', async () => {
-    let sudoku = generateSudoku(0.5);
-    await deploy(sudoku, account, zkAppAddress, zkAppPrivateKey);
+    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
 
-    let state = await getZkAppState(zkAppAddress);
+    let state = getZkAppState(zkAppInstance);
     expect(state).toBeDefined();
     expect(state.isSolved).toBe(false);
   });
 
   it('accepts a correct solution', async () => {
-    let sudoku = generateSudoku(0.5);
-    await deploy(sudoku, account, zkAppAddress, zkAppPrivateKey);
+    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+
+    let state = getZkAppState(zkAppInstance);
+    expect(state).toBeDefined();
+    expect(state.isSolved).toBe(false);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -47,13 +55,17 @@ describe('sudoku', () => {
     );
     expect(accepted).toBe(true);
 
-    let { isSolved } = await getZkAppState(zkAppAddress);
+    let { isSolved } = getZkAppState(zkAppInstance);
     expect(isSolved).toBe(true);
   });
 
   it('rejects an incorrect solution', async () => {
     let sudoku = generateSudoku(0.5);
-    await deploy(sudoku, account, zkAppAddress, zkAppPrivateKey);
+    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+
+    let state = getZkAppState(zkAppInstance);
+    expect(state).toBeDefined();
+    expect(state.isSolved).toBe(false);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -75,7 +87,7 @@ describe('sudoku', () => {
       // This will cause an assert.
     }
 
-    let { isSolved } = await getZkAppState(zkAppAddress);
+    let { isSolved } = getZkAppState(zkAppInstance);
     expect(isSolved).toBe(false);
   });
 });

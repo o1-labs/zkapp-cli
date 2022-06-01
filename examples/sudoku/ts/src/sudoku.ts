@@ -2,7 +2,6 @@ import {
   matrixProp,
   CircuitValue,
   Field,
-  DeployArgs,
   SmartContract,
   method,
   Bool,
@@ -41,14 +40,6 @@ export class SudokuZkApp extends SmartContract {
   @method init(sudokuInstance: Sudoku) {
     this.sudokuHash.set(sudokuInstance.hash());
     this.isSolved.set(Bool(false));
-  }
-
-  deploy(args: DeployArgs) {
-    super.deploy(args);
-    this.self.update.permissions.setValue({
-      ...Permissions.default(),
-      editState: Permissions.proofOrSignature(),
-    });
   }
 
   @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
@@ -118,22 +109,22 @@ function createLocalBlockchain(): PrivateKey {
 }
 
 async function deploy(
+  zkAppInstance: SudokuZkApp,
+  zkAppPrivateKey: PrivateKey,
   sudoku: number[][],
-  account: PrivateKey,
-  zkAppAddress: PublicKey,
-  zkAppPrivateKey: PrivateKey
+  account: PrivateKey
 ) {
   let tx = await Mina.transaction(account, () => {
     Party.fundNewAccount(account);
-    let zkApp = new SudokuZkApp(zkAppAddress);
+    // let zkApp = new SudokuZkApp(zkAppAddress);
     let sudokuInstance = new Sudoku(sudoku);
-    zkApp.deploy({ zkappKey: zkAppPrivateKey });
-    zkApp.setPermissions({
+    zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+    zkAppInstance.setPermissions({
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
-    zkApp.sudokuHash.set(sudokuInstance.hash());
-    zkApp.isSolved.set(Bool(false));
+
+    zkAppInstance.init(sudokuInstance);
   });
   await tx.send().wait();
 }
@@ -158,12 +149,9 @@ async function submitSolution(
   }
 }
 
-function getZkAppState(zkAppAddress: PublicKey) {
-  let zkAppState = Mina.getAccount(zkAppAddress).zkapp?.appState;
-  if (zkAppState === undefined)
-    throw Error('Account does not have zkApp state.');
-  let sudokuHash = fieldToHex(zkAppState?.[0]);
-  let isSolved = zkAppState[1].equals(true).toBoolean();
+function getZkAppState(zkAppInstance: SudokuZkApp) {
+  let sudokuHash = fieldToHex(zkAppInstance.sudokuHash.get());
+  let isSolved = zkAppInstance.isSolved.get().toBoolean();
   return { sudokuHash, isSolved };
 }
 
