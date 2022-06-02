@@ -7,7 +7,7 @@
  *
  * To run locally:
  * Build the project: `$ npm run build`
- * Run with node:     `$ node build/src/index.js`.
+ * Run with node:     `$ npm start`.
  */
 import {
   deploy,
