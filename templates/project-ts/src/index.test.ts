@@ -1,20 +1,69 @@
-import { Field, isReady, shutdown } from 'snarkyjs';
+import { Add } from './index';
+import {
+  isReady,
+  shutdown,
+  Field,
+  Mina,
+  PrivateKey,
+  PublicKey,
+  Party,
+} from 'snarkyjs';
 
-describe('index.ts', () => {
-  describe('foo()', () => {
-    beforeAll(async () => {
-      await isReady;
+function createLocalBlockchain() {
+  const Local = Mina.LocalBlockchain();
+  Mina.setActiveInstance(Local);
+  return Local.testAccounts[0].privateKey;
+}
+
+async function localDeploy(
+  zkAppInstance: Add,
+  zkAppPrivkey: PrivateKey,
+  deployerAccount: PrivateKey
+) {
+  const txn = await Mina.transaction(deployerAccount, () => {
+    Party.fundNewAccount(deployerAccount);
+    zkAppInstance.deploy({ zkappKey: zkAppPrivkey });
+    zkAppInstance.init();
+  });
+  await txn.send().wait();
+}
+
+describe('Add', () => {
+  let deployerAccount: PrivateKey,
+    zkAppAddress: PublicKey,
+    zkAppPrivateKey: PrivateKey;
+
+  beforeEach(async () => {
+    await isReady;
+    deployerAccount = createLocalBlockchain();
+    zkAppPrivateKey = PrivateKey.random();
+    zkAppAddress = zkAppPrivateKey.toPublicKey();
+  });
+
+  afterAll(async () => {
+    // `shutdown()` internally calls `process.exit()` which will exit the running Jest process early.
+    // Specifying a timeout of 0 is a workaround to defer `shutdown()` until Jest is done running all tests.
+    // This should be fixed with https://github.com/MinaProtocol/mina/issues/10943
+    setTimeout(shutdown, 0);
+  });
+
+  it('generates and deploys the `Add` smart contract', async () => {
+    const zkAppInstance = new Add(zkAppAddress);
+    await localDeploy(zkAppInstance, zkAppPrivateKey, deployerAccount);
+    const num = zkAppInstance.num.get();
+    expect(num).toEqual(Field.one);
+  });
+
+  it('correctly updates the num state on the `Add` smart contract', async () => {
+    const zkAppInstance = new Add(zkAppAddress);
+    await localDeploy(zkAppInstance, zkAppPrivateKey, deployerAccount);
+    const txn = await Mina.transaction(deployerAccount, () => {
+      zkAppInstance.update();
+      zkAppInstance.sign(zkAppPrivateKey);
     });
-    afterAll(async () => {
-      // `shutdown()` internally calls `process.exit()` which will exit the running Jest process early.
-      // Specifying a timeout of 0 is a workaround to defer `shutdown()` until Jest is done running all tests.
-      // This should be fixed with https://github.com/MinaProtocol/mina/issues/10943
-      setTimeout(async () => {
-        await shutdown();
-      }, 0);
-    });
-    it('should be correct', async () => {
-      expect(Field(1).add(1)).toEqual(Field(2));
-    });
+    await txn.send().wait();
+
+    const updatedNum = zkAppInstance.num.get();
+    expect(updatedNum).toEqual(Field(3));
   });
 });
