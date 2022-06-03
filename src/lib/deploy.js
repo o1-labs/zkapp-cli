@@ -158,9 +158,8 @@ async function deploy({ network, yes }) {
   }
 
   // import snarkyjs from the user directory
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
-    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
-  );
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Party } =
+    await import(`${DIR}/node_modules/snarkyjs/dist/server/index.mjs`);
 
   const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
@@ -288,8 +287,8 @@ async function deploy({ network, yes }) {
         let zkapp = new zkApp(zkAppAddress);
         zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
         // hack: manually increment nonce
-        let nonce = zkapp.self.body.accountPrecondition.nonce.lower.add(1);
-        zkapp.self.body.accountPrecondition.nonce.assertBetween(nonce, nonce);
+        let nonce = zkapp.self.body.preconditions.account.nonce.lower.add(1);
+        Party.assertEquals(zkapp.self.body.preconditions.account.nonce, nonce);
       }
     );
     return tx.sign().toJSON();
@@ -506,7 +505,8 @@ function getAccountQuery(publicKey) {
 
 function getErrorMessage(errors) {
   let errorMessage =
-    '  Failed to send transaction to relayer. Please try again.';
+    '  Failed to send transaction to relayer. Errors: ' +
+    errors.map((e) => e.message);
   for (const error of errors) {
     if (error.message.includes('Invalid_nonce')) {
       errorMessage = `  Failed to send transaction to the relayer. An invalid account nonce was specified. Please try again.`;
