@@ -1,4 +1,4 @@
-import { Add } from './index';
+import { Add } from './Add';
 import {
   isReady,
   shutdown,
@@ -8,6 +8,13 @@ import {
   PublicKey,
   Party,
 } from 'snarkyjs';
+
+/*
+ * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace 
+ * with your own tests. 
+ * 
+ * See https://docs.minaprotocol.com/zkapps for more info.
+ */
 
 function createLocalBlockchain() {
   const Local = Mina.LocalBlockchain();
