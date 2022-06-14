@@ -122,6 +122,31 @@ This will output system info such as your NodeJS version, NPM version,
 `zkapp-cli` version, etc. Please include this if submitting a bug report for
 `zkapp-cli`, for easier troubleshooting.
 
+## Contributing
+
+The best way to contribute to the zkApp CLI is to help us test it broadly to
+ensure it works as expected on all platforms. If you encounter any issues,
+please submit an issue on Github and include the info printed when running `zk
+system`, which contains your OS, NodeJS, & zkapp-cli versions to help us
+reproduce the issue.
+
+To submit a PR:
+
+```sh
+# Visit https://github.com/o1-labs/zkapp-cli & fork it.
+git clone https://github.com/<your-username>/zkapp-cli.git
+git remote add upstream https://github.com/o1-labs/zkapp-cli.git
+cd zkapp-cli
+npm install
+npm link # makes it available globally on your system
+
+git checkout -b upstream/main
+# Make desired changes and commit
+git push origin <your-branch>
+# Submit a pull request
+# To switch back to the released version, run `npm i -g zkapp-cli`
+```
+
 ## License
 
 [Apache-2.0](LICENSE)
