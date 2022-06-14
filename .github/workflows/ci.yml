@@ -28,6 +28,7 @@ jobs:
           cd templates/project-ts
           npm ci || true
           npm run test
+          rm -rf node_modules
         env:
           CI: true
       - name: Publish to NPM if version has changed
