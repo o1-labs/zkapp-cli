@@ -12,7 +12,10 @@ function system() {
       },
       { showNotFound: true }
     )
-    .then((env) => env.replace('Not Found', 'Not Found (not in a project)'))
+    .then((env) => {
+      const str = 'snarkyjs: Not Found';
+      return env.replace(str, `${str} (not in a project)`);
+    })
     .then((env) => console.log(env));
 }
 
