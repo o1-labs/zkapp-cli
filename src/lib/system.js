@@ -12,6 +12,7 @@ function system() {
       },
       { showNotFound: true }
     )
+    .then((env) => env.replace('Not Found', 'Not Found (not in a project)'))
     .then((env) => console.log(env));
 }
 
