@@ -241,7 +241,7 @@ async function deploy({ alias, yes }) {
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
   const verificationKey = await step(
-    'Generate verification key (takes 1-2 min)',
+    'Generate verification key (takes 10-30 sec)',
     async () => {
       let { verificationKey } = await zkApp.compile(zkAppAddress);
       return verificationKey;

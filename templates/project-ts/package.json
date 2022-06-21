@@ -28,7 +28,6 @@
       "prettier --write --ignore-unknown"
     ]
   },
-
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-typescript": "^7.16.0",
