@@ -29,7 +29,7 @@
     ]
   },
   "dependencies": {
-    "snarkyjs": "^0.4.1"
+    "snarkyjs": "^0.4.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
