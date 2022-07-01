@@ -142,20 +142,23 @@ async function setProjectName(projDir) {
     kebabCase(name)
   );
 
-  let packageJsonContent = JSON.parse(
-    fs.readFileSync(path.join(projDir, 'package.json'), 'utf8')
-  );
+  addStartScript(path.join(projDir, 'package.json'));
 
+  spin.succeed(_green(step));
+}
+
+/**
+ * Helper to add start script to package.json.
+ * @param {string} file    Path to file
+ * @param {string} script  Start script to add.
+ */
+function addStartScript(file) {
   const startScript = 'node build/src/index.js';
+  let packageJsonContent = JSON.parse(fs.readFileSync(file, 'utf8'));
 
   // Add start script to template package.json
   packageJsonContent['scripts']['start'] = startScript;
-  fs.writeFileSync(
-    path.join(projDir, 'package.json'),
-    JSON.stringify(packageJsonContent, null, 2)
-  );
-
-  spin.succeed(_green(step));
+  fs.writeFileSync(file, JSON.stringify(packageJsonContent, null, 2));
 }
 
 /**
