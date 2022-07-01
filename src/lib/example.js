@@ -152,7 +152,7 @@ async function setProjectName(projDir) {
   packageJsonContent['scripts']['start'] = startScript;
   fs.writeFileSync(
     path.join(projDir, 'package.json'),
-    JSON.stringify(packageJsonContent)
+    JSON.stringify(packageJsonContent, null, 2)
   );
 
   spin.succeed(_green(step));
