@@ -14,14 +14,14 @@
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "scripts": {
+    "start": "node build/src/index.js",
     "build": "tsc -p tsconfig.json",
     "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --coverage",
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
     "test": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest",
     "testw": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/.bin/jest --watch",
-    "lint": "npx eslint src/* --fix",
-    "start": "node build/src/index.js"
+    "lint": "npx eslint src/* --fix"
   },
   "lint-staged": {
     "**/*": [
