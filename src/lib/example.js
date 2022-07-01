@@ -135,11 +135,21 @@ async function setProjectName(projDir) {
     'PROJECT_NAME',
     titleCase(name)
   );
+
   replaceInFile(
     path.join(projDir, 'package.json'),
     'package-name',
     kebabCase(name)
   );
+
+  let packageJsonContent = JSON.parse(
+    fs.readFileSync(path.join(projDir, 'package.json'), 'utf8')
+  );
+
+  const startScript = 'node build/src/index.js';
+
+  // Add start script to template package.json
+  packageJsonContent['scripts']['start'] = startScript;
 
   spin.succeed(_green(step));
 }
