@@ -150,6 +150,10 @@ async function setProjectName(projDir) {
 
   // Add start script to template package.json
   packageJsonContent['scripts']['start'] = startScript;
+  fs.writeFileSync(
+    path.join(projDir, 'package.json'),
+    JSON.stringify(packageJsonContent)
+  );
 
   spin.succeed(_green(step));
 }
