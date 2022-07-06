@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const ora = require('ora');
 const sh = require('shelljs');
@@ -135,13 +135,26 @@ async function setProjectName(projDir) {
     'PROJECT_NAME',
     titleCase(name)
   );
+
   replaceInFile(
     path.join(projDir, 'package.json'),
     'package-name',
     kebabCase(name)
   );
 
+  addStartScript(path.join(projDir, 'package.json'));
+
   spin.succeed(_green(step));
+}
+
+/**
+ * Helper to add start script to package.json.
+ * @param {string} file Path to file
+ */
+function addStartScript(file) {
+  let packageJsonContent = fs.readJsonSync(file, 'utf8');
+  packageJsonContent['scripts']['start'] = 'node build/src/run.js';
+  fs.writeJsonSync(file, packageJsonContent, { spaces: 2 });
 }
 
 /**
