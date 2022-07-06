@@ -153,8 +153,6 @@ async function setProjectName(projDir) {
  */
 function addStartScript(file) {
   let packageJsonContent = fs.readJsonSync(file, 'utf8');
-
-  // Add start script to template package.json
   packageJsonContent['scripts']['start'] = 'node build/src/run.js';
   fs.writeJsonSync(file, packageJsonContent, { spaces: 2 });
 }
