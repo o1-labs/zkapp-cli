@@ -47,12 +47,12 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
-  .command(['config'], 'Add a new network & key pair', {}, config)
+  .command(['config'], 'Add a new deploy alias', {}, config)
   .command(
-    ['deploy [network]'],
+    ['deploy [alias]'],
     'Deploy or redeploy a zkApp',
     {
-      network: { demand: false, string: true, hidden: true },
+      alias: { demand: false, string: true, hidden: true },
       y: {
         alias: 'yes',
         boolean: true,

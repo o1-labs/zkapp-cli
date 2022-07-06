@@ -16,11 +16,11 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
 /**
  * Deploy a smart contract to the specified network. If no network param is
  * provided, yargs will tell the user that the network param is required.
- * @param {string} network Network name to deploy to.
+ * @param {string} alias   The deploy alias to deploy to.
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
  * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
  */
-async function deploy({ network, yes }) {
+async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -39,23 +39,23 @@ async function deploy({ network, yes }) {
     return;
   }
 
-  if (!network) {
-    const networks = Object.keys(config?.networks);
-    if (!networks.length) {
-      log(red('No network aliases found in config.json.'));
-      log(red('Run `zk config` to add a network alias, then try again.'));
+  if (!alias) {
+    const aliases = Object.keys(config?.networks);
+    if (!aliases.length) {
+      log(red('No deploy aliases found in config.json.'));
+      log(red('Run `zk config` to add a deploy alias, then try again.'));
       return;
     }
 
     const res = await prompt({
       type: 'select',
       name: 'network',
-      choices: networks,
+      choices: aliases,
       message: (state) => {
         // Makes the step text green upon success, else uses reset.
         const style =
           state.submitted && !state.cancelled ? state.styles.success : reset;
-        return style('Which network alias would you like to deploy to?');
+        return style('Which deploy alias would you like to deploy to?');
       },
       prefix: (state) => {
         // Shows a cyan question mark when not submitted.
@@ -67,18 +67,18 @@ async function deploy({ network, yes }) {
           : red(state.symbols.cross);
       },
     });
-    network = res.network;
+    alias = res.network;
   }
 
-  network = network.toLowerCase();
+  alias = alias.toLowerCase();
 
-  if (!config.networks[network]) {
+  if (!config.networks[alias]) {
     log(red('Network name not found in config.json.'));
     log(red('You can add a network by running `zk config`.'));
     return;
   }
 
-  if (!config.networks[network].url) {
+  if (!config.networks[alias].url) {
     log(red(`No 'url' property is specified for this network in config.json.`));
     log(red(`Please correct your config.json and try again.`));
     return;
@@ -103,7 +103,7 @@ async function deploy({ network, yes }) {
   });
 
   // Identify which smart contract should be deployed for this network.
-  let contractName = chooseSmartContract(config, build, network);
+  let contractName = chooseSmartContract(config, build, alias);
 
   // If no smart contract is specified for this network in config.json &
   // 2+ smart contracts exist in build.json, ask which they want to use.
@@ -134,9 +134,9 @@ async function deploy({ network, yes }) {
     // the step formatting.
     await step('Choose smart contract', async () => {});
 
-    if (config.networks[network]?.smartContract) {
+    if (config.networks[alias]?.smartContract) {
       log(
-        `  The '${config.networks[network]?.smartContract}' smart contract will be used\n  for this network as specified in config.json.`
+        `  The '${config.networks[alias]?.smartContract}' smart contract will be used\n  for this network as specified in config.json.`
       );
     } else {
       log(
@@ -149,8 +149,8 @@ async function deploy({ network, yes }) {
   // Occurs when this is the first time we're deploying to a given network.
   // Important to ensure the same smart contract will always be deployed to
   // the same network.
-  if (config.networks[network]?.smartContract !== contractName) {
-    config.networks[network].smartContract = contractName;
+  if (config.networks[alias]?.smartContract !== contractName) {
+    config.networks[alias].smartContract = contractName;
     fs.writeJSONSync(`${DIR}/config.json`, config, { spaces: 2 });
     log(
       `  Your config.json was updated to always use this\n  smart contract when deploying to this network.`
@@ -158,11 +158,10 @@ async function deploy({ network, yes }) {
   }
 
   // import snarkyjs from the user directory
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina } = await import(
-    `${DIR}/node_modules/snarkyjs/dist/server/index.mjs`
-  );
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Party } =
+    await import(`${DIR}/node_modules/snarkyjs/dist/server/index.mjs`);
 
-  const graphQLEndpoint = config?.networks[network]?.url ?? DEFAULT_GRAPHQL;
+  const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
     graphQLEndpoint,
     `query {
@@ -173,7 +172,7 @@ async function deploy({ network, yes }) {
   if (!nodeStatus || nodeStatus.syncStatus === 'OFFLINE') {
     log(
       red(
-        `  Transaction relayer node is offline. Please try again or use a different "url" for this network alias in your config.json`
+        `  Transaction relayer node is offline. Please try again or use a different "url" for this deploy alias in your config.json`
       )
     );
     await shutdown();
@@ -181,7 +180,7 @@ async function deploy({ network, yes }) {
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
     log(
       red(
-        `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this network alias in your config.json`
+        `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this deploy alias in your config.json`
       )
     );
     await shutdown();
@@ -202,7 +201,7 @@ async function deploy({ network, yes }) {
   } catch (_) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this network alias.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this deploy alias.`
       )
     );
     await shutdown();
@@ -224,7 +223,7 @@ async function deploy({ network, yes }) {
   // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
   let privateKey;
   try {
-    privateKey = fs.readJSONSync(`${DIR}/keys/${network}.json`).privateKey;
+    privateKey = fs.readJSONSync(`${DIR}/keys/${alias}.json`).privateKey;
   } catch (_) {
     log(
       red(
@@ -242,18 +241,18 @@ async function deploy({ network, yes }) {
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
   const verificationKey = await step(
-    'Generate verification key (takes 1-2 min)',
+    'Generate verification key (takes 10-30 sec)',
     async () => {
       let { verificationKey } = await zkApp.compile(zkAppAddress);
       return verificationKey;
     }
   );
 
-  let { fee } = config.networks[network];
+  let { fee } = config.networks[alias];
   if (!fee) {
     log(
       red(
-        `  The "fee" property is not specified for this network alias in config.json. Please update your config.json and try again.`
+        `  The "fee" property is not specified for this deploy alias in config.json. Please update your config.json and try again.`
       )
     );
     await shutdown();
@@ -288,16 +287,16 @@ async function deploy({ network, yes }) {
         let zkapp = new zkApp(zkAppAddress);
         zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
         // hack: manually increment nonce
-        let nonce = zkapp.self.body.accountPrecondition.nonce.lower.add(1);
-        zkapp.self.body.accountPrecondition.nonce.assertBetween(nonce, nonce);
+        let nonce = zkapp.self.body.preconditions.account.nonce.lower.add(1);
+        Party.assertEquals(zkapp.self.body.preconditions.account.nonce, nonce);
       }
     );
     return tx.sign().toJSON();
   });
 
   const settings = [
-    [bold('Network'), reset(network)],
-    [bold('Url'), reset(config.networks[network].url)],
+    [bold('Network'), reset(alias)],
+    [bold('Url'), reset(config.networks[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
@@ -506,7 +505,8 @@ function getAccountQuery(publicKey) {
 
 function getErrorMessage(errors) {
   let errorMessage =
-    '  Failed to send transaction to relayer. Please try again.';
+    '  Failed to send transaction to relayer. Errors: ' +
+    errors.map((e) => e.message);
   for (const error of errors) {
     if (error.message.includes('Invalid_nonce')) {
       errorMessage = `  Failed to send transaction to the relayer. An invalid account nonce was specified. Please try again.`;
