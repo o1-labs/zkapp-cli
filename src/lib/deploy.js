@@ -243,13 +243,18 @@ async function deploy({ alias, yes }) {
   const verificationKey = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let cacheDigests = fs.readJSONSync(`${DIR}/build/build.json`)?.digests;
-      if (cacheDigests[contractName]) {
-        // compare cache digest to current digest
-      }
+      let buildJson = fs.readJSONSync(`${DIR}/build/build.json`);
+      let currentDigest = await zkApp.digest(zkAppAddress);
 
-      let { verificationKey } = await zkApp.compile(zkAppAddress);
-      return verificationKey;
+      if (buildJson?.digests[contractName] == currentDigest) {
+        // Don't recompile contract
+      } else {
+        buildJson.digests[contractName] = currentDigest;
+        fs.writeJsonSync(`${DIR}/build/build.json`, buildJson, { spaces: 2 });
+
+        let { verificationKey } = await zkApp.compile(zkAppAddress);
+        return verificationKey;
+      }
     }
   );
 
