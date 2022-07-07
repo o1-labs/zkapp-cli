@@ -243,6 +243,11 @@ async function deploy({ alias, yes }) {
   const verificationKey = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
+      let digests = fs.readJSONSync(`${DIR}/build/build.json`)?.digests;
+      if (digests) {
+        // compare cache digest to current digest
+      }
+
       let { verificationKey } = await zkApp.compile(zkAppAddress);
       return verificationKey;
     }
