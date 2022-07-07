@@ -243,8 +243,8 @@ async function deploy({ alias, yes }) {
   const verificationKey = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let digests = fs.readJSONSync(`${DIR}/build/build.json`)?.digests;
-      if (digests) {
+      let cacheDigests = fs.readJSONSync(`${DIR}/build/build.json`)?.digests;
+      if (cacheDigests[contractName]) {
         // compare cache digest to current digest
       }
 
