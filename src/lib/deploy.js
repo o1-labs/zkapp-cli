@@ -255,11 +255,19 @@ async function deploy({ alias, yes }) {
         let cacheKey = fs.readJSONSync(`${DIR}/build/cache.json`)[contractName]
           .verificationKey;
         console.log('Using the cached verification key');
-        return cacheKey;
-      }
 
-      let { verificationKey } = await zkApp.compile(zkAppAddress);
-      return verificationKey;
+        return cacheKey;
+      } else {
+        let { verificationKey } = await zkApp.compile(zkAppAddress);
+        // update cache with new verification key and currrentDigest
+        cache[contractName].verificationKey = verificationKey;
+        cache[contractName].digest = currentDigest;
+        fs.writeJsonSync(`${DIR}/build/cache.json`, cache, {
+          spaces: 2,
+        });
+
+        return verificationKey;
+      }
     }
   );
 
