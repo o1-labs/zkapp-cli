@@ -85,7 +85,11 @@ async function deploy({ alias, yes }) {
   }
 
   await step('Build project', async () => {
+    // store cache to add after build directory is emptied
+    let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
     fs.emptyDirSync(`${DIR}/build`); // ensure old artifacts don't remain
+    fs.outputJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
+
     await sh('npm run build --silent');
   });
 
