@@ -244,10 +244,18 @@ async function deploy({ alias, yes }) {
     'Generate verification key (takes 10-30 sec)',
     async () => {
       let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      let currentDigest = await zkApp.digest(zkAppAddress);
 
       if (!cache[contractName]) {
         cache[contractName] = { digest: '', verificationKey: '' };
         fs.writeJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
+      }
+
+      if (cache[contractName]['digest'] === currentDigest) {
+        let cacheKey = fs.readJSONSync(`${DIR}/build/cache.json`)[contractName]
+          .verificationKey;
+        console.log('Using the cached verification key');
+        return cacheKey;
       }
 
       let { verificationKey } = await zkApp.compile(zkAppAddress);
