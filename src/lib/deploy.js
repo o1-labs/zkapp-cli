@@ -244,7 +244,7 @@ async function deploy({ alias, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
-  const verificationKey = await step(
+  const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
       let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
@@ -252,9 +252,10 @@ async function deploy({ alias, yes }) {
       let currentDigest = await zkApp.digest(zkAppAddress);
 
       if (cache[contractName]?.digest === currentDigest) {
-        console.log('Using the cached verification key');
-
-        return cache[contractName].verificationKey;
+        return {
+          verificationKey: cache[contractName].verificationKey,
+          isCached: true,
+        };
       } else {
         const { verificationKey } = await zkApp.compile(zkAppAddress);
         // update cache with new verification key and currrentDigest
@@ -264,10 +265,16 @@ async function deploy({ alias, yes }) {
           spaces: 2,
         });
 
-        return verificationKey;
+        return { verificationKey, isCached: false };
       }
     }
   );
+
+  // Can't include the log message inside the callback b/c it will break
+  // the step formatting.
+  if (isCached) {
+    log('  Using the cached verification key');
+  }
 
   let { fee } = config.networks[alias];
   if (!fee) {
