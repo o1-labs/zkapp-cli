@@ -248,21 +248,18 @@ async function deploy({ alias, yes }) {
     'Generate verification key (takes 10-30 sec)',
     async () => {
       let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
-      // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run
+      // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
 
       // initialize cache if 'zk deploy' is run the first time on the contract
       if (!cache[contractName]) {
         cache[contractName] = { digest: '', verificationKey: '' };
-        fs.writeJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
       }
 
       if (cache[contractName]['digest'] === currentDigest) {
-        let cacheKey = fs.readJSONSync(`${DIR}/build/cache.json`)[contractName]
-          .verificationKey;
         console.log('Using the cached verification key');
 
-        return cacheKey;
+        return cache[contractName].verificationKey;
       } else {
         let { verificationKey } = await zkApp.compile(zkAppAddress);
         // update cache with new verification key and currrentDigest
