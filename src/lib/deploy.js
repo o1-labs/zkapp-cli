@@ -261,7 +261,7 @@ async function deploy({ alias, yes }) {
 
         return cache[contractName].verificationKey;
       } else {
-        let { verificationKey } = await zkApp.compile(zkAppAddress);
+        const { verificationKey } = await zkApp.compile(zkAppAddress);
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
