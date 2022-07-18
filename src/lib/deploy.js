@@ -86,7 +86,17 @@ async function deploy({ alias, yes }) {
 
   await step('Build project', async () => {
     // store cache to add after build directory is emptied
-    let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+    let cache;
+    try {
+      cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        cache = {};
+      } else {
+        console.error(err);
+      }
+    }
+
     fs.emptyDirSync(`${DIR}/build`); // ensure old artifacts don't remain
     fs.outputJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
 
@@ -261,6 +271,7 @@ async function deploy({ alias, yes }) {
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
+
         fs.writeJsonSync(`${DIR}/build/cache.json`, cache, {
           spaces: 2,
         });
