@@ -199,6 +199,7 @@ export class TicTacToe extends SmartContract {
     this.nextPlayer.set(player.not());
 
     // 4. get and deserialize the board
+    this.board.assertEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
