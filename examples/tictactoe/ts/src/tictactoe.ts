@@ -192,6 +192,7 @@ export class TicTacToe extends SmartContract {
 
     // ensure its their turn
     const nextPlayer = this.nextPlayer.get();
+    this.nextPlayer.assertEquals(nextPlayer); // precondition that links this.nextPlayer.get() to the actual on-chain state
     nextPlayer.assertEquals(player);
 
     // set the next player
