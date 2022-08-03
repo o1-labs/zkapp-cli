@@ -23,9 +23,8 @@ await isReady;
 class Sudoku extends CircuitValue {
   @matrixProp(Field, 9, 9) value: Field[][];
 
-  constructor(value: number[][]) {
-    super();
-    this.value = value.map((row) => row.map(Field));
+  static from(value: number[][]) {
+    return new Sudoku(value.map((row) => row.map(Field)));
   }
 
   hash() {
