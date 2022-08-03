@@ -172,6 +172,7 @@ export class TicTacToe extends SmartContract {
   ) {
     // 1. if the game is already finished, abort.
     const finished = this.gameDone.get();
+    this.gameDone.assertEquals(finished); // precondition that links this.gameDone.get() to the actual on-chain state
     finished.assertEquals(false);
 
     // 2. ensure that we know the private key associated to the public key
