@@ -116,7 +116,8 @@ async function deploy(
 ) {
   let tx = await Mina.transaction(account, () => {
     Party.fundNewAccount(account);
-    let sudokuInstance = new Sudoku(sudoku);
+    
+    let sudokuInstance = Sudoku.from(sudoku);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
     zkAppInstance.setPermissions({
       ...Permissions.default(),
@@ -137,7 +138,7 @@ async function submitSolution(
 ) {
   let tx = await Mina.transaction(account, () => {
     let zkApp = new SudokuZkApp(zkAppAddress);
-    zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
+    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution));
     zkApp.sign(zkAppPrivateKey);
   });
   try {
