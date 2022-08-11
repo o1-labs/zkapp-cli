@@ -144,7 +144,7 @@ export class TicTacToe extends SmartContract {
 
   deploy(args: DeployArgs) {
     super.deploy(args);
-    this.self.update.permissions.setValue({
+    this.setPermissions({
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
@@ -172,6 +172,7 @@ export class TicTacToe extends SmartContract {
   ) {
     // 1. if the game is already finished, abort.
     const finished = this.gameDone.get();
+    this.gameDone.assertEquals(finished); // precondition that links this.gameDone.get() to the actual on-chain state
     finished.assertEquals(false);
 
     // 2. ensure that we know the private key associated to the public key
@@ -191,12 +192,14 @@ export class TicTacToe extends SmartContract {
 
     // ensure its their turn
     const nextPlayer = this.nextPlayer.get();
+    this.nextPlayer.assertEquals(nextPlayer); // precondition that links this.nextPlayer.get() to the actual on-chain state
     nextPlayer.assertEquals(player);
 
     // set the next player
     this.nextPlayer.set(player.not());
 
     // 4. get and deserialize the board
+    this.board.assertEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
