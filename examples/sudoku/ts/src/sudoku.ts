@@ -23,8 +23,9 @@ await isReady;
 class Sudoku extends CircuitValue {
   @matrixProp(Field, 9, 9) value: Field[][];
 
-  static from(value: number[][]) {
-    return new Sudoku(value.map((row) => row.map(Field)));
+  constructor(value: number[][]) {
+    super();
+    this.value = value.map((row) => row.map(Field));
   }
 
   hash() {
@@ -116,8 +117,8 @@ async function deploy(
 ) {
   let tx = await Mina.transaction(account, () => {
     Party.fundNewAccount(account);
-    
-    let sudokuInstance = Sudoku.from(sudoku);
+
+    let sudokuInstance = new Sudoku(sudoku);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
     zkAppInstance.setPermissions({
       ...Permissions.default(),
@@ -138,7 +139,7 @@ async function submitSolution(
 ) {
   let tx = await Mina.transaction(account, () => {
     let zkApp = new SudokuZkApp(zkAppAddress);
-    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution));
+    zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
     zkApp.sign(zkAppPrivateKey);
   });
   try {
