@@ -33,13 +33,14 @@ async function playTicTacToe() {
 
   // initial state
   let b = await Mina.getAccount(zkAppPubkey);
+  console.log('b', b);
   console.log('initial state of the zkApp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
-    console.log('state', i, ':', b.zkapp?.appState[i].toString());
+    console.log('state', i, ':', b.appState?.[i].toString());
   }
 
   console.log('\ninitial board');
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
@@ -55,7 +56,7 @@ async function playTicTacToe() {
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
@@ -70,7 +71,7 @@ async function playTicTacToe() {
   );
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
@@ -85,7 +86,7 @@ async function playTicTacToe() {
   );
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
@@ -101,7 +102,7 @@ async function playTicTacToe() {
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
@@ -117,10 +118,10 @@ async function playTicTacToe() {
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.zkapp?.appState?.[0]!).printState();
+  new Board(b.appState?.[0]!).printState();
   console.log(
     'did someone win?',
-    b.zkapp?.appState[2].toString() ? 'Player 1!' : 'Player 2!'
+    b.appState?.[2].toString() ? 'Player 1!' : 'Player 2!'
   );
 
   // cleanup
