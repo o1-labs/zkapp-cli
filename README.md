@@ -7,7 +7,7 @@ recommended best practices. Apps are written using
 TypeScript framework for writing zero-knowledge proof-based smart contracts,
 which is included by default in projects created using this CLI.
 
-## Get started
+## Getting started
 
 To get started, please read this README, followed by [Mina Protocol's zkApp
 docs](https://docs.minaprotocol.com/zkapps) for a step-by-step guide.
@@ -185,8 +185,8 @@ To submit a PR:
 ```sh
 # Visit https://github.com/o1-labs/zkapp-cli & fork it.
 git clone https://github.com/<your-username>/zkapp-cli.git
-git remote add upstream https://github.com/o1-labs/zkapp-cli.git
 cd zkapp-cli
+git remote add upstream https://github.com/o1-labs/zkapp-cli.git
 npm install
 npm link # makes it available globally on your system
 
