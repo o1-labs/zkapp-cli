@@ -158,7 +158,7 @@ async function deploy({ alias, yes }) {
   }
 
   // import snarkyjs from the user directory
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Party } =
+  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Bool } =
     await import(`${DIR}/node_modules/snarkyjs/dist/server/index.mjs`);
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
@@ -286,10 +286,13 @@ async function deploy({ alias, yes }) {
       () => {
         let zkapp = new zkApp(zkAppAddress);
         zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
-        // hack: manually increment nonce
-        let nonce =
-          zkapp.self.body.preconditions.account.nonce.value.lower.add(1);
-        Party.assertEquals(zkapp.self.body.preconditions.account.nonce, nonce);
+        // manually patch the tx (TODO: have this implemented properly in snarkyjs)
+        // remove the nonce precondition
+        zkapp.self.body.preconditions.account.nonce.isSome = Bool(false);
+        // don't increment the nonce
+        zkapp.self.body.incrementNonce = Bool(false);
+        // use full commitment (means with include the fee payer in the signature, so we're protected against replays)
+        zkapp.self.body.useFullCommitment = Bool(true);
       }
     );
     return tx.sign().toJSON();
