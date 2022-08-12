@@ -85,7 +85,21 @@ async function deploy({ alias, yes }) {
   }
 
   await step('Build project', async () => {
+    // store cache to add after build directory is emptied
+    let cache;
+    try {
+      cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        cache = {};
+      } else {
+        console.error(err);
+      }
+    }
+
     fs.emptyDirSync(`${DIR}/build`); // ensure old artifacts don't remain
+    fs.outputJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
+
     await sh('npm run build --silent');
   });
 
@@ -240,13 +254,43 @@ async function deploy({ alias, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
-  const verificationKey = await step(
+  const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let { verificationKey } = await zkApp.compile(zkAppAddress);
-      return verificationKey;
+      let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
+      let currentDigest = await zkApp.digest(zkAppAddress);
+
+      // initialize cache if 'zk deploy' is run the first time on the contract
+      if (!cache[contractName]) {
+        cache[contractName] = { digest: '', verificationKey: '' };
+      }
+
+      if (cache[contractName]?.digest === currentDigest) {
+        return {
+          verificationKey: cache[contractName].verificationKey,
+          isCached: true,
+        };
+      } else {
+        const { verificationKey } = await zkApp.compile(zkAppAddress);
+        // update cache with new verification key and currrentDigest
+        cache[contractName].verificationKey = verificationKey;
+        cache[contractName].digest = currentDigest;
+
+        fs.writeJsonSync(`${DIR}/build/cache.json`, cache, {
+          spaces: 2,
+        });
+
+        return { verificationKey, isCached: false };
+      }
     }
   );
+
+  // Can't include the log message inside the callback b/c it will break
+  // the step formatting.
+  if (isCached) {
+    log('  Using the cached verification key');
+  }
 
   let { fee } = config.networks[alias];
   if (!fee) {
