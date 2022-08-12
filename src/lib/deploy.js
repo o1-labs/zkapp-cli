@@ -326,7 +326,8 @@ async function deploy({ alias, yes }) {
         let zkapp = new zkApp(zkAppAddress);
         zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
         // hack: manually increment nonce
-        let nonce = zkapp.self.body.preconditions.account.nonce.lower.add(1);
+        let nonce =
+          zkapp.self.body.preconditions.account.nonce.value.lower.add(1);
         Party.assertEquals(zkapp.self.body.preconditions.account.nonce, nonce);
       }
     );
