@@ -528,7 +528,7 @@ function sendZkAppQuery(partiesJson) {
   return `
   mutation {
     sendZkapp(input: {
-      parties: ${removeJsonQuotes(partiesJson)}
+      accountUpdates: ${removeJsonQuotes(partiesJson)}
     }) { zkapp
       {
         id
