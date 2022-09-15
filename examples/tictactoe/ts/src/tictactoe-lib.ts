@@ -1,4 +1,11 @@
-import { Field, PrivateKey, PublicKey, Mina, Party, Signature } from 'snarkyjs';
+import {
+  Field,
+  PrivateKey,
+  PublicKey,
+  Mina,
+  AccountUpdate,
+  Signature,
+} from 'snarkyjs';
 import { TicTacToe } from './tictactoe.js';
 
 export function createLocalBlockchain(): PrivateKey[] {
@@ -9,20 +16,21 @@ export function createLocalBlockchain(): PrivateKey[] {
 
 export async function deploy(
   zkAppInstance: TicTacToe,
-  zkAppPrivkey: PrivateKey,
+  zkAppPrivatekey: PrivateKey,
   deployer: PrivateKey
 ) {
   const txn = await Mina.transaction(deployer, () => {
-    Party.fundNewAccount(deployer);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivkey });
+    AccountUpdate.fundNewAccount(deployer);
+    zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
     zkAppInstance.init();
+    zkAppInstance.sign(zkAppPrivatekey);
   });
   await txn.send().wait();
 }
 
 export async function makeMove(
   zkAppInstance: TicTacToe,
-  zkAppPrivkey: PrivateKey,
+  zkAppPrivatekey: PrivateKey,
   currentPlayer: PrivateKey,
   player1Public: PublicKey,
   player2Public: PublicKey,
@@ -39,7 +47,7 @@ export async function makeMove(
       player1Public,
       player2Public
     );
-    zkAppInstance.sign(zkAppPrivkey);
+    zkAppInstance.sign(zkAppPrivatekey);
   });
   await txn.send().wait();
 }
