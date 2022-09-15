@@ -1,4 +1,4 @@
-import { Field, PrivateKey, PublicKey, Mina, Party, Signature } from 'snarkyjs';
+import { Field, PrivateKey, PublicKey, Mina, AccountUpdate, Signature } from 'snarkyjs';
 import { TicTacToe } from './tictactoe.js';
 
 export function createLocalBlockchain(): PrivateKey[] {
@@ -13,7 +13,7 @@ export async function deploy(
   deployer: PrivateKey
 ) {
   const txn = await Mina.transaction(deployer, () => {
-    Party.fundNewAccount(deployer);
+    AccountUpdate.fundNewAccount(deployer);
     zkAppInstance.deploy({ zkappKey: zkAppPrivkey });
     zkAppInstance.init();
   });
