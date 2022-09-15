@@ -173,7 +173,7 @@ async function deploy({ alias, yes }) {
 
   // import snarkyjs from the user directory
   let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Bool } =
-    await import(`${DIR}/node_modules/snarkyjs/dist/server/index.mjs`);
+    await import(`${DIR}/node_modules/snarkyjs/dist/node/index.js`);
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
