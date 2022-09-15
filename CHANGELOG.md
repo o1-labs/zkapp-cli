@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/o1-labs/zkapp-cli/compare/feature/deploy-alias...HEAD)
 
+## [0.4.15] - 2021-09-015
+
+### Changed
+
+- Upgraded SnarkyJS to `0.6.0`. [#249](https://github.com/o1-labs/zkapp-cli/pull/249)
+- Renamed the references of Party to AccountUpdate and parties to zkappCommand in CLI and template/examples to match changes in Mina Protocol and SnarkyJS.
+
 ## [0.4.7] - 2021-06-14
 
 ### Added
