@@ -10,9 +10,9 @@ import {
 } from 'snarkyjs';
 
 /*
- * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace 
- * with your own tests. 
- * 
+ * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
+ * with your own tests.
+ *
  * See https://docs.minaprotocol.com/zkapps for more info.
  */
 
@@ -24,13 +24,14 @@ function createLocalBlockchain() {
 
 async function localDeploy(
   zkAppInstance: Add,
-  zkAppPrivkey: PrivateKey,
+  zkAppPrivatekey: PrivateKey,
   deployerAccount: PrivateKey
 ) {
   const txn = await Mina.transaction(deployerAccount, () => {
     AccountUpdate.fundNewAccount(deployerAccount);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivkey });
+    zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
     zkAppInstance.init();
+    zkAppInstance.sign(zkAppPrivatekey);
   });
   await txn.send().wait();
 }
