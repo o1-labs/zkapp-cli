@@ -524,11 +524,11 @@ async function sendGraphQL(graphQLEndpoint, query) {
   }
 }
 
-function sendZkAppQuery(partiesJson) {
+function sendZkAppQuery(acountUpdatesJson) {
   return `
   mutation {
     sendZkapp(input: {
-      accountUpdates: ${removeJsonQuotes(partiesJson)}
+      accountUpdates: ${removeJsonQuotes(acountUpdatesJson)}
     }) { zkapp
       {
         id
