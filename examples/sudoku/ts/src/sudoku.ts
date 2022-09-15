@@ -11,7 +11,7 @@ import {
   Poseidon,
   Permissions,
   Mina,
-  Party,
+  AccountUpdate,
   PrivateKey,
   PublicKey,
 } from 'snarkyjs';
@@ -116,7 +116,7 @@ async function deploy(
   account: PrivateKey
 ) {
   let tx = await Mina.transaction(account, () => {
-    Party.fundNewAccount(account);
+    AccountUpdate.fundNewAccount(account);
 
     let sudokuInstance = new Sudoku(sudoku);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
