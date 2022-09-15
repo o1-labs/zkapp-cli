@@ -33,7 +33,7 @@ async function playTicTacToe() {
 
   // initial state
   let b = await Mina.getAccount(zkAppPubkey);
-  console.log('b', b);
+
   console.log('initial state of the zkApp');
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
     console.log('state', i, ':', b.appState?.[i].toString());

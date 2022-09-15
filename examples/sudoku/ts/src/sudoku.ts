@@ -126,6 +126,7 @@ async function deploy(
     });
 
     zkAppInstance.init(sudokuInstance);
+    zkAppInstance.sign(zkAppPrivateKey);
   });
   await tx.send().wait();
 }
