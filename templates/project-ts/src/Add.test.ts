@@ -6,7 +6,7 @@ import {
   Mina,
   PrivateKey,
   PublicKey,
-  Party,
+  AccountUpdate,
 } from 'snarkyjs';
 
 /*
@@ -28,7 +28,7 @@ async function localDeploy(
   deployerAccount: PrivateKey
 ) {
   const txn = await Mina.transaction(deployerAccount, () => {
-    Party.fundNewAccount(deployerAccount);
+    AccountUpdate.fundNewAccount(deployerAccount);
     zkAppInstance.deploy({ zkappKey: zkAppPrivkey });
     zkAppInstance.init();
   });
