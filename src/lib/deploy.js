@@ -528,7 +528,7 @@ function sendZkAppQuery(acountUpdatesJson) {
   return `
   mutation {
     sendZkapp(input: {
-      accountUpdates: ${removeJsonQuotes(acountUpdatesJson)}
+      zkappCommand: ${removeJsonQuotes(acountUpdatesJson)}
     }) { zkapp
       {
         id
