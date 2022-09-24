@@ -159,7 +159,7 @@ async function config() {
   const str =
     `\nSuccess!\n` +
     `\nNext steps:` +
-    `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/qanets?address=${encodeURIComponent(
+    `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
     )}` +
     `\n  - To deploy, run: \`zk deploy ${network}\``;
