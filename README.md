@@ -134,7 +134,7 @@ configurations.
 Run the `zk config` command to add a new deployment configuration to this file.
 
 This command is interactive and will prompt you to specify 1.) a network name
-(can be anything, e.g. `qanet`), 2.) the Mina GraphQL API URL where you want to
+(can be anything, e.g. `testnet`), 2.) the Mina GraphQL API URL where you want to
 send your deployment transaction (e.g.
 `https://proxy.berkeley.minaexplorer.com/graphql`), and 3.) the transaction fee
 to be used during deployment (in MINA; e.g. `0.01`). The URL is significant
@@ -142,10 +142,9 @@ because this determines which network you're deploying to (e.g. `QANet`,
 `Testnet`, etc).
 
 Note: If your project contains more than one smart contract that you will be
-deploying, we recommend following an alias naming convention such as `qanet-foo`
-and `qanet-bar`, where `qanet` is the name of the network and `foo` and `bar`
-are the name of your smart contracts. Then you can deploy using `zk deploy
-qanet-foo` and `zk deploy qanet-bar`.
+deploying, we recommend following an alias naming convention such as `testnet-foo`
+and `testnet-bar`, where `testnet` is the name of the network and `foo` and `bar`
+are the name of your smart contracts. Then you can deploy using `zk deploy testnet-foo` and `zk deploy testnet-bar`.
 
 ### Deploy your smart contract
 
@@ -155,18 +154,16 @@ zk deploy <alias>
 zk deploy // will show a list of aliases in your project to choose from
 ```
 
-_**Deployment is possible to Berkeley QANet currently and--soon--will
-be possible for Berkeley Testnet. It is not possible to deploy
+_**Deployment is possible to Berkeley Testnet currently. It is not possible to deploy
 to Mina Mainnet at this time.**_
 
 The `deploy` command allows you to deploy a smart contract to your desired
 alias. You must run `zk config` once before deploying, in order to set up a
-deploy alias with the required details. Then run `zk deploy <alias>` or `zk
-deploy` (and select the alias from the list shown) and type `yes` or `y` to
+deploy alias with the required details. Then run `zk deploy <alias>` or `zk deploy` (and select the alias from the list shown) and type `yes` or `y` to
 confirm when prompted.
 
 Note: When deploying to an alias for the first time, the CLI will prompt you to
-choose which smart contract you want to deploy from those that exist as *named*
+choose which smart contract you want to deploy from those that exist as _named_
 exports in your project. The name of the smart contract that you choose will
 then be remembered by being saved into your `config.json` for this alias, so
 that running `zk deploy <alias>` will automatically deploy this _same_ smart
@@ -176,8 +173,7 @@ contract in the future when deploying to this alias, for safety.
 
 The best way to contribute to the zkApp CLI is to help us test it broadly to
 ensure it works as expected on all platforms. If you encounter any issues,
-please submit an issue on Github and include the info printed when running `zk
-system`, which contains your OS, NodeJS, & zkapp-cli versions to help us
+please submit an issue on Github and include the info printed when running `zk system`, which contains your OS, NodeJS, & zkapp-cli versions to help us
 reproduce the issue.
 
 To submit a PR:
