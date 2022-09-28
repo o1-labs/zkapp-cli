@@ -172,8 +172,12 @@ async function deploy({ alias, yes }) {
   }
 
   // import snarkyjs from the user directory
+  let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
+  if (process.platform === 'win32') {
+    snarkyjsImportPath = 'file://' + snarkyjsImportPath;
+  }
   let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Bool } =
-    await import(`${DIR}/node_modules/snarkyjs/dist/node/index.js`);
+    await import(snarkyjsImportPath);
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
@@ -209,9 +213,11 @@ async function deploy({ alias, yes }) {
 
   let smartContractImports;
   try {
-    smartContractImports = await import(
-      `${DIR}/build/src/${smartContractFile}`
-    );
+    let smartContractImportPath = `${DIR}/build/src/${smartContractFile}`;
+    if (process.platform === 'win32') {
+      smartContractImportPath = 'file://' + smartContractImportPath;
+    }
+    smartContractImports = await import(smartContractImportPath);
   } catch (_) {
     log(
       red(
@@ -438,6 +444,9 @@ async function deploy({ alias, yes }) {
  * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
  */
 async function findSmartContracts(path) {
+  if (process.platform === 'win32') {
+    path = path.replaceAll('\\', '/');
+  }
   const files = await glob(path);
 
   let smartContracts = [];
@@ -481,6 +490,9 @@ function chooseSmartContract(config, deploy, network) {
  * @returns {Promise<string>}      The file name of the user-specified smart contract.
  */
 async function findSmartContractToDeploy(buildPath, contractName) {
+  if (process.platform === 'win32') {
+    buildPath = buildPath.replaceAll('\\', '/');
+  }
   const files = await glob(buildPath);
   const re = new RegExp(`class ${contractName} extends SmartContract`, 'gi');
   for (const file of files) {
