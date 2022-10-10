@@ -78,7 +78,7 @@ async function project(name) {
 async function fetchProjectTemplate(name, lang) {
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
   const step = 'Fetch project template';
-  const spin = ora(`${step}...`).start();
+  const spin = ora({ text: `${step}...`, discardStdin: true }).start();
 
   try {
     const src = 'github:o1-labs/zkapp-cli#main';
@@ -116,7 +116,7 @@ async function fetchProjectTemplate(name, lang) {
  * @returns {Promise<void>}
  */
 async function step(step, cmd) {
-  const spin = ora(`${step}...`).start();
+  const spin = ora({ text: `${step}...`, discardStdin: true }).start();
   try {
     await shExec(cmd);
     spin.succeed(_green(step));
