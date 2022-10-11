@@ -13,9 +13,10 @@ const shExec = util.promisify(sh.exec);
 /**
  * Create a new zkApp project with recommended dir structure, Prettier config,
  * testing lib, etc. Warns if already exists and does NOT overwrite.
- * @param {string} name  Desired dir name or path. Will recursively create
- *                       dirs without overwriting existing content, if needed.
- * @return {promise<void>}
+ * @param {object} argv - The arguments object provided by yargs.
+ * @param {string} argv.name - The user's desired project name.
+ * @param {string} argv.ui - The name of the UI framework to use.
+ * @return {Promise<void>}
  */
 async function project({ name, ui }) {
   const isWindows = process.platform === 'win32';
@@ -173,7 +174,7 @@ async function project({ name, ui }) {
 
 /**
  * Fetch project template.
- * @returns {promise<boolean>} True if successful; false if not.
+ * @returns {Promise<boolean>} - True if successful; false if not.
  */
 async function fetchProjectTemplate() {
   const projectName = 'project-ts';
@@ -217,9 +218,9 @@ async function fetchProjectTemplate() {
 
 /**
  * Helper for any steps that need to call a shell command.
- * @param {string} step Name of step to show user
- * @param {string} cmd  Shell command to execute.
- * @returns {promise<void>}
+ * @param {string} step - Name of step to show user
+ * @param {string} cmd - Shell command to execute.
+ * @returns {Promise<void>}
  */
 async function step(step, cmd) {
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
@@ -234,9 +235,9 @@ async function step(step, cmd) {
 /**
  * Step to replace placeholder names in the project with the properly-formatted
  * version of the user-supplied name as specified via `zk project <name>`
- * @param {string} dir Path to the dir containing target files to be changed.
- * @param {string} name User-provided project name.
- * @returns {promise<void>}
+ * @param {string} dir - Path to the dir containing target files to be changed.
+ * @param {string} name - User-provided project name.
+ * @returns {Promise<void>}
  */
 async function setProjectName(dir, name) {
   const step = 'Set project name';
@@ -254,9 +255,9 @@ async function setProjectName(dir, name) {
 
 /**
  * Helper to replace text in a file.
- * @param {string} file Path to file
- * @param {string} a    Old text.
- * @param {string} b    New text.
+ * @param {string} file - Path to file
+ * @param {string} a - Old text.
+ * @param {string} b - New text.
  */
 function replaceInFile(file, a, b) {
   let content = fs.readFileSync(file, 'utf8');
