@@ -115,9 +115,7 @@ async function project({ name, ui }) {
       sh.cd('ui');
       await step(
         'UI: NPM install',
-        `npm install --prefix=ui --silent > ${
-          isWindows ? 'NUL' : '"/dev/null" 2>&1'
-        }`
+        `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
       );
       sh.cd('..');
     }
