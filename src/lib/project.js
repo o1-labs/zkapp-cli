@@ -44,7 +44,7 @@ async function project({ name, ui }) {
           // Make the step text green upon success, else use the reset color.
           const style =
             state.submitted && !state.cancelled ? state.styles.success : reset;
-          return style('Create an accompanying UI project?');
+          return style('Create a UI for your smart contract too?');
         },
         prefix: (state) => {
           // Show a cyan question mark when not submitted.
