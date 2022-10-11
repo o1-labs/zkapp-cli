@@ -10,7 +10,9 @@ const { spawnSync } = require('child_process');
  * @returns {Promise<T>}
  */
 async function step(str, fn) {
-  const spin = ora(`${str}...`).start();
+  // discardStdin prevents Ora from accepting input that would be passed to a
+  // subsequent command, like a y/n confirmation step, which would be dangerous.
+  const spin = ora({ text: `${str}...`, discardStdin: true }).start();
   try {
     const result = await fn();
     spin.succeed(green(str));

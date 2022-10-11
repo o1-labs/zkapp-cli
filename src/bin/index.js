@@ -32,6 +32,10 @@ yargs(hideBin(process.argv))
     'Unknown command: %s': {
       one: _red('Unknown command: %s'),
     },
+    'Invalid values:': _red('Invalid values:'),
+    'Argument: %s, Given: %s, Choices: %s': _red(
+      `%s was %s. Must be one of: %s.`
+    ),
   })
   .demandCommand(1, _red('Please provide a command.'))
 
@@ -76,7 +80,14 @@ yargs(hideBin(process.argv))
   .command(
     ['example [name]', 'e [name]'],
     'Create an example project',
-    { name: { demand: true, string: true, hidden: true } },
+    {
+      name: {
+        demand: true,
+        string: true,
+        hidden: false,
+        choices: ['sudoku', 'tictactoe'],
+      },
+    },
     async (argv) => await example(argv.name)
   )
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
