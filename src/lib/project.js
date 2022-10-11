@@ -1,14 +1,13 @@
-const chalk = require('chalk');
 const fs = require('fs-extra');
 const path = require('path');
 const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
+const { prompt } = require('enquirer');
 const { spawnSync } = require('child_process');
+const { red, green, reset } = require('chalk');
 
-const _green = chalk.green;
-const _red = chalk.red;
 const shExec = util.promisify(sh.exec);
 
 /**
@@ -22,7 +21,7 @@ async function project({ name, ui }) {
   const isWindows = process.platform === 'win32';
 
   if (fs.existsSync(name)) {
-    console.error(_red(`Directory already exists. Not proceeding`));
+    console.error(red(`Directory already exists. Not proceeding`));
     return;
   }
 
@@ -30,8 +29,39 @@ async function project({ name, ui }) {
   // NPM `prepare` script to set up its pre-commit hook within `.git`.
   // Check before fetching project template, to not leave crud on user's system.
   if (!sh.which('git')) {
-    console.error(_red('Please ensure Git is installed, then try again.'));
+    console.error(red('Please ensure Git is installed, then try again.'));
     return;
+  }
+
+  let res;
+  if (!ui) {
+    try {
+      res = await prompt({
+        type: 'select',
+        name: 'ui',
+        choices: ['svelte', 'next', 'vue', 'empty', 'none'],
+        message: (state) => {
+          // Make the step text green upon success, else use the reset color.
+          const style =
+            state.submitted && !state.cancelled ? state.styles.success : reset;
+          return style('Create an accompanying UI project?');
+        },
+        prefix: (state) => {
+          // Show a cyan question mark when not submitted.
+          // Show a green check mark if submitted.
+          // Show a red "x" if ctrl+C is pressed (default is a magenta).
+          if (!state.submitted) return state.symbols.question;
+          return !state.cancelled
+            ? state.symbols.check
+            : red(state.symbols.cross);
+        },
+      });
+    } catch (err) {
+      // If ctrl+c is pressed it will throw.
+      return;
+    }
+
+    ui = res.ui;
   }
 
   sh.mkdir('-p', name); // Create path/to/dir with their desired name
@@ -65,10 +95,16 @@ async function project({ name, ui }) {
       case 'empty':
         sh.mkdir('ui');
         break;
+      case 'none':
+        // `zk project <name>` now shows a dropdown to allow users to select
+        // from available UI project options. Because of this, we also need
+        // `--ui none` in order to allow devs to create a project w/o a UI.
+        ui = false;
+        break;
     }
-    ora(_green(`UI: Set up project`)).succeed();
+    ora(green(`UI: Set up project`)).succeed();
 
-    if (ui !== 'empty') {
+    if (ui && ui !== 'empty') {
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
       await step(
         'UI: NPM install',
@@ -132,7 +168,7 @@ async function project({ name, ui }) {
     `\n  git remote add origin <your-repo-url>` +
     `\n  git push -u origin main`;
 
-  console.log(_green(str));
+  console.log(green(str));
 }
 
 /**
@@ -170,7 +206,7 @@ async function fetchProjectTemplate() {
     // we have `keys` in our .gitignore.
     sh.mkdir('keys');
 
-    spin.succeed(_green(step));
+    spin.succeed(green(step));
     return true;
   } catch (err) {
     spin.fail(step);
@@ -189,7 +225,7 @@ async function step(step, cmd) {
   const spin = ora(`${step}...`).start();
   try {
     await shExec(cmd);
-    spin.succeed(_green(step));
+    spin.succeed(green(step));
   } catch (err) {
     spin.fail(step);
   }
@@ -208,7 +244,7 @@ async function setProjectName(name) {
   replaceInFile('README.md', 'PROJECT_NAME', titleCase(name));
   replaceInFile('package.json', 'package-name', kebabCase(name));
 
-  spin.succeed(_green(step));
+  spin.succeed(green(step));
 }
 
 /**
