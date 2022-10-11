@@ -151,7 +151,7 @@ async function project({ name, ui }) {
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
 
-  await setProjectName(name.split(path.sep).pop());
+  await setProjectName('.', name.split(path.sep).pop());
 
   if (ui) sh.cd('..'); // back to project root
 
@@ -234,15 +234,20 @@ async function step(step, cmd) {
 /**
  * Step to replace placeholder names in the project with the properly-formatted
  * version of the user-supplied name as specified via `zk project <name>`
+ * @param {string} dir Path to the dir containing target files to be changed.
  * @param {string} name User-provided project name.
  * @returns {promise<void>}
  */
-async function setProjectName(name) {
+async function setProjectName(dir, name) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
-  replaceInFile('README.md', 'PROJECT_NAME', titleCase(name));
-  replaceInFile('package.json', 'package-name', kebabCase(name));
+  replaceInFile(path.join(dir, 'README.md'), 'PROJECT_NAME', titleCase(name));
+  replaceInFile(
+    path.join(dir, 'package.json'),
+    'package-name',
+    kebabCase(name)
+  );
 
   spin.succeed(green(step));
 }

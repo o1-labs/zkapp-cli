@@ -1,8 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 let {
-  project,
-  step,
   setProjectName,
   replaceInFile,
   titleCase,
@@ -35,20 +33,24 @@ describe('project.js', () => {
 
     it('should replace text in README.md & package.json', () => {
       const DIR = 'temp-fixture-proj';
+      const NAME = 'my-cool-zkapp';
+
       const README = '# Mina zkApp: PROJECT_NAME\n more stuff\n and more';
       const PKG = `{"name": "package-name","version": "0.1.0"}`;
       fs.mkdirSync('temp-fixture-proj', { recursive: true });
       fs.writeFileSync(DIR + '/README.md', README);
       fs.writeFileSync(DIR + '/package.json', PKG);
-      setProjectName(DIR);
+
+      setProjectName(DIR, NAME);
+
       const readmeAfter = fs.readFileSync(path.join(DIR, 'README.md'), 'utf8');
-      expect(readmeAfter.includes('Temp Fixture Proj')).toBeTruthy();
+      expect(readmeAfter.includes('My Cool Zkapp')).toBeTruthy();
       expect(readmeAfter.includes('PROJECT_NAME')).toBeFalsy();
       const packageAfter = fs.readFileSync(
         path.join(DIR, 'package.json'),
         'utf8'
       );
-      expect(packageAfter.includes('temp-fixture-proj')).toBeTruthy();
+      expect(packageAfter.includes('my-cool-zkapp')).toBeTruthy();
       expect(packageAfter.includes('package-name')).toBeFalsy();
       fs.rmSync(DIR, { recursive: true });
     });
