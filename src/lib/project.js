@@ -81,17 +81,22 @@ async function project({ name, ui }) {
       case 'svelte':
         spawnSync('npm', ['create', 'svelte@latest', 'ui'], {
           stdio: 'inherit',
+          shell: true,
         });
         break;
       case 'next':
         // https://nextjs.org/docs/api-reference/create-next-app#options
         spawnSync('npx', ['create-next-app@latest', 'ui', '--use-npm'], {
           stdio: 'inherit',
+          shell: true,
         });
-        shExec('rm -rf ui/.git'); // Remove NextJS' .git; we will init .git in our monorepo's root.
+        sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
         break;
       case 'vue':
-        spawnSync('npm', ['init', 'vue@latest', 'ui'], { stdio: 'inherit' });
+        spawnSync('npm', ['init', 'vue@latest', 'ui'], {
+          stdio: 'inherit',
+          shell: true,
+        });
         break;
       case 'empty':
         sh.mkdir('ui');
@@ -107,12 +112,14 @@ async function project({ name, ui }) {
 
     if (ui && ui !== 'empty') {
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
+      sh.cd('ui');
       await step(
         'UI: NPM install',
         `npm install --prefix=ui --silent > ${
           isWindows ? 'NUL' : '"/dev/null" 2>&1'
         }`
       );
+      sh.cd('..');
     }
   }
 
@@ -134,14 +141,17 @@ async function project({ name, ui }) {
   if (ui) {
     // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/package.json#L20
     let x = fs.readJSONSync(`package.json`);
-    x.scripts.prepare = 'cd .. && husky install contracts/.husky';
+    x.scripts.prepare = `cd .. && husky install ${path.join(
+      'contracts',
+      '.husky'
+    )}`;
     fs.writeJSONSync(`package.json`, x, { spaces: 2 });
 
     // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/.husky/pre-commit#L3
-    let y = fs.readFileSync(`.husky/pre-commit`, 'utf-8');
+    let y = fs.readFileSync(`${path.join('.husky', 'pre-commit')}`, 'utf-8');
     const targetStr = 'husky.sh"\n';
     y = y.replace(targetStr, targetStr + '\ncd contracts');
-    fs.writeFileSync(`.husky/pre-commit`, y, 'utf-8');
+    fs.writeFileSync(`${path.join('.husky', 'pre-commit')}`, y, 'utf-8');
   }
 
   // `/dev/null` on Mac or Linux and 'NUL' on Windows is the only way to silence
