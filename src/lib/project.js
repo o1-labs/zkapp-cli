@@ -79,7 +79,8 @@ async function project({ name, ui }) {
   if (ui) {
     switch (ui) {
       case 'svelte':
-        spawnSync('npm', ['create', 'svelte@latest', 'ui'], {
+        // `-y` installs the latest version of create-svelte without prompting.
+        spawnSync('npm', ['create', 'svelte@latest', '-y', 'ui'], {
           stdio: 'inherit',
           shell: true,
         });
