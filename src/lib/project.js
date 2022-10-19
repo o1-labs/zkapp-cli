@@ -40,7 +40,7 @@ async function project({ name, ui }) {
       res = await prompt({
         type: 'select',
         name: 'ui',
-        choices: ['svelte', 'next', 'vue', 'empty', 'none'],
+        choices: ['svelte', 'next', 'nuxt', 'empty', 'none'],
         message: (state) => {
           // Make the step text green upon success, else use the reset color.
           const style =
@@ -93,8 +93,9 @@ async function project({ name, ui }) {
         });
         sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
         break;
-      case 'vue':
-        spawnSync('npm', ['init', 'vue@latest', 'ui'], {
+      case 'nuxt':
+        console.log("  Choose 'no version control' when prompted.");
+        spawnSync('npx', ['create-nuxt-app', 'ui'], {
           stdio: 'inherit',
           shell: true,
         });
