@@ -84,6 +84,10 @@ async function project({ name, ui }) {
           stdio: 'inherit',
           shell: true,
         });
+        sh.cp(
+          path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
+          path.join('ui', 'src')
+        );
         break;
       case 'next':
         // https://nextjs.org/docs/api-reference/create-next-app#options
@@ -91,7 +95,12 @@ async function project({ name, ui }) {
           stdio: 'inherit',
           shell: true,
         });
-        sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+        sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+        sh.mv(
+          path.join('ui', 'next.config.js'),
+          path.join('ui', 'next.config.js-BAK')
+        );
+        sh.cp(path.join(__dirname, 'ui', 'next', 'next.config.js'), 'ui');
         break;
       case 'nuxt':
         console.log("  Choose 'no version control' when prompted.");
