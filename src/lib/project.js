@@ -1,28 +1,28 @@
-const chalk = require('chalk');
 const fs = require('fs-extra');
 const path = require('path');
 const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
+const { prompt } = require('enquirer');
+const { spawnSync } = require('child_process');
+const { red, green, reset } = require('chalk');
 
-const _green = chalk.green;
-const _red = chalk.red;
 const shExec = util.promisify(sh.exec);
 
 /**
  * Create a new zkApp project with recommended dir structure, Prettier config,
  * testing lib, etc. Warns if already exists and does NOT overwrite.
- * @param {string} name  Desired dir name or path. Will recursively create
- *                       dirs without overwriting existing content, if needed.
+ * @param {object} argv - The arguments object provided by yargs.
+ * @param {string} argv.name - The user's desired project name.
+ * @param {string} argv.ui - The name of the UI framework to use.
  * @return {Promise<void>}
  */
-async function project(name) {
-  const lang = 'ts';
+async function project({ name, ui }) {
   const isWindows = process.platform === 'win32';
 
   if (fs.existsSync(name)) {
-    console.error(_red(`Directory already exists. Not proceeding`));
+    console.error(red(`Directory already exists. Not proceeding`));
     return;
   }
 
@@ -30,28 +30,141 @@ async function project(name) {
   // NPM `prepare` script to set up its pre-commit hook within `.git`.
   // Check before fetching project template, to not leave crud on user's system.
   if (!sh.which('git')) {
-    console.error(_red('Please ensure Git is installed, then try again.'));
+    console.error(red('Please ensure Git is installed, then try again.'));
     return;
   }
 
-  if (!(await fetchProjectTemplate(name, lang))) return;
+  let res;
+  if (!ui) {
+    try {
+      res = await prompt({
+        type: 'select',
+        name: 'ui',
+        choices: ['svelte', 'next', 'nuxt', 'empty', 'none'],
+        message: (state) => {
+          // Make the step text green upon success, else use the reset color.
+          const style =
+            state.submitted && !state.cancelled ? state.styles.success : reset;
+          return style('Create an accompanying UI project too?');
+        },
+        prefix: (state) => {
+          // Show a cyan question mark when not submitted.
+          // Show a green check mark if submitted.
+          // Show a red "x" if ctrl+C is pressed (default is a magenta).
+          if (!state.submitted) return state.symbols.question;
+          return !state.cancelled
+            ? state.symbols.check
+            : red(state.symbols.cross);
+        },
+      });
+    } catch (err) {
+      // If ctrl+c is pressed it will throw.
+      return;
+    }
 
-  // Create a keys dir because we excluded it from Git
-  fs.ensureDirSync(`${name}/keys`);
+    ui = res.ui;
+  }
 
-  // Set dir for shell commands. Doesn't change user's dir in their CLI.
-  sh.cd(name);
+  sh.mkdir('-p', name); // Create path/to/dir with their desired name
+  sh.cd(name); // Set dir for shell commands. Doesn't change user's dir in their CLI.
 
+  // If user wants a UI framework installed alongside their smart contract,
+  // we'll create this dir structure:
+  //   /<name>     (with .git)
+  //     ui/
+  //     contracts/
+  // - We use NPM for the UI projects for consistency with our smart contract
+  //   project, as opposed to Yarn or PNPM.
+  // - spawnSync with stdio:inherit allows the child process to be interactive.
+  if (ui) {
+    switch (ui) {
+      case 'svelte':
+        // `-y` installs the latest version of create-svelte without prompting.
+        spawnSync('npm', ['create', 'svelte@latest', '-y', 'ui'], {
+          stdio: 'inherit',
+          shell: true,
+        });
+        break;
+      case 'next':
+        // https://nextjs.org/docs/api-reference/create-next-app#options
+        spawnSync('npx', ['create-next-app@latest', 'ui', '--use-npm'], {
+          stdio: 'inherit',
+          shell: true,
+        });
+        sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+        break;
+      case 'nuxt':
+        console.log("  Choose 'no version control' when prompted.");
+        spawnSync('npx', ['create-nuxt-app', 'ui'], {
+          stdio: 'inherit',
+          shell: true,
+        });
+        break;
+      case 'empty':
+        sh.mkdir('ui');
+        break;
+      case 'none':
+        // `zk project <name>` now shows a dropdown to allow users to select
+        // from available UI project options. Because of this, we also need
+        // `--ui none` in order to allow devs to create a project w/o a UI.
+        ui = false;
+        break;
+    }
+    ora(green(`UI: Set up project`)).succeed();
+
+    if (ui && ui !== 'empty') {
+      // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
+      sh.cd('ui');
+      await step(
+        'UI: NPM install',
+        `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+      );
+      sh.cd('..');
+    }
+  }
+
+  // Initialize .git in the root, whether monorepo or not.
   await step('Initialize Git repo', 'git init -q');
 
-  // `/dev/null` on linux or 'NUL' on windows is the only way to silence Husky's install log msg.
+  // Scaffold smart contract project
+  if (ui) {
+    sh.mkdir('contracts');
+    sh.cd('contracts');
+  }
+  if (!(await fetchProjectTemplate())) return;
+
+  // Make Husky work if using a monorepo. It needs some changes to work when
+  // .git lives one dir level above package.json. Note that Husky's pre-commit
+  // checks only apply to the contracts project, not to the UI, unless the dev
+  // set that up themselves. It's more valuable for the smart contract.
+  // Source: https://github.com/typicode/husky/issues/348#issuecomment-899344732
+  if (ui) {
+    // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/package.json#L20
+    let x = fs.readJSONSync(`package.json`);
+    x.scripts.prepare = `cd .. && husky install ${path.join(
+      'contracts',
+      '.husky'
+    )}`;
+    fs.writeJSONSync(`package.json`, x, { spaces: 2 });
+
+    // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/.husky/pre-commit#L3
+    let y = fs.readFileSync(`${path.join('.husky', 'pre-commit')}`, 'utf-8');
+    const targetStr = 'husky.sh"\n';
+    y = y.replace(targetStr, targetStr + '\ncd contracts');
+    fs.writeFileSync(`${path.join('.husky', 'pre-commit')}`, y, 'utf-8');
+  }
+
+  // `/dev/null` on Mac or Linux and 'NUL' on Windows is the only way to silence
+  // Husky's install log msg. (Note: The contract project template commits
+  // package-lock.json so we can use `npm ci` for faster installation.)
   await step(
     'NPM install',
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
 
-  // process.cwd() is full path to user's terminal + path/to/name.
-  await setProjectName(process.cwd());
+  await setProjectName('.', name.split(path.sep).pop());
+
+  if (ui) sh.cd('..'); // back to project root
 
   // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
@@ -66,18 +179,17 @@ async function project(name) {
     `\n  git remote add origin <your-repo-url>` +
     `\n  git push -u origin main`;
 
-  console.log(_green(str));
+  console.log(green(str));
 }
 
 /**
  * Fetch project template.
- * @param {string} example     Name of the destination dir.
- * @param {string} lang        ts or js
- * @returns {Promise<boolean>} True if successful; false if not.
+ * @returns {Promise<boolean>} - True if successful; false if not.
  */
-async function fetchProjectTemplate(name, lang) {
-  const projectName = lang === 'ts' ? 'project-ts' : 'project';
-  const step = 'Fetch project template';
+async function fetchProjectTemplate() {
+  const projectName = 'project-ts';
+
+  const step = 'Set up project';
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
 
   try {
@@ -93,14 +205,19 @@ async function fetchProjectTemplate(name, lang) {
       },
     });
 
-    sh.mkdir('-p', name); // create path/to/dir if needed.
+    // Copy files into current working dir
     sh.cp(
       '-r',
       `${path.join(TEMP, 'templates', projectName)}${path.sep}.`,
-      name
+      '.'
     );
     sh.rm('-r', TEMP);
-    spin.succeed(_green(step));
+
+    // Create a keys dir because it's not part of the project scaffolding given
+    // we have `keys` in our .gitignore.
+    sh.mkdir('keys');
+
+    spin.succeed(green(step));
     return true;
   } catch (err) {
     spin.fail(step);
@@ -111,15 +228,15 @@ async function fetchProjectTemplate(name, lang) {
 
 /**
  * Helper for any steps that need to call a shell command.
- * @param {string} step Name of step to show user
- * @param {string} cmd  Shell command to execute.
+ * @param {string} step - Name of step to show user
+ * @param {string} cmd - Shell command to execute.
  * @returns {Promise<void>}
  */
 async function step(step, cmd) {
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
   try {
     await shExec(cmd);
-    spin.succeed(_green(step));
+    spin.succeed(green(step));
   } catch (err) {
     spin.fail(step);
   }
@@ -128,33 +245,29 @@ async function step(step, cmd) {
 /**
  * Step to replace placeholder names in the project with the properly-formatted
  * version of the user-supplied name as specified via `zk project <name>`
- * @param {string} projDir Full path to terminal dir + path/to/name
+ * @param {string} dir - Path to the dir containing target files to be changed.
+ * @param {string} name - User-provided project name.
  * @returns {Promise<void>}
  */
-async function setProjectName(projDir) {
+async function setProjectName(dir, name) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
-  const name = projDir.split(path.sep).pop();
+  replaceInFile(path.join(dir, 'README.md'), 'PROJECT_NAME', titleCase(name));
   replaceInFile(
-    path.join(projDir, 'README.md'),
-    'PROJECT_NAME',
-    titleCase(name)
-  );
-  replaceInFile(
-    path.join(projDir, 'package.json'),
+    path.join(dir, 'package.json'),
     'package-name',
     kebabCase(name)
   );
 
-  spin.succeed(_green(step));
+  spin.succeed(green(step));
 }
 
 /**
  * Helper to replace text in a file.
- * @param {string} file Path to file
- * @param {string} a    Old text.
- * @param {string} b    New text.
+ * @param {string} file - Path to file
+ * @param {string} a - Old text.
+ * @param {string} b - New text.
  */
 function replaceInFile(file, a, b) {
   let content = fs.readFileSync(file, 'utf8');
