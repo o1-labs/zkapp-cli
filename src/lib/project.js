@@ -108,6 +108,9 @@ async function project({ name, ui }) {
           stdio: 'inherit',
           shell: true,
         });
+        if (fs.existsSync(path.join('ui', '.git'))) {
+          sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
+        }
         break;
       case 'empty':
         sh.mkdir('ui');
