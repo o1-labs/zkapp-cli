@@ -337,8 +337,10 @@ function scaffoldNuxt() {
   // Read in the NuxtJS config file and add the middleware.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
   const newNuxtConfig = nuxtConfig.replace(
-    '{',
-    `{\n  serverMiddleware: ['middleware/headers'],`
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `
+  ,serverMiddleware: ['middleware/headers']
+};`
   );
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
 }
