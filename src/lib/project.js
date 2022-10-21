@@ -292,11 +292,31 @@ function scaffoldNext() {
     shell: true,
   });
   sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
-  sh.mv(
-    path.join('ui', 'next.config.js'),
-    path.join('ui', 'next.config.js-BAK')
+  // Read in the NextJS config file and add the middleware.
+  const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
+  const newNextConfig = nextConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+        ],
+      },
+    ];
+  }
+};`
   );
-  sh.cp(path.join(__dirname, 'ui', 'next', 'next.config.js'), 'ui');
+  fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 }
 
 function scaffoldNuxt() {
