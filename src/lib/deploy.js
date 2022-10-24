@@ -395,7 +395,7 @@ async function deploy({ alias, yes }) {
         val = val.toLowerCase();
         if (!(val === 'yes' || val === 'y')) {
           log('  Aborted. Transaction not sent.');
-          process.exit();
+          process.exit(1);
         }
         return val;
       },
