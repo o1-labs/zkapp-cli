@@ -239,7 +239,7 @@ async function step(step, cmd) {
     spin.succeed(green(step));
   } catch (err) {
     spin.fail(step);
-    process.exit();
+    process.exit(1);
   }
 }
 
