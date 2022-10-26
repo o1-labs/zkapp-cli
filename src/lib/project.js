@@ -4,7 +4,7 @@ const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
-const { prompt } = require('enquirer');
+const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 
@@ -41,21 +41,9 @@ async function project({ name, ui }) {
         type: 'select',
         name: 'ui',
         choices: ['svelte', 'next', 'nuxt', 'empty', 'none'],
-        message: (state) => {
-          // Make the step text green upon success, else use the reset color.
-          const style =
-            state.submitted && !state.cancelled ? state.styles.success : reset;
-          return style('Create an accompanying UI project too?');
-        },
-        prefix: (state) => {
-          // Show a cyan question mark when not submitted.
-          // Show a green check mark if submitted.
-          // Show a red "x" if ctrl+C is pressed (default is a magenta).
-          if (!state.submitted) return state.symbols.question;
-          return !state.cancelled
-            ? state.symbols.check
-            : red(state.symbols.cross);
-        },
+        message: (state) =>
+          message(state, 'Create an accompanying UI project too?'),
+        prefix: (state) => prefix(state),
       });
     } catch (err) {
       // If ctrl+c is pressed it will throw.
@@ -82,7 +70,7 @@ async function project({ name, ui }) {
         scaffoldSvelte();
         break;
       case 'next':
-        scaffoldNext();
+        await scaffoldNext();
         break;
       case 'nuxt':
         scaffoldNuxt();
@@ -286,12 +274,31 @@ function scaffoldSvelte() {
   );
 }
 
-function scaffoldNext() {
+async function scaffoldNext() {
+  const prompt = new Select({
+    message: (state) =>
+      message(state, 'Do you want your NextJS project to use TypeScript?'),
+    choices: ['yes', 'no'],
+    prefix: (state) => prefix(state),
+  });
+
+  let useTypescript;
+  try {
+    useTypescript = await prompt.run();
+  } catch (err) {
+    // If ctrl+c is pressed it will throw.
+    return;
+  }
+
+  let args = ['create-next-app@latest', 'ui', '--use-npm'];
+  if (useTypescript === 'yes') args.push('--ts');
+
   // https://nextjs.org/docs/api-reference/create-next-app#options
-  spawnSync('npx', ['create-next-app@latest', 'ui', '--use-npm'], {
+  spawnSync('npx', args, {
     stdio: 'inherit',
     shell: true,
   });
+
   sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
   // Read in the NextJS config file and add the middleware.
   const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
@@ -346,6 +353,32 @@ function scaffoldNuxt() {
 };`
   );
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
+}
+
+/**
+ * Custom message method for Enquirer, to use our desired colors.
+ * Make the step text green upon success, else use the reset color.
+ * @param {object} state - Enquirer's state object.
+ * @param {string} str - Prompt message to show.
+ * @returns {string}
+ */
+function message(state, str) {
+  const style =
+    state.submitted && !state.cancelled ? state.styles.success : reset;
+  return style(str);
+}
+
+/**
+ * Custom prefix method for Enquirer.
+ *  1. Show a cyan question mark when not submitted.
+ *  2. Show a green check mark if submitted.
+ *  3. Show a red "x" if ctrl+C is pressed (default is a magenta).
+ * @param {object} state - Enquirer's state object.
+ * @returns {string} The prefix symbol to use.
+ */
+function prefix(state) {
+  if (!state.submitted) return state.symbols.question;
+  return !state.cancelled ? state.symbols.check : red(state.symbols.cross);
 }
 
 module.exports = {
