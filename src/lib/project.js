@@ -86,6 +86,12 @@ async function project({ name, ui }) {
         ui = false;
         break;
     }
+
+    // Add SnarkyJS as a dependency in the UI project.
+    let x = fs.readJSONSync(`ui/package.json`);
+    x.dependencies.snarkyjs = '0.*';
+    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
+
     ora(green(`UI: Set up project`)).succeed();
 
     if (ui && ui !== 'empty') {
