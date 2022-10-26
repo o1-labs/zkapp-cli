@@ -4,7 +4,7 @@ const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
-const { prompt } = require('enquirer');
+const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 
@@ -85,14 +85,32 @@ async function project({ name, ui }) {
           shell: true,
         });
         break;
-      case 'next':
+      case 'next': {
         // https://nextjs.org/docs/api-reference/create-next-app#options
-        spawnSync('npx', ['create-next-app@latest', 'ui', '--use-npm'], {
+        const prompt = new Select({
+          message: 'Do you want your NextJS project to use TypeScript?',
+          choices: ['yes', 'no'],
+        });
+        let useTypescript;
+        try {
+          useTypescript = await prompt.run();
+        } catch (err) {
+          // If ctrl+c is pressed it will throw.
+          return;
+        }
+        let args;
+        if (useTypescript == 'yes') {
+          args = ['create-next-app@latest', 'ui', '--use-npm'];
+        } else {
+          args = ['create-next-app@latest', '--ts', 'ui', '--use-npm'];
+        }
+        spawnSync('npx', args, {
           stdio: 'inherit',
           shell: true,
         });
         sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
         break;
+      }
       case 'nuxt':
         console.log("  Choose 'no version control' when prompted.");
         spawnSync('npx', ['create-nuxt-app', 'ui'], {
