@@ -300,9 +300,9 @@ async function scaffoldNext() {
   }
   let args;
   if (useTypescript == 'yes') {
-    args = ['create-next-app@latest', 'ui', '--use-npm'];
-  } else {
     args = ['create-next-app@latest', '--ts', 'ui', '--use-npm'];
+  } else {
+    args = ['create-next-app@latest', 'ui', '--use-npm'];
   }
   // https://nextjs.org/docs/api-reference/create-next-app#options
   spawnSync('npx', args, {
