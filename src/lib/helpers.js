@@ -19,7 +19,7 @@ async function step(str, fn) {
   } catch (err) {
     spin.fail(str);
     console.error('  ' + red(err)); // maintain expected indentation
-    process.exit();
+    process.exit(1);
   }
 }
 

@@ -1,0 +1,43 @@
+name: "\U0001F41E Bug report"
+description: Report an issue with the Mina zkApp CLI
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Before you start, make sure you have the latest version of the [Mina zkApp CLI](https://www.npmjs.com/package/zkapp-cli).
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: Please describe the expected and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide steps for how to reproduce this issue.
+    validations:
+      required: true
+  - type: textarea
+    id: system-info
+    attributes:
+      label: System Info
+      description: Please run `zk system` in your contracts directory and paste the output here.
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - annoyance
+        - serious, but I can work around it
+        - blocking all usage
+    validations:
+      required: true
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Information

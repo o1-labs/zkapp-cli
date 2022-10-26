@@ -79,44 +79,13 @@ async function project({ name, ui }) {
   if (ui) {
     switch (ui) {
       case 'svelte':
-        // `-y` installs the latest version of create-svelte without prompting.
-        spawnSync('npm', ['create', 'svelte@latest', '-y', 'ui'], {
-          stdio: 'inherit',
-          shell: true,
-        });
+        scaffoldSvelte();
         break;
-      case 'next': {
-        // https://nextjs.org/docs/api-reference/create-next-app#options
-        const prompt = new Select({
-          message: 'Do you want your NextJS project to use TypeScript?',
-          choices: ['yes', 'no'],
-        });
-        let useTypescript;
-        try {
-          useTypescript = await prompt.run();
-        } catch (err) {
-          // If ctrl+c is pressed it will throw.
-          return;
-        }
-        let args;
-        if (useTypescript == 'yes') {
-          args = ['create-next-app@latest', 'ui', '--use-npm'];
-        } else {
-          args = ['create-next-app@latest', '--ts', 'ui', '--use-npm'];
-        }
-        spawnSync('npx', args, {
-          stdio: 'inherit',
-          shell: true,
-        });
-        sh.rm('-rf', path.join('ui', 'git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+      case 'next':
+        await scaffoldNext();
         break;
-      }
       case 'nuxt':
-        console.log("  Choose 'no version control' when prompted.");
-        spawnSync('npx', ['create-nuxt-app', 'ui'], {
-          stdio: 'inherit',
-          shell: true,
-        });
+        scaffoldNuxt();
         break;
       case 'empty':
         sh.mkdir('ui');
@@ -257,6 +226,7 @@ async function step(step, cmd) {
     spin.succeed(green(step));
   } catch (err) {
     spin.fail(step);
+    process.exit(1);
   }
 }
 
@@ -302,6 +272,97 @@ function titleCase(str) {
 
 function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
+}
+
+function scaffoldSvelte() {
+  // `-y` installs the latest version of create-svelte without prompting.
+  spawnSync('npm', ['create', 'svelte@latest', '-y', 'ui'], {
+    stdio: 'inherit',
+    shell: true,
+  });
+  sh.cp(
+    path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
+    path.join('ui', 'src')
+  );
+}
+
+async function scaffoldNext() {
+  const prompt = new Select({
+    message: 'Do you want your NextJS project to use TypeScript?',
+    choices: ['yes', 'no'],
+  });
+  let useTypescript;
+  try {
+    useTypescript = await prompt.run();
+  } catch (err) {
+    // If ctrl+c is pressed it will throw.
+    return;
+  }
+  let args;
+  if (useTypescript == 'yes') {
+    args = ['create-next-app@latest', 'ui', '--use-npm'];
+  } else {
+    args = ['create-next-app@latest', '--ts', 'ui', '--use-npm'];
+  }
+  // https://nextjs.org/docs/api-reference/create-next-app#options
+  spawnSync('npx', args, {
+    stdio: 'inherit',
+    shell: true,
+  });
+  sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+  // Read in the NextJS config file and add the middleware.
+  const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
+  const newNextConfig = nextConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `
+  // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
+  // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+        ],
+      },
+    ];
+  }
+};`
+  );
+  fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+}
+
+function scaffoldNuxt() {
+  console.log("  Choose 'no version control' when prompted.");
+  spawnSync('npx', ['create-nuxt-app', 'ui'], {
+    stdio: 'inherit',
+    shell: true,
+  });
+  if (fs.existsSync(path.join('ui', '.git'))) {
+    sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
+  }
+  sh.mkdir(path.join('ui', 'middleware'));
+  sh.cp(
+    path.join(__dirname, 'ui', 'nuxt', 'headers.js'),
+    path.join('ui', 'middleware')
+  );
+
+  // Read in the NuxtJS config file and add the middleware.
+  const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
+  const newNuxtConfig = nuxtConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `
+  ,serverMiddleware: ['middleware/headers']
+};`
+  );
+  fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
 }
 
 module.exports = {
