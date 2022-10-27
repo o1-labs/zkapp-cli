@@ -512,12 +512,6 @@ loadCOIServiceWorker();
 `
     );
   }
-  const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.js';
-
-  const currentIndexFile = fs.readFileSync(
-    path.join('ui', 'pages', indexFileName),
-    'utf8'
-  );
 }
 
 function scaffoldNuxt() {
