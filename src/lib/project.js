@@ -363,7 +363,7 @@ async function scaffoldNext(projectName) {
         ],
       },
     ];
-  },
+  }
 };`
   );
 
@@ -374,12 +374,13 @@ async function scaffoldNext(projectName) {
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
-  const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.jsx';
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
 
   fs.writeFileSync(
     path.join('ui', 'pages', indexFileName),
     customNextIndex,
     'utf8'
+  );
 
   sh.mv(
     path.join('ui', 'pages', '_app.tsx'),
@@ -388,7 +389,6 @@ async function scaffoldNext(projectName) {
   sh.mv(
     path.join('ui', 'pages', 'index.tsx'),
     path.join('ui', 'pages', 'index.page.tsx')
-
   );
 
   const tsconfig = `
@@ -417,7 +417,6 @@ async function scaffoldNext(projectName) {
       "exclude": ["node_modules"]
     }
   `;
-
 
   if (useTypescript) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
