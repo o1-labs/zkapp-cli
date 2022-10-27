@@ -308,9 +308,16 @@ async function scaffoldNext() {
   sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
   // Read in the NextJS config file and add the middleware.
   const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
-  const newNextConfig = nextConfig.replace(
+  let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      snarkyjs: require('path').resolve('./node_modules/snarkyjs'),
+    }
+    return config;
+  },
   // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
   // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
   async headers() {
@@ -332,7 +339,47 @@ async function scaffoldNext() {
   }
 };`
   );
+  newNextConfig = newNextConfig.replace(
+    'reactStrictMode: true',
+    'reactStrictMode: false'
+  );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+  const tsconfig = `
+    {
+      "compilerOptions": {
+        "target": "ES2019",
+        "module": "es2022",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "incremental": true
+      },
+      "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+      "exclude": ["node_modules"]
+    }
+  `;
+
+  if (useTypescript == 'yes') {
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
+
+    // Add a script to the package.json
+    let x = fs.readJSONSync(`ui/package.json`);
+    x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
+    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
+  }
 }
 
 function scaffoldNuxt() {
