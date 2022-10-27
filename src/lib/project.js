@@ -311,6 +311,13 @@ async function scaffoldNext() {
   const newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      snarkyjs: require('path').resolve('./node_modules/snarkyjs'),
+    }
+    return config;
+  },
   // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
   // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
   async headers() {
@@ -333,6 +340,37 @@ async function scaffoldNext() {
 };`
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+  const tsconfig = `
+    {
+      "compilerOptions": {
+        "target": "ES2019",
+        "module": "es2022",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "incremental": true
+      },
+      "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+      "exclude": ["node_modules"]
+    }
+  `;
+
+  if (useTypescript) {
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
+  }
 }
 
 function scaffoldNuxt() {
