@@ -374,6 +374,22 @@ async function scaffoldNext() {
 
   if (useTypescript == 'yes') {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
+
+    spawnSync(
+      'npx',
+      [
+        'npm-add-script',
+        '-k',
+        'ts-watch',
+        '-v',
+        '"tsc --noEmit --incremental --watch"',
+      ],
+      {
+        stdio: 'inherit',
+        shell: true,
+        cwd: 'ui',
+      }
+    );
   }
 }
 
