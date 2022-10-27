@@ -375,21 +375,10 @@ async function scaffoldNext() {
   if (useTypescript == 'yes') {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
 
-    spawnSync(
-      'npx',
-      [
-        'npm-add-script',
-        '-k',
-        'ts-watch',
-        '-v',
-        '"tsc --noEmit --incremental --watch"',
-      ],
-      {
-        stdio: 'inherit',
-        shell: true,
-        cwd: 'ui',
-      }
-    );
+    // Add a script to the package.json
+    let x = fs.readJSONSync(`ui/package.json`);
+    x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
+    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
   }
 }
 
