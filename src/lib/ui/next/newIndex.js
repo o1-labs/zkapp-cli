@@ -2,6 +2,7 @@ module.exports = `
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import { useEffect, useState } from 'react';
+import type { Add } from '../../contracts/src/Add';
 import {
   Mina,
   isReady,
@@ -10,9 +11,13 @@ import {
 } from 'snarkyjs';
 
 export default function Home() {
+  const [contract, setContract] = useState<Add | null>();
   useEffect(() => {
     async () => {
-      const { Add } = await import('../../contracts/build/src');
+      await isReady;
+      const { Add } = await import('../../contracts/build/src/Add.js');
+
+      setContract(Add);
     };
   }, []);
 
