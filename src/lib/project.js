@@ -308,7 +308,7 @@ async function scaffoldNext() {
   sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
   // Read in the NextJS config file and add the middleware.
   const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
-  const newNextConfig = nextConfig.replace(
+  let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
   webpack(config) {
@@ -338,6 +338,10 @@ async function scaffoldNext() {
     ];
   }
 };`
+  );
+  newNextConfig = newNextConfig.replace(
+    'reactStrictMode: true',
+    'reactStrictMode: false'
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
