@@ -325,19 +325,9 @@ async function scaffoldNext() {
       },
     ];
   },
-  webpack(config) {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      snarkyjs: path.resolve('./node_modules/snarkyjs')
-    };
-    config.experiments.topLevelAwait = true;
-    return config;
-  },
-  experimental: {
-    externalDir: true
-  }  
 };`
   );
+
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
   const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.js';
