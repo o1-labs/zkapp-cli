@@ -372,6 +372,7 @@ async function scaffoldNext(projectName) {
     'reactStrictMode: true',
     'reactStrictMode: false'
   );
+
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
   const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
