@@ -339,8 +339,10 @@ async function scaffoldNext() {
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
+  const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.js';
+
   const currentIndexFile = fs.readFileSync(
-    path.join('ui', 'pages', 'index.tsx'),
+    path.join('ui', 'pages', indexFileName),
     'utf8'
   );
 }
