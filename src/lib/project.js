@@ -7,6 +7,7 @@ const gittar = require('gittar');
 const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
+const newNextIndex = require('../lib/ui/next/newIndex');
 
 const shExec = util.promisify(sh.exec);
 
@@ -341,10 +342,14 @@ async function scaffoldNext() {
 
   const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.js';
 
-  const currentIndexFile = fs.readFileSync(
+  fs.writeFileSync(
     path.join('ui', 'pages', indexFileName),
+    newNextIndex,
     'utf8'
   );
+
+  // TODO: The command npm run build needs to be invoked in the smart contract directory root to generate
+  // the build that is imported into the UI
 }
 
 function scaffoldNuxt() {

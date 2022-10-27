@@ -1,8 +1,15 @@
-export const newIndex = `import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+module.exports = `
+import Image from 'next/image';
+import styles from '../styles/Home.module.css';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
+  useEffect(() => {
+    async () => {
+      const { Add } = await import('../../contracts/build/src');
+    };
+  }, []);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -67,6 +74,7 @@ export default function Home() {
         </a>
       </footer>
     </div>
-  )
+  );
 }
+
 `;
