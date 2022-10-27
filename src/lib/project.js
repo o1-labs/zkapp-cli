@@ -512,6 +512,10 @@ loadCOIServiceWorker();
 `
     );
   }
+  const currentIndexFile = fs.readFileSync(
+    path.join('ui', 'pages', 'index.tsx'),
+    'utf8'
+  );
 }
 
 function scaffoldNuxt() {
