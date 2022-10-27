@@ -354,7 +354,7 @@ async function scaffoldNext() {
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
-        "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+        "strictPropertyInitialization": false,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "esModuleInterop": true,
@@ -372,7 +372,7 @@ async function scaffoldNext() {
     }
   `;
 
-  if (useTypescript) {
+  if (useTypescript == 'yes') {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
   }
 }
