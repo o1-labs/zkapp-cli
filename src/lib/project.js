@@ -144,7 +144,7 @@ async function project({ name, ui }) {
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
 
-  // Build the template contract so it can be imported into the ui scaffold.
+  // Build the template contract so it can be imported into the ui scaffold
   await step('NPM build contract', 'npm run build --silent');
 
   await setProjectName('.', name.split(path.sep).pop());
