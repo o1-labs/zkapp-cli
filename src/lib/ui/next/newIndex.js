@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import { useEffect, useState } from 'react';
-import type { Add } from '../../contracts/src/Add';
+import type { Add } from '../../contracts/src/';
 import {
   Mina,
   isReady,
@@ -16,9 +16,15 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       await isReady;
-      const { Add } = await import('../../contracts/build/src/Add.js');
+      const { Add } = await import('../../contracts/build/src/');
 
-      setContract(Add);
+      // This is the public key of the smart contract. Replace with the key of your deployed smart contract.
+      const zkAppAdress = PublicKey.fromBase58(
+        'B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4'
+      );
+
+      const zkAppInstance = new Add(zkAppAdress);
+      setContract(zkAppInstance);
     })();
   }, []);
 
