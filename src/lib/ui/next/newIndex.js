@@ -14,12 +14,12 @@ import {
 export default function Home() {
   const [contract, setContract] = useState<Add | null>();
   useEffect(() => {
-    async () => {
+    (async () => {
       await isReady;
       const { Add } = await import('../../contracts/build/src/Add.js');
 
       setContract(Add);
-    };
+    })();
   }, []);
 
   return (
