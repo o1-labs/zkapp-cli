@@ -34,8 +34,14 @@ async function project({ name, ui }) {
     return;
   }
 
+  // default to no ui
+  if (ui == null) {
+    ui = 'none';
+  }
+
   let res;
-  if (!ui) {
+  // show prompt if ui flag is provided without an option
+  if (ui == '') {
     try {
       res = await prompt({
         type: 'select',
@@ -87,13 +93,14 @@ async function project({ name, ui }) {
     }
 
     // Add SnarkyJS as a dependency in the UI project.
-    let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
-    pkgJson.dependencies.snarkyjs = '0.*';
-    fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
-
-    ora(green(`UI: Set up project`)).succeed();
 
     if (ui && ui !== 'empty') {
+      let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+      pkgJson.dependencies.snarkyjs = '0.*';
+      fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+
+      ora(green(`UI: Set up project`)).succeed();
+
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
       sh.cd('ui');
       await step(
