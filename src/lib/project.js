@@ -460,7 +460,7 @@ async function scaffoldNext(projectName) {
     );
     apptsx = apptsx.replace(
       'export default function',
-      `import { loadCOISerivceWorker } from './reactCOIServiceWorker';
+      `import './reactCOIServiceWorker';
 
 export default function`
     );
