@@ -407,7 +407,7 @@ async function scaffoldNext(projectName) {
     console.log(
       'Using project name ' +
         projectName +
-        ' for github repo name. Please change in next.js if this is not correct or changes'
+        ' for github repo name. Please change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
     );
 
     let newNextConfig = nextConfig.replace(
@@ -464,7 +464,7 @@ export default function`
 export function loadCOISerivceWorker() {
   if (typeof window !== 'undefined') {
     const coi = window.document.createElement('script');
-    coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js');
+    coi.setAttribute('src','/${projectName}/coi-serviceworker.min.js');
     window.document.head.appendChild(coi);
   }
 }
