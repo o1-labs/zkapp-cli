@@ -447,7 +447,7 @@ async function scaffoldNext(projectName) {
     let apptsx = fs.readFileSync(path.join('ui', 'pages', '_app.tsx'), 'utf8');
     apptsx = apptsx.replace(
       'export default function',
-      `import { loadCOISerivceWorker } from './reactCOIServiceWorker.tsx';
+      `import { loadCOISerivceWorker } from './reactCOIServiceWorker';
 
 loadCOISerivceWorker();
 
