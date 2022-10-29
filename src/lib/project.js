@@ -329,6 +329,7 @@ async function scaffoldNext(projectName) {
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
+  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -362,6 +363,15 @@ async function scaffoldNext(projectName) {
     'reactStrictMode: false'
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+  sh.mv(
+    path.join('ui', 'pages', '_app.tsx'),
+    path.join('ui', 'pages', '_app.page.tsx')
+  );
+  sh.mv(
+    path.join('ui', 'index', '_app.tsx'),
+    path.join('ui', 'pages', 'index.page.tsx')
+  );
 
   const tsconfig = `
     {
