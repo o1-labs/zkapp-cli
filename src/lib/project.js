@@ -447,16 +447,26 @@ async function scaffoldNext(projectName) {
     let apptsx = fs.readFileSync(path.join('ui', 'pages', '_app.tsx'), 'utf8');
     apptsx = apptsx.replace(
       'export default function',
-      `
-if (typeof window !== 'undefined') {
-  const coi = window.document.createElement('script');
-  coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js');
-  window.document.head.appendChild(coi);
-}
+      `import { loadCOISerivceWorker } from './reactCOIServiceWorker.tsx';
+
+loadCOISerivceWorker();
 
 export default function`
     );
     fs.writeFileSync(path.join('ui', 'pages', '_app.tsx'), apptsx);
+
+    fs.writeFileSync(
+      path.join('ui', 'pages', 'reactCOIServiceWorker.tsx'),
+      `
+export function loadCOISerivceWorker() {
+  if (typeof window !== 'undefined') {
+    const coi = window.document.createElement('script');
+    coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js');
+    window.document.head.appendChild(coi);
+  }
+}
+`
+    );
   }
 }
 
