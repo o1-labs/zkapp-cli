@@ -449,8 +449,6 @@ async function scaffoldNext(projectName) {
       'export default function',
       `import { loadCOISerivceWorker } from './reactCOIServiceWorker';
 
-loadCOISerivceWorker();
-
 export default function`
     );
     fs.writeFileSync(path.join('ui', 'pages', '_app.tsx'), apptsx);
@@ -458,13 +456,17 @@ export default function`
     fs.writeFileSync(
       path.join('ui', 'pages', 'reactCOIServiceWorker.tsx'),
       `
-export function loadCOISerivceWorker() {
+export {}
+
+function loadCOIServiceWorker() {
   if (typeof window !== 'undefined' && window.location.hostname != 'localhost') {
     const coi = window.document.createElement('script');
-    coi.setAttribute('src','/${projectName}/coi-serviceworker.min.js');
+    coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js');
     window.document.head.appendChild(coi);
   }
 }
+
+loadCOIServiceWorker();
 `
     );
   }
