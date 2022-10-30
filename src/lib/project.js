@@ -366,7 +366,7 @@ async function scaffoldNext(projectName) {
     path.join('ui', 'pages', '_app.page.tsx')
   );
   sh.mv(
-    path.join('ui', 'index', '_app.tsx'),
+    path.join('ui', 'pages', 'index.tsx'),
     path.join('ui', 'pages', 'index.page.tsx')
   );
 
