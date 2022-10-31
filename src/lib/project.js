@@ -278,6 +278,17 @@ function scaffoldSvelte() {
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
   );
+
+  const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
+  const newViteConfig = vitConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `build: {
+		target: ['esnext']
+	  }
+  };`
+  );
+
+  fs.writeFileSync(path.join('ui', 'vite.config.js'), newViteConfig);
 }
 
 async function scaffoldNext() {
