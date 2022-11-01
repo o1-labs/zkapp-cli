@@ -343,6 +343,8 @@ async function scaffoldNext() {
   },
 };`
   );
+
+  // This prevents usEffect from running twice on initial mount.
   newNextConfig = newNextConfig.replace(
     'reactStrictMode: true',
     'reactStrictMode: false'
