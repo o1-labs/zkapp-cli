@@ -283,12 +283,22 @@ function scaffoldSvelte() {
   const newViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `build: {
-		target: ['esnext']
-	  }
+  	target: ['esnext']
+    }
   };`
   );
 
   fs.writeFileSync(path.join('ui', 'vite.config.js'), newViteConfig);
+
+  const sveltePage = fs.readFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    'utf8'
+  );
+
+  // A script tag will be added if a user generates a skelton project from the svelte prompt
+  if (sveltePage.includes('<script>')) {
+    // Add import to existing script
+  }
 }
 
 async function scaffoldNext() {
