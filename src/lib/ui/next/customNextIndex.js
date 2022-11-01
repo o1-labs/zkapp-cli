@@ -12,19 +12,20 @@ import {
 } from 'snarkyjs';
 
 export default function Home() {
-  const [contract, setContract] = useState<Add | null>();
   useEffect(() => {
     (async () => {
       await isReady;
       const { Add } = await import('../../contracts/build/src/');
 
-      // This is the public key of the smart contract. Replace with the key of your deployed smart contract.
-      const zkAppAdress = PublicKey.fromBase58(
-        'B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4'
-      );
+      // Update this to use the address (public key) for your zkApp account
+      // To try it out, you can try this address for an example "Add" smart contract that we've deployed to 
+      // Berkeley Testnet B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg
+      const zkAppAddress = '';
 
-      const zkAppInstance = new Add(zkAppAdress);
-      setContract(zkAppInstance);
+      const zkAppInstance = new Add(PublicKey.fromBase58(
+        Address
+      ));
+      
     })();
   }, []);
 
