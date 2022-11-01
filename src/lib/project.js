@@ -295,10 +295,26 @@ function scaffoldSvelte() {
     'utf8'
   );
 
+  let newSveltePage;
   // A script tag will be added if a user generates a skelton project from the svelte prompt
-  if (sveltePage.includes('<script>')) {
-    // Add import to existing script
+  if (!sveltePage.includes('<script>')) {
+    // Add import to existing
+    newSveltePage = `
+    <script>
+	    import { onMount } from "svelte";
+	    import { isReady, Mina, PublicKey } from 'snarkyjs';
+
+ 	    onMount(async () => {
+		    const { Add } = await import('../../contracts/build/src/Add.js')
+      });	
+    </script>
+    `;
   }
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    newSveltePage
+  );
 }
 
 async function scaffoldNext() {
