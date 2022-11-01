@@ -351,7 +351,7 @@ async function scaffoldNext() {
   );
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
-  const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.js';
+  const indexFileName = useTypescript === 'yes' ? 'index.tsx' : 'index.jsx';
 
   fs.writeFileSync(
     path.join('ui', 'pages', indexFileName),
