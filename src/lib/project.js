@@ -441,7 +441,7 @@ async function scaffoldNext(projectName) {
     let x = fs.readJSONSync(`ui/package.json`);
     x.scripts['export'] = 'next export';
     x.scripts['deploy'] =
-      'next build && next export && touch out/.nojekyll && git add -f out/ && git commit -m "Deploy gh-pages" && cd ../../ && git subtree push --prefix ui/out origin gh-pages';
+      'next build && next export && touch out/.nojekyll && git add -f out/ && git commit -m "Deploy gh-pages" && cd ../ && git subtree push --prefix ui/out origin gh-pages';
     fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
 
     sh.cd('ui');
