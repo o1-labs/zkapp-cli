@@ -426,8 +426,8 @@ async function scaffoldNext(projectName) {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : undefined,
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : undefined,
+  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
 };`
     );
     newNextConfig = newNextConfig.replace(
@@ -477,7 +477,7 @@ export {}
 function loadCOIServiceWorker() {
   if (typeof window !== 'undefined' && window.location.hostname != 'localhost') {
     const coi = window.document.createElement('script');
-    coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js');
+    coi.setAttribute('src','/zkApp-examples/coi-serviceworker.min.js'); // update if your repo name changes for npm run deploy to work successfully
     window.document.head.appendChild(coi);
   }
 }
