@@ -88,7 +88,10 @@ async function project({ name, ui }) {
 
     // Add SnarkyJS as a dependency in the UI project.
     let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
-    pkgJson.dependencies.snarkyjs = '0.*';
+    // Add dependencies object if none is found in the package.json because generated
+    // SvelteKit projects do not have dependencies included.
+    if (!pkgJson.dependencies) pkgJson['dependencies'] = {}
+    pkgJson.dependencies.snarkyjs = '0.*'; 
     fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
     ora(green(`UI: Set up project`)).succeed();
