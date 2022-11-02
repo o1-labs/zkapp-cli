@@ -333,7 +333,10 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('./node_modules/snarkyjs'),
+      snarkyjs: require('path').resolve('${path.join(
+        'node_modules',
+        'snarkyjs'
+      )}'),
     }
     return config;
   },
@@ -404,9 +407,9 @@ async function scaffoldNext(projectName) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
 
     // Add a script to the package.json
-    let x = fs.readJSONSync(`ui/package.json`);
+    let x = fs.readJSONSync(path.join('ui', 'package.json'));
     x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
-    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
+    fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
   }
 
   if (useGHPages) {
@@ -440,8 +443,15 @@ async function scaffoldNext(projectName) {
     // Add some scripts to the package.json
     let x = fs.readJSONSync(`ui/package.json`);
     x.scripts['export'] = 'next export';
-    x.scripts['deploy'] =
-      'next build && next export && touch out/.nojekyll && git add -f out/ && git commit -m "Deploy gh-pages" && cd ../ && git subtree push --prefix ui/out origin gh-pages';
+    const deployScript = `next build && next export && ${
+      isWindows
+        ? `type nul > ${path.join('out', '.nojekyll')}`
+        : `touch ${path.join('out', '.nojekyll')}`
+    }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ${path.join(
+      'ui',
+      'out'
+    )} origin gh-pages`;
+    x.scripts['deploy'] = deployScript;
     fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
 
     sh.cd('ui');
@@ -452,7 +462,11 @@ async function scaffoldNext(projectName) {
       }`
     );
     sh.cp(
-      './node_modules/coi-serviceworker/coi-serviceworker.min.js',
+      path.join(
+        'node_modules',
+        'coi-serviceworker',
+        'coi-serviceworker.min.js'
+      ),
       './public/'
     );
     sh.cd('..');
