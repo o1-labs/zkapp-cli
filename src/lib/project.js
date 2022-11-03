@@ -449,7 +449,7 @@ async function scaffoldNext(projectName) {
         : `touch ${path.join('out', '.nojekyll')}`
     }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
     x.scripts['deploy'] = deployScript;
-    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
+    fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
     sh.cd('ui');
     await step(
