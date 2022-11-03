@@ -333,7 +333,6 @@ async function scaffoldNext(projectName) {
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
   webpack(config) {
     config.resolve.alias = {
@@ -377,15 +376,6 @@ async function scaffoldNext(projectName) {
 
   const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
 
-  fs.writeFileSync(
-    path.join('ui', 'pages', indexFileName),
-    customNextIndex,
-    'utf8'
-  );
-
-  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
-
-  // Adds index file with a smart contract imported
   fs.writeFileSync(
     path.join('ui', 'pages', indexFileName),
     customNextIndex,
