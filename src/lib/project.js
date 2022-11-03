@@ -383,6 +383,15 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
+
+  // Adds index file with a smart contract imported
+  fs.writeFileSync(
+    path.join('ui', 'pages', indexFileName),
+    customNextIndex,
+    'utf8'
+  );
+
   sh.mv(
     path.join('ui', 'pages', '_app.tsx'),
     path.join('ui', 'pages', '_app.page.tsx')
