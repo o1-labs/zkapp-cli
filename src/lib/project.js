@@ -7,6 +7,7 @@ const gittar = require('gittar');
 const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
+const customNextIndex = require('../lib/ui/next/customNextIndex');
 
 const shExec = util.promisify(sh.exec);
 
@@ -145,6 +146,9 @@ async function project({ name, ui }) {
     'NPM install',
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
+
+  // Build the template contract so it can be imported into the ui scaffold
+  await step('NPM build contract', 'npm run build --silent');
 
   await setProjectName('.', name.split(path.sep).pop());
 
@@ -333,10 +337,7 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('${path.join(
-        'node_modules',
-        'snarkyjs'
-      )}'),
+      snarkyjs: require('path').resolve('node_modules/snarkyjs'),
     }
     return config;
   },
@@ -361,11 +362,22 @@ async function scaffoldNext(projectName) {
   }
 };`
   );
+
+  // This prevents usEffect from running twice on initial mount.
   newNextConfig = newNextConfig.replace(
     'reactStrictMode: true',
     'reactStrictMode: false'
   );
+
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
+
+  fs.writeFileSync(
+    path.join('ui', 'pages', indexFileName),
+    customNextIndex,
+    'utf8'
+  );
 
   sh.mv(
     path.join('ui', 'pages', '_app.tsx'),
