@@ -337,10 +337,7 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('${path.join(
-        'node_modules',
-        'snarkyjs'
-      )}'),
+      snarkyjs: require('path').resolve('node_modules/snarkyjs'),
     }
     return config;
   },
