@@ -23,8 +23,8 @@ export default function Home() {
       const zkAppAddress = '';
       // This should be removed once the zkAppAddress is updated.
       if (!zkAppAddress) {
-        console.log(
-          'Update the zkAppAddress empty string with the public key for your zkApp account or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4'
+        console.error(
+          'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4'
         );
       }
 
