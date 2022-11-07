@@ -7,7 +7,6 @@ const gittar = require('gittar');
 const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
-let customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 
 const shExec = util.promisify(sh.exec);
 
@@ -304,7 +303,7 @@ function scaffoldSvelte() {
     path.join('ui', 'src', 'routes', '+page.svelte'),
     'utf8'
   );
-
+  let customPageSvelte;
   // A script tag will be added if a user generates a skelton project from the svelte prompt
   if (!pageSvelte.includes('<script>')) {
     // Add import to existing
