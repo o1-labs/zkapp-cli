@@ -7,6 +7,7 @@ const gittar = require('gittar');
 const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
+let customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 
 const shExec = util.promisify(sh.exec);
 
@@ -86,8 +87,16 @@ async function project({ name, ui }) {
         break;
     }
 
+    // // Add SnarkyJS as a dependency in the UI project.
+    // let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+    // pkgJson.dependencies.snarkyjs = '0.*';
+    // fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+
     // Add SnarkyJS as a dependency in the UI project.
     let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+    // Add dependencies object if none is found in the package.json because generated
+    // SvelteKit projects do not have dependencies included.
+    if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
     pkgJson.dependencies.snarkyjs = '0.*';
     fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
@@ -280,7 +289,8 @@ function scaffoldSvelte() {
   );
 
   const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
-  const newViteConfig = vitConfig.replace(
+
+  const customViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `build: {
   	target: ['esnext']
@@ -288,32 +298,48 @@ function scaffoldSvelte() {
   };`
   );
 
-  fs.writeFileSync(path.join('ui', 'vite.config.js'), newViteConfig);
+  fs.writeFileSync(path.join('ui', 'vite.config.ts'), customViteConfig);
 
-  const sveltePage = fs.readFileSync(
+  const pageSvelte = fs.readFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     'utf8'
   );
 
-  let newSveltePage;
   // A script tag will be added if a user generates a skelton project from the svelte prompt
-  if (!sveltePage.includes('<script>')) {
+  if (!pageSvelte.includes('<script>')) {
     // Add import to existing
-    newSveltePage = `
+    customPageSvelte = pageSvelte.replace(
+      '<h1>',
+      `
     <script>
-	    import { onMount } from "svelte";
-	    import { isReady, Mina, PublicKey } from 'snarkyjs';
+    import { onMount } from "svelte";
+    import { isReady, Mina, PublicKey } from 'snarkyjs';
 
- 	    onMount(async () => {
-		    const { Add } = await import('../../contracts/build/src/Add.js')
-      });	
+    onMount(async () => {
+      const { Add } = await import('../../contracts/build/src/Add.js')
+    });
     </script>
-    `;
+
+    <h1>
+    `
+    );
+  } else {
+    customPageSvelte = pageSvelte.replace(
+      '</script>',
+      `
+    import { onMount } from "svelte";
+    import { isReady, Mina, PublicKey } from 'snarkyjs';
+
+    onMount(async () => {
+      const { Add } = await import('../../contracts/build/src/Add.js')
+    });
+    </script>`
+    );
   }
 
   fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
-    newSveltePage
+    customPageSvelte
   );
 }
 
