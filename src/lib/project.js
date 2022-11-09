@@ -535,6 +535,11 @@ function scaffoldNuxt() {
 };`
   );
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
+
+  const nuxtIndexPage = fs.readFileSync(
+    path.join('ui', 'pages', 'index.vue'),
+    'utf8'
+  );
 }
 
 /**
