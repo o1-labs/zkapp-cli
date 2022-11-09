@@ -540,6 +540,15 @@ function scaffoldNuxt() {
     path.join('ui', 'pages', 'index.vue'),
     'utf8'
   );
+  const customNuxtIndex = nuxtIndexPage.replace(
+    '<script>',
+    `
+   <script>
+   import { Mina, isReady, PublicKey, fetchAccount } from 'snarkyjs'
+   import { Add } from '../../contracts/build/Add.js'
+ 
+ `
+  );
 }
 
 /**
