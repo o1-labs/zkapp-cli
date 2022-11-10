@@ -419,7 +419,7 @@ async function deploy({ alias, yes }) {
 
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
-    log(red(getErrorMessage(txn.message ?? [])));
+    log(red(getErrorMessage(txn?.message ?? [])));
     await shutdown();
     return;
   }
@@ -564,6 +564,9 @@ function getAccountQuery(publicKey) {
 }
 
 function getErrorMessage(errors) {
+  if (errors.length === 0) {
+    return 'Failed to send transaction. Unknown error.';
+  }
   let errorMessage =
     '  Failed to send transaction to relayer. Errors: ' +
     errors.map((e) => e.message);
