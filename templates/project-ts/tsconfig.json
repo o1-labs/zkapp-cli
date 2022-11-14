@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
+    "target": "es2020",
     "module": "es2022",
     "lib": ["dom", "esnext"],
     "outDir": "./build",
@@ -15,7 +15,7 @@
     "emitDecoratorMetadata": true,
     "allowJs": true,
     "declaration": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true

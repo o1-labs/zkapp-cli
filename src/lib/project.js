@@ -7,8 +7,11 @@ const gittar = require('gittar');
 const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
+const customNextIndex = require('../lib/ui/next/customNextIndex');
 
 const shExec = util.promisify(sh.exec);
+
+const isWindows = process.platform === 'win32';
 
 /**
  * Create a new zkApp project with recommended dir structure, Prettier config,
@@ -19,8 +22,6 @@ const shExec = util.promisify(sh.exec);
  * @return {Promise<void>}
  */
 async function project({ name, ui }) {
-  const isWindows = process.platform === 'win32';
-
   if (fs.existsSync(name)) {
     console.error(red(`Directory already exists. Not proceeding`));
     return;
@@ -70,7 +71,7 @@ async function project({ name, ui }) {
         scaffoldSvelte();
         break;
       case 'next':
-        await scaffoldNext();
+        await scaffoldNext(name);
         break;
       case 'nuxt':
         scaffoldNuxt();
@@ -86,22 +87,17 @@ async function project({ name, ui }) {
         break;
     }
 
-    // // Add SnarkyJS as a dependency in the UI project.
-    // let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
-    // pkgJson.dependencies.snarkyjs = '0.*';
-    // fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
-
-    // Add SnarkyJS as a dependency in the UI project.
-    let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
-    // Add dependencies object if none is found in the package.json because generated
-    // SvelteKit projects do not have dependencies included.
-    if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
-    pkgJson.dependencies.snarkyjs = '0.*';
-    fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
-
     ora(green(`UI: Set up project`)).succeed();
 
     if (ui && ui !== 'empty') {
+      // Add SnarkyJS as a dependency in the UI project.
+      let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+      // Add dependencies object if none is found in the package.json because generated
+      // SvelteKit projects do not have dependencies included.
+      if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
+      pkgJson.dependencies.snarkyjs = '0.*';
+      fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
       sh.cd('ui');
       await step(
@@ -150,6 +146,9 @@ async function project({ name, ui }) {
     'NPM install',
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
+
+  // Build the template contract so it can be imported into the ui scaffold
+  await step('NPM build contract', 'npm run build --silent');
 
   await setProjectName('.', name.split(path.sep).pop());
 
@@ -400,8 +399,8 @@ ${contractImport}
   );
 }
 
-async function scaffoldNext() {
-  const prompt = new Select({
+async function scaffoldNext(projectName) {
+  const tsPrompt = new Select({
     message: (state) =>
       message(state, 'Do you want your NextJS project to use TypeScript?'),
     choices: ['yes', 'no'],
@@ -410,14 +409,29 @@ async function scaffoldNext() {
 
   let useTypescript;
   try {
-    useTypescript = await prompt.run();
+    useTypescript = (await tsPrompt.run()) == 'yes';
+  } catch (err) {
+    // If ctrl+c is pressed it will throw.
+    return;
+  }
+
+  const ghPagesPrompt = new Select({
+    message: (state) =>
+      message(state, 'Do you want to setup your project for github pages?'),
+    choices: ['no', 'yes'],
+    prefix: (state) => prefix(state),
+  });
+
+  let useGHPages;
+  try {
+    useGHPages = (await ghPagesPrompt.run()) == 'yes';
   } catch (err) {
     // If ctrl+c is pressed it will throw.
     return;
   }
 
   let args = ['create-next-app@latest', 'ui', '--use-npm'];
-  if (useTypescript === 'yes') args.push('--ts');
+  if (useTypescript) args.push('--ts');
 
   // https://nextjs.org/docs/api-reference/create-next-app#options
   spawnSync('npx', args, {
@@ -431,10 +445,11 @@ async function scaffoldNext() {
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
+  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('./node_modules/snarkyjs'),
+      snarkyjs: require('path').resolve('node_modules/snarkyjs'),
     }
     return config;
   },
@@ -459,11 +474,31 @@ async function scaffoldNext() {
   }
 };`
   );
+
+  // This prevents usEffect from running twice on initial mount.
   newNextConfig = newNextConfig.replace(
     'reactStrictMode: true',
     'reactStrictMode: false'
   );
+
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
+
+  fs.writeFileSync(
+    path.join('ui', 'pages', indexFileName),
+    customNextIndex,
+    'utf8'
+  );
+
+  sh.mv(
+    path.join('ui', 'pages', '_app.tsx'),
+    path.join('ui', 'pages', '_app.page.tsx')
+  );
+  sh.mv(
+    path.join('ui', 'pages', 'index.tsx'),
+    path.join('ui', 'pages', 'index.page.tsx')
+  );
 
   const tsconfig = `
     {
@@ -490,13 +525,99 @@ async function scaffoldNext() {
     }
   `;
 
-  if (useTypescript == 'yes') {
+  if (useTypescript) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
 
     // Add a script to the package.json
-    let x = fs.readJSONSync(`ui/package.json`);
+    let x = fs.readJSONSync(path.join('ui', 'package.json'));
     x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
-    fs.writeJSONSync(`ui/package.json`, x, { spaces: 2 });
+    fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
+  }
+
+  if (useGHPages) {
+    const nextConfig = fs.readFileSync(
+      path.join('ui', 'next.config.js'),
+      'utf8'
+    );
+    console.log(
+      'Using project name ' +
+        projectName +
+        ' for github repo name. Please change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
+    );
+
+    let newNextConfig = nextConfig.replace(
+      '  }\n};',
+      `  },
+  images: {
+    unoptimized: true,
+  },
+  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+};`
+    );
+    newNextConfig = newNextConfig.replace(
+      'return config;',
+      `config.optimization.minimizer = [];
+    return config;`
+    );
+    fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+
+    // Add some scripts to the package.json
+    let x = fs.readJSONSync(`ui/package.json`);
+    x.scripts['export'] = 'next export';
+    const deployScript = `next build && next export && ${
+      isWindows
+        ? `type nul > ${path.join('out', '.nojekyll')}`
+        : `touch ${path.join('out', '.nojekyll')}`
+    }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
+    x.scripts['deploy'] = deployScript;
+    fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
+
+    sh.cd('ui');
+    await step(
+      'COI-ServiceWorker: NPM install',
+      `npm install coi-serviceworker --save > ${
+        isWindows ? 'NUL' : '"/dev/null" 2>&1'
+      }`
+    );
+    sh.cp(
+      path.join(
+        'node_modules',
+        'coi-serviceworker',
+        'coi-serviceworker.min.js'
+      ),
+      './public/'
+    );
+    sh.cd('..');
+
+    let apptsx = fs.readFileSync(
+      path.join('ui', 'pages', '_app.page.tsx'),
+      'utf8'
+    );
+    apptsx = apptsx.replace(
+      'export default function',
+      `import './reactCOIServiceWorker';
+
+export default function`
+    );
+    fs.writeFileSync(path.join('ui', 'pages', '_app.page.tsx'), apptsx);
+
+    fs.writeFileSync(
+      path.join('ui', 'pages', 'reactCOIServiceWorker.tsx'),
+      `
+export {}
+
+function loadCOIServiceWorker() {
+  if (typeof window !== 'undefined' && window.location.hostname != 'localhost') {
+    const coi = window.document.createElement('script');
+    coi.setAttribute('src','/${projectName}/coi-serviceworker.min.js'); // update if your repo name changes for npm run deploy to work successfully
+    window.document.head.appendChild(coi);
+  }
+}
+
+loadCOIServiceWorker();
+`
+    );
   }
 }
 
