@@ -7,6 +7,7 @@ const { table, getBorderCharacters } = require('table');
 const glob = require('fast-glob');
 const { step } = require('./helpers');
 const fetch = require('node-fetch');
+const util = require('util');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
@@ -419,7 +420,7 @@ async function deploy({ alias, yes }) {
 
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
-    log(red(getErrorMessage(txn?.message ?? [])));
+    log(red(getErrorMessage(txn)));
     await shutdown();
     return;
   }
@@ -563,9 +564,10 @@ function getAccountQuery(publicKey) {
   }`;
 }
 
-function getErrorMessage(errors) {
+function getErrorMessage(error) {
+  let errors = error?.message ?? [];
   if (errors.length === 0) {
-    return 'Failed to send transaction. Unknown error.';
+    return `Failed to send transaction. Unknown error: ${util.format(error)}`;
   }
   let errorMessage =
     '  Failed to send transaction to relayer. Errors: ' +
