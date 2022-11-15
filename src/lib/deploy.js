@@ -566,7 +566,7 @@ function getAccountQuery(publicKey) {
 
 function getErrorMessage(error) {
   let errors = error?.message;
-  if (!Array.isArray(errors.length)) {
+  if (!Array.isArray(errors)) {
     return `Failed to send transaction. Unknown error: ${util.format(error)}`;
   }
   let errorMessage =
