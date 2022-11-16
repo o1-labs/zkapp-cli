@@ -513,7 +513,7 @@ loadCOIServiceWorker();
 
 function scaffoldNuxt() {
   console.log("  Choose 'no version control' when prompted.");
-  spawnSync('npx', ['create-nuxt-app', 'ui'], {
+  spawnSync('npx', ['create-nuxt-app@latest', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
