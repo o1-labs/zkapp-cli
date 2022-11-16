@@ -546,14 +546,13 @@ function scaffoldNuxt() {
     buildModules: ["nuxt-vite",
     `
   );
-  //  }
 
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
 
-  const nuxtIndexPage = fs.readFileSync(
-    path.join('ui', 'pages', 'index.vue'),
-    'utf8'
-  );
+  // Add vite as a devDependency in the nuxt UI project.
+  let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+  pkgJson.devDependencies['nuxt-vite'] = '0.*';
+  fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
   const customNuxtIndex = `
 <template>
