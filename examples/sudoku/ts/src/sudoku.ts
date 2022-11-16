@@ -128,7 +128,7 @@ async function deploy(
     zkAppInstance.init(sudokuInstance);
     zkAppInstance.sign(zkAppPrivateKey);
   });
-  await tx.send().wait();
+  await tx.send();
 }
 
 async function submitSolution(
@@ -144,7 +144,7 @@ async function submitSolution(
     zkApp.sign(zkAppPrivateKey);
   });
   try {
-    await tx.send().wait();
+    await tx.send();
     return true;
   } catch (err) {
     return false;
