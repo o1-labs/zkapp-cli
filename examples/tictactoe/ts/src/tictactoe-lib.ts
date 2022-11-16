@@ -25,7 +25,7 @@ export async function deploy(
     zkAppInstance.init();
     zkAppInstance.sign(zkAppPrivatekey);
   });
-  await txn.send().wait();
+  await txn.send();
 }
 
 export async function makeMove(
@@ -49,5 +49,5 @@ export async function makeMove(
     );
     zkAppInstance.sign(zkAppPrivatekey);
   });
-  await txn.send().wait();
+  await txn.send();
 }
