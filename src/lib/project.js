@@ -531,7 +531,7 @@ function scaffoldNuxt() {
   let newNuxtConfig = nuxtConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-  ,serverMiddleware: ['middleware/headers'],
+  serverMiddleware: ['middleware/headers'],
 
   vite: {
     build: { target: "es2020" },
@@ -541,14 +541,20 @@ function scaffoldNuxt() {
   );
 
   // Set ssr to false if it was set to true in nuxt scaffold
-  if (newNuxtConfig.includes('ssr: true')) {
-    newNuxtConfig = newNuxtConfig.replace('ssr: true,', 'ssr: false,');
+  if (!newNuxtConfig.includes('ssr')) {
+    newNuxtConfig = newNuxtConfig.replace(
+      'export default {',
+      `
+  export default {
+    ssr: false, 
+    `
+    );
   }
 
   newNuxtConfig = newNuxtConfig.replace(
     'buildModules: [',
     `
-    buildModules: ["nuxt-vite",
+  buildModules: ["nuxt-vite",
     `
   );
 
