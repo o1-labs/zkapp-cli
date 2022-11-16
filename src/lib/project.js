@@ -529,15 +529,16 @@ function scaffoldNuxt() {
   // Read in the NuxtJS config file and add the middleware and vite config.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
-    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    'export default {', // Search for the last '}' in the file.
     `
-  ,serverMiddleware: ['middleware/headers'],
+  export default {  
+    serverMiddleware: ['middleware/headers'],
 
-  vite: {
-    build: { target: "es2020" },
-    optimizeDeps: { esbuildOptions: { target: "es2020" } },
-  },
-};`
+    vite: {
+      build: { target: "es2020" },
+      optimizeDeps: { esbuildOptions: { target: "es2020" } },
+    },
+  `
   );
 
   // Set ssr to false if it was set to true in nuxt scaffold
