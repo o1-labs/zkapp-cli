@@ -540,6 +540,11 @@ function scaffoldNuxt() {
 };`
   );
 
+  // Set ssr to false if it was set to true in nuxt scaffold
+  if (newNuxtConfig.includes('ssr: true')) {
+    newNuxtConfig = newNuxtConfig.replace('ssr: true,', 'ssr: false,');
+  }
+
   newNuxtConfig = newNuxtConfig.replace(
     'buildModules: [',
     `
