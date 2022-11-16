@@ -6,6 +6,7 @@ import {
   method,
   DeployArgs,
   Permissions,
+  PrivateKey,
 } from 'snarkyjs';
 
 /**
@@ -14,7 +15,7 @@ import {
  *
  * The Add contract initializes the state variable 'num' to be a Field(1) value by default when deployed.
  * When the 'update' method is called, the Add contract adds Field(2) to its 'num' contract state.
- * 
+ *
  * This file is safe to delete and replace with your own contract.
  */
 export class Add extends SmartContract {
@@ -28,8 +29,10 @@ export class Add extends SmartContract {
     });
   }
 
-  @method init() {
+  @method init(zkappKey: PrivateKey) {
+    super.init(zkappKey);
     this.num.set(Field(1));
+    this.requireSignature();
   }
 
   @method update() {
@@ -38,5 +41,6 @@ export class Add extends SmartContract {
     const newState = currentState.add(2);
     newState.assertEquals(currentState.add(2));
     this.num.set(newState);
+    this.requireSignature();
   }
 }
