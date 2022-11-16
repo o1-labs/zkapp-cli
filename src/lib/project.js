@@ -531,7 +531,7 @@ function scaffoldNuxt() {
   let newNuxtConfig = nuxtConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-  serverMiddleware: ['middleware/headers'],
+  ,serverMiddleware: ['middleware/headers'],
 
   vite: {
     build: { target: "es2020" },
