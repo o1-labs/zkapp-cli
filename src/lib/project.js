@@ -554,7 +554,7 @@ function scaffoldNuxt() {
   newNuxtConfig = newNuxtConfig.replace(
     'buildModules: [',
     `
-  buildModules: ["nuxt-vite",
+  buildModules: ["nuxt-vite"
     `
   );
 
