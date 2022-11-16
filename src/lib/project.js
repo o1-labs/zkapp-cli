@@ -526,14 +526,28 @@ function scaffoldNuxt() {
     path.join('ui', 'middleware')
   );
 
-  // Read in the NuxtJS config file and add the middleware.
+  // Read in the NuxtJS config file and add the middleware and vite config.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
-  const newNuxtConfig = nuxtConfig.replace(
+  let newNuxtConfig = nuxtConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-  ,serverMiddleware: ['middleware/headers']
+  ,serverMiddleware: ['middleware/headers'],
+
+  vite: {
+    build: { target: "es2020" },
+    optimizeDeps: { esbuildOptions: { target: "es2020" } },
+  },
 };`
   );
+
+  newNuxtConfig = newNuxtConfig.replace(
+    'buildModules: [',
+    `
+    buildModules: ["nuxt-vite",
+    `
+  );
+  //  }
+
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
 
   const nuxtIndexPage = fs.readFileSync(
@@ -569,11 +583,6 @@ export default {
 }
 </script>
 `;
-
-  // const customNuxtIndex = nuxtIndexPage.replace(
-  //   `import Vue from 'vue'`,
-  //   contractImport
-  // );
 
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
 }
