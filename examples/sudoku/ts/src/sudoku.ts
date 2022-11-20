@@ -10,6 +10,7 @@ import {
   isReady,
   Poseidon,
   Permissions,
+  DeployArgs,
   Mina,
   AccountUpdate,
   PrivateKey,
@@ -37,7 +38,11 @@ export class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
-  @method init(sudokuInstance: Sudoku) {
+  deploy(args?: DeployArgs) {
+    super.deploy(args);
+  }
+
+  setInitialValues(sudokuInstance: Sudoku) {
     this.sudokuHash.set(sudokuInstance.hash());
     this.isSolved.set(Bool(false));
   }
@@ -120,12 +125,13 @@ async function deploy(
 
     let sudokuInstance = new Sudoku(sudoku);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+
     zkAppInstance.setPermissions({
       ...Permissions.default(),
       editState: Permissions.proofOrSignature(),
     });
 
-    zkAppInstance.init(sudokuInstance);
+    zkAppInstance.setInitialValues(sudokuInstance);
     zkAppInstance.sign(zkAppPrivateKey);
   });
   await tx.send();

@@ -40,6 +40,7 @@ function solveSudokuInternal(sudoku, deterministic, possible) {
     possible = possibleFromSudoku(sudoku);
     sudoku = cloneSudoku(sudoku);
   }
+  
   while (true) {
     let [i, j, n] = cellWithFewestPossible(sudoku, possible);
 
