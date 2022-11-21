@@ -261,6 +261,10 @@ async function deploy({ alias, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
+  // figure out if the zkApp has a @method init() - in that case we need to create a proof,
+  // so we need to compile no matter what, and we show a separate step to create the proof
+  let isInitMethod = zkApp._methods?.some((intf) => intf.methodName === 'init');
+
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
@@ -273,7 +277,7 @@ async function deploy({ alias, yes }) {
         cache[contractName] = { digest: '', verificationKey: '' };
       }
 
-      if (cache[contractName]?.digest === currentDigest) {
+      if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
         return {
           verificationKey: cache[contractName].verificationKey,
           isCached: true,
@@ -330,7 +334,7 @@ async function deploy({ alias, yes }) {
     nonce = Number(accountResponse.data.account.nonce);
   }
 
-  let transactionJson = await step('Build transaction', async () => {
+  let transaction = await step('Build transaction', async () => {
     addCachedAccount({ publicKey: zkAppAddressBase58, nonce });
     let tx = await Mina.transaction(
       { feePayerKey: zkAppPrivateKey, fee },
@@ -346,8 +350,19 @@ async function deploy({ alias, yes }) {
         zkapp.self.body.useFullCommitment = Bool(true);
       }
     );
-    return tx.sign().toJSON();
+    return { tx, json: tx.sign().toJSON() };
   });
+
+  if (isInitMethod) {
+    transaction = await step(
+      'Create transaction proof (takes 10-30 sec)',
+      async () => {
+        await transaction.tx.prove();
+        return { tx: transaction.tx, json: transaction.tx.sign().toJSON() };
+      }
+    );
+  }
+  let transactionJson = transaction.json;
 
   const settings = [
     [bold('Network'), reset(alias)],
