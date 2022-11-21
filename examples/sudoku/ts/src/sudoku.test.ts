@@ -1,12 +1,13 @@
-import {
-  deploy,
-  submitSolution,
-  getZkAppState,
-  createLocalBlockchain,
-  SudokuZkApp,
-} from './sudoku';
+import { Sudoku, SudokuZkApp } from './sudoku';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
-import { isReady, shutdown, PrivateKey, PublicKey } from 'snarkyjs';
+import {
+  isReady,
+  shutdown,
+  PrivateKey,
+  PublicKey,
+  Mina,
+  AccountUpdate,
+} from 'snarkyjs';
 
 describe('sudoku', () => {
   let zkAppInstance: SudokuZkApp,
@@ -17,45 +18,30 @@ describe('sudoku', () => {
 
   beforeEach(async () => {
     await isReady;
-    account = createLocalBlockchain();
+    let Local = Mina.LocalBlockchain();
+    Mina.setActiveInstance(Local);
+    account = Local.testAccounts[0].privateKey;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkAppInstance = new SudokuZkApp(zkAppAddress);
     sudoku = generateSudoku(0.5);
-    return;
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     setTimeout(shutdown, 0);
-  });
-
-  it('generates and deploys sudoku', async () => {
-    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
-
-    let state = getZkAppState(zkAppInstance);
-    expect(state).toBeDefined();
-    expect(state.isSolved).toBe(false);
   });
 
   it('accepts a correct solution', async () => {
     await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
 
-    let state = getZkAppState(zkAppInstance);
-    expect(state).toBeDefined();
-    expect(state.isSolved).toBe(false);
+    let isSolved = zkAppInstance.isSolved.get().toBoolean();
+    expect(isSolved).toBe(false);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    let accepted = await submitSolution(
-      sudoku,
-      solution,
-      account,
-      zkAppAddress,
-      zkAppPrivateKey
-    );
-    expect(accepted).toBe(true);
+    await submitSolution(sudoku, solution, account, zkAppAddress);
 
-    let { isSolved } = getZkAppState(zkAppInstance);
+    isSolved = zkAppInstance.isSolved.get().toBoolean();
     expect(isSolved).toBe(true);
   });
 
@@ -68,21 +54,42 @@ describe('sudoku', () => {
     let noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    expect.assertions(1);
-    try {
-      await submitSolution(
-        sudoku,
-        noSolution,
-        account,
-        zkAppAddress,
-        zkAppPrivateKey
-      );
-    } catch (e) {
-      // A row, column  or 3x3 square will not have full range 1-9
-      // This will cause an assert.
-    }
+    await expect(() =>
+      submitSolution(sudoku, noSolution, account, zkAppAddress)
+    ).rejects.toThrow(/array contains the numbers 1...9/);
 
-    let { isSolved } = await getZkAppState(zkAppInstance);
+    let isSolved = zkAppInstance.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
   });
 });
+
+async function deploy(
+  zkAppInstance: SudokuZkApp,
+  zkAppPrivateKey: PrivateKey,
+  sudoku: number[][],
+  account: PrivateKey
+) {
+  await SudokuZkApp.compile();
+  let tx = await Mina.transaction(account, () => {
+    AccountUpdate.fundNewAccount(account);
+    let sudokuInstance = Sudoku.from(sudoku);
+    zkAppInstance.deploy();
+    zkAppInstance.update(sudokuInstance);
+  });
+  await tx.prove();
+  await tx.sign([zkAppPrivateKey]).send();
+}
+
+async function submitSolution(
+  sudoku: number[][],
+  solution: number[][],
+  account: PrivateKey,
+  zkAppAddress: PublicKey
+) {
+  let tx = await Mina.transaction(account, () => {
+    let zkApp = new SudokuZkApp(zkAppAddress);
+    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution));
+  });
+  await tx.prove();
+  await tx.send();
+}

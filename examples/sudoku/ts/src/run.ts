@@ -9,28 +9,32 @@
  * Build the project: `$ npm run build`
  * Run with node:     `$ node build/src/run.js`.
  */
-import {
-  deploy,
-  submitSolution,
-  getZkAppState,
-  createLocalBlockchain,
-  SudokuZkApp,
-} from './sudoku.js';
+import { Sudoku, SudokuZkApp } from './sudoku.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
-import { PrivateKey, shutdown } from 'snarkyjs';
+import { AccountUpdate, Mina, PrivateKey, shutdown } from 'snarkyjs';
 
 // setup
-const account = createLocalBlockchain();
+const Local = Mina.LocalBlockchain();
+Mina.setActiveInstance(Local);
+
+const account = Local.testAccounts[0].privateKey;
 const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppAddress = zkAppPrivateKey.toPublicKey();
 // create an instance of the smart contract
-const zkAppInstance = new SudokuZkApp(zkAppAddress);
+const zkApp = new SudokuZkApp(zkAppAddress);
 
-console.log('Deploying Sudoku...');
-await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+console.log('Deploying and initializing Sudoku...');
+await SudokuZkApp.compile();
+let tx = await Mina.transaction(account, () => {
+  AccountUpdate.fundNewAccount(account);
+  zkApp.deploy();
+  zkApp.update(Sudoku.from(sudoku));
+});
+await tx.prove();
+await tx.sign([zkAppPrivateKey]).send();
 
-console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
+console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -41,22 +45,24 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  await submitSolution(
-    sudoku,
-    noSolution,
-    account,
-    zkAppAddress,
-    zkAppPrivateKey
-  );
+  let tx = await Mina.transaction(account, () => {
+    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
+  });
+  await tx.prove();
+  await tx.send();
 } catch {
-  console.log('There was an error submitting the solution');
+  console.log('There was an error submitting the solution, as expected');
 }
-console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
+console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // submit the actual solution
 console.log('Submitting solution...');
-await submitSolution(sudoku, solution, account, zkAppAddress, zkAppPrivateKey);
-console.log('Is the sudoku solved?', getZkAppState(zkAppInstance).isSolved);
+tx = await Mina.transaction(account, () => {
+  zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
+});
+await tx.prove();
+await tx.send();
+console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // cleanup
 await shutdown();
