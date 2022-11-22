@@ -22,8 +22,6 @@ export async function deploy(
   const txn = await Mina.transaction(deployer, () => {
     AccountUpdate.fundNewAccount(deployer);
     zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
-    zkAppInstance.init();
-    zkAppInstance.sign(zkAppPrivatekey);
   });
   await txn.send();
 }
