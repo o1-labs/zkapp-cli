@@ -25,10 +25,32 @@ jobs:
           npm ci
           npm run build --if-present
           npm run test
+
+          # Test generic template
           cd templates/project-ts
           npm ci || true
           npm run test
           rm -rf node_modules
+          cd ../..
+
+          # Ensure example apps are working
+          npm link
+
+          zk example sudoku
+          cd sudoku
+          npm run test
+          npm run build
+          npm run start
+          cd ..
+          rm -rf sudoku
+
+          zk example tictactoe
+          cd tictactoe
+          npm run test
+          npm run build
+          npm run start
+          cd ..
+          rm -rf tictactoe
         env:
           CI: true
       - name: Publish to NPM if version has changed
