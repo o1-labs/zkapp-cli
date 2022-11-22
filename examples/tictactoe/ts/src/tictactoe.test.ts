@@ -20,16 +20,21 @@ describe('tictactoe', () => {
     [player1, player2] = createLocalBlockchain();
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-    return;
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     setTimeout(shutdown, 0);
   });
 
   it('generates and deploys tictactoe', async () => {
     const zkAppInstance = new TicTacToe(zkAppAddress);
-    await deploy(zkAppInstance, zkAppPrivateKey, player1);
+    await deploy(
+      zkAppInstance,
+      zkAppPrivateKey,
+      player1,
+      player1.toPublicKey(),
+      player2.toPublicKey()
+    );
 
     const board = zkAppInstance.board.get();
     expect(board).toEqual(Field.zero);
@@ -37,18 +42,22 @@ describe('tictactoe', () => {
 
   it('accepts a correct move', async () => {
     const zkAppInstance = new TicTacToe(zkAppAddress);
-    await deploy(zkAppInstance, zkAppPrivateKey, player1);
-    await makeMove(
+    await deploy(
       zkAppInstance,
       zkAppPrivateKey,
       player1,
       player1.toPublicKey(),
-      player2.toPublicKey(),
+      player2.toPublicKey()
+    );
+    await makeMove(
+      zkAppInstance,
+      zkAppPrivateKey,
+      player1,
       Field.zero,
       Field.zero
     );
 
-    const nextPlayer = zkAppInstance.nextPlayer.get();
+    const nextPlayer = zkAppInstance.nextIsPlayer2.get();
     expect(nextPlayer).toEqual(Bool(true));
   });
 });
