@@ -14,6 +14,8 @@ import {
   Signature,
 } from 'snarkyjs';
 
+export { Board, TicTacToe };
+
 class Optional<T> {
   isSome: Bool;
   value: T;
@@ -24,11 +26,11 @@ class Optional<T> {
   }
 }
 
-export class Board {
+class Board {
   board: Optional<Bool>[][];
 
   constructor(serializedBoard: Field) {
-    const bits = serializedBoard.toBits();
+    const bits = serializedBoard.toBits(18);
     let board = [];
     for (let i = 0; i < 3; i++) {
       let row = [];
@@ -132,7 +134,7 @@ export class Board {
   }
 }
 
-export class TicTacToe extends SmartContract {
+class TicTacToe extends SmartContract {
   // The board is serialized as a single field element
   @state(Field) board = State<Field>();
   // false -> player 1 | true -> player 2
@@ -171,9 +173,7 @@ export class TicTacToe extends SmartContract {
   // 2 | x  x  x
   @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
     // 1. if the game is already finished, abort.
-    const finished = this.gameDone.get();
-    this.gameDone.assertEquals(finished); // precondition that links this.gameDone.get() to the actual on-chain state
-    finished.assertFalse();
+    this.gameDone.assertEquals(Bool(false)); // precondition on this.gameDone
 
     // 2. ensure that we know the private key associated to the public key
     //    and that our public key is known to the zkApp
@@ -207,14 +207,14 @@ export class TicTacToe extends SmartContract {
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
-    x.equals(Field.zero)
-      .or(x.equals(Field.one))
-      .or(x.equals(new Field(2)))
-      .assertEquals(true);
-    y.equals(Field.zero)
-      .or(y.equals(Field.one))
-      .or(y.equals(new Field(2)))
-      .assertEquals(true);
+    x.equals(Field(0))
+      .or(x.equals(Field(1)))
+      .or(x.equals(Field(2)))
+      .assertTrue();
+    y.equals(Field(0))
+      .or(y.equals(Field(1)))
+      .or(y.equals(Field(2)))
+      .assertTrue();
 
     board.update(x, y, player);
     this.board.set(board.serialize());
