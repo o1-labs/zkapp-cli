@@ -38,6 +38,13 @@ const txn = await Mina.transaction(player1, () => {
   zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
 });
 await txn.prove();
+/**
+ * note: this tx needs to be signed with `tx.sign()`, because `deploy` uses `requireSignature()` under the hood,
+ * so one of the account updates in this tx has to be authorized with a signature (vs proof).
+ * this is necessary for the deploy tx because the initial permissions for all account fields are "signature".
+ * (but `deploy()` changes some of those permissions to "proof" and adds the verification key that enables proofs.
+ * that's why we don't need `tx.sign()` for the later transactions.)
+ */
 await txn.sign([zkAppPrivateKey]).send();
 
 console.log('after transaction');
