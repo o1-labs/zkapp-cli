@@ -39,7 +39,12 @@ describe('sudoku', () => {
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    await submitSolution(sudoku, solution, account, zkAppAddress);
+    let tx = await Mina.transaction(account, () => {
+      let zkApp = new SudokuZkApp(zkAppAddress);
+      zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
+    });
+    await tx.prove();
+    await tx.send();
 
     isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(true);
@@ -54,9 +59,14 @@ describe('sudoku', () => {
     let noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    await expect(() =>
-      submitSolution(sudoku, noSolution, account, zkAppAddress)
-    ).rejects.toThrow(/array contains the numbers 1...9/);
+    await expect(async () => {
+      let tx = await Mina.transaction(account, () => {
+        let zkApp = new SudokuZkApp(zkAppAddress);
+        zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
+      });
+      await tx.prove();
+      await tx.send();
+    }).rejects.toThrow(/array contains the numbers 1...9/);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
@@ -71,25 +81,10 @@ async function deploy(
 ) {
   let tx = await Mina.transaction(account, () => {
     AccountUpdate.fundNewAccount(account);
-    let sudokuInstance = Sudoku.from(sudoku);
     zkApp.deploy();
-    zkApp.update(sudokuInstance);
+    zkApp.update(Sudoku.from(sudoku));
   });
   await tx.prove();
   // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
   await tx.sign([zkAppPrivateKey]).send();
-}
-
-async function submitSolution(
-  sudoku: number[][],
-  solution: number[][],
-  account: PrivateKey,
-  zkAppAddress: PublicKey
-) {
-  let tx = await Mina.transaction(account, () => {
-    let zkApp = new SudokuZkApp(zkAppAddress);
-    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution));
-  });
-  await tx.prove();
-  await tx.send();
 }
