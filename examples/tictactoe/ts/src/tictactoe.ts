@@ -53,7 +53,7 @@ export class Board {
         player.push(this.board[i][j].value);
       }
     }
-    return Field.ofBits(isPlayed.concat(player));
+    return Field.fromBits(isPlayed.concat(player));
   }
 
   update(x: Field, y: Field, playerToken: Bool) {
@@ -150,10 +150,11 @@ export class TicTacToe extends SmartContract {
     });
   }
 
-  @method init() {
-    this.board.set(Field.zero);
-    this.nextPlayer.set(new Bool(false)); // player 1 starts
-    this.gameDone.set(new Bool(false));
+  init() {
+    super.init();
+    this.board.set(Field(0));
+    this.nextPlayer.set(Bool(false)); // player 1 starts
+    this.gameDone.set(Bool(false));
   }
 
   // board:
