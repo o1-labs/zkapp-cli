@@ -10,37 +10,43 @@
  * Run with node:     `$ node build/src/run.js`.
  */
 
-import { Field, PrivateKey, Mina, shutdown, isReady } from 'snarkyjs';
-import { createLocalBlockchain, makeMove, deploy } from './tictactoe-lib.js';
+import {
+  Field,
+  PrivateKey,
+  Mina,
+  shutdown,
+  isReady,
+  AccountUpdate,
+  Signature,
+} from 'snarkyjs';
 import { TicTacToe, Board } from './tictactoe.js';
 
 await isReady;
+let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+Mina.setActiveInstance(Local);
+const [{ privateKey: player1 }, { privateKey: player2 }] = Local.testAccounts;
 
-const [player1, player2] = createLocalBlockchain();
-const player1Public = player1.toPublicKey();
-const player2Public = player2.toPublicKey();
-
-const zkAppPrivkey = PrivateKey.random();
-const zkAppPubkey = zkAppPrivkey.toPublicKey();
-const zkAppInstance = new TicTacToe(zkAppPubkey);
+const zkAppPrivateKey = PrivateKey.random();
+const zkAppPublicKey = zkAppPrivateKey.toPublicKey();
+const zkApp = new TicTacToe(zkAppPublicKey);
 
 // Create a new instance of the contract
 console.log('\n\n====== DEPLOYING ======\n\n');
-await deploy(
-  zkAppInstance,
-  zkAppPrivkey,
-  player1,
-  player1Public,
-  player2Public
-);
+const txn = await Mina.transaction(player1, () => {
+  AccountUpdate.fundNewAccount(player1);
+  zkApp.deploy();
+  zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+});
+await txn.prove();
+await txn.sign([zkAppPrivateKey]).send();
 
 console.log('after transaction');
 
 // initial state
-let b = zkAppInstance.board.get();
+let b = zkApp.board.get();
 
 console.log('initial state of the zkApp');
-let zkAppState = Mina.getAccount(zkAppPubkey).appState;
+let zkAppState = Mina.getAccount(zkAppPublicKey).appState;
 for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
   console.log('state', i, ':', zkAppState?.[i].toString());
 }
@@ -50,45 +56,55 @@ new Board(b).printState();
 
 // play
 console.log('\n\n====== FIRST MOVE ======\n\n');
-await makeMove(zkAppInstance, player1, Field.zero, Field.zero);
+await makeMove(player1, 0, 0);
 
 // debug
-b = zkAppInstance.board.get();
+b = zkApp.board.get();
 new Board(b).printState();
 
 // play
 console.log('\n\n====== SECOND MOVE ======\n\n');
-await makeMove(zkAppInstance, player2, Field.one, Field.zero);
+await makeMove(player2, 1, 0);
 // debug
-b = zkAppInstance.board.get();
+b = zkApp.board.get();
 new Board(b).printState();
 
 // play
 console.log('\n\n====== THIRD MOVE ======\n\n');
-await makeMove(zkAppInstance, player1, Field.one, Field.one);
+await makeMove(player1, 1, 1);
 // debug
-b = zkAppInstance.board.get();
+b = zkApp.board.get();
 new Board(b).printState();
 
 // play
 console.log('\n\n====== FOURTH MOVE ======\n\n');
-await makeMove(zkAppInstance, player2, Field(2), Field.one);
+await makeMove(player2, 2, 1);
 
 // debug
-b = zkAppInstance.board.get();
+b = zkApp.board.get();
 new Board(b).printState();
 
 // play
 console.log('\n\n====== FIFTH MOVE ======\n\n');
-await makeMove(zkAppInstance, player1, Field(2), Field(2));
+await makeMove(player1, 2, 2);
 
 // debug
-b = zkAppInstance.board.get();
+b = zkApp.board.get();
 new Board(b).printState();
 console.log(
   'did someone win?',
-  zkAppInstance.nextIsPlayer2.get().toBoolean() ? 'Player 1!' : 'Player 2!'
+  zkApp.nextIsPlayer2.get().toBoolean() ? 'Player 1!' : 'Player 2!'
 );
 
 // cleanup
 await shutdown();
+
+async function makeMove(currentPlayer: PrivateKey, x0: number, y0: number) {
+  const [x, y] = [Field(x0), Field(y0)];
+  const txn = await Mina.transaction(currentPlayer, async () => {
+    const signature = Signature.create(currentPlayer, [x, y]);
+    zkApp.play(currentPlayer.toPublicKey(), signature, x, y);
+  });
+  await txn.prove();
+  await txn.send();
+}
