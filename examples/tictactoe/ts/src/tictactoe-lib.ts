@@ -23,16 +23,15 @@ export async function deploy(
 ) {
   const txn = await Mina.transaction(deployer, () => {
     AccountUpdate.fundNewAccount(deployer);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
+    zkAppInstance.deploy();
     zkAppInstance.startGame(player1, player2);
   });
   await txn.prove();
-  await txn.send();
+  await txn.sign([zkAppPrivatekey]).send();
 }
 
 export async function makeMove(
   zkAppInstance: TicTacToe,
-  zkAppPrivatekey: PrivateKey,
   currentPlayer: PrivateKey,
   x: Field,
   y: Field
@@ -40,7 +39,6 @@ export async function makeMove(
   const txn = await Mina.transaction(currentPlayer, async () => {
     const signature = Signature.create(currentPlayer, [x, y]);
     zkAppInstance.play(currentPlayer.toPublicKey(), signature, x, y);
-    zkAppInstance.sign(zkAppPrivatekey);
   });
   await txn.prove();
   await txn.send();
