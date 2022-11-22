@@ -31,7 +31,12 @@ class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
-  // by making this a `@method`, we ensure that a proof is created for the state initialization
+  /**
+   * by making this a `@method`, we ensure that a proof is created for the state initialization.
+   * alternatively (and, more efficiently), we could have used `super.init()` inside `update()` below,
+   * to ensure the entire state is overwritten.
+   * however, it's good to have an example which tests the CLI's ability to handle init() decorated with `@method`.
+   */
   @method init() {
     super.init();
   }
@@ -85,14 +90,18 @@ class SudokuZkApp extends SmartContract {
         let solutionCell = solution[i][j];
         // either the sudoku has nothing in it (indicated by a cell value of 0),
         // or it is equal to the solution
-        Bool.or(cell.equals(0), cell.equals(solutionCell)).assertEquals(true);
+        Bool.or(cell.equals(0), cell.equals(solutionCell)).assertTrue(
+          `solution cell (${i + 1},${j + 1}) matches the original sudoku`
+        );
       }
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
     let sudokuHash = this.sudokuHash.get(); // get the hash from the blockchain
     this.sudokuHash.assertEquals(sudokuHash); // precondition that links this.sudokuHash.get() to the actual on-chain state
-    sudokuInstance.hash().assertEquals(sudokuHash);
+    sudokuInstance
+      .hash()
+      .assertEquals(sudokuHash, 'sudoku matches the one committed on-chain');
 
     // all checks passed => the sudoku is solved!
     this.isSolved.set(Bool(true));

@@ -32,6 +32,13 @@ let tx = await Mina.transaction(account, () => {
   zkApp.update(Sudoku.from(sudoku));
 });
 await tx.prove();
+/**
+ * note: this tx needs to be signed with `tx.sign()`, because `deploy` uses `requireSignature()` under the hood,
+ * so one of the account updates in this tx has to be authorized with a signature (vs proof).
+ * this is necessary for the deploy tx because the initial permissions for all account fields are "signature".
+ * (but `deploy()` changes some of those permissions to "proof" and adds the verification key that enables proofs.
+ * that's why we don't need `tx.sign()` for the later transactions.)
+ */
 await tx.sign([zkAppPrivateKey]).send();
 
 console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());

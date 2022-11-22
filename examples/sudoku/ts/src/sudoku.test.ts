@@ -10,7 +10,7 @@ import {
 } from 'snarkyjs';
 
 describe('sudoku', () => {
-  let zkAppInstance: SudokuZkApp,
+  let zkApp: SudokuZkApp,
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     sudoku: number[][],
@@ -23,7 +23,7 @@ describe('sudoku', () => {
     account = Local.testAccounts[0].privateKey;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-    zkAppInstance = new SudokuZkApp(zkAppAddress);
+    zkApp = new SudokuZkApp(zkAppAddress);
     sudoku = generateSudoku(0.5);
   });
 
@@ -32,21 +32,21 @@ describe('sudoku', () => {
   });
 
   it('accepts a correct solution', async () => {
-    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, account);
 
-    let isSolved = zkAppInstance.isSolved.get().toBoolean();
+    let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
     await submitSolution(sudoku, solution, account, zkAppAddress);
 
-    isSolved = zkAppInstance.isSolved.get().toBoolean();
+    isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(true);
   });
 
   it('rejects an incorrect solution', async () => {
-    await deploy(zkAppInstance, zkAppPrivateKey, sudoku, account);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, account);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -58,13 +58,13 @@ describe('sudoku', () => {
       submitSolution(sudoku, noSolution, account, zkAppAddress)
     ).rejects.toThrow(/array contains the numbers 1...9/);
 
-    let isSolved = zkAppInstance.isSolved.get().toBoolean();
+    let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
   });
 });
 
 async function deploy(
-  zkAppInstance: SudokuZkApp,
+  zkApp: SudokuZkApp,
   zkAppPrivateKey: PrivateKey,
   sudoku: number[][],
   account: PrivateKey
@@ -72,10 +72,11 @@ async function deploy(
   let tx = await Mina.transaction(account, () => {
     AccountUpdate.fundNewAccount(account);
     let sudokuInstance = Sudoku.from(sudoku);
-    zkAppInstance.deploy();
-    zkAppInstance.update(sudokuInstance);
+    zkApp.deploy();
+    zkApp.update(sudokuInstance);
   });
   await tx.prove();
+  // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
   await tx.sign([zkAppPrivateKey]).send();
 }
 
