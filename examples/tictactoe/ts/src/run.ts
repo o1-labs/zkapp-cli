@@ -27,7 +27,13 @@ async function playTicTacToe() {
 
   // Create a new instance of the contract
   console.log('\n\n====== DEPLOYING ======\n\n');
-  await deploy(zkAppInstance, zkAppPrivkey, player1);
+  await deploy(
+    zkAppInstance,
+    zkAppPrivkey,
+    player1,
+    player1Public,
+    player2Public
+  );
 
   console.log('after transaction');
 
@@ -44,15 +50,7 @@ async function playTicTacToe() {
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
-  await makeMove(
-    zkAppInstance,
-    zkAppPrivkey,
-    player1,
-    player1Public,
-    player2Public,
-    Field.zero,
-    Field.zero
-  );
+  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field.zero, Field.zero);
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
@@ -60,45 +58,21 @@ async function playTicTacToe() {
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
-  await makeMove(
-    zkAppInstance,
-    zkAppPrivkey,
-    player2,
-    player1Public,
-    player2Public,
-    Field.one,
-    Field.zero
-  );
+  await makeMove(zkAppInstance, zkAppPrivkey, player2, Field.one, Field.zero);
   // debug
   b = await Mina.getAccount(zkAppPubkey);
   new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
-  await makeMove(
-    zkAppInstance,
-    zkAppPrivkey,
-    player1,
-    player1Public,
-    player2Public,
-    Field.one,
-    Field.one
-  );
+  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field.one, Field.one);
   // debug
   b = await Mina.getAccount(zkAppPubkey);
   new Board(b.appState?.[0]!).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
-  await makeMove(
-    zkAppInstance,
-    zkAppPrivkey,
-    player2,
-    player1Public,
-    player2Public,
-    Field(2),
-    Field.one
-  );
+  await makeMove(zkAppInstance, zkAppPrivkey, player2, Field(2), Field.one);
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
@@ -106,15 +80,7 @@ async function playTicTacToe() {
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
-  await makeMove(
-    zkAppInstance,
-    zkAppPrivkey,
-    player1,
-    player1Public,
-    player2Public,
-    Field(2),
-    Field(2)
-  );
+  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field(2), Field(2));
 
   // debug
   b = await Mina.getAccount(zkAppPubkey);
