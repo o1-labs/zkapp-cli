@@ -49,13 +49,7 @@ describe('tictactoe', () => {
       player1.toPublicKey(),
       player2.toPublicKey()
     );
-    await makeMove(
-      zkAppInstance,
-      zkAppPrivateKey,
-      player1,
-      Field.zero,
-      Field.zero
-    );
+    await makeMove(zkAppInstance, player1, Field.zero, Field.zero);
 
     const nextPlayer = zkAppInstance.nextIsPlayer2.get();
     expect(nextPlayer).toEqual(Bool(true));

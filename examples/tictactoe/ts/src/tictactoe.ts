@@ -12,8 +12,6 @@ import {
   Bool,
   Circuit,
   Signature,
-  Permissions,
-  DeployArgs,
 } from 'snarkyjs';
 
 class Optional<T> {
@@ -145,18 +143,8 @@ export class TicTacToe extends SmartContract {
   @state(PublicKey) player1 = State<PublicKey>();
   @state(PublicKey) player2 = State<PublicKey>();
 
-  deploy(args: DeployArgs) {
-    super.deploy(args);
-    this.setPermissions({
-      ...Permissions.default(),
-      editState: Permissions.proofOrSignature(),
-    });
-  }
-
   init() {
     super.init();
-    this.board.set(Field(0));
-    this.nextIsPlayer2.set(Bool(false)); // player 1 starts
     this.gameDone.set(Bool(true));
     this.player1.set(PublicKey.empty());
     this.player2.set(PublicKey.empty());
@@ -169,6 +157,10 @@ export class TicTacToe extends SmartContract {
     // set players
     this.player1.set(player1);
     this.player2.set(player2);
+    // reset board
+    this.board.set(Field(0));
+    // player 1 starts
+    this.nextIsPlayer2.set(Bool(false));
   }
 
   // board:

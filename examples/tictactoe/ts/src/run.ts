@@ -38,56 +38,57 @@ async function playTicTacToe() {
   console.log('after transaction');
 
   // initial state
-  let b = await Mina.getAccount(zkAppPubkey);
+  let b = zkAppInstance.board.get();
 
   console.log('initial state of the zkApp');
+  let zkAppState = Mina.getAccount(zkAppPubkey).appState;
   for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
-    console.log('state', i, ':', b.appState?.[i].toString());
+    console.log('state', i, ':', zkAppState?.[i].toString());
   }
 
   console.log('\ninitial board');
-  new Board(b.appState?.[0]!).printState();
+  new Board(b).printState();
 
   // play
   console.log('\n\n====== FIRST MOVE ======\n\n');
-  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field.zero, Field.zero);
+  await makeMove(zkAppInstance, player1, Field.zero, Field.zero);
 
   // debug
-  b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.appState?.[0]!).printState();
+  b = zkAppInstance.board.get();
+  new Board(b).printState();
 
   // play
   console.log('\n\n====== SECOND MOVE ======\n\n');
-  await makeMove(zkAppInstance, zkAppPrivkey, player2, Field.one, Field.zero);
+  await makeMove(zkAppInstance, player2, Field.one, Field.zero);
   // debug
-  b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.appState?.[0]!).printState();
+  b = zkAppInstance.board.get();
+  new Board(b).printState();
 
   // play
   console.log('\n\n====== THIRD MOVE ======\n\n');
-  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field.one, Field.one);
+  await makeMove(zkAppInstance, player1, Field.one, Field.one);
   // debug
-  b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.appState?.[0]!).printState();
+  b = zkAppInstance.board.get();
+  new Board(b).printState();
 
   // play
   console.log('\n\n====== FOURTH MOVE ======\n\n');
-  await makeMove(zkAppInstance, zkAppPrivkey, player2, Field(2), Field.one);
+  await makeMove(zkAppInstance, player2, Field(2), Field.one);
 
   // debug
-  b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.appState?.[0]!).printState();
+  b = zkAppInstance.board.get();
+  new Board(b).printState();
 
   // play
   console.log('\n\n====== FIFTH MOVE ======\n\n');
-  await makeMove(zkAppInstance, zkAppPrivkey, player1, Field(2), Field(2));
+  await makeMove(zkAppInstance, player1, Field(2), Field(2));
 
   // debug
-  b = await Mina.getAccount(zkAppPubkey);
-  new Board(b.appState?.[0]!).printState();
+  b = zkAppInstance.board.get();
+  new Board(b).printState();
   console.log(
     'did someone win?',
-    b.appState?.[2].toString() ? 'Player 1!' : 'Player 2!'
+    zkAppInstance.nextIsPlayer2.get().toBoolean() ? 'Player 1!' : 'Player 2!'
   );
 
   // cleanup
