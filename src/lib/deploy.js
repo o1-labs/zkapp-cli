@@ -332,8 +332,8 @@ async function deploy({ alias, yes }) {
   }
 
   let transaction = await step('Build transaction', async () => {
-    let Berkeley = Mina.BerkeleyQANet(graphQLEndpoint);
-    Mina.setActiveInstance(Berkeley);
+    let Network = Mina.Network(graphQLEndpoint);
+    Mina.setActiveInstance(Network);
     let tx = await Mina.transaction(
       { feePayerKey: zkAppPrivateKey, fee },
       () => {
