@@ -39,7 +39,7 @@ let key: { privateKey: string } = JSON.parse(
 let zkAppKey = PrivateKey.fromBase58(key.privateKey);
 
 // set up Mina instance and contract we interact with
-const Berkeley = Mina.BerkeleyQANet(config.url);
+const Berkeley = Mina.Network(config.url);
 Mina.setActiveInstance(Berkeley);
 let zkAppAddress = zkAppKey.toPublicKey();
 let zkApp = new Add(zkAppAddress);
