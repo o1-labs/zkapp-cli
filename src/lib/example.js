@@ -80,20 +80,26 @@ async function fetchProjectTemplate(name, lang) {
   const spin = ora(`${step}...`).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src, { force: true });
+    let repoDir;
 
-    // Note: Extract will overwrite any existing dir's contents. But we're
-    // using an always-unique name.
-    const TEMP = '.gittar-temp-dir';
-    await gittar.extract(src, TEMP, {
-      filter(path) {
-        return path.includes(`templates/${projectName}/`);
-      },
-    });
+    if (process.env.CI) {
+      repoDir = './';
+    } else {
+      const src = 'github:o1-labs/zkapp-cli#main';
+      await gittar.fetch(src, { force: true });
 
-    sh.mv(path.join(TEMP, 'templates', projectName), name);
-    sh.rm('-r', TEMP);
+      // Note: Extract will overwrite any existing dir's contents. But we're
+      // using an always-unique name.
+      repoDir = '.gittar-temp-dir';
+      await gittar.extract(src, repoDir, {
+        filter(path) {
+          return path.includes(`templates/${projectName}/`);
+        },
+      });
+    }
+
+    sh.mv(path.join(repoDir, 'templates', projectName), name);
+    if (!process.env.CI) sh.rm('-r', repoDir);
     spin.succeed(_green(step));
     return true;
   } catch (err) {
@@ -192,28 +198,35 @@ async function extractExample(example, name, lang) {
   const spin = ora(`${step}...`).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
+    let repoDir;
 
-    // Note: Extract will overwrite any existing dir's contents. That's ok here.
-    const TEMP = '.gittar-temp-dir';
-    await gittar.extract(src, TEMP, {
-      filter(path) {
-        return path.includes(`examples/${example}/${lang}/src`);
-      },
-    });
+    if (process.env.CI) {
+      repoDir = './';
+    } else {
+      const src = 'github:o1-labs/zkapp-cli#main';
+      const examplePath = `examples/${example}/${lang}/src`;
 
-    // Example not found. Delete the project template & temp dir to clean up.
-    if (isEmpty(TEMP)) {
-      spin.fail(step);
-      console.error(_red('Example not found'));
-      sh.rm('-r', `${process.cwd()}/${name}`, TEMP);
-      return false;
+      // Note: Extract will overwrite any existing dir's contents. That's ok here.
+      const repoDir = '.gittar-temp-dir';
+      await gittar.extract(src, repoDir, {
+        filter(path) {
+          return path.includes(examplePath);
+        },
+      });
+
+      // Example not found. Delete the project template & temp dir to clean up.
+      if (!fs.existsSync(path.join(repoDir, examplePath))) {
+        spin.fail(step);
+        console.error(_red('Example not found'));
+        sh.rm('-r', `${process.cwd()}/${name}`, repoDir);
+        return false;
+      }
     }
 
     // Delete the project template's `src` & use the example's `src` instead.
     sh.rm('-r', `${name}/src`);
-    sh.mv(`${TEMP}/examples/${example}/${lang}/src`, `${name}/src`);
-    sh.rm('-r', TEMP);
+    sh.mv(`${repoDir}/examples/${example}/${lang}/src`, `${name}/src`);
+    if (!process.env.CI) sh.rm('-r', repoDir);
     spin.succeed(_green(step));
     return true;
   } catch (err) {
