@@ -403,7 +403,7 @@ async function scaffoldNext(projectName) {
   const tsPrompt = new Select({
     message: (state) =>
       message(state, 'Do you want your NextJS project to use TypeScript?'),
-    choices: ['yes', 'no'],
+    choices: ['no', 'yes'],
     prefix: (state) => prefix(state),
   });
 
