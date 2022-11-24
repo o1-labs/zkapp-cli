@@ -41,7 +41,7 @@ async function file(_path) {
 
   // TODO: Add SnarkyJS import to fileContent, when it's ready.
   const fileContent = ``;
-  const testContent = `import ${projName} from './${projName}';
+  const testContent = `import { ${projName} } from './${projName}';
 
 describe('${projName}.js', () => {
   describe('${projName}()', () => {
