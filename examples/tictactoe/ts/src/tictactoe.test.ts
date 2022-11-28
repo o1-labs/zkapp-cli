@@ -1,5 +1,4 @@
 import { TicTacToe } from './tictactoe';
-import { createLocalBlockchain, makeMove, deploy } from './tictactoe-lib';
 import {
   isReady,
   shutdown,
@@ -7,6 +6,9 @@ import {
   Bool,
   PrivateKey,
   PublicKey,
+  Mina,
+  AccountUpdate,
+  Signature,
 } from 'snarkyjs';
 
 describe('tictactoe', () => {
@@ -17,38 +19,52 @@ describe('tictactoe', () => {
 
   beforeEach(async () => {
     await isReady;
-    [player1, player2] = createLocalBlockchain();
+    let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+    Mina.setActiveInstance(Local);
+    [{ privateKey: player1 }, { privateKey: player2 }] = Local.testAccounts;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-    return;
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     setTimeout(shutdown, 0);
   });
 
   it('generates and deploys tictactoe', async () => {
-    const zkAppInstance = new TicTacToe(zkAppAddress);
-    await deploy(zkAppInstance, zkAppPrivateKey, player1);
-
-    const board = zkAppInstance.board.get();
-    expect(board).toEqual(Field.zero);
+    const zkApp = new TicTacToe(zkAppAddress);
+    const txn = await Mina.transaction(player1, () => {
+      AccountUpdate.fundNewAccount(player1);
+      zkApp.deploy();
+      zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+    });
+    await txn.prove();
+    await txn.sign([zkAppPrivateKey]).send();
+    const board = zkApp.board.get();
+    expect(board).toEqual(Field(0));
   });
 
-  it('accepts a correct move', async () => {
-    const zkAppInstance = new TicTacToe(zkAppAddress);
-    await deploy(zkAppInstance, zkAppPrivateKey, player1);
-    await makeMove(
-      zkAppInstance,
-      zkAppPrivateKey,
-      player1,
-      player1.toPublicKey(),
-      player2.toPublicKey(),
-      Field.zero,
-      Field.zero
-    );
+  it('deploys tictactoe & accepts a correct move', async () => {
+    const zkApp = new TicTacToe(zkAppAddress);
 
-    const nextPlayer = zkAppInstance.nextPlayer.get();
-    expect(nextPlayer).toEqual(Bool(true));
+    // deploy
+    let txn = await Mina.transaction(player1, () => {
+      AccountUpdate.fundNewAccount(player1);
+      zkApp.deploy();
+      zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+    });
+    await txn.prove();
+    await txn.sign([zkAppPrivateKey]).send();
+
+    // move
+    const [x, y] = [Field(0), Field(0)];
+    const signature = Signature.create(player1, [x, y]);
+    txn = await Mina.transaction(player1, async () => {
+      zkApp.play(player1.toPublicKey(), signature, x, y);
+    });
+    await txn.prove();
+    await txn.send();
+
+    const nextIsPlayer2 = zkApp.nextIsPlayer2.get();
+    expect(nextIsPlayer2).toEqual(Bool(true));
   });
 });

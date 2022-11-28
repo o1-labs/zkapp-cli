@@ -50,7 +50,6 @@ yargs(hideBin(process.argv))
         hidden: false,
         default: 'none',
         choices: ['svelte', 'next', 'nuxt', 'empty', 'none'],
-        // choices: ['next', 'empty', 'none'],
         description: 'Creates an accompanying UI',
       },
     },

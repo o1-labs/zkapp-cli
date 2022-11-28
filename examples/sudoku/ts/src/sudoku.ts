@@ -1,6 +1,4 @@
 import {
-  matrixProp,
-  CircuitValue,
   Field,
   SmartContract,
   method,
@@ -9,23 +7,19 @@ import {
   State,
   isReady,
   Poseidon,
-  Permissions,
-  Mina,
-  AccountUpdate,
-  PrivateKey,
-  PublicKey,
+  Struct,
+  Circuit,
 } from 'snarkyjs';
 
-export { deploy, submitSolution, getZkAppState, createLocalBlockchain };
+export { Sudoku, SudokuZkApp };
 
 await isReady;
 
-class Sudoku extends CircuitValue {
-  @matrixProp(Field, 9, 9) value: Field[][];
-
-  constructor(value: number[][]) {
-    super();
-    this.value = value.map((row) => row.map(Field));
+class Sudoku extends Struct({
+  value: Circuit.array(Circuit.array(Field, 9), 9),
+}) {
+  static from(value: number[][]) {
+    return new Sudoku({ value: value.map((row) => row.map(Field)) });
   }
 
   hash() {
@@ -33,11 +27,21 @@ class Sudoku extends CircuitValue {
   }
 }
 
-export class SudokuZkApp extends SmartContract {
+class SudokuZkApp extends SmartContract {
   @state(Field) sudokuHash = State<Field>();
   @state(Bool) isSolved = State<Bool>();
 
-  @method init(sudokuInstance: Sudoku) {
+  /**
+   * by making this a `@method`, we ensure that a proof is created for the state initialization.
+   * alternatively (and, more efficiently), we could have used `super.init()` inside `update()` below,
+   * to ensure the entire state is overwritten.
+   * however, it's good to have an example which tests the CLI's ability to handle init() decorated with `@method`.
+   */
+  @method init() {
+    super.init();
+  }
+
+  @method update(sudokuInstance: Sudoku) {
     this.sudokuHash.set(sudokuInstance.hash());
     this.isSolved.set(Bool(false));
   }
@@ -56,7 +60,7 @@ export class SudokuZkApp extends SmartContract {
       oneTo9
         .map((k) => range9.map((i) => array[i].equals(k)).reduce(Bool.or))
         .reduce(Bool.and)
-        .assertEquals(true);
+        .assertTrue('array contains the numbers 1...9');
     }
 
     // check all rows
@@ -86,82 +90,25 @@ export class SudokuZkApp extends SmartContract {
         let solutionCell = solution[i][j];
         // either the sudoku has nothing in it (indicated by a cell value of 0),
         // or it is equal to the solution
-        Bool.or(cell.equals(0), cell.equals(solutionCell)).assertEquals(true);
+        Bool.or(cell.equals(0), cell.equals(solutionCell)).assertTrue(
+          `solution cell (${i + 1},${j + 1}) matches the original sudoku`
+        );
       }
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
     let sudokuHash = this.sudokuHash.get(); // get the hash from the blockchain
     this.sudokuHash.assertEquals(sudokuHash); // precondition that links this.sudokuHash.get() to the actual on-chain state
-    sudokuInstance.hash().assertEquals(sudokuHash);
+    sudokuInstance
+      .hash()
+      .assertEquals(sudokuHash, 'sudoku matches the one committed on-chain');
 
     // all checks passed => the sudoku is solved!
     this.isSolved.set(Bool(true));
   }
 }
 
-// helpers
-function createLocalBlockchain(): PrivateKey {
-  let Local = Mina.LocalBlockchain();
-  Mina.setActiveInstance(Local);
-
-  const account = Local.testAccounts[0].privateKey;
-  return account;
-}
-
-async function deploy(
-  zkAppInstance: SudokuZkApp,
-  zkAppPrivateKey: PrivateKey,
-  sudoku: number[][],
-  account: PrivateKey
-) {
-  let tx = await Mina.transaction(account, () => {
-    AccountUpdate.fundNewAccount(account);
-
-    let sudokuInstance = new Sudoku(sudoku);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-    zkAppInstance.setPermissions({
-      ...Permissions.default(),
-      editState: Permissions.proofOrSignature(),
-    });
-
-    zkAppInstance.init(sudokuInstance);
-    zkAppInstance.sign(zkAppPrivateKey);
-  });
-  await tx.send();
-}
-
-async function submitSolution(
-  sudoku: number[][],
-  solution: number[][],
-  account: PrivateKey,
-  zkAppAddress: PublicKey,
-  zkAppPrivateKey: PrivateKey
-) {
-  let tx = await Mina.transaction(account, () => {
-    let zkApp = new SudokuZkApp(zkAppAddress);
-    zkApp.submitSolution(new Sudoku(sudoku), new Sudoku(solution));
-    zkApp.sign(zkAppPrivateKey);
-  });
-  try {
-    await tx.send();
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
-
-function getZkAppState(zkAppInstance: SudokuZkApp) {
-  let sudokuHash = fieldToHex(zkAppInstance.sudokuHash.get());
-  let isSolved = zkAppInstance.isSolved.get().toBoolean();
-  return { sudokuHash, isSolved };
-}
-
 function divmod(k: number, n: number) {
   let q = Math.floor(k / n);
   return [q, k - q * n];
-}
-
-function fieldToHex(field: Field) {
-  return BigInt(field.toString()).toString(16);
 }

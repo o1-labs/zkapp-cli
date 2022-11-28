@@ -12,9 +12,9 @@ import {
   Bool,
   Circuit,
   Signature,
-  Permissions,
-  DeployArgs,
 } from 'snarkyjs';
+
+export { Board, TicTacToe };
 
 class Optional<T> {
   isSome: Bool;
@@ -26,11 +26,11 @@ class Optional<T> {
   }
 }
 
-export class Board {
+class Board {
   board: Optional<Bool>[][];
 
   constructor(serializedBoard: Field) {
-    const bits = serializedBoard.toBits();
+    const bits = serializedBoard.toBits(18);
     let board = [];
     for (let i = 0; i < 3; i++) {
       let row = [];
@@ -53,7 +53,7 @@ export class Board {
         player.push(this.board[i][j].value);
       }
     }
-    return Field.ofBits(isPlayed.concat(player));
+    return Field.fromBits(isPlayed.concat(player));
   }
 
   update(x: Field, y: Field, playerToken: Bool) {
@@ -134,26 +134,35 @@ export class Board {
   }
 }
 
-export class TicTacToe extends SmartContract {
+class TicTacToe extends SmartContract {
   // The board is serialized as a single field element
   @state(Field) board = State<Field>();
   // false -> player 1 | true -> player 2
-  @state(Bool) nextPlayer = State<Bool>();
+  @state(Bool) nextIsPlayer2 = State<Bool>();
   // defaults to false, set to true when a player wins
   @state(Bool) gameDone = State<Bool>();
+  // the two players who are allowed to play
+  @state(PublicKey) player1 = State<PublicKey>();
+  @state(PublicKey) player2 = State<PublicKey>();
 
-  deploy(args: DeployArgs) {
-    super.deploy(args);
-    this.setPermissions({
-      ...Permissions.default(),
-      editState: Permissions.proofOrSignature(),
-    });
+  init() {
+    super.init();
+    this.gameDone.set(Bool(true));
+    this.player1.set(PublicKey.empty());
+    this.player2.set(PublicKey.empty());
   }
 
-  @method init() {
-    this.board.set(Field.zero);
-    this.nextPlayer.set(new Bool(false)); // player 1 starts
-    this.gameDone.set(new Bool(false));
+  @method startGame(player1: PublicKey, player2: PublicKey) {
+    // you can only start a new game if the current game is done
+    this.gameDone.assertEquals(Bool(true));
+    this.gameDone.set(Bool(false));
+    // set players
+    this.player1.set(player1);
+    this.player2.set(player2);
+    // reset board
+    this.board.set(Field(0));
+    // player 1 starts
+    this.nextIsPlayer2.set(Bool(false));
   }
 
   // board:
@@ -162,27 +171,22 @@ export class TicTacToe extends SmartContract {
   // 0 | x  x  x
   // 1 | x  x  x
   // 2 | x  x  x
-  @method play(
-    pubkey: PublicKey,
-    signature: Signature,
-    x: Field,
-    y: Field,
-    player1: PublicKey,
-    player2: PublicKey
-  ) {
+  @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
     // 1. if the game is already finished, abort.
-    const finished = this.gameDone.get();
-    this.gameDone.assertEquals(finished); // precondition that links this.gameDone.get() to the actual on-chain state
-    finished.assertEquals(false);
+    this.gameDone.assertEquals(Bool(false)); // precondition on this.gameDone
 
     // 2. ensure that we know the private key associated to the public key
     //    and that our public key is known to the zkApp
 
     // ensure player owns the associated private key
-    signature.verify(pubkey, [x, y]).assertEquals(true);
+    signature.verify(pubkey, [x, y]).assertTrue();
 
     // ensure player is valid
-    Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertEquals(true);
+    const player1 = this.player1.get();
+    this.player1.assertEquals(player1);
+    const player2 = this.player2.get();
+    this.player2.assertEquals(player2);
+    Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertTrue();
 
     // 3. Make sure that its our turn,
     //    and set the state for the next player
@@ -191,26 +195,26 @@ export class TicTacToe extends SmartContract {
     const player = pubkey.equals(player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
-    const nextPlayer = this.nextPlayer.get();
-    this.nextPlayer.assertEquals(nextPlayer); // precondition that links this.nextPlayer.get() to the actual on-chain state
+    const nextPlayer = this.nextIsPlayer2.get();
+    this.nextIsPlayer2.assertEquals(nextPlayer); // precondition that links this.nextIsPlayer2.get() to the actual on-chain state
     nextPlayer.assertEquals(player);
 
     // set the next player
-    this.nextPlayer.set(player.not());
+    this.nextIsPlayer2.set(player.not());
 
     // 4. get and deserialize the board
     this.board.assertEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
-    x.equals(Field.zero)
-      .or(x.equals(Field.one))
-      .or(x.equals(new Field(2)))
-      .assertEquals(true);
-    y.equals(Field.zero)
-      .or(y.equals(Field.one))
-      .or(y.equals(new Field(2)))
-      .assertEquals(true);
+    x.equals(Field(0))
+      .or(x.equals(Field(1)))
+      .or(x.equals(Field(2)))
+      .assertTrue();
+    y.equals(Field(0))
+      .or(y.equals(Field(1)))
+      .or(y.equals(Field(2)))
+      .assertTrue();
 
     board.update(x, y, player);
     this.board.set(board.serialize());

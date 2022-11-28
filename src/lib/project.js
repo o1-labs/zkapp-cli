@@ -285,6 +285,118 @@ function scaffoldSvelte() {
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
   );
+
+  const customTsConfig = ` {
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2022",
+    "lib": ["dom", "esnext"],
+    "strict": true,
+    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
+  },
+  // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
+	//
+	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
+	// from the referenced tsconfig.json - TypeScript does not merge them in
+}
+  `;
+
+  let viteConfigFileName;
+  try {
+    // determine if generated project is a ts project by looking for a tsconfig file
+    fs.readFileSync(path.join('ui', 'tsconfig.json'), 'utf-8');
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
+
+    viteConfigFileName = 'vite.config.ts';
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      // if no tsconfig is found set vite file extension to js
+      viteConfigFileName = 'vite.config.js';
+    } else {
+      console.error(err);
+    }
+  }
+
+  const vitConfig = fs.readFileSync(
+    path.join('ui', viteConfigFileName),
+    'utf8'
+  );
+
+  const customViteConfig = vitConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `,
+    optimizeDeps: { esbuildOptions: { target: 'es2020' } }
+  };`
+  );
+
+  fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
+
+  const pageSvelte = fs.readFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    'utf8'
+  );
+
+  const contractImport = `
+  import { onMount } from "svelte";
+  import { isReady, Mina, PublicKey } from 'snarkyjs';
+
+  onMount(async () => {
+    await isReady;  
+
+    const { Add } = await import('../../../contracts/build/src/')
+    // Update this to use the address (public key) for your zkApp account
+    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
+    // Berkeley Testnet B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4
+    const zkAppAddress = ''
+    // This should be removed once the zkAppAddress is updated.
+    if (!zkAppAddress) {
+      console.error(
+        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
+      );
+    }
+    const zkAppInstance = new Add(PublicKey.fromBase58(zkAppAddress))
+  });
+`;
+
+  let customPageSvelte;
+  // A script tag will be added if a user generates a skelton project from the svelte prompt
+  if (!pageSvelte.includes('<script>')) {
+    customPageSvelte = pageSvelte.replace(
+      '<h1>',
+      `
+    <script>
+    ${contractImport}
+    </script>
+
+    <h1>
+    `
+    );
+  } else {
+    customPageSvelte = pageSvelte.replace(
+      '</script>',
+      `
+${contractImport}
+</script>`
+    );
+  }
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    customPageSvelte
+  );
 }
 
 async function scaffoldNext(projectName) {
@@ -390,28 +502,26 @@ async function scaffoldNext(projectName) {
 
   const tsconfig = `
     {
-      "compilerOptions": {
-        "target": "ES2019",
+    "compilerOptions": {
+        "target": "es2020",
         "module": "es2022",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "allowJs": true,
-        "skipLibCheck": true,
         "strict": true,
-        "strictPropertyInitialization": false,
+        "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
         "esModuleInterop": true,
-        "module": "esnext",
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "incremental": true
+        "allowJs": true,
+        "declaration": true,
+        "sourceMap": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true
       },
-      "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-      "exclude": ["node_modules"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules"]
     }
   `;
 

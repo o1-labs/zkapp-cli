@@ -177,8 +177,9 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Bool } =
-    await import(snarkyjsImportPath);
+  let { isReady, shutdown, PrivateKey, Mina, Bool } = await import(
+    snarkyjsImportPath
+  );
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
@@ -261,6 +262,10 @@ async function deploy({ alias, yes }) {
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
   let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
 
+  // figure out if the zkApp has a @method init() - in that case we need to create a proof,
+  // so we need to compile no matter what, and we show a separate step to create the proof
+  let isInitMethod = zkApp._methods?.some((intf) => intf.methodName === 'init');
+
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
@@ -273,7 +278,7 @@ async function deploy({ alias, yes }) {
         cache[contractName] = { digest: '', verificationKey: '' };
       }
 
-      if (cache[contractName]?.digest === currentDigest) {
+      if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
         return {
           verificationKey: cache[contractName].verificationKey,
           isCached: true,
@@ -315,7 +320,6 @@ async function deploy({ alias, yes }) {
   const accountQuery = getAccountQuery(zkAppAddressBase58);
   const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
 
-  let nonce = 0;
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
     log(
@@ -325,13 +329,11 @@ async function deploy({ alias, yes }) {
     );
     await shutdown();
     return;
-  } else {
-    // Account nonce value is found from the network
-    nonce = Number(accountResponse.data.account.nonce);
   }
 
-  let transactionJson = await step('Build transaction', async () => {
-    addCachedAccount({ publicKey: zkAppAddressBase58, nonce });
+  let transaction = await step('Build transaction', async () => {
+    let Network = Mina.Network(graphQLEndpoint);
+    Mina.setActiveInstance(Network);
     let tx = await Mina.transaction(
       { feePayerKey: zkAppPrivateKey, fee },
       () => {
@@ -346,8 +348,19 @@ async function deploy({ alias, yes }) {
         zkapp.self.body.useFullCommitment = Bool(true);
       }
     );
-    return tx.sign().toJSON();
+    return { tx, json: tx.sign().toJSON() };
   });
+
+  if (isInitMethod) {
+    transaction = await step(
+      'Create transaction proof (takes 10-30 sec)',
+      async () => {
+        await transaction.tx.prove();
+        return { tx: transaction.tx, json: transaction.tx.sign().toJSON() };
+      }
+    );
+  }
+  let transactionJson = transaction.json;
 
   const settings = [
     [bold('Network'), reset(alias)],
