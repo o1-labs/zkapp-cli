@@ -529,7 +529,7 @@ function scaffoldNuxt() {
   // Read in the NuxtJS config file and add the middleware and vite config.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
-    'export default {', // Search for the last '}' in the file.
+    'export default {',
     `
   export default {  
     serverMiddleware: ['middleware/headers'],
