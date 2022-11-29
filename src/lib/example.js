@@ -99,7 +99,7 @@ async function fetchProjectTemplate(name, lang) {
       });
     }
 
-    sh.mv(path.join(TEMP, 'templates', projectName), name);
+    sh.mv(path.join(TEMP, templatePath), name);
     sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
