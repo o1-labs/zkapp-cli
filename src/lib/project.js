@@ -314,26 +314,16 @@ function scaffoldSvelte() {
 }
   `;
 
-  let viteConfigFileName;
   try {
-    // determine if generated project is a ts project by looking for a tsconfig file
-    fs.readFileSync(path.join('ui', 'tsconfig.json'), 'utf-8');
+    // Determine if generated project is a ts project by looking for a tsconfig file
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
-
-    viteConfigFileName = 'vite.config.ts';
   } catch (err) {
-    if (err.code === 'ENOENT') {
-      // if no tsconfig is found set vite file extension to js
-      viteConfigFileName = 'vite.config.js';
-    } else {
+    if (err.code !== 'ENOENT') {
       console.error(err);
     }
   }
 
-  const vitConfig = fs.readFileSync(
-    path.join('ui', viteConfigFileName),
-    'utf8'
-  );
+  const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
 
   const customViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
@@ -342,13 +332,13 @@ function scaffoldSvelte() {
   };`
   );
 
-  fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
+  fs.writeFileSync(path.join('ui', 'vite.config.js'), customViteConfig);
 
   const pageSvelte = fs.readFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     'utf8'
   );
-
+  console.log('page.svelte', pageSvelte);
   const contractImport = `
   import { onMount } from "svelte";
   import { isReady, Mina, PublicKey } from 'snarkyjs';
@@ -359,7 +349,7 @@ function scaffoldSvelte() {
     const { Add } = await import('../../../contracts/build/src/')
     // Update this to use the address (public key) for your zkApp account
     // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4
+    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
     const zkAppAddress = ''
     // This should be removed once the zkAppAddress is updated.
     if (!zkAppAddress) {
@@ -367,7 +357,7 @@ function scaffoldSvelte() {
         'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
       );
     }
-    const zkAppInstance = new Add(PublicKey.fromBase58(zkAppAddress))
+    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
   });
 `;
 
@@ -623,7 +613,7 @@ loadCOIServiceWorker();
 
 function scaffoldNuxt() {
   console.log("  Choose 'no version control' when prompted.");
-  spawnSync('npx', ['create-nuxt-app', 'ui'], {
+  spawnSync('npx', ['create-nuxt-app@latest', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
@@ -636,15 +626,76 @@ function scaffoldNuxt() {
     path.join('ui', 'middleware')
   );
 
-  // Read in the NuxtJS config file and add the middleware.
+  // Read in the NuxtJS config file and add the middleware and vite config.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
-  const newNuxtConfig = nuxtConfig.replace(
-    /^}(.*?)$/gm, // Search for the last '}' in the file.
+  let newNuxtConfig = nuxtConfig.replace(
+    'export default {',
     `
-  ,serverMiddleware: ['middleware/headers']
-};`
+  export default {  
+    serverMiddleware: ['middleware/headers'],
+
+    vite: {
+      build: { target: "es2020" },
+      optimizeDeps: { esbuildOptions: { target: "es2020" } },
+    },
+  `
   );
+
+  // Set ssr to false if it was set to true in nuxt scaffold
+  if (!newNuxtConfig.includes('ssr')) {
+    newNuxtConfig = newNuxtConfig.replace(
+      'export default {',
+      `
+  export default {
+    ssr: false, 
+    `
+    );
+  }
+
+  newNuxtConfig = newNuxtConfig.replace(
+    'buildModules: [',
+    `
+  buildModules: ["nuxt-vite",
+    `
+  );
+
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
+
+  // Add vite as a devDependency in the nuxt UI project.
+  let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+  pkgJson.devDependencies['nuxt-vite'] = '0.*';
+  fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+
+  const customNuxtIndex = `
+<template>
+<Tutorial />
+</template>
+
+<script>
+import { isReady, Mina, PublicKey } from 'snarkyjs'
+
+export default {
+  async mounted() {
+    await isReady
+
+    const { Add } = await import('../../contracts/build/src/')
+    // Update this to use the address (public key) for your zkApp account
+    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
+    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
+    const zkAppAddress = ''
+    // This should be removed once the zkAppAddress is updated.
+    if (!zkAppAddress) {
+      console.error(
+        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
+      )
+    }
+    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
+  }
+}
+</script>
+`;
+
+  fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
 }
 
 /**
