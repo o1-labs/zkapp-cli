@@ -32,7 +32,6 @@ jobs:
           CI: true
   sudoku-example:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     strategy:
       matrix:
         node: [16]
@@ -57,7 +56,6 @@ jobs:
           CI: true
   tictactoe-example:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     strategy:
       matrix:
         node: [16]
