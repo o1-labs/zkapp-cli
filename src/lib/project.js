@@ -285,13 +285,115 @@ function scaffoldSvelte() {
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
   );
+
+  const customTsConfig = ` {
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2022",
+    "lib": ["dom", "esnext"],
+    "strict": true,
+    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true
+  },
+  // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
+	//
+	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
+	// from the referenced tsconfig.json - TypeScript does not merge them in
+}
+  `;
+
+  try {
+    // Determine if generated project is a ts project by looking for a tsconfig file
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(err);
+    }
+  }
+
+  const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
+
+  const customViteConfig = vitConfig.replace(
+    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    `,
+    optimizeDeps: { esbuildOptions: { target: 'es2020' } }
+  };`
+  );
+
+  fs.writeFileSync(path.join('ui', 'vite.config.js'), customViteConfig);
+
+  const pageSvelte = fs.readFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    'utf8'
+  );
+  console.log('page.svelte', pageSvelte);
+  const contractImport = `
+  import { onMount } from "svelte";
+  import { isReady, Mina, PublicKey } from 'snarkyjs';
+
+  onMount(async () => {
+    await isReady;  
+
+    const { Add } = await import('../../../contracts/build/src/')
+    // Update this to use the address (public key) for your zkApp account
+    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
+    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
+    const zkAppAddress = ''
+    // This should be removed once the zkAppAddress is updated.
+    if (!zkAppAddress) {
+      console.error(
+        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
+      );
+    }
+    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
+  });
+`;
+
+  let customPageSvelte;
+  // A script tag will be added if a user generates a skelton project from the svelte prompt
+  if (!pageSvelte.includes('<script>')) {
+    customPageSvelte = pageSvelte.replace(
+      '<h1>',
+      `
+    <script>
+    ${contractImport}
+    </script>
+
+    <h1>
+    `
+    );
+  } else {
+    customPageSvelte = pageSvelte.replace(
+      '</script>',
+      `
+${contractImport}
+</script>`
+    );
+  }
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', '+page.svelte'),
+    customPageSvelte
+  );
 }
 
 async function scaffoldNext(projectName) {
   const tsPrompt = new Select({
     message: (state) =>
       message(state, 'Do you want your NextJS project to use TypeScript?'),
-    choices: ['yes', 'no'],
+    choices: ['no', 'yes'],
     prefix: (state) => prefix(state),
   });
 
@@ -305,7 +407,7 @@ async function scaffoldNext(projectName) {
 
   const ghPagesPrompt = new Select({
     message: (state) =>
-      message(state, 'Do you want to setup your project for github pages?'),
+      message(state, 'Do you want to setup your project for deployment to Github Pages?'),
     choices: ['no', 'yes'],
     prefix: (state) => prefix(state),
   });
@@ -390,28 +492,26 @@ async function scaffoldNext(projectName) {
 
   const tsconfig = `
     {
-      "compilerOptions": {
-        "target": "ES2019",
+    "compilerOptions": {
+        "target": "es2020",
         "module": "es2022",
-        "lib": ["dom", "dom.iterable", "esnext"],
-        "allowJs": true,
-        "skipLibCheck": true,
         "strict": true,
-        "strictPropertyInitialization": false,
+        "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
         "esModuleInterop": true,
-        "module": "esnext",
         "moduleResolution": "node",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "incremental": true
+        "allowJs": true,
+        "declaration": true,
+        "sourceMap": true,
+        "noFallthroughCasesInSwitch": true,
+        "allowSyntheticDefaultImports": true,
+        "isolatedModules": true
       },
-      "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-      "exclude": ["node_modules"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules"]
     }
   `;
 
@@ -513,7 +613,7 @@ loadCOIServiceWorker();
 
 function scaffoldNuxt() {
   console.log("  Choose 'no version control' when prompted.");
-  spawnSync('npx', ['create-nuxt-app', 'ui'], {
+  spawnSync('npx', ['create-nuxt-app@latest', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
@@ -526,15 +626,76 @@ function scaffoldNuxt() {
     path.join('ui', 'middleware')
   );
 
-  // Read in the NuxtJS config file and add the middleware.
+  // Read in the NuxtJS config file and add the middleware and vite config.
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
-  const newNuxtConfig = nuxtConfig.replace(
-    /^}(.*?)$/gm, // Search for the last '}' in the file.
+  let newNuxtConfig = nuxtConfig.replace(
+    'export default {',
     `
-  ,serverMiddleware: ['middleware/headers']
-};`
+  export default {  
+    serverMiddleware: ['middleware/headers'],
+
+    vite: {
+      build: { target: "es2020" },
+      optimizeDeps: { esbuildOptions: { target: "es2020" } },
+    },
+  `
   );
+
+  // Set ssr to false if it was set to true in nuxt scaffold
+  if (!newNuxtConfig.includes('ssr')) {
+    newNuxtConfig = newNuxtConfig.replace(
+      'export default {',
+      `
+  export default {
+    ssr: false, 
+    `
+    );
+  }
+
+  newNuxtConfig = newNuxtConfig.replace(
+    'buildModules: [',
+    `
+  buildModules: ["nuxt-vite",
+    `
+  );
+
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
+
+  // Add vite as a devDependency in the nuxt UI project.
+  let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+  pkgJson.devDependencies['nuxt-vite'] = '0.*';
+  fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+
+  const customNuxtIndex = `
+<template>
+<Tutorial />
+</template>
+
+<script>
+import { isReady, Mina, PublicKey } from 'snarkyjs'
+
+export default {
+  async mounted() {
+    await isReady
+
+    const { Add } = await import('../../contracts/build/src/')
+    // Update this to use the address (public key) for your zkApp account
+    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
+    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
+    const zkAppAddress = ''
+    // This should be removed once the zkAppAddress is updated.
+    if (!zkAppAddress) {
+      console.error(
+        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
+      )
+    }
+    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
+  }
+}
+</script>
+`;
+
+  fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
 }
 
 /**

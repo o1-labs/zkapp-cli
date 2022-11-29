@@ -177,8 +177,9 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { isReady, shutdown, PrivateKey, addCachedAccount, Mina, Bool } =
-    await import(snarkyjsImportPath);
+  let { isReady, shutdown, PrivateKey, Mina, Bool } = await import(
+    snarkyjsImportPath
+  );
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
   const { data: nodeStatus } = await sendGraphQL(
@@ -319,7 +320,6 @@ async function deploy({ alias, yes }) {
   const accountQuery = getAccountQuery(zkAppAddressBase58);
   const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
 
-  let nonce = 0;
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
     log(
@@ -329,13 +329,11 @@ async function deploy({ alias, yes }) {
     );
     await shutdown();
     return;
-  } else {
-    // Account nonce value is found from the network
-    nonce = Number(accountResponse.data.account.nonce);
   }
 
   let transaction = await step('Build transaction', async () => {
-    addCachedAccount({ publicKey: zkAppAddressBase58, nonce });
+    let Network = Mina.Network(graphQLEndpoint);
+    Mina.setActiveInstance(Network);
     let tx = await Mina.transaction(
       { feePayerKey: zkAppPrivateKey, fee },
       () => {
