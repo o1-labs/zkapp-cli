@@ -8,6 +8,7 @@ const glob = require('fast-glob');
 const { step } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
+const envinfo = require('envinfo');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
@@ -44,6 +45,10 @@ async function deploy({ alias, yes }) {
   const npmResponse = await fetch(
     'https://registry.npmjs.org/-/package/zkapp-cli/dist-tags'
   );
+
+  const globalInstalledPkg = await envinfo.run({
+    npmGlobalPackages: ['zkapp-cli'],
+  });
 
   if (!alias) {
     const aliases = Object.keys(config?.networks);
