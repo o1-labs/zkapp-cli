@@ -42,9 +42,11 @@ async function deploy({ alias, yes }) {
   }
 
   // Query npm registry to get the latest CLI version.
-  const npmResponse = await fetch(
+  const latestCliVersion = await fetch(
     'https://registry.npmjs.org/-/package/zkapp-cli/dist-tags'
-  );
+  )
+    .then((response) => response.json())
+    .then((response) => response['latest']);
 
   const globalInstalledPkg = await envinfo.run({
     npmGlobalPackages: ['zkapp-cli'],
