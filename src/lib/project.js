@@ -145,7 +145,7 @@ async function project({ name, ui }) {
 
   // Add a ts-watch script to the contract package.json
   let contractPkgJson = fs.readJSONSync('package.json');
-  contractPkgJson.scripts['buildw'] = 'tsc --noEmit --incremental --watch';
+  contractPkgJson.scripts['buildw'] = 'tsc -p tsconfig.json --watch';
   fs.writeJSONSync('package.json', contractPkgJson, { spaces: 2 });
 
   await step(
