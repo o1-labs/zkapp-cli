@@ -48,9 +48,15 @@ async function deploy({ alias, yes }) {
     .then((response) => response.json())
     .then((response) => response['latest']);
 
-  const globalInstalledPkg = await envinfo.run({
-    npmGlobalPackages: ['zkapp-cli'],
-  });
+  const globalInstalledPkg = await envinfo.run(
+    {
+      npmGlobalPackages: ['zkapp-cli'],
+    },
+    { json: true }
+  );
+
+  const installedCliVersion =
+    JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
 
   if (!alias) {
     const aliases = Object.keys(config?.networks);
