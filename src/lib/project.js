@@ -143,11 +143,6 @@ async function project({ name, ui }) {
   // Husky's install log msg. (Note: The contract project template commits
   // package-lock.json so we can use `npm ci` for faster installation.)
 
-  // Add a ts-watch script to the contract package.json
-  let contractPkgJson = fs.readJSONSync('package.json');
-  contractPkgJson.scripts['buildw'] = 'tsc -p tsconfig.json --watch';
-  fs.writeJSONSync('package.json', contractPkgJson, { spaces: 2 });
-
   await step(
     'NPM install',
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
