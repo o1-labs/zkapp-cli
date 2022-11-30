@@ -144,7 +144,9 @@ async function project({ name, ui }) {
   // package-lock.json so we can use `npm ci` for faster installation.)
 
   // Add a ts-watch script to the contract package.json
-  const contractPkgJson = fs.readJSONSync('package.json');
+  let contractPkgJson = fs.readJSONSync('package.json');
+  contractPkgJson.scripts['buildw'] = 'tsc --noEmit --incremental --watch';
+  fs.writeJSONSync('package.json', contractPkgJson, { spaces: 2 });
 
   await step(
     'NPM install',
