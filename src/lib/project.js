@@ -142,6 +142,7 @@ async function project({ name, ui }) {
   // `/dev/null` on Mac or Linux and 'NUL' on Windows is the only way to silence
   // Husky's install log msg. (Note: The contract project template commits
   // package-lock.json so we can use `npm ci` for faster installation.)
+
   await step(
     'NPM install',
     `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
@@ -407,7 +408,10 @@ async function scaffoldNext(projectName) {
 
   const ghPagesPrompt = new Select({
     message: (state) =>
-      message(state, 'Do you want to setup your project for deployment to Github Pages?'),
+      message(
+        state,
+        'Do you want to setup your project for deployment to Github Pages?'
+      ),
     choices: ['no', 'yes'],
     prefix: (state) => prefix(state),
   });

@@ -15,6 +15,7 @@
   "types": "build/src/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "buildw": "tsc -p tsconfig.json --watch",
     "coverage": "node --experimental-vm-modules --experimental-wasm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
