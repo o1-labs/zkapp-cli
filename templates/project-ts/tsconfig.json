@@ -17,8 +17,7 @@
     "declaration": true,
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true
+    "allowSyntheticDefaultImports": true
   },
   "include": ["./src"]
 }
