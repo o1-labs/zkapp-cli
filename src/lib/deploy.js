@@ -40,6 +40,11 @@ async function deploy({ alias, yes }) {
     return;
   }
 
+  // Query npm registry to get the latest CLI version.
+  const npmResponse = await fetch(
+    'https://registry.npmjs.org/-/package/zkapp-cli/dist-tags'
+  );
+
   if (!alias) {
     const aliases = Object.keys(config?.networks);
     if (!aliases.length) {

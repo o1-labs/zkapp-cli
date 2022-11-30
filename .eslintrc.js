@@ -13,6 +13,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     'no-constant-condition': 'off',
+    'no-unused-vars': 'off',
   },
   ignorePatterns: ['*.md'],
 };
