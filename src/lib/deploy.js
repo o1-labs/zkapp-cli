@@ -58,7 +58,7 @@ async function deploy({ alias, yes }) {
   const installedCliVersion =
     JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
 
-  if (installedCliVersion.split('.')[1] !== latestCliVersion.split('.')[1]) {
+  if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm upgrade -g zkapp-cli && npm update snarkyjs`.'));
@@ -474,6 +474,17 @@ async function deploy({ alias, yes }) {
 
   log(green(str));
   await shutdown();
+}
+
+/*
+While SnarkyJS and the zkApp CLI have a major version of 0,
+a change of the minor version represents a breaking change.
+When SnarkyJS and the zkApp have a major version of 1 or higher,
+changes to the major version of the zkapp-cli will represnt
+breaking changes, following semver.
+*/
+function hasBreakingChanges(version1, version2) {
+  return version1.split('.')[1] !== version2.split('.')[1];
 }
 
 /**
