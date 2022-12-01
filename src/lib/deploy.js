@@ -41,12 +41,7 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  // Query npm registry to get the latest CLI version.
-  const latestCliVersion = await fetch(
-    'https://registry.npmjs.org/-/package/zkapp-cli/dist-tags'
-  )
-    .then((response) => response.json())
-    .then((response) => response['latest']);
+  const latestCliVersion = await getLatestCliVersion();
 
   const globalInstalledPkg = await envinfo.run(
     {
@@ -474,6 +469,13 @@ async function deploy({ alias, yes }) {
 
   log(green(str));
   await shutdown();
+}
+
+// Query npm registry to get the latest CLI version.
+async function getLatestCliVersion() {
+  return await fetch('https://registry.npmjs.org/-/package/zkapp-cli/dist-tags')
+    .then((response) => response.json())
+    .then((response) => response['latest']);
 }
 
 /*
