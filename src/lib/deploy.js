@@ -483,8 +483,8 @@ async function getInstalledCliVersion() {
 /*
 While SnarkyJS and the zkApp CLI have a major version of 0,
 a change of the minor version represents a breaking change.
-When SnarkyJS and the zkApp have a major version of 1 or higher,
-changes to the major version of the zkapp-cli will represnt
+When SnarkyJS and the zkApp CLI have a major version of 1 or higher,
+changes to the major version of the zkApp CLI will represnt
 breaking changes, following semver.
 */
 function hasBreakingChanges(version1, version2) {
