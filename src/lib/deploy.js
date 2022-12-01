@@ -58,7 +58,7 @@ async function deploy({ alias, yes }) {
   const installedCliVersion =
     JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
 
-  if (installedCliVersion !== latestCliVersion) {
+  if (installedCliVersion.split('.')[1] !== latestCliVersion.split('.')[1]) {
     log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm upgrade -g zkapp-cli && npm update snarkyjs`.'));
