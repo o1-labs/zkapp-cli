@@ -58,6 +58,12 @@ async function deploy({ alias, yes }) {
   const installedCliVersion =
     JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
 
+  if (installedCliVersion !== latestCliVersion) {
+    log(red('You are using an old zkapp-cli version.'));
+    log(red('Run `npm upgrade -g zkapp-cli && npm update snarkyjs.'));
+    return;
+  }
+
   if (!alias) {
     const aliases = Object.keys(config?.networks);
     if (!aliases.length) {
