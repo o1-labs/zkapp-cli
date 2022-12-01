@@ -484,7 +484,13 @@ changes to the major version of the zkapp-cli will represnt
 breaking changes, following semver.
 */
 function hasBreakingChanges(version1, version2) {
-  return version1.split('.')[1] !== version2.split('.')[1];
+  const version1Arr = version1.split('.');
+  const version2Arr = version2.split('.');
+
+  if (version1Arr[0] === '0') {
+    return version1Arr[1] !== version2Arr[1];
+  }
+  return version1Arr[0] !== version2Arr[0];
 }
 
 /**
