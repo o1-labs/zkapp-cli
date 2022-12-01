@@ -42,16 +42,7 @@ async function deploy({ alias, yes }) {
   }
 
   const latestCliVersion = await getLatestCliVersion();
-
-  const globalInstalledPkg = await envinfo.run(
-    {
-      npmGlobalPackages: ['zkapp-cli'],
-    },
-    { json: true }
-  );
-
-  const installedCliVersion =
-    JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
+  const installedCliVersion = await getInstalledCliVersion();
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
@@ -476,6 +467,17 @@ async function getLatestCliVersion() {
   return await fetch('https://registry.npmjs.org/-/package/zkapp-cli/dist-tags')
     .then((response) => response.json())
     .then((response) => response['latest']);
+}
+
+async function getInstalledCliVersion() {
+  const globalInstalledPkg = await envinfo.run(
+    {
+      npmGlobalPackages: ['zkapp-cli'],
+    },
+    { json: true }
+  );
+
+  return JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
 }
 
 /*
