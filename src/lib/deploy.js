@@ -8,7 +8,6 @@ const glob = require('fast-glob');
 const { step } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
-const envinfo = require('envinfo');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
@@ -470,14 +469,16 @@ async function getLatestCliVersion() {
 }
 
 async function getInstalledCliVersion() {
-  const globalInstalledPkg = await envinfo.run(
+  const globalInstalledPkgs = sh(
+    'npm list --location=global --depth 0 --json',
     {
-      npmGlobalPackages: ['zkapp-cli'],
-    },
-    { json: true }
+      encoding: 'utf-8',
+    }
   );
 
-  return JSON.parse(globalInstalledPkg).npmGlobalPackages['zkapp-cli'];
+  return JSON.parse(globalInstalledPkgs)['dependencies']['zkapp-cli'][
+    'version'
+  ];
 }
 
 /*
