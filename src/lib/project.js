@@ -169,6 +169,7 @@ async function project({ name, ui }) {
     `\n  git push -u origin main`;
 
   console.log(green(str));
+  process.exit(0);
 }
 
 /**
