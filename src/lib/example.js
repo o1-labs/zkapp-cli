@@ -80,19 +80,26 @@ async function fetchProjectTemplate(name, lang) {
   const spin = ora(`${step}...`).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src, { force: true });
+    const TEMP = '.temp-dir';
+    const templatePath = `templates/${projectName}`;
 
-    // Note: Extract will overwrite any existing dir's contents. But we're
-    // using an always-unique name.
-    const TEMP = '.gittar-temp-dir';
-    await gittar.extract(src, TEMP, {
-      filter(path) {
-        return path.includes(`templates/${projectName}/`);
-      },
-    });
+    if (process.env.CI) {
+      sh.mkdir('-p', path.join(TEMP, templatePath));
+      sh.cp('-r', `${templatePath}/.`, path.join(TEMP, templatePath));
+    } else {
+      const src = 'github:o1-labs/zkapp-cli#main';
+      await gittar.fetch(src, { force: true });
 
-    sh.mv(path.join(TEMP, 'templates', projectName), name);
+      // Note: Extract will overwrite any existing dir's contents. But we're
+      // using an always-unique name.
+      await gittar.extract(src, TEMP, {
+        filter(path) {
+          return path.includes(templatePath);
+        },
+      });
+    }
+
+    sh.mv(path.join(TEMP, templatePath), name);
     sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
@@ -192,15 +199,22 @@ async function extractExample(example, name, lang) {
   const spin = ora(`${step}...`).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
+    const TEMP = '.temp-dir';
+    const examplePath = `examples/${example}/${lang}/src`;
 
-    // Note: Extract will overwrite any existing dir's contents. That's ok here.
-    const TEMP = '.gittar-temp-dir';
-    await gittar.extract(src, TEMP, {
-      filter(path) {
-        return path.includes(`examples/${example}/${lang}/src`);
-      },
-    });
+    if (process.env.CI) {
+      sh.mkdir('-p', path.join(TEMP, examplePath));
+      sh.cp('-r', `${examplePath}/.`, path.join(TEMP, examplePath));
+    } else {
+      const src = 'github:o1-labs/zkapp-cli#main';
+
+      // Note: Extract will overwrite any existing dir's contents. That's ok here.
+      await gittar.extract(src, TEMP, {
+        filter(path) {
+          return path.includes(examplePath);
+        },
+      });
+    }
 
     // Example not found. Delete the project template & temp dir to clean up.
     if (isEmpty(TEMP)) {
@@ -212,7 +226,7 @@ async function extractExample(example, name, lang) {
 
     // Delete the project template's `src` & use the example's `src` instead.
     sh.rm('-r', `${name}/src`);
-    sh.mv(`${TEMP}/examples/${example}/${lang}/src`, `${name}/src`);
+    sh.mv(`${TEMP}/${examplePath}`, `${name}/src`);
     sh.rm('-r', TEMP);
     spin.succeed(_green(step));
     return true;
