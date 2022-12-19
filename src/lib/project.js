@@ -340,7 +340,7 @@ function scaffoldSvelte() {
     path.join('ui', 'src', 'routes', '+page.svelte'),
     'utf8'
   );
-  console.log('page.svelte', pageSvelte);
+
   const contractImport = `
   import { onMount } from "svelte";
   import { isReady, Mina, PublicKey } from 'snarkyjs';
