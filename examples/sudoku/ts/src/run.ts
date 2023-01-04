@@ -17,7 +17,7 @@ import { AccountUpdate, Mina, PrivateKey, shutdown } from 'snarkyjs';
 const Local = Mina.LocalBlockchain();
 Mina.setActiveInstance(Local);
 
-const account = Local.testAccounts[0].privateKey;
+const { publicKey: deployerAccount } = Local.testAccounts[0];
 const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppAddress = zkAppPrivateKey.toPublicKey();
@@ -26,8 +26,8 @@ const zkApp = new SudokuZkApp(zkAppAddress);
 
 console.log('Deploying and initializing Sudoku...');
 await SudokuZkApp.compile();
-let tx = await Mina.transaction(account, () => {
-  AccountUpdate.fundNewAccount(account);
+let tx = await Mina.transaction(deployerAccount, () => {
+  AccountUpdate.fundNewAccount(deployerAccount);
   zkApp.deploy();
   zkApp.update(Sudoku.from(sudoku));
 });
@@ -52,7 +52,7 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  let tx = await Mina.transaction(account, () => {
+  let tx = await Mina.transaction(deployerAccount, () => {
     zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();
@@ -64,7 +64,7 @@ console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // submit the actual solution
 console.log('Submitting solution...');
-tx = await Mina.transaction(account, () => {
+tx = await Mina.transaction(deployerAccount, () => {
   zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
 });
 await tx.prove();
