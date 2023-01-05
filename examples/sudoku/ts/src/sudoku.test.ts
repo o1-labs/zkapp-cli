@@ -14,13 +14,15 @@ describe('sudoku', () => {
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     sudoku: number[][],
-    sender: PublicKey;
+    sender: PublicKey,
+    senderKey: PrivateKey;
 
   beforeEach(async () => {
     await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     sender = Local.testAccounts[0].publicKey;
+    senderKey = Local.testAccounts[0].privateKey;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new SudokuZkApp(zkAppAddress);
@@ -32,7 +34,7 @@ describe('sudoku', () => {
   });
 
   it('accepts a correct solution', async () => {
-    await deploy(zkApp, zkAppPrivateKey, sudoku, sender);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, sender, senderKey);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
@@ -51,7 +53,7 @@ describe('sudoku', () => {
   });
 
   it('rejects an incorrect solution', async () => {
-    await deploy(zkApp, zkAppPrivateKey, sudoku, sender);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, sender, senderKey);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -77,7 +79,8 @@ async function deploy(
   zkApp: SudokuZkApp,
   zkAppPrivateKey: PrivateKey,
   sudoku: number[][],
-  sender: PublicKey
+  sender: PublicKey,
+  senderKey: PrivateKey
 ) {
   let tx = await Mina.transaction(sender, () => {
     AccountUpdate.fundNewAccount(sender);
@@ -86,5 +89,5 @@ async function deploy(
   });
   await tx.prove();
   // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
-  await tx.sign([zkAppPrivateKey]).send();
+  await tx.sign([zkAppPrivateKey, senderKey]).send();
 }
