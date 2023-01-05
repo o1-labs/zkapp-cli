@@ -56,7 +56,7 @@ try {
     zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();
-  await tx.send();
+  await tx.sign([senderKey]).send();
 } catch {
   console.log('There was an error submitting the solution, as expected');
 }
@@ -68,7 +68,7 @@ tx = await Mina.transaction(sender, () => {
   zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
 });
 await tx.prove();
-await tx.send();
+await tx.sign([senderKey]).send();
 console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // cleanup
