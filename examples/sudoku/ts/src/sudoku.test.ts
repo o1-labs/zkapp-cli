@@ -14,13 +14,13 @@ describe('sudoku', () => {
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     sudoku: number[][],
-    account: PrivateKey;
+    account: PublicKey;
 
   beforeEach(async () => {
     await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    account = Local.testAccounts[0].privateKey;
+    account = Local.testAccounts[0].publicKey;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new SudokuZkApp(zkAppAddress);
@@ -77,7 +77,7 @@ async function deploy(
   zkApp: SudokuZkApp,
   zkAppPrivateKey: PrivateKey,
   sudoku: number[][],
-  account: PrivateKey
+  account: PublicKey
 ) {
   let tx = await Mina.transaction(account, () => {
     AccountUpdate.fundNewAccount(account);
