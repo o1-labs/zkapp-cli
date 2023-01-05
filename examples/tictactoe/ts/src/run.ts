@@ -24,7 +24,8 @@ import { TicTacToe, Board } from './tictactoe.js';
 await isReady;
 let Local = Mina.LocalBlockchain({ proofsEnabled: false });
 Mina.setActiveInstance(Local);
-const [{ privateKey: player1 }, { privateKey: player2 }] = Local.testAccounts;
+const [{ publicKey: player1, privateKey: player1Key }, { publicKey: player2 }] =
+  Local.testAccounts;
 
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppPublicKey = zkAppPrivateKey.toPublicKey();
@@ -35,7 +36,7 @@ console.log('\n\n====== DEPLOYING ======\n\n');
 const txn = await Mina.transaction(player1, () => {
   AccountUpdate.fundNewAccount(player1);
   zkApp.deploy();
-  zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+  zkApp.startGame(player1, player2);
 });
 await txn.prove();
 /**
@@ -45,7 +46,7 @@ await txn.prove();
  * (but `deploy()` changes some of those permissions to "proof" and adds the verification key that enables proofs.
  * that's why we don't need `tx.sign()` for the later transactions.)
  */
-await txn.sign([zkAppPrivateKey]).send();
+await txn.sign([zkAppPrivateKey, player1Key]).send();
 
 console.log('after transaction');
 
