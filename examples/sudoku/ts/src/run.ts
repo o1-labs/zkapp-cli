@@ -17,7 +17,7 @@ import { AccountUpdate, Mina, PrivateKey, shutdown } from 'snarkyjs';
 const Local = Mina.LocalBlockchain();
 Mina.setActiveInstance(Local);
 
-const { publicKey: deployerAccount } = Local.testAccounts[0];
+const { privateKey: senderKey, publicKey: sender } = Local.testAccounts[0];
 const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppAddress = zkAppPrivateKey.toPublicKey();
@@ -26,8 +26,8 @@ const zkApp = new SudokuZkApp(zkAppAddress);
 
 console.log('Deploying and initializing Sudoku...');
 await SudokuZkApp.compile();
-let tx = await Mina.transaction(deployerAccount, () => {
-  AccountUpdate.fundNewAccount(deployerAccount);
+let tx = await Mina.transaction(sender, () => {
+  AccountUpdate.fundNewAccount(sender);
   zkApp.deploy();
   zkApp.update(Sudoku.from(sudoku));
 });
@@ -39,7 +39,7 @@ await tx.prove();
  * (but `deploy()` changes some of those permissions to "proof" and adds the verification key that enables proofs.
  * that's why we don't need `tx.sign()` for the later transactions.)
  */
-await tx.sign([zkAppPrivateKey]).send();
+await tx.sign([zkAppPrivateKey, senderKey]).send();
 
 console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
@@ -52,7 +52,7 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  let tx = await Mina.transaction(deployerAccount, () => {
+  let tx = await Mina.transaction(sender, () => {
     zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();
@@ -64,7 +64,7 @@ console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // submit the actual solution
 console.log('Submitting solution...');
-tx = await Mina.transaction(deployerAccount, () => {
+tx = await Mina.transaction(sender, () => {
   zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
 });
 await tx.prove();
