@@ -46,7 +46,7 @@ describe('sudoku', () => {
       zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
     });
     await tx.prove();
-    await tx.send();
+    await tx.sign([senderKey]).send();
 
     isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(true);
@@ -67,7 +67,7 @@ describe('sudoku', () => {
         zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
       });
       await tx.prove();
-      await tx.send();
+      await tx.sign([senderKey]).send();
     }).rejects.toThrow(/array contains the numbers 1...9/);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
