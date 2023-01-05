@@ -14,13 +14,13 @@ describe('sudoku', () => {
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     sudoku: number[][],
-    account: PublicKey;
+    sender: PublicKey;
 
   beforeEach(async () => {
     await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    account = Local.testAccounts[0].publicKey;
+    sender = Local.testAccounts[0].publicKey;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new SudokuZkApp(zkAppAddress);
@@ -32,14 +32,14 @@ describe('sudoku', () => {
   });
 
   it('accepts a correct solution', async () => {
-    await deploy(zkApp, zkAppPrivateKey, sudoku, account);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, sender);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    let tx = await Mina.transaction(account, () => {
+    let tx = await Mina.transaction(sender, () => {
       let zkApp = new SudokuZkApp(zkAppAddress);
       zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
     });
@@ -51,7 +51,7 @@ describe('sudoku', () => {
   });
 
   it('rejects an incorrect solution', async () => {
-    await deploy(zkApp, zkAppPrivateKey, sudoku, account);
+    await deploy(zkApp, zkAppPrivateKey, sudoku, sender);
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -60,7 +60,7 @@ describe('sudoku', () => {
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
     await expect(async () => {
-      let tx = await Mina.transaction(account, () => {
+      let tx = await Mina.transaction(sender, () => {
         let zkApp = new SudokuZkApp(zkAppAddress);
         zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
       });
@@ -77,10 +77,10 @@ async function deploy(
   zkApp: SudokuZkApp,
   zkAppPrivateKey: PrivateKey,
   sudoku: number[][],
-  account: PublicKey
+  sender: PublicKey
 ) {
-  let tx = await Mina.transaction(account, () => {
-    AccountUpdate.fundNewAccount(account);
+  let tx = await Mina.transaction(sender, () => {
+    AccountUpdate.fundNewAccount(sender);
     zkApp.deploy();
     zkApp.update(Sudoku.from(sudoku));
   });
