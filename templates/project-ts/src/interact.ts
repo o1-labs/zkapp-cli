@@ -50,7 +50,7 @@ await Add.compile();
 
 // call update() and send transaction
 console.log('build transaction and create proof...');
-let tx = await Mina.transaction({ feePayerKey: zkAppKey, fee: 0.1e9 }, () => {
+let tx = await Mina.transaction({ sender: zkAppAddress, fee: 0.1e9 }, () => {
   zkApp.update();
 });
 await tx.prove();
