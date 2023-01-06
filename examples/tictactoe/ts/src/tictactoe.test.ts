@@ -12,8 +12,10 @@ import {
 } from 'snarkyjs';
 
 describe('tictactoe', () => {
-  let player1: PrivateKey,
-    player2: PrivateKey,
+  let player1: PublicKey,
+    player1Key: PrivateKey,
+    player2: PublicKey,
+    player2Key: PrivateKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
@@ -21,7 +23,10 @@ describe('tictactoe', () => {
     await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    [{ privateKey: player1 }, { privateKey: player2 }] = Local.testAccounts;
+    [
+      { publicKey: player1, privateKey: player1Key },
+      { publicKey: player2, privateKey: player2Key },
+    ] = Local.testAccounts;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
   });
@@ -35,7 +40,7 @@ describe('tictactoe', () => {
     const txn = await Mina.transaction(player1, () => {
       AccountUpdate.fundNewAccount(player1);
       zkApp.deploy();
-      zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+      zkApp.startGame(player1, player2);
     });
     await txn.prove();
     await txn.sign([zkAppPrivateKey]).send();
@@ -50,7 +55,7 @@ describe('tictactoe', () => {
     let txn = await Mina.transaction(player1, () => {
       AccountUpdate.fundNewAccount(player1);
       zkApp.deploy();
-      zkApp.startGame(player1.toPublicKey(), player2.toPublicKey());
+      zkApp.startGame(player1, player2);
     });
     await txn.prove();
     await txn.sign([zkAppPrivateKey]).send();
@@ -59,7 +64,7 @@ describe('tictactoe', () => {
     const [x, y] = [Field(0), Field(0)];
     const signature = Signature.create(player1, [x, y]);
     txn = await Mina.transaction(player1, async () => {
-      zkApp.play(player1.toPublicKey(), signature, x, y);
+      zkApp.play(player1, signature, x, y);
     });
     await txn.prove();
     await txn.send();
