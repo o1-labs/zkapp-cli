@@ -9,6 +9,7 @@ import {
   Mina,
   AccountUpdate,
   Signature,
+  zkappCommandToJson,
 } from 'snarkyjs';
 
 describe('tictactoe', () => {
@@ -58,16 +59,16 @@ describe('tictactoe', () => {
       zkApp.startGame(player1, player2);
     });
     await txn.prove();
-    await txn.sign([zkAppPrivateKey]).send();
+    await txn.sign([zkAppPrivateKey, player1Key]).send();
 
     // move
     const [x, y] = [Field(0), Field(0)];
-    const signature = Signature.create(player1, [x, y]);
+    const signature = Signature.create(player1Key, [x, y]);
     txn = await Mina.transaction(player1, async () => {
       zkApp.play(player1, signature, x, y);
     });
     await txn.prove();
-    await txn.send();
+    await txn.sign([player1Key]).send();
 
     const nextIsPlayer2 = zkApp.nextIsPlayer2.get();
     expect(nextIsPlayer2).toEqual(Bool(true));
