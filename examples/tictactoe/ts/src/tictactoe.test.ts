@@ -16,7 +16,6 @@ describe('tictactoe', () => {
   let player1: PublicKey,
     player1Key: PrivateKey,
     player2: PublicKey,
-    player2Key: PrivateKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
@@ -24,10 +23,8 @@ describe('tictactoe', () => {
     await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    [
-      { publicKey: player1, privateKey: player1Key },
-      { publicKey: player2, privateKey: player2Key },
-    ] = Local.testAccounts;
+    [{ publicKey: player1, privateKey: player1Key }, { publicKey: player2 }] =
+      Local.testAccounts;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
   });
