@@ -43,7 +43,7 @@ describe('tictactoe', () => {
       zkApp.startGame(player1, player2);
     });
     await txn.prove();
-    await txn.sign([zkAppPrivateKey]).send();
+    await txn.sign([zkAppPrivateKey, player1Key]).send();
     const board = zkApp.board.get();
     expect(board).toEqual(Field(0));
   });
