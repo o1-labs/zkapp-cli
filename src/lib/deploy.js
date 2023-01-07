@@ -184,6 +184,7 @@ async function deploy({ alias, yes }) {
 
   // import snarkyjs from the user directory
   let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
+
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
@@ -344,20 +345,17 @@ async function deploy({ alias, yes }) {
   let transaction = await step('Build transaction', async () => {
     let Network = Mina.Network(graphQLEndpoint);
     Mina.setActiveInstance(Network);
-    let tx = await Mina.transaction(
-      { feePayerKey: zkAppPrivateKey, fee },
-      () => {
-        let zkapp = new zkApp(zkAppAddress);
-        zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
-        // manually patch the tx (TODO: have this implemented properly in snarkyjs)
-        // remove the nonce precondition
-        zkapp.self.body.preconditions.account.nonce.isSome = Bool(false);
-        // don't increment the nonce
-        zkapp.self.body.incrementNonce = Bool(false);
-        // use full commitment (means with include the fee payer in the signature, so we're protected against replays)
-        zkapp.self.body.useFullCommitment = Bool(true);
-      }
-    );
+    let tx = await Mina.transaction({ sender: zkAppAddress, fee }, () => {
+      let zkapp = new zkApp(zkAppAddress);
+      zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
+      // manually patch the tx (TODO: have this implemented properly in snarkyjs)
+      // remove the nonce precondition
+      zkapp.self.body.preconditions.account.nonce.isSome = Bool(false);
+      // don't increment the nonce
+      zkapp.self.body.incrementNonce = Bool(false);
+      // use full commitment (means with include the fee payer in the signature, so we're protected against replays)
+      zkapp.self.body.useFullCommitment = Bool(true);
+    });
     return { tx, json: tx.sign().toJSON() };
   });
 
