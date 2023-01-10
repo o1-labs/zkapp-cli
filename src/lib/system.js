@@ -22,7 +22,14 @@ function system() {
     )
     .then((env) => {
       const str = 'snarkyjs: Not Found';
-      return env.replace(str, `${str} (not in a project)`);
+      return env.replace(
+        str,
+        `snarkyjs: ${
+          installedSnarkyJSversion
+            ? installedSnarkyJSversion
+            : 'not in a project'
+        }`
+      );
     })
     .then((env) => console.log(env));
 }
