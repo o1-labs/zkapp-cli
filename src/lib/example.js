@@ -6,6 +6,7 @@ const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
 const { prompt } = require('enquirer');
+const { reset } = require('chalk');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -24,6 +25,11 @@ async function example(example) {
       type: 'select',
       name: 'example',
       choices: ['sudoku', 'tictactoe'],
+      message: (state) => {
+        const style =
+          state.submitted && !state.cancelled ? state.styles.success : reset;
+        return style('Choose an example');
+      },
     });
   }
 
