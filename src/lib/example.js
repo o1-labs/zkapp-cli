@@ -6,7 +6,7 @@ const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
 const { prompt } = require('enquirer');
-const { reset } = require('chalk');
+const { red, reset } = require('chalk');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -29,6 +29,15 @@ async function example(example) {
         const style =
           state.submitted && !state.cancelled ? state.styles.success : reset;
         return style('Choose an example');
+      },
+      prefix: (state) => {
+        // Shows a cyan question mark when not submitted.
+        // Shows a green check mark if submitted.
+        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
+        if (!state.submitted) return state.symbols.question;
+        return !state.cancelled
+          ? state.symbols.check
+          : red(state.symbols.cross);
       },
     });
   }
