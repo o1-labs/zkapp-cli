@@ -1,6 +1,11 @@
 const envinfo = require('envinfo');
+const sh = require('child_process').execSync;
 
 function system() {
+  const installedPkgs = sh('npm list --all --depth 0 --json', {
+    encoding: 'utf-8',
+  });
+
   console.log('Please include the following when submitting a Github issue:');
   envinfo
     .run(
