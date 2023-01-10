@@ -5,6 +5,7 @@ const ora = require('ora');
 const sh = require('shelljs');
 const util = require('util');
 const gittar = require('gittar');
+const { prompt } = require('enquirer');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -18,11 +19,20 @@ const shExec = util.promisify(sh.exec);
  * @return {Promise<void>}
  */
 async function example(example) {
+  if (!example) {
+    const res = await prompt({
+      type: 'select',
+      name: 'example',
+      choices: ['sudoku', 'tictactoe'],
+    });
+  }
+
   const dir = findUniqueDir(example);
   const lang = 'ts';
   const isWindows = process.platform === 'win32';
 
   if (!(await fetchProjectTemplate(dir, lang))) return;
+
   if (!(await extractExample(example, dir, lang))) return;
 
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
