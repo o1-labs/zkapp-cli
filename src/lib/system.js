@@ -6,6 +6,9 @@ function system() {
     encoding: 'utf-8',
   });
 
+  const installedSnarkyJSversion =
+    JSON.parse(installedPkgs)['dependencies']?.['snarkyjs']?.['version'];
+
   console.log('Please include the following when submitting a Github issue:');
   envinfo
     .run(
