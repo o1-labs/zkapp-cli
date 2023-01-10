@@ -83,7 +83,7 @@ yargs(hideBin(process.argv))
     'Create an example project',
     {
       name: {
-        demand: true,
+        demand: false,
         string: true,
         hidden: false,
         choices: ['sudoku', 'tictactoe'],
