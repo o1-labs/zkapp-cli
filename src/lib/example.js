@@ -40,6 +40,7 @@ async function example(example) {
           : red(state.symbols.cross);
       },
     });
+    example = res.example;
   }
 
   const dir = findUniqueDir(example);
