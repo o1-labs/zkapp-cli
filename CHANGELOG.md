@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fix to show SnarkyJS version with 'zk system' command. [#349](https://github.com/o1-labs/zkapp-cli/pull/349)
+- Fix to show SnarkyJS version with `zk system` command. [#349](https://github.com/o1-labs/zkapp-cli/pull/349)
 - Allow '.js' imports to work in Jest. [#339](https://github.com/o1-labs/zkapp-cli/pull/339)
 - Minor fix to exit the cli process after generating a new project. [#330](https://github.com/o1-labs/zkapp-cli/pull/330)
 
@@ -17,25 +17,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add dropdown to select an example project. [#348](https://github.com/o1-labs/zkapp-cli/pull/348)
 - Show a warning when users must upgrade their zkApp-cli version. [#327](https://github.com/o1-labs/zkapp-cli/pull/327)
-- Add a 'tsc watch' script. [#326](https://github.com/o1-labs/zkapp-cli/pull/326)
+- Add a `tsc watch` script. [#326](https://github.com/o1-labs/zkapp-cli/pull/326)
 
 ## [0.5.4] - 2022-12-01
 
 ### Changed
 
-- Fix build errors when using 'zk file'. [#325](https://github.com/o1-labs/zkapp-cli/pull/325)
+- Fix build errors when using `zk file`. [#325](https://github.com/o1-labs/zkapp-cli/pull/325)
 
 ## [0.5.3]
 
 ### Changed
 
-- Fix template contract and add interaction script. [#320](https://github.com/o1-labs/zkapp-cli/pull/320)
+- Fix template contract, add interaction script, and upgrade to SnarkyJS `0.7.3`. [#320](https://github.com/o1-labs/zkapp-cli/pull/320)
 - Fix tictactoe example. [#318](https://github.com/o1-labs/zkapp-cli/pull/318)
 
 ## [0.5.2]
 
 ### Changed
 
+- Upgraded SnarkyJS to `0.7.2` [#316](https://github.com/o1-labs/zkapp-cli/pull/316)
 - Fix Sudoku and enable CLI to create init() proofs. [#315](https://github.com/o1-labs/zkapp-cli/pull/315)
 
 ## [0.5.1]
@@ -66,14 +67,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Exit the CLI when a project step fails. [#281](https://github.com/o1-labs/zkapp-cli/pull/281)
 - Fix confirmation step to not consume user input entered earlier. [#265](https://github.com/o1-labs/zkapp-cli/pull/265)
-- Set default verion of user's smart contract project to 0.1.0. [#264](https://github.com/o1-labs/zkapp-cli/pull/264)
+- Set default verion of user's smart contract project to `0.1.0`. [#264](https://github.com/o1-labs/zkapp-cli/pull/264)
 - Constrain valid example names for better error handling. [#263](https://github.com/o1-labs/zkapp-cli/pull/263)
 
 ### Added
 
 - Add ability to generate UI project alongsde the smart contract.
 
-  - Add an option to NextJS to set it up for github pages. [#292] https://github.com/o1-labs/zkapp-cli/pull/292)
+  - Add an option to NextJS to set it up for github pages. [#292](https://github.com/o1-labs/zkapp-cli/pull/292)
   - Import a smart contract into the NextJS UI project scaffold. [#290](https://github.com/o1-labs/zkapp-cli/pull/290)
   - Fixes to the NextJS project for snarkyjs + typescript. [#287](https://github.com/o1-labs/zkapp-cli/pull/287)
   - Add a NextJS typescript prompt. [#285](https://github.com/o1-labs/zkapp-cli/pull/285)
@@ -86,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Fix running 'zk deploy' on windows. [#256](https://github.com/o1-labs/zkapp-cli/pull/256)
+- Fix running `zk deploy` on windows. [#256](https://github.com/o1-labs/zkapp-cli/pull/256)
 
 ## [0.4.16] - 2022-9-026
 
