@@ -2,13 +2,7 @@ const envinfo = require('envinfo');
 const sh = require('child_process').execSync;
 
 function system() {
-  const installedPkgs = sh('npm list --all --depth 0 --json', {
-    encoding: 'utf-8',
-  });
-
-  const installedSnarkyJSversion =
-    JSON.parse(installedPkgs)['dependencies']?.['snarkyjs']?.['version'];
-
+  const installedSnarkyJSversion = getInstalledSnarkyJSversion();
   console.log('Please include the following when submitting a Github issue:');
   envinfo
     .run(
@@ -27,11 +21,19 @@ function system() {
         `snarkyjs: ${
           installedSnarkyJSversion
             ? installedSnarkyJSversion
-            : 'not in a project'
+            : 'Not Found (not in a project)'
         }`
       );
     })
     .then((env) => console.log(env));
+}
+
+function getInstalledSnarkyJSversion() {
+  const installedPkgs = sh('npm list --all --depth 0 --json', {
+    encoding: 'utf-8',
+  });
+
+  return JSON.parse(installedPkgs)['dependencies']?.['snarkyjs']?.['version'];
 }
 
 module.exports = { system };
