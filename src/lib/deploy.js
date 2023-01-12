@@ -473,8 +473,6 @@ async function getInstalledCliVersion() {
     encoding: 'utf-8',
   });
 
-  console.log('installedPkgs', globalInstalledPkgs);
-
   return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
     'version'
   ];
