@@ -475,8 +475,9 @@ async function getInstalledCliVersion() {
       encoding: 'utf-8',
     }
   );
+  console.log('installedPkgs', globalInstalledPkgs);
 
-  return JSON.parse(globalInstalledPkgs)['dependencies']['zkapp-cli'][
+  return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
     'version'
   ];
 }
@@ -489,8 +490,8 @@ changes to the major version of the zkApp CLI will represnt
 breaking changes, following semver.
 */
 function hasBreakingChanges(version1, version2) {
-  const version1Arr = version1.split('.');
-  const version2Arr = version2.split('.');
+  const version1Arr = version1?.split('.');
+  const version2Arr = version2?.split('.');
 
   if (version1Arr[0] === '0') {
     return version1Arr[1] !== version2Arr[1];
