@@ -469,12 +469,10 @@ async function getLatestCliVersion() {
 }
 
 async function getInstalledCliVersion() {
-  const globalInstalledPkgs = sh(
-    'npm list --location=global --depth 0 --json',
-    {
-      encoding: 'utf-8',
-    }
-  );
+  const globalInstalledPkgs = sh('npm list -g --depth 0 --json', {
+    encoding: 'utf-8',
+  });
+
   console.log('installedPkgs', globalInstalledPkgs);
 
   return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
