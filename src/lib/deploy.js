@@ -469,7 +469,7 @@ async function getLatestCliVersion() {
 }
 
 async function getInstalledCliVersion() {
-  const globalInstalledPkgs = sh('npm list -g --depth 0 --json', {
+  const globalInstalledPkgs = sh('npm list -g --depth 0 --json --silent', {
     encoding: 'utf-8',
   });
 
