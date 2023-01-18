@@ -356,7 +356,7 @@ async function deploy({ alias, yes }) {
       // use full commitment (means with include the fee payer in the signature, so we're protected against replays)
       zkapp.self.body.useFullCommitment = Bool(true);
     });
-    return { tx, json: tx.sign().toJSON() };
+    return { tx, json: tx.sign([zkAppPrivateKey]).toJSON() };
   });
 
   if (isInitMethod) {
