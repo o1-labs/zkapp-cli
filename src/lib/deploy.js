@@ -364,7 +364,10 @@ async function deploy({ alias, yes }) {
       'Create transaction proof (takes 10-30 sec)',
       async () => {
         await transaction.tx.prove();
-        return { tx: transaction.tx, json: transaction.tx.sign().toJSON() };
+        return {
+          tx: transaction.tx,
+          json: transaction.tx.sign([zkAppPrivateKey]).toJSON(),
+        };
       }
     );
   }
