@@ -19,7 +19,9 @@ import {
 let proofsEnabled = false;
 
 describe('Add', () => {
-  let sender: PublicKey,
+  let deployerAccount: PublicKey,
+    deployerKey: PrivateKey,
+    senderAccount: PublicKey,
     senderKey: PrivateKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey,
@@ -33,8 +35,10 @@ describe('Add', () => {
   beforeEach(() => {
     const Local = Mina.LocalBlockchain({ proofsEnabled });
     Mina.setActiveInstance(Local);
-    sender = Local.testAccounts[0].publicKey;
-    senderKey = Local.testAccounts[0].privateKey;
+    ({ privateKey: deployerKey, publicKey: deployerAccount } =
+      Local.testAccounts[0]);
+    ({ privateKey: senderKey, publicKey: senderAccount } =
+      Local.testAccounts[1]);
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new Add(zkAppAddress);
@@ -48,13 +52,13 @@ describe('Add', () => {
   });
 
   async function localDeploy() {
-    const txn = await Mina.transaction(sender, () => {
-      AccountUpdate.fundNewAccount(sender);
+    const txn = await Mina.transaction(deployerAccount, () => {
+      AccountUpdate.fundNewAccount(deployerAccount);
       zkApp.deploy();
     });
     await txn.prove();
     // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
-    await txn.sign([zkAppPrivateKey, senderKey]).send();
+    await txn.sign([deployerKey, zkAppPrivateKey]).send();
   }
 
   it('generates and deploys the `Add` smart contract', async () => {
@@ -67,11 +71,11 @@ describe('Add', () => {
     await localDeploy();
 
     // update transaction
-    const txn = await Mina.transaction(sender, () => {
+    const txn = await Mina.transaction(senderAccount, () => {
       zkApp.update();
     });
     await txn.prove();
-    await txn.send();
+    await txn.sign([senderKey]).send();
 
     const updatedNum = zkApp.num.get();
     expect(updatedNum).toEqual(Field(3));
