@@ -6,3 +6,6 @@ src
 
 # System
 .DS_Store
+
+# Never reveal your keys!
+keys
