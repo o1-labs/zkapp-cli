@@ -477,6 +477,7 @@ function getTxUrl(graphQLEndpoint, txn) {
       txBaseUrl = `https://berkeley.minaexplorer.com/transaction/`;
       break;
     default:
+      txBaseUrl = `https://berkeley.minaexplorer.com/transaction/`;
       break;
   }
 
