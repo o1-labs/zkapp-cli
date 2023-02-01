@@ -169,8 +169,8 @@ async function config() {
   log(green(str));
 }
 
-function getExplorerName(networkUrl) {
-  return new URL(networkUrl).hostname
+function getExplorerName(graphQLUrl) {
+  return new URL(graphQLUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
