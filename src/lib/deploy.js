@@ -192,10 +192,10 @@ async function deploy({ alias, yes }) {
     snarkyjsImportPath
   );
 
-  const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
+  const graphQLUrl = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
 
   const { data: nodeStatus } = await sendGraphQL(
-    graphQLEndpoint,
+    graphQLUrl,
     `query {
       syncStatus
     }`
@@ -330,7 +330,7 @@ async function deploy({ alias, yes }) {
 
   const zkAppAddressBase58 = zkAppAddress.toBase58();
   const accountQuery = getAccountQuery(zkAppAddressBase58);
-  const accountResponse = await sendGraphQL(graphQLEndpoint, accountQuery);
+  const accountResponse = await sendGraphQL(graphQLUrl, accountQuery);
 
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
@@ -344,7 +344,7 @@ async function deploy({ alias, yes }) {
   }
 
   let transaction = await step('Build transaction', async () => {
-    let Network = Mina.Network(graphQLEndpoint);
+    let Network = Mina.Network(graphQLUrl);
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: zkAppAddress, fee }, () => {
       let zkapp = new zkApp(zkAppAddress);
@@ -437,7 +437,7 @@ async function deploy({ alias, yes }) {
   const txn = await step('Send to network', async () => {
     const zkAppMutation = sendZkAppQuery(transactionJson);
     try {
-      return await sendGraphQL(graphQLEndpoint, zkAppMutation);
+      return await sendGraphQL(graphQLUrl, zkAppMutation);
     } catch (error) {
       return error;
     }
@@ -456,19 +456,19 @@ async function deploy({ alias, yes }) {
     `\nNext step:` +
     `\n  Your smart contract will be live (or updated)` +
     `\n  as soon as the transaction is included in a block:` +
-    `\n  ${getTxnUrl(graphQLEndpoint, txn)}`;
+    `\n  ${getTxnUrl(graphQLUrl, txn)}`;
 
   log(green(str));
   await shutdown();
 }
 
 // Get the desired blockchain explorer url with txn hash
-function getTxnUrl(graphQLEndpoint, txn) {
+function getTxnUrl(graphQLUrl, txn) {
   const MINASCAN_BASE_URL = `https://minascan.io/berkeley/zk-transaction/`;
   const MINA_EXPLORER_BASE_URL = `https://berkeley.minaexplorer.com/transaction/`;
   const randomIndex = Math.floor(Math.random() * 2);
 
-  const explorerName = new URL(graphQLEndpoint).hostname
+  const explorerName = new URL(graphQLUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
   let txnBaseUrl;
@@ -588,7 +588,7 @@ async function findSmartContractToDeploy(buildPath, contractName) {
   }
 }
 
-async function sendGraphQL(graphQLEndpoint, query) {
+async function sendGraphQL(graphQLUrl, query) {
   const controller = new AbortController();
   const timer = setTimeout(() => {
     controller.abort();
@@ -596,7 +596,7 @@ async function sendGraphQL(graphQLEndpoint, query) {
   let response;
   try {
     let body = JSON.stringify({ operationName: null, query, variables: {} });
-    response = await fetch(graphQLEndpoint, {
+    response = await fetch(graphQLUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
