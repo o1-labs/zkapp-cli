@@ -456,36 +456,36 @@ async function deploy({ alias, yes }) {
     `\nNext step:` +
     `\n  Your smart contract will be live (or updated)` +
     `\n  as soon as the transaction is included in a block:` +
-    `\n  ${getTxUrl(graphQLEndpoint, txn)}`;
+    `\n  ${getTxnUrl(graphQLEndpoint, txn)}`;
 
   log(green(str));
   await shutdown();
 }
 
 // Get the desired blockchain explorer url with txn hash
-function getTxUrl(graphQLEndpoint, txn) {
+function getTxnUrl(graphQLEndpoint, txn) {
   const MINASCAN_BASE_URL = `https://minascan.io/berkeley/zk-transaction/`;
   const MINA_EXPLORER_BASE_URL = `https://berkeley.minaexplorer.com/transaction/`;
   const randomIndex = Math.floor(Math.random() * 2);
 
-  const explorerName = graphQLEndpoint
+  const explorerName = new URL(graphQLEndpoint).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
-  let txBaseUrl;
+  let txnBaseUrl;
 
   switch (explorerName) {
     case 'minascan':
-      txBaseUrl = MINASCAN_BASE_URL;
+      txnBaseUrl = MINASCAN_BASE_URL;
       break;
     case 'minaexplorer':
-      txBaseUrl = MINA_EXPLORER_BASE_URL;
+      txnBaseUrl = MINA_EXPLORER_BASE_URL;
       break;
     default:
-      txBaseUrl = [MINASCAN_BASE_URL, MINA_EXPLORER_BASE_URL][randomIndex];
+      txnBaseUrl = [MINASCAN_BASE_URL, MINA_EXPLORER_BASE_URL][randomIndex];
       break;
   }
 
-  return `${txBaseUrl}${txn.data.sendZkapp.zkapp.hash}`;
+  return `${txnBaseUrl}${txn.data.sendZkapp.zkapp.hash}`;
 }
 
 // Query npm registry to get the latest CLI version.
