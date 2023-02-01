@@ -463,7 +463,7 @@ async function deploy({ alias, yes }) {
   await shutdown();
 }
 
-function getTxUrl(graphQLEndpoint) {
+function getTxUrl(graphQLEndpoint, txn) {
   const networkName = graphQLEndpoint
     .split('.')
     .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
@@ -479,6 +479,8 @@ function getTxUrl(graphQLEndpoint) {
     default:
       break;
   }
+
+  return `${txBaseUrl}${txn.data.sendZkapp.zkapp.hash}`;
 }
 
 // Query npm registry to get the latest CLI version.
