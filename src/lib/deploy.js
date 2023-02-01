@@ -466,7 +466,7 @@ async function deploy({ alias, yes }) {
 function getTxUrl(graphQLEndpoint, txn) {
   const explorerName = graphQLEndpoint
     .split('.')
-    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
+    .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
   let txBaseUrl;
 
   switch (explorerName) {

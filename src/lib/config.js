@@ -172,7 +172,7 @@ async function config() {
 function getExplorerName(networkUrl) {
   return networkUrl
     .split('.')
-    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
+    .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
 module.exports = {
   config,
