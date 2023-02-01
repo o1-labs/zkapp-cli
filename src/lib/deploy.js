@@ -450,10 +450,6 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  const networkName = graphQLEndpoint
-    .split('.')
-    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
-
   const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.data.sendZkapp.zkapp.hash}`; // TODO: Make the network configurable
   const str =
     `\nSuccess! Deploy transaction sent.` +
@@ -465,6 +461,22 @@ async function deploy({ alias, yes }) {
 
   log(green(str));
   await shutdown();
+}
+
+function getTxUrl(graphQLEndpoint) {
+  const networkName = graphQLEndpoint
+    .split('.')
+    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
+  let txBaseUrl;
+
+  switch (networkName) {
+    case 'minascan':
+      txBaseUrl = `https://minascan.io/berkeley/zk-transaction/`;
+      break;
+
+    default:
+      break;
+  }
 }
 
 // Query npm registry to get the latest CLI version.
