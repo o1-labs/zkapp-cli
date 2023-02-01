@@ -168,6 +168,7 @@ async function config() {
 
   log(green(str));
 }
+
 function getExplorerName(networkUrl) {
   return networkUrl
     .split('.')
