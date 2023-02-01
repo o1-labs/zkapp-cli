@@ -473,7 +473,9 @@ function getTxUrl(graphQLEndpoint) {
     case 'minascan':
       txBaseUrl = `https://minascan.io/berkeley/zk-transaction/`;
       break;
-
+    case 'minaexplorer':
+      txBaseUrl = `https://berkeley.minaexplorer.com/transaction/`;
+      break;
     default:
       break;
   }
