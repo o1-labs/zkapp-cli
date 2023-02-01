@@ -163,7 +163,7 @@ async function config() {
     `\nNext steps:` +
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
-    )}` +
+    )}&?network=${networkName}` +
     `\n  - To deploy, run: \`zk deploy ${network}\``;
 
   log(green(str));
