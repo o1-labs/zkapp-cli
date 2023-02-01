@@ -462,6 +462,7 @@ async function deploy({ alias, yes }) {
   await shutdown();
 }
 
+// Get the desired blockchain explorer url with txn hash
 function getTxUrl(graphQLEndpoint, txn) {
   const explorerName = graphQLEndpoint
     .split('.')
