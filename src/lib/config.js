@@ -156,19 +156,19 @@ async function config() {
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const networkName = getNetworkName(config?.networks[network]?.url);
+  const explorerName = getExplorerName(config?.networks[network]?.url);
 
   const str =
     `\nSuccess!\n` +
     `\nNext steps:` +
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
-    )}&?network=${networkName}` +
+    )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${network}\``;
 
   log(green(str));
 }
-function getNetworkName(networkUrl) {
+function getExplorerName(networkUrl) {
   return networkUrl
     .split('.')
     .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];

@@ -463,12 +463,12 @@ async function deploy({ alias, yes }) {
 }
 
 function getTxUrl(graphQLEndpoint, txn) {
-  const networkName = graphQLEndpoint
+  const explorerName = graphQLEndpoint
     .split('.')
     .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
   let txBaseUrl;
 
-  switch (networkName) {
+  switch (explorerName) {
     case 'minascan':
       txBaseUrl = `https://minascan.io/berkeley/zk-transaction/`;
       break;
