@@ -170,7 +170,7 @@ async function config() {
 }
 
 function getExplorerName(networkUrl) {
-  return networkUrl
+  return new URL(networkUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
