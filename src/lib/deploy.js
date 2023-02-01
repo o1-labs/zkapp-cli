@@ -193,6 +193,7 @@ async function deploy({ alias, yes }) {
   );
 
   const graphQLEndpoint = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
+
   const { data: nodeStatus } = await sendGraphQL(
     graphQLEndpoint,
     `query {
@@ -448,6 +449,10 @@ async function deploy({ alias, yes }) {
     await shutdown();
     return;
   }
+
+  const networkName = graphQLEndpoint
+    .split('.')
+    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
 
   const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.data.sendZkapp.zkapp.hash}`; // TODO: Make the network configurable
   const str =
