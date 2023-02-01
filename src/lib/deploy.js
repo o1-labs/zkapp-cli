@@ -450,14 +450,13 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  const txUrl = `https://berkeley.minaexplorer.com/transaction/${txn.data.sendZkapp.zkapp.hash}`; // TODO: Make the network configurable
   const str =
     `\nSuccess! Deploy transaction sent.` +
     `\n` +
     `\nNext step:` +
     `\n  Your smart contract will be live (or updated)` +
     `\n  as soon as the transaction is included in a block:` +
-    `\n  ${txUrl}`;
+    `\n  ${getTxUrl(graphQLEndpoint, txn)}`;
 
   log(green(str));
   await shutdown();
