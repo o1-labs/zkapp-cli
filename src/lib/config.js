@@ -156,6 +156,8 @@ async function config() {
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
+  const networkName = getNetworkName(config?.networks[network]?.url);
+
   const str =
     `\nSuccess!\n` +
     `\nNext steps:` +
@@ -166,7 +168,11 @@ async function config() {
 
   log(green(str));
 }
-
+function getNetworkName(networkUrl) {
+  return networkUrl
+    .split('.')
+    .filter((item) => (item === 'minascan') | (item === 'minaexplorer'))?.[0];
+}
 module.exports = {
   config,
 };
