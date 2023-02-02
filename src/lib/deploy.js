@@ -466,7 +466,8 @@ async function deploy({ alias, yes }) {
 function getTxnUrl(graphQLUrl, txn) {
   const MINASCAN_BASE_URL = `https://minascan.io/berkeley/zk-transaction/`;
   const MINA_EXPLORER_BASE_URL = `https://berkeley.minaexplorer.com/transaction/`;
-  const randomIndex = Math.floor(Math.random() * 2);
+  const explorers = [MINASCAN_BASE_URL, MINA_EXPLORER_BASE_URL];
+  const randomExplorersIndex = Math.floor(Math.random() * explorers.length);
 
   const explorerName = new URL(graphQLUrl).hostname
     .split('.')
@@ -481,7 +482,8 @@ function getTxnUrl(graphQLUrl, txn) {
       txnBaseUrl = MINA_EXPLORER_BASE_URL;
       break;
     default:
-      txnBaseUrl = [MINASCAN_BASE_URL, MINA_EXPLORER_BASE_URL][randomIndex];
+      // An explorer will be randomly selected from the availble explorers if the developer doesn't specify
+      txnBaseUrl = explorers[randomExplorersIndex];
       break;
   }
 
