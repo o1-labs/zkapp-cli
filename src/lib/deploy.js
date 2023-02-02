@@ -482,7 +482,7 @@ function getTxnUrl(graphQLUrl, txn) {
       txnBaseUrl = MINA_EXPLORER_BASE_URL;
       break;
     default:
-      // An explorer will be randomly selected from the availble explorers if the developer doesn't specify
+      // An explorer will be randomly selected from the available explorers if the developer doesn't specify
       txnBaseUrl = explorers[randomExplorersIndex];
       break;
   }
