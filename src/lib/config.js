@@ -10,7 +10,7 @@ const log = console.log;
 
 /**
  * Show existing deployAliases in `config.json` and allow a user to add a new
- * network and url--and generate a key pair for it.
+ * deployAlias and url--and generate a key pair for it.
  * @returns {Promise<void>}
  */
 async function config() {
@@ -34,16 +34,16 @@ async function config() {
 
   // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const network in config.deployAliases) {
-    const { url, smartContract } = config.deployAliases[network];
+  for (const deployAlias in config.deployAliases) {
+    const { url, smartContract } = config.deployAliases[deployAlias];
     tableData.push([
-      network,
+      deployAlias,
       url ?? '',
       smartContract ?? gray('(never deployed)'),
     ]);
   }
 
-  // Sort alphabetically by network name.
+  // Sort alphabetically by deployAlias name.
   tableData = tableData.sort((a, b) => a[0].localeCompare(b[0]));
 
   const tableConfig = {
@@ -68,10 +68,10 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new network:');
+  console.log('Add a new deployAlias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
-  // add a custom network.
+  // add a custom deployAlias.
 
   function formatPrefixSymbol(state) {
     // Shows a cyan question mark when not submitted.
@@ -89,7 +89,7 @@ async function config() {
   const response = await prompt([
     {
       type: 'input',
-      name: 'network',
+      name: 'deployAlias',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose a name (can be anything):');
@@ -138,29 +138,31 @@ async function config() {
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { network, url, fee } = response;
-  if (!network || !url || !fee) return;
+  const { deployAlias, url, fee } = response;
+  if (!deployAlias || !url || !fee) return;
 
   const keyPair = await step(
-    `Create key pair at keys/${network}.json`,
+    `Create key pair at keys/${deployAlias}.json`,
     async () => {
-      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
+      const client = new Client({ deployAlias: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
-      fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
+      fs.outputJsonSync(`${DIR}/keys/${deployAlias}.json`, keyPair, {
+        spaces: 2,
+      });
       return keyPair;
     }
   );
 
-  await step(`Add network to config.json`, async () => {
-    config.deployAliases[network] = {
+  await step(`Add deployAlias to config.json`, async () => {
+    config.deployAliases[deployAlias] = {
       url,
-      keyPath: `keys/${network}.json`,
+      keyPath: `keys/${deployAlias}.json`,
       fee,
     };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(config?.deployAliases[network]?.url);
+  const explorerName = getExplorerName(config?.deployAliases[deployAlias]?.url);
 
   const str =
     `\nSuccess!\n` +
@@ -168,7 +170,7 @@ async function config() {
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
     )}&?explorer=${explorerName}` +
-    `\n  - To deploy, run: \`zk deploy ${network}\``;
+    `\n  - To deploy, run: \`zk deploy ${deployAlias}\``;
 
   log(green(str));
 }
