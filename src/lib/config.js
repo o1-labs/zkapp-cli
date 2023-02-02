@@ -9,7 +9,7 @@ const Client = require('mina-signer');
 const log = console.log;
 
 /**
- * Show existing networks in `config.json` and allow a user to add a new
+ * Show existing deployAliases in `config.json` and allow a user to add a new
  * network and url--and generate a key pair for it.
  * @returns {Promise<void>}
  */
@@ -32,10 +32,10 @@ async function config() {
     return;
   }
 
-  // Build table of existing networks found in their config.json
+  // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const network in config.networks) {
-    const { url, smartContract } = config.networks[network];
+  for (const network in config.deployAliases) {
+    const { url, smartContract } = config.deployAliases[network];
     tableData.push([
       network,
       url ?? '',
@@ -50,11 +50,11 @@ async function config() {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('Networks in config.json'),
+      content: bold('DeployAliases in config.json'),
     },
   };
 
-  // Show "none found", if no networks exist.
+  // Show "none found", if no deployAliases exist.
   if (tableData.length === 1) {
     // Add some padding to empty name & url columns, to feel more natural.
     tableData[0][0] = tableData[0][0] + ' '.repeat(2);
@@ -98,7 +98,7 @@ async function config() {
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
         if (!val) return red('Name is required.');
-        if (Object.keys(config.networks).includes(val)) {
+        if (Object.keys(config.deployAliases).includes(val)) {
           return red('Name already exists.');
         }
         return true;
@@ -152,11 +152,15 @@ async function config() {
   );
 
   await step(`Add network to config.json`, async () => {
-    config.networks[network] = { url, keyPath: `keys/${network}.json`, fee };
+    config.deployAliases[network] = {
+      url,
+      keyPath: `keys/${network}.json`,
+      fee,
+    };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(config?.networks[network]?.url);
+  const explorerName = getExplorerName(config?.deployAliases[network]?.url);
 
   const str =
     `\nSuccess!\n` +
