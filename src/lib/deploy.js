@@ -51,7 +51,7 @@ async function deploy({ alias, yes }) {
   }
 
   if (!alias) {
-    const aliases = Object.keys(config?.networks);
+    const aliases = Object.keys(config?.deployAliases);
     if (!aliases.length) {
       log(red('No deploy aliases found in config.json.'));
       log(red('Run `zk config` to add a deploy alias, then try again.'));
@@ -83,13 +83,13 @@ async function deploy({ alias, yes }) {
 
   alias = alias.toLowerCase();
 
-  if (!config.networks[alias]) {
+  if (!config.deployAliases[alias]) {
     log(red('Network name not found in config.json.'));
     log(red('You can add a network by running `zk config`.'));
     return;
   }
 
-  if (!config.networks[alias].url) {
+  if (!config.deployAliases[alias].url) {
     log(red(`No 'url' property is specified for this network in config.json.`));
     log(red(`Please correct your config.json and try again.`));
     return;
@@ -159,9 +159,9 @@ async function deploy({ alias, yes }) {
     // the step formatting.
     await step('Choose smart contract', async () => {});
 
-    if (config.networks[alias]?.smartContract) {
+    if (config.deployAliases[alias]?.smartContract) {
       log(
-        `  The '${config.networks[alias]?.smartContract}' smart contract will be used\n  for this network as specified in config.json.`
+        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this network as specified in config.json.`
       );
     } else {
       log(
@@ -174,8 +174,8 @@ async function deploy({ alias, yes }) {
   // Occurs when this is the first time we're deploying to a given network.
   // Important to ensure the same smart contract will always be deployed to
   // the same network.
-  if (config.networks[alias]?.smartContract !== contractName) {
-    config.networks[alias].smartContract = contractName;
+  if (config.deployAliases[alias]?.smartContract !== contractName) {
+    config.deployAliases[alias].smartContract = contractName;
     fs.writeJSONSync(`${DIR}/config.json`, config, { spaces: 2 });
     log(
       `  Your config.json was updated to always use this\n  smart contract when deploying to this network.`
@@ -192,7 +192,7 @@ async function deploy({ alias, yes }) {
     snarkyjsImportPath
   );
 
-  const graphQLUrl = config?.networks[alias]?.url ?? DEFAULT_GRAPHQL;
+  const graphQLUrl = config?.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
   const { data: nodeStatus } = await sendGraphQL(
     graphQLUrl,
@@ -316,7 +316,7 @@ async function deploy({ alias, yes }) {
     log('  Using the cached verification key');
   }
 
-  let { fee } = config.networks[alias];
+  let { fee } = config.deployAliases[alias];
   if (!fee) {
     log(
       red(
@@ -376,7 +376,7 @@ async function deploy({ alias, yes }) {
 
   const settings = [
     [bold('Network'), reset(alias)],
-    [bold('Url'), reset(config.networks[alias].url)],
+    [bold('Url'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
@@ -556,8 +556,8 @@ async function findSmartContracts(path) {
  */
 function chooseSmartContract(config, deploy, network) {
   // If the network in config.json has a smartContract specified, use it.
-  if (config.networks[network]?.smartContract) {
-    return config.networks[network]?.smartContract;
+  if (config.deployAliases[network]?.smartContract) {
+    return config.deployAliases[network]?.smartContract;
   }
 
   // If only one smart contract exists in the build, use it.
