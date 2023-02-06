@@ -144,7 +144,7 @@ async function config() {
   const keyPair = await step(
     `Create key pair at keys/${deployAlias}.json`,
     async () => {
-      const client = new Client({ deployAlias: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
+      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
       fs.outputJsonSync(`${DIR}/keys/${deployAlias}.json`, keyPair, {
         spaces: 2,
