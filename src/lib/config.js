@@ -32,7 +32,7 @@ async function config() {
     return;
   }
 
-  // Checks to see if developer has the legacy networks config object
+  // Checks if developer has the legacy networks or deployAliases in config.json
   const deployAliasesConfigName = config?.['networks']
     ? 'networks'
     : 'deployAliases';
