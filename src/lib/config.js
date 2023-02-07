@@ -39,8 +39,8 @@ async function config() {
 
   // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const deployAlias in config.deployAliases) {
-    const { url, smartContract } = config.deployAliases[deployAlias];
+  for (const deployAlias in config[deployAliasesConfigName]) {
+    const { url, smartContract } = config[deployAliasesConfigName][deployAlias];
     tableData.push([
       deployAlias,
       url ?? '',
@@ -103,7 +103,7 @@ async function config() {
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
         if (!val) return red('Name is required.');
-        if (Object.keys(config.deployAliases).includes(val)) {
+        if (Object.keys(config[deployAliasesConfigName]).includes(val)) {
           return red('Name already exists.');
         }
         return true;
@@ -159,7 +159,7 @@ async function config() {
   );
 
   await step(`Add deployAlias to config.json`, async () => {
-    config.deployAliases[deployAlias] = {
+    config[deployAliasesConfigName][deployAlias] = {
       url,
       keyPath: `keys/${deployAlias}.json`,
       fee,
