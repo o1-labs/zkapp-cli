@@ -32,6 +32,11 @@ async function config() {
     return;
   }
 
+  // Checks to see if developer has the legacy networks config object
+  const deployAliasesConfigName = config?.['networks']
+    ? 'networks'
+    : 'deployAliases';
+
   // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
   for (const deployAlias in config.deployAliases) {
