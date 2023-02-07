@@ -9,7 +9,7 @@ describe('deploy.js', () => {
       it('should select that smart contract', () => {
         const config = {
           version: 1,
-          networks: {
+          deployAliases: {
             mainnet: {
               smartContract: 'Foo',
             },
@@ -17,24 +17,36 @@ describe('deploy.js', () => {
         };
         const deploy = {};
         const network = 'mainnet';
-        const result = chooseSmartContract(config, deploy, network);
+        const deployAliasesConfigName = 'deployAliases';
+        const result = chooseSmartContract(
+          config,
+          deploy,
+          deployAliasesConfigName,
+          network
+        );
         expect(result).toEqual('Foo');
       });
     });
     describe('if the network in config.json does NOT have a smartContract specified', () => {
       const config = {
         version: 1,
-        networks: {
+        deployAliases: {
           mainnet: {},
         },
       };
+      const deployAliasesConfigName = 'deployAliases';
       const network = 'mainnet';
       describe('if only one smart contract exists in the build (deploy.json)', () => {
         it('should select that smart contract', () => {
           const deploy = {
             smartContracts: ['Bar'],
           };
-          const result = chooseSmartContract(config, deploy, network);
+          const result = chooseSmartContract(
+            config,
+            deploy,
+            deployAliasesConfigName,
+            network
+          );
           expect(result).toEqual('Bar');
         });
       });
@@ -43,7 +55,12 @@ describe('deploy.js', () => {
           const deploy = {
             smartContracts: ['Foo', 'Bar'],
           };
-          const result = chooseSmartContract(config, deploy, network);
+          const result = chooseSmartContract(
+            config,
+            deploy,
+            deployAliasesConfigName,
+            network
+          );
           expect(result).toEqual(''); // falsy
         });
       });
