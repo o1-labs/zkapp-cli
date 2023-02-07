@@ -167,7 +167,9 @@ async function config() {
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(config?.deployAliases[deployAlias]?.url);
+  const explorerName = getExplorerName(
+    config?.[deployAliasesConfigName][deployAlias]?.url
+  );
 
   const str =
     `\nSuccess!\n` +
