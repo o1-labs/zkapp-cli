@@ -33,14 +33,12 @@ async function config() {
   }
 
   // Checks if developer has the legacy networks or deployAliases in config.json
-  const deployAliasesConfigName = config?.['networks']
-    ? 'networks'
-    : 'deployAliases';
+  if (!config.hasOwn('deployAliases')) config.deployAliases = config?.networks;
 
   // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const deployAlias in config[deployAliasesConfigName]) {
-    const { url, smartContract } = config[deployAliasesConfigName][deployAlias];
+  for (const deployAlias in config.deployAliases) {
+    const { url, smartContract } = config.deployAliases[deployAlias];
     tableData.push([
       deployAlias,
       url ?? '',
@@ -103,7 +101,7 @@ async function config() {
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
         if (!val) return red('Name is required.');
-        if (Object.keys(config[deployAliasesConfigName]).includes(val)) {
+        if (Object.keys(config.deployAliases).includes(val)) {
           return red('Name already exists.');
         }
         return true;
@@ -159,7 +157,7 @@ async function config() {
   );
 
   await step(`Add deployAlias to config.json`, async () => {
-    config[deployAliasesConfigName][deployAlias] = {
+    config.deployAliases[deployAlias] = {
       url,
       keyPath: `keys/${deployAlias}.json`,
       fee,
@@ -167,9 +165,7 @@ async function config() {
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(
-    config?.[deployAliasesConfigName][deployAlias]?.url
-  );
+  const explorerName = getExplorerName(config.deployAliases[deployAlias]?.url);
 
   const str =
     `\nSuccess!\n` +
