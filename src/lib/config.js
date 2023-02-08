@@ -32,7 +32,7 @@ async function config() {
     return;
   }
 
-  // Checks if developer has the legacy networks or deployAliases in config.json
+  // Checks if developer has the legacy networks or deploy aliases in config.json
   if (!config.hasOwn('deployAliases')) config.deployAliases = config?.networks;
 
   // Build table of existing deployAliases found in their config.json
@@ -53,7 +53,7 @@ async function config() {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('DeployAliases in config.json'),
+      content: bold('Deploy Aliases in config.json'),
     },
   };
 
@@ -71,7 +71,7 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new deployAlias:');
+  console.log('Add a new deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
   // add a custom deployAlias.
@@ -156,7 +156,7 @@ async function config() {
     }
   );
 
-  await step(`Add deployAlias to config.json`, async () => {
+  await step(`Add deploy alias to config.json`, async () => {
     config.deployAliases[deployAlias] = {
       url,
       keyPath: `keys/${deployAlias}.json`,
