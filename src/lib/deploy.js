@@ -15,7 +15,7 @@ const log = console.log;
 const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
- * Deploy a smart contract to the specified deployAlias. If no deployAlias param is
+ * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
  * provided, yargs will tell the user that the deployAlias param is required.
  * @param {string} alias   The deploy alias to deploy to.
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
@@ -42,7 +42,8 @@ async function deploy({ alias, yes }) {
 
   const latestCliVersion = await getLatestCliVersion();
   const installedCliVersion = await getInstalledCliVersion();
-  // Checks if developer has the legacy networks or deployAliases in config.json
+
+  // Checks if developer has the legacy networks or deploy aliases in config.json
   if (!config.hasOwn('deployAliases')) config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
@@ -86,13 +87,17 @@ async function deploy({ alias, yes }) {
   alias = alias.toLowerCase();
 
   if (!config.deployAliases[alias]) {
-    log(red('Network name not found in config.json.'));
-    log(red('You can add a network by running `zk config`.'));
+    log(red('Deploy Alias name not found in config.json.'));
+    log(red('You can add a deploy alias by running `zk config`.'));
     return;
   }
 
   if (!config.deployAliases[alias].url) {
-    log(red(`No 'url' property is specified for this network in config.json.`));
+    log(
+      red(
+        `No 'url' property is specified for this deploy alias in config.json.`
+      )
+    );
     log(red(`Please correct your config.json and try again.`));
     return;
   }
@@ -129,10 +134,10 @@ async function deploy({ alias, yes }) {
     return { smartContracts };
   });
 
-  // Identify which smart contract should be deployed for this network.
+  // Identify which smart contract should be deployed for this deploy alias.
   let contractName = chooseSmartContract(config, build, alias);
 
-  // If no smart contract is specified for this network in config.json &
+  // If no smart contract is specified for this deploy alias in config.json &
   // 2+ smart contracts exist in build.json, ask which they want to use.
   if (!contractName) {
     const res = await prompt({
@@ -163,7 +168,7 @@ async function deploy({ alias, yes }) {
 
     if (config.deployAliases[alias]?.smartContract) {
       log(
-        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this network as specified in config.json.`
+        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
       );
     } else {
       log(
@@ -172,15 +177,15 @@ async function deploy({ alias, yes }) {
     }
   }
 
-  // Set the default smartContract name for this network in config.json.
-  // Occurs when this is the first time we're deploying to a given network.
+  // Set the default smartContract name for this deploy alias in config.json.
+  // Occurs when this is the first time we're deploying to a given deploy alias.
   // Important to ensure the same smart contract will always be deployed to
-  // the same network.
+  // the same deploy alias.
   if (config.deployAliases[alias]?.smartContract !== contractName) {
     config.deployAliases[alias].smartContract = contractName;
     fs.writeJSONSync(`${DIR}/config.json`, config, { spaces: 2 });
     log(
-      `  Your config.json was updated to always use this\n  smart contract when deploying to this network.`
+      `  Your config.json was updated to always use this\n  smart contract when deploying to this deploy alias.`
     );
   }
 
@@ -377,7 +382,7 @@ async function deploy({ alias, yes }) {
   let transactionJson = transaction.json;
 
   const settings = [
-    [bold('Network'), reset(alias)],
+    [bold('Deploy Alias'), reset(alias)],
     [bold('Url'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
@@ -551,7 +556,7 @@ async function findSmartContracts(path) {
 }
 
 /**
- * Choose which smart contract should be deployed for this network.
+ * Choose which smart contract should be deployed for this deploy alias.
  * @param {object} config  The config.json in object format.
  * @param {object} deploy  The build/build.json in object format.
  * @returns {string}       The smart contract name.
