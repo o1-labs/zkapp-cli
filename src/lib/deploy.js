@@ -44,7 +44,8 @@ async function deploy({ alias, yes }) {
   const installedCliVersion = await getInstalledCliVersion();
 
   // Checks if developer has the legacy networks or deploy aliases in config.json
-  if (!config.hasOwn('deployAliases')) config.deployAliases = config?.networks;
+  if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
+    config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
@@ -559,6 +560,7 @@ async function findSmartContracts(path) {
  * Choose which smart contract should be deployed for this deploy alias.
  * @param {object} config  The config.json in object format.
  * @param {object} deploy  The build/build.json in object format.
+ * @param {string} deployAliasName The deploy alias name.
  * @returns {string}       The smart contract name.
  */
 function chooseSmartContract(config, deploy, deployAliasName) {

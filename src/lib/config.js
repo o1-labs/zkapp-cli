@@ -33,7 +33,8 @@ async function config() {
   }
 
   // Checks if developer has the legacy networks or deploy aliases in config.json
-  if (!config.hasOwn('deployAliases')) config.deployAliases = config?.networks;
+  if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
+    config.deployAliases = config?.networks;
 
   // Build table of existing deployAliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
