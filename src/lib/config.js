@@ -9,8 +9,8 @@ const Client = require('mina-signer');
 const log = console.log;
 
 /**
- * Show existing deployAliases in `config.json` and allow a user to add a new
- * deployAlias and url--and generate a key pair for it.
+ * Show existing deploy aliases in `config.json` and allow a user to add a new
+ * deploy alias and url--and generate a key pair for it.
  * @returns {Promise<void>}
  */
 async function config() {
@@ -36,7 +36,7 @@ async function config() {
   if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
     config.deployAliases = config?.networks;
 
-  // Build table of existing deployAliases found in their config.json
+  // Build table of existing deploy aliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
   for (const deployAlias in config.deployAliases) {
     const { url, smartContract } = config.deployAliases[deployAlias];
@@ -47,7 +47,7 @@ async function config() {
     ]);
   }
 
-  // Sort alphabetically by deployAlias name.
+  // Sort alphabetically by deploy alias name.
   tableData = tableData.sort((a, b) => a[0].localeCompare(b[0]));
 
   const tableConfig = {
@@ -58,7 +58,7 @@ async function config() {
     },
   };
 
-  // Show "none found", if no deployAliases exist.
+  // Show "none found", if no deploy aliases exist.
   if (tableData.length === 1) {
     // Add some padding to empty name & url columns, to feel more natural.
     tableData[0][0] = tableData[0][0] + ' '.repeat(2);
@@ -75,7 +75,7 @@ async function config() {
   console.log('Add a new deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
-  // add a custom deployAlias.
+  // add a custom deploy alias.
 
   function formatPrefixSymbol(state) {
     // Shows a cyan question mark when not submitted.
