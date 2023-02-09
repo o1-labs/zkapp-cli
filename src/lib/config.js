@@ -38,10 +38,10 @@ async function config() {
 
   // Build table of existing deploy aliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const deployAlias in config.deployAliases) {
-    const { url, smartContract } = config.deployAliases[deployAlias];
+  for (const deployAliasName in config.deployAliases) {
+    const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
-      deployAlias,
+      deployAliasName,
       url ?? '',
       smartContract ?? gray('(never deployed)'),
     ]);
@@ -54,7 +54,7 @@ async function config() {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('Deploy Aliases in config.json'),
+      content: bold('Deploy aliases in config.json'),
     },
   };
 
@@ -93,7 +93,7 @@ async function config() {
   const response = await prompt([
     {
       type: 'input',
-      name: 'deployAlias',
+      name: 'deployAliasName',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose a name (can be anything):');
@@ -142,15 +142,15 @@ async function config() {
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAlias, url, fee } = response;
-  if (!deployAlias || !url || !fee) return;
+  const { deployAliasName, url, fee } = response;
+  if (!deployAliasName || !url || !fee) return;
 
   const keyPair = await step(
-    `Create key pair at keys/${deployAlias}.json`,
+    `Create key pair at keys/${deployAliasName}.json`,
     async () => {
       const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
-      fs.outputJsonSync(`${DIR}/keys/${deployAlias}.json`, keyPair, {
+      fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
         spaces: 2,
       });
       return keyPair;
@@ -158,15 +158,17 @@ async function config() {
   );
 
   await step(`Add deploy alias to config.json`, async () => {
-    config.deployAliases[deployAlias] = {
+    config.deployAliases[deployAliasName] = {
       url,
-      keyPath: `keys/${deployAlias}.json`,
+      keyPath: `keys/${deployAliasName}.json`,
       fee,
     };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(config.deployAliases[deployAlias]?.url);
+  const explorerName = getExplorerName(
+    config.deployAliases[deployAliasName]?.url
+  );
 
   const str =
     `\nSuccess!\n` +
@@ -174,7 +176,7 @@ async function config() {
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
     )}&?explorer=${explorerName}` +
-    `\n  - To deploy, run: \`zk deploy ${deployAlias}\``;
+    `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
 }
