@@ -16,7 +16,7 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
 
 /**
  * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
- * provided, yargs will tell the user that the deployAlias param is required.
+ * provided, yargs will tell the user that the deploy alias param is required.
  * @param {string} alias   The deploy alias to deploy to.
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
  * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
@@ -88,7 +88,7 @@ async function deploy({ alias, yes }) {
   alias = alias.toLowerCase();
 
   if (!config.deployAliases[alias]) {
-    log(red('Deploy Alias name not found in config.json.'));
+    log(red('Deploy alias name not found in config.json.'));
     log(red('You can add a deploy alias by running `zk config`.'));
     return;
   }
@@ -564,7 +564,7 @@ async function findSmartContracts(path) {
  * @returns {string}       The smart contract name.
  */
 function chooseSmartContract(config, deploy, deployAliasName) {
-  // If the deployAlias in config.json has a smartContract specified, use it.
+  // If the deploy alias in config.json has a smartContract specified, use it.
   if (config.deployAliases[deployAliasName]?.smartContract) {
     return config.deployAliases[deployAliasName]?.smartContract;
   }
@@ -575,7 +575,7 @@ function chooseSmartContract(config, deploy, deployAliasName) {
   }
 
   // If 2+ smartContract classes exist in build.json, return falsy.
-  // We'll need to ask the user which they want to use for this deployAlias.
+  // We'll need to ask the user which they want to use for this deploy alias.
   return '';
 }
 
