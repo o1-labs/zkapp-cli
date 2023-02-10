@@ -62,4 +62,10 @@ async function warmGittarCache() {
   }
 }
 
-async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {}
+async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {
+  const gittarTimeoutPromise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(null);
+    }, maxTimeLimit);
+  });
+}
