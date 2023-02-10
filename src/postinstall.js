@@ -11,7 +11,8 @@ const gittar = require('gittar');
 const shExec = util.promisify(sh.exec);
 
 (async () => {
-  await warmNpmCache();
+  gittarFetchInTimeLimit(100, warmNpmCache);
+  // await warmNpmCache();
   await warmGittarCache();
 })();
 
@@ -56,29 +57,35 @@ async function warmGittarCache() {
 
   try {
     console.log('  Fetching project template.');
+
     const maxTimeLimit = 7000;
     const src = 'github:o1-labs/zkapp-cli#main';
     const response = await gittarFetchInTimeLimit(
-      maxTimeLimit,
-      gittar.fetch(src, { force: true })
+      gittar.fetch(src, { force: true }),
+      maxTimeLimit
     );
-    if (response === null) return;
+
+    if (response === null) {
+      console.log('  Skip warm cache for project template');
+      return;
+    }
   } catch (err) {
     console.error(err);
   }
 }
 
-async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {
+async function gittarFetchInTimeLimit(gittarFetch, maxTimeLimit) {
   let gittarTimeout;
-  const gittarTimeoutPromise = new Promise((resolve) => {
+
+  const gittarTimeoutPromise = new Promise((resolve, reject) => {
     gittarTimeout = setTimeout(() => {
       resolve(null);
     }, maxTimeLimit);
   });
 
-  if (gittarTimeout) clearTimeout(gittarTimeout);
-
   const response = await Promise.race([gittarFetch, gittarTimeoutPromise]);
+
+  if (gittarTimeout) clearTimeout(gittarTimeout);
 
   return response;
 }
