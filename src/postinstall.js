@@ -43,6 +43,7 @@ async function warmNpmCache() {
 
   try {
     for await (const pkgWithVersion of toCache) {
+      console.log(`  Adding ${pkgWithVersion} to the cache.`);
       await shExec(`npm cache add ${pkgWithVersion}`);
     }
     console.log('    Done.');
