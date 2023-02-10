@@ -64,11 +64,14 @@ async function warmGittarCache() {
 }
 
 async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {
-  const gittarTimeoutPromise = new Promise((resolve, reject) => {
-    setTimeout(() => {
+  let gittarTimeout;
+  const gittarTimeoutPromise = new Promise((resolve) => {
+    gittarTimeout = setTimeout(() => {
       resolve(null);
     }, maxTimeLimit);
   });
+
+  if (gittarTimeout) clearTimeout(gittarTimeout);
 
   const response = await Promise.race([gittarFetch, gittarTimeoutPromise]);
 
