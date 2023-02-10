@@ -56,8 +56,10 @@ async function warmGittarCache() {
 
   try {
     const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src, { force: true });
+    gittar.fetch(src, { force: true });
   } catch (err) {
     console.error(err);
   }
 }
+
+async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {}
