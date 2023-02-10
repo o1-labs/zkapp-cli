@@ -22,7 +22,6 @@ const shExec = util.promisify(sh.exec);
  */
 async function warmNpmCache() {
   console.log('  Warm NPM cache for project template deps.');
-
   // cwd is the root dir where zkapp-cli's package.json is located.
   const tsProj = fs.readFileSync(
     path.join('templates', 'project-ts', 'package.json'),
@@ -70,4 +69,8 @@ async function gittarFetchInTimeLimit(maxTimeLimit, gittarFetch) {
       resolve(null);
     }, maxTimeLimit);
   });
+
+  const response = await Promise.race([gittarFetch, gittarTimeoutPromise]);
+
+  return response;
 }
