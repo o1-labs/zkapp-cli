@@ -55,7 +55,7 @@ async function warmGittarCache() {
   console.log('  Warm cache for project template.');
 
   try {
-    const maxTimeLimit = 7000;
+    const maxTimeLimit = 15000;
     const src = 'github:o1-labs/zkapp-cli#main';
     console.log('  Fetching project template.');
     const response = await gittarFetchInTimeLimit(
