@@ -35,7 +35,7 @@ async function config() {
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
   if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
     Object.assign(config, { deployAliases: config.networks });
-    delete config['networks'];
+    delete config.networks;
   }
 
   // Build table of existing deploy aliases found in their config.json
