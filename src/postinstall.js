@@ -56,6 +56,7 @@ async function warmGittarCache() {
   console.log('  Warm cache for project template.');
 
   try {
+    console.log('  Fetching project template.');
     const src = 'github:o1-labs/zkapp-cli#main';
     gittar.fetch(src, { force: true });
   } catch (err) {
