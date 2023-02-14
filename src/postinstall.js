@@ -43,6 +43,7 @@ async function warmNpmCache() {
 
   try {
     for await (const pkgWithVersion of toCache) {
+      console.log(`  Adding ${pkgWithVersion} to the cache.`);
       await shExec(`npm cache add ${pkgWithVersion}`);
     }
     console.log('    Done.');
@@ -55,9 +56,37 @@ async function warmGittarCache() {
   console.log('  Warm cache for project template.');
 
   try {
+    const fetchMaxTimeLimit = 15000;
     const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src, { force: true });
+    console.log('  Fetching project template.');
+    // Skips "Warm cache for project template" step if operation takes
+    // longer than the fetch max time limit.
+    const response = await executeInTimeLimit(
+      gittar.fetch(src, { force: true }),
+      fetchMaxTimeLimit
+    );
+
+    if (response === null) {
+      console.log('  Skip warm cache for project template');
+      return;
+    }
   } catch (err) {
     console.error(err);
   }
+}
+
+async function executeInTimeLimit(operation, maxTimeLimit) {
+  let timeout;
+
+  const timeoutPromise = new Promise((resolve, reject) => {
+    timeout = setTimeout(() => {
+      resolve(null);
+    }, maxTimeLimit);
+  });
+
+  const response = await Promise.race([operation, timeoutPromise]);
+
+  if (timeout) clearTimeout(timeout);
+
+  return response;
 }
