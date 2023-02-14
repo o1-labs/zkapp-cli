@@ -22,6 +22,7 @@ const shExec = util.promisify(sh.exec);
  */
 async function warmNpmCache() {
   console.log('  Warm NPM cache for project template deps.');
+
   // cwd is the root dir where zkapp-cli's package.json is located.
   const tsProj = fs.readFileSync(
     path.join('templates', 'project-ts', 'package.json'),
@@ -41,7 +42,6 @@ async function warmNpmCache() {
   }
 
   try {
-    const addPkgMaxTimeLimit = 2000;
     for await (const pkgWithVersion of toCache) {
       console.log(`  Adding ${pkgWithVersion} to the cache.`);
       await shExec(`npm cache add ${pkgWithVersion}`);
