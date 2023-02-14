@@ -41,9 +41,20 @@ async function warmNpmCache() {
   }
 
   try {
+    const addPkgMaxTimeLimit = 1500;
     for await (const pkgWithVersion of toCache) {
       console.log(`  Adding ${pkgWithVersion} to the cache.`);
-      await shExec(`npm cache add ${pkgWithVersion}`);
+      // Skips "Warm NPM cache for project template deps" steps  if adding
+      // a pacakage takes longer than the add package max time limit.
+      const npmCacheResponse = await executeInTimeLimit(
+        shExec(`npm cache add ${pkgWithVersion}`),
+        addPkgMaxTimeLimit
+      );
+
+      if (npmCacheResponse === null) {
+        console.log('  Skip warm NPM cache for project template');
+        return;
+      }
     }
     console.log('    Done.');
   } catch (err) {
@@ -55,12 +66,14 @@ async function warmGittarCache() {
   console.log('  Warm cache for project template.');
 
   try {
-    const maxTimeLimit = 15000;
+    const fetchMaxTimeLimit = 15000;
     const src = 'github:o1-labs/zkapp-cli#main';
     console.log('  Fetching project template.');
+    // Skips "Warm cache for project template" step if operation takes
+    // linger than fetch max time limit.
     const response = await executeInTimeLimit(
       gittar.fetch(src, { force: true }),
-      maxTimeLimit
+      fetchMaxTimeLimit
     );
 
     if (response === null) {
