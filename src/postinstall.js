@@ -44,17 +44,7 @@ async function warmNpmCache() {
     const addPkgMaxTimeLimit = 2000;
     for await (const pkgWithVersion of toCache) {
       console.log(`  Adding ${pkgWithVersion} to the cache.`);
-      // Skips "Warm NPM cache for project template deps" steps  if adding
-      // a pacakage takes longer than the add package max time limit.
-      const npmCacheResponse = await executeInTimeLimit(
-        shExec(`npm cache add ${pkgWithVersion}`),
-        addPkgMaxTimeLimit
-      );
-
-      if (npmCacheResponse === null) {
-        console.log('  Skip warm NPM cache for project template');
-        return;
-      }
+      await shExec(`npm cache add ${pkgWithVersion}`);
     }
     console.log('    Done.');
   } catch (err) {
