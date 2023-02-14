@@ -9,8 +9,8 @@ const Client = require('mina-signer');
 const log = console.log;
 
 /**
- * Show existing networks in `config.json` and allow a user to add a new
- * network and url--and generate a key pair for it.
+ * Show existing deploy aliases in `config.json` and allow a user to add a new
+ * deploy alias and url--and generate a key pair for it.
  * @returns {Promise<void>}
  */
 async function config() {
@@ -32,29 +32,35 @@ async function config() {
     return;
   }
 
-  // Build table of existing networks found in their config.json
+  // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
+  if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
+    Object.assign(config, { deployAliases: config.networks });
+    delete config.networks;
+  }
+
+  // Build table of existing deploy aliases found in their config.json
   let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
-  for (const network in config.networks) {
-    const { url, smartContract } = config.networks[network];
+  for (const deployAliasName in config.deployAliases) {
+    const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
-      network,
+      deployAliasName,
       url ?? '',
       smartContract ?? gray('(never deployed)'),
     ]);
   }
 
-  // Sort alphabetically by network name.
+  // Sort alphabetically by deploy alias name.
   tableData = tableData.sort((a, b) => a[0].localeCompare(b[0]));
 
   const tableConfig = {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('Networks in config.json'),
+      content: bold('Deploy aliases in config.json'),
     },
   };
 
-  // Show "none found", if no networks exist.
+  // Show "none found", if no deploy aliases exist.
   if (tableData.length === 1) {
     // Add some padding to empty name & url columns, to feel more natural.
     tableData[0][0] = tableData[0][0] + ' '.repeat(2);
@@ -68,10 +74,10 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new network:');
+  console.log('Add a new deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
-  // add a custom network.
+  // add a custom deploy alias.
 
   function formatPrefixSymbol(state) {
     // Shows a cyan question mark when not submitted.
@@ -89,7 +95,7 @@ async function config() {
   const response = await prompt([
     {
       type: 'input',
-      name: 'network',
+      name: 'deployAliasName',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose a name (can be anything):');
@@ -98,7 +104,7 @@ async function config() {
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
         if (!val) return red('Name is required.');
-        if (Object.keys(config.networks).includes(val)) {
+        if (Object.keys(config.deployAliases).includes(val)) {
           return red('Name already exists.');
         }
         return true;
@@ -138,25 +144,33 @@ async function config() {
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { network, url, fee } = response;
-  if (!network || !url || !fee) return;
+  const { deployAliasName, url, fee } = response;
+  if (!deployAliasName || !url || !fee) return;
 
   const keyPair = await step(
-    `Create key pair at keys/${network}.json`,
+    `Create key pair at keys/${deployAliasName}.json`,
     async () => {
       const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
       let keyPair = client.genKeys();
-      fs.outputJsonSync(`${DIR}/keys/${network}.json`, keyPair, { spaces: 2 });
+      fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
+        spaces: 2,
+      });
       return keyPair;
     }
   );
 
-  await step(`Add network to config.json`, async () => {
-    config.networks[network] = { url, keyPath: `keys/${network}.json`, fee };
+  await step(`Add deploy alias to config.json`, async () => {
+    config.deployAliases[deployAliasName] = {
+      url,
+      keyPath: `keys/${deployAliasName}.json`,
+      fee,
+    };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
   });
 
-  const explorerName = getExplorerName(config?.networks[network]?.url);
+  const explorerName = getExplorerName(
+    config.deployAliases[deployAliasName]?.url
+  );
 
   const str =
     `\nSuccess!\n` +
@@ -164,7 +178,7 @@ async function config() {
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
     )}&?explorer=${explorerName}` +
-    `\n  - To deploy, run: \`zk deploy ${network}\``;
+    `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
 }

@@ -9,32 +9,34 @@ describe('deploy.js', () => {
       it('should select that smart contract', () => {
         const config = {
           version: 1,
-          networks: {
+          deployAliases: {
             mainnet: {
               smartContract: 'Foo',
             },
           },
         };
         const deploy = {};
-        const network = 'mainnet';
-        const result = chooseSmartContract(config, deploy, network);
+        const deployAliasName = 'mainnet';
+
+        const result = chooseSmartContract(config, deploy, deployAliasName);
         expect(result).toEqual('Foo');
       });
     });
     describe('if the network in config.json does NOT have a smartContract specified', () => {
       const config = {
         version: 1,
-        networks: {
+        deployAliases: {
           mainnet: {},
         },
       };
-      const network = 'mainnet';
+
+      const deployAliasName = 'mainnet';
       describe('if only one smart contract exists in the build (deploy.json)', () => {
         it('should select that smart contract', () => {
           const deploy = {
             smartContracts: ['Bar'],
           };
-          const result = chooseSmartContract(config, deploy, network);
+          const result = chooseSmartContract(config, deploy, deployAliasName);
           expect(result).toEqual('Bar');
         });
       });
@@ -43,7 +45,8 @@ describe('deploy.js', () => {
           const deploy = {
             smartContracts: ['Foo', 'Bar'],
           };
-          const result = chooseSmartContract(config, deploy, network);
+          const deployAliasName = 'mainnet';
+          const result = chooseSmartContract(config, deploy, deployAliasName);
           expect(result).toEqual(''); // falsy
         });
       });
