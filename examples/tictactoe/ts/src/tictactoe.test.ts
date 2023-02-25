@@ -9,7 +9,6 @@ import {
   Mina,
   AccountUpdate,
   Signature,
-  zkappCommandToJson,
 } from 'snarkyjs';
 
 describe('tictactoe', () => {
