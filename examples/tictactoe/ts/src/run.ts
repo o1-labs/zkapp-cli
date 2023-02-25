@@ -56,6 +56,13 @@ console.log('after transaction');
 // initial state
 let b = zkApp.board.get();
 
+console.log('initial state of the zkApp');
+let zkAppState = Mina.getAccount(zkAppPublicKey);
+console.log('state', zkAppState);
+for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
+  console.log('state', i, ':', zkAppState?.zkapp?.appState?.[i].toString());
+}
+
 console.log('\ninitial board');
 new Board(b).printState();
 

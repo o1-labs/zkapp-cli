@@ -11,7 +11,7 @@
  */
 import { Sudoku, SudokuZkApp } from './sudoku.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
-import { AccountUpdate, Mina, PrivateKey, shutdown } from 'snarkyjs';
+import { AccountUpdate, Circuit, Mina, PrivateKey, shutdown } from 'snarkyjs';
 
 // setup
 const Local = Mina.LocalBlockchain();
@@ -41,7 +41,9 @@ await tx.prove();
  */
 await tx.sign([zkAppPrivateKey, senderKey]).send();
 
-console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+Circuit.runAndCheck(() => {
+  console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+});
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -69,7 +71,9 @@ tx = await Mina.transaction(sender, () => {
 });
 await tx.prove();
 await tx.sign([senderKey]).send();
-console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+Circuit.runAndCheck(() => {
+  console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+});
 
 // cleanup
 await shutdown();
