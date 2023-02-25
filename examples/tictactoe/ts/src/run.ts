@@ -102,11 +102,17 @@ await makeMove(player1, player1Key, 2, 2);
 // debug
 b = zkApp.board.get();
 new Board(b).printState();
+
+let gameWon, isNextPlayer2;
+await Mina.transaction(player2, async () => {
+  isNextPlayer2 = zkApp.nextIsPlayer2.get().toBoolean();
+  gameWon = zkApp.gameDone.get().toBoolean();
+});
+
 console.log(
   'did someone win?',
-  zkApp.nextIsPlayer2.get().toBoolean() ? 'Player 1!' : 'Player 2!'
+  gameWon && isNextPlayer2 ? 'Player 1!' : 'Player 2!'
 );
-
 // cleanup
 await shutdown();
 
