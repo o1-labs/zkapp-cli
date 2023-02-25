@@ -41,7 +41,11 @@ await tx.prove();
  */
 await tx.sign([zkAppPrivateKey, senderKey]).send();
 
-console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+let isSolved;
+await Mina.transaction(sender, async () => {
+  isSolved = zkApp.isSolved.get().toBoolean();
+});
+console.log('Is the sudoku solved?', isSolved);
 
 let solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
@@ -60,7 +64,10 @@ try {
 } catch {
   console.log('There was an error submitting the solution, as expected');
 }
-console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+
+await Mina.transaction(sender, async () => {
+  isSolved = zkApp.isSolved.get().toBoolean();
+});
 
 // submit the actual solution
 console.log('Submitting solution...');
@@ -69,7 +76,11 @@ tx = await Mina.transaction(sender, () => {
 });
 await tx.prove();
 await tx.sign([senderKey]).send();
-console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
+
+await Mina.transaction(sender, async () => {
+  isSolved = zkApp.isSolved.get().toBoolean();
+});
+console.log('Is the sudoku solved?', isSolved);
 
 // cleanup
 await shutdown();

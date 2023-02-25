@@ -78,7 +78,7 @@ async function warmGittarCache() {
 async function executeInTimeLimit(operation, maxTimeLimit) {
   let timeout;
 
-  const timeoutPromise = new Promise((resolve, reject) => {
+  const timeoutPromise = new Promise((resolve) => {
     timeout = setTimeout(() => {
       resolve(null);
     }, maxTimeLimit);

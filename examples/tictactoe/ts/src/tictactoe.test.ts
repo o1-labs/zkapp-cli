@@ -9,7 +9,6 @@ import {
   Mina,
   AccountUpdate,
   Signature,
-  zkappCommandToJson,
 } from 'snarkyjs';
 
 describe('tictactoe', () => {
@@ -67,7 +66,12 @@ describe('tictactoe', () => {
     await txn.prove();
     await txn.sign([player1Key]).send();
 
-    const nextIsPlayer2 = zkApp.nextIsPlayer2.get();
-    expect(nextIsPlayer2).toEqual(Bool(true));
+    // check next player
+    let isNextPlayer2;
+    await Mina.transaction(player1, async () => {
+      isNextPlayer2 = zkApp.nextIsPlayer2.get();
+    });
+
+    expect(isNextPlayer2).toEqual(Bool(true));
   });
 });

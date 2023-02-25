@@ -57,9 +57,10 @@ console.log('after transaction');
 let b = zkApp.board.get();
 
 console.log('initial state of the zkApp');
-let zkAppState = Mina.getAccount(zkAppPublicKey).appState;
+let zkAppState = Mina.getAccount(zkAppPublicKey);
+
 for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
-  console.log('state', i, ':', zkAppState?.[i].toString());
+  console.log('state', i, ':', zkAppState?.zkapp?.appState?.[i].toString());
 }
 
 console.log('\ninitial board');
@@ -102,11 +103,13 @@ await makeMove(player1, player1Key, 2, 2);
 // debug
 b = zkApp.board.get();
 new Board(b).printState();
-console.log(
-  'did someone win?',
-  zkApp.nextIsPlayer2.get().toBoolean() ? 'Player 1!' : 'Player 2!'
-);
 
+let isNextPlayer2;
+await Mina.transaction(player2, async () => {
+  isNextPlayer2 = zkApp.nextIsPlayer2.get().toBoolean();
+});
+
+console.log('did someone win?', isNextPlayer2 ? 'Player 1!' : 'Player 2!');
 // cleanup
 await shutdown();
 
