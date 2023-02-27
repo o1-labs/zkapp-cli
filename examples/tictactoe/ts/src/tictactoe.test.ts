@@ -67,11 +67,7 @@ describe('tictactoe', () => {
     await txn.sign([player1Key]).send();
 
     // check next player
-    let isNextPlayer2;
-    await Mina.transaction(player1, async () => {
-      isNextPlayer2 = zkApp.nextIsPlayer2.get();
-    });
-
+    let isNextPlayer2 = zkApp.nextIsPlayer2.get();
     expect(isNextPlayer2).toEqual(Bool(true));
   });
 });
