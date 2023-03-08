@@ -45,7 +45,7 @@
     "mina-signer": "^1.1.0",
     "ora": "^5.4.1",
     "shelljs": "^0.8.5",
-    "snarkyjs": "^0.9.*",
+    "snarkyjs": "0.9.*",
     "table": "^6.8.0",
     "yargs": "^17.5.1"
   },
