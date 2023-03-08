@@ -66,7 +66,7 @@ async function example(example) {
   // `/dev/null` on linux or 'NUL' on windows is the only way to silence Husky's install log msg.
   await step(
     'NPM install',
-    `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+    `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
 
   // process.cwd() is full path to user's terminal + path/to/name.
