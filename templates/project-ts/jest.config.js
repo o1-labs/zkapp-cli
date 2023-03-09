@@ -13,11 +13,9 @@ export default {
     '^.+\\.(j)s$': 'babel-jest',
   },
   resolver: '<rootDir>/jest-resolver.cjs',
-  transformIgnorePatterns: [
-    '<rootDir>/node_modules/(?!snarkyjs/node_modules/tslib)',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!tslib)'],
   modulePathIgnorePatterns: ['<rootDir>/build/'],
   moduleNameMapper: {
     '^(\\.{1,2}/.+)\\.js$': '$1',
-  }
+  },
 };
