@@ -140,12 +140,11 @@ async function project({ name, ui }) {
   }
 
   // `/dev/null` on Mac or Linux and 'NUL' on Windows is the only way to silence
-  // Husky's install log msg. (Note: The contract project template commits
-  // package-lock.json so we can use `npm ci` for faster installation.)
+  // Husky's install log msg.
 
   await step(
     'NPM install',
-    `npm ci --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+    `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
   );
 
   // Build the template contract so it can be imported into the ui scaffold
