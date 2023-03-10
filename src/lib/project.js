@@ -426,7 +426,13 @@ async function scaffoldNext(projectName) {
 
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
-  let args = ['create-next-app@latest', 'ui', '--use-npm', '--src-dir'];
+  let args = [
+    'create-next-app@latest',
+    'ui',
+    '--use-npm',
+    '--src-dir',
+    '--import-alias "@/*"',
+  ];
   if (useTypescript) args.push('--ts');
 
   spawnSync('npx', args, {
@@ -513,7 +519,10 @@ async function scaffoldNext(projectName) {
         "sourceMap": true,
         "noFallthroughCasesInSwitch": true,
         "allowSyntheticDefaultImports": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "paths": {
+          "@/*": ["./src/*"]
+    }
       },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules"]
