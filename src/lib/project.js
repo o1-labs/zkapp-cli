@@ -487,12 +487,12 @@ async function scaffoldNext(projectName) {
   );
 
   sh.mv(
-    path.join('ui', 'pages', '_app.tsx'),
-    path.join('ui', 'pages', '_app.page.tsx')
+    path.join('ui', 'src/pages', '_app.tsx'),
+    path.join('ui', 'src/pages', '_app.page.tsx')
   );
   sh.mv(
-    path.join('ui', 'pages', 'index.tsx'),
-    path.join('ui', 'pages', 'index.page.tsx')
+    path.join('ui', 'src/pages', 'index.tsx'),
+    path.join('ui', 'src/pages', 'index.page.tsx')
   );
 
   const tsconfig = `
