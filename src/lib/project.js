@@ -481,7 +481,7 @@ async function scaffoldNext(projectName) {
   const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
 
   fs.writeFileSync(
-    path.join('ui', 'pages', indexFileName),
+    path.join('ui', 'src/pages', indexFileName),
     customNextIndex,
     'utf8'
   );
