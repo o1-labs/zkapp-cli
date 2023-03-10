@@ -424,10 +424,11 @@ async function scaffoldNext(projectName) {
     return;
   }
 
-  let args = ['create-next-app@latest', 'ui', '--use-npm'];
+  // set the project name and default flags
+  // https://nextjs.org/docs/api-reference/create-next-app#options
+  let args = ['create-next-app@latest', 'ui', '--use-npm', '--src-dir'];
   if (useTypescript) args.push('--ts');
 
-  // https://nextjs.org/docs/api-reference/create-next-app#options
   spawnSync('npx', args, {
     stdio: 'inherit',
     shell: true,
