@@ -595,7 +595,7 @@ async function scaffoldNext(projectName) {
     sh.cd('..');
 
     let apptsx = fs.readFileSync(
-      path.join('ui', 'pages', '_app.page.tsx'),
+      path.join('ui', 'src', '/pages', '_app.page.tsx'),
       'utf8'
     );
     apptsx = apptsx.replace(
@@ -604,10 +604,10 @@ async function scaffoldNext(projectName) {
 
 export default function`
     );
-    fs.writeFileSync(path.join('ui', 'pages', '_app.page.tsx'), apptsx);
+    fs.writeFileSync(path.join('ui', 'src', 'pages', '_app.page.tsx'), apptsx);
 
     fs.writeFileSync(
-      path.join('ui', 'pages', 'reactCOIServiceWorker.tsx'),
+      path.join('ui', 'src', 'pages', 'reactCOIServiceWorker.tsx'),
       `
 export {}
 
