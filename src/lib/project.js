@@ -597,7 +597,7 @@ async function scaffoldNext(projectName) {
     sh.cd('..');
 
     let apptsx = fs.readFileSync(
-      path.join('ui', 'src', '/pages', '_app.page.tsx'),
+      path.join('ui', 'src', 'pages', '_app.page.tsx'),
       'utf8'
     );
     apptsx = apptsx.replace(
