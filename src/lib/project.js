@@ -41,7 +41,7 @@ async function project({ name, ui }) {
       res = await prompt({
         type: 'select',
         name: 'ui',
-        choices: ['svelte', 'next', 'nuxt', 'empty', 'none'],
+        choices: ['next', 'svelte', 'nuxt', 'empty', 'none'],
         message: (state) =>
           message(state, 'Create an accompanying UI project too?'),
         prefix: (state) => prefix(state),
@@ -423,7 +423,9 @@ async function scaffoldNext(projectName) {
     // If ctrl+c is pressed it will throw.
     return;
   }
-
+  console.log(
+    ' Choose no to use experimental `app/` directory with this project'
+  );
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
