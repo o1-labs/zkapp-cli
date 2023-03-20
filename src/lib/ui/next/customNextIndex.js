@@ -63,7 +63,18 @@ export default function Home() {
             Get started by editing&nbsp;
             <code className={styles.code}>src/pages/index.tsx</code>
           </p>
-      
+        <div className={styles.grid}>
+          <a
+            href="https://docs.minaprotocol.com/zkapps"
+            className={styles.card}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h2>Docs</h2>
+            <p>Explore zkApps, how to build one & in-depth references</p>
+          </a>
+         
+        </div> 
       </main>
      </>
   );
