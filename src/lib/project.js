@@ -500,6 +500,12 @@ async function scaffoldNext(projectName) {
     path.join('ui', 'src', 'styles')
   );
 
+  // Adds landing page assets directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'assets'),
+    path.join('ui', 'public', 'assets')
+  );
+
   sh.mv(
     path.join('ui', 'src/pages', '_app.tsx'),
     path.join('ui', 'src/pages', '_app.page.tsx')
