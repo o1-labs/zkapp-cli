@@ -82,6 +82,15 @@ export default function Home() {
             <h2>Tutorials</h2>
             <p>Learn with step-by-step SnarkyJS tutorials</p>
           </a>
+          <a
+            href="https://discord.com/invite/minaprotocol"
+            className={styles.card}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h2>Questions</h2>
+            <p>Ask questions on our Discord</p>
+          </a>
          
         </div> 
       </main>
