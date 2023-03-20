@@ -55,7 +55,7 @@ export default function Home() {
             priority
           />
           <p style={{ width: '100%' }}>
-            built with&nbsp;
+            Built with&nbsp;
             <code className={styles.code}>SnarkyJS</code>
           </p>
         </div>  

@@ -7,33 +7,6 @@
   min-height: 100vh;
 }
 
-.description {
-  display: inherit;
-  justify-content: inherit;
-  align-items: inherit;
-  font-size: 0.85rem;
-  max-width: var(--max-width);
-  width: 100%;
-  z-index: 2;
-  font-family: var(--font-monument);
-}
-
-.description a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.description p {
-  position: relative;
-  margin: 0;
-  padding: 1rem;
-  background-color: rgba(var(--callout-rgb), 0.5);
-  border: 1px solid rgba(var(--callout-border-rgb), 0.3);
-  border-radius: var(--border-radius);
-}
-
 .code {
   font-weight: 700;
   font-family: var(--font-monument);
@@ -46,8 +19,18 @@
   max-width: 100%;
   margin-bottom: 200px;
 }
-
 .card {
+  padding: 1rem 1.2rem;
+  gap: 0.5rem;
+  margin: 1rem;
+  background: rgba(var(--card-rgb), 0);
+  background-color: rgb(255, 255, 255);
+  border: 1px solid #2d2d2d;
+  border-radius: 4px 1px;
+  transform-style: preserve-3d;
+  transition: background 200ms, border 200ms;
+}
+.card:after {
   content: '';
   position: absolute;
   inset: 0.4rem -0.4rem -0.4rem 0.4rem;
