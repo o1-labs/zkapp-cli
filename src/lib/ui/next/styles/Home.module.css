@@ -48,12 +48,13 @@
 }
 
 .card {
-  padding: 1rem 1.2rem;
-  margin: 1rem;
-  background: rgba(var(--card-rgb), 0);
-  background-color: rgb(255, 255, 255);
-  border: 1px solid rgba(var(--card-border-rgb), 0);
-  transition: background 200ms, border 200ms;
+  content: '';
+  position: absolute;
+  inset: 0.4rem -0.4rem -0.4rem 0.4rem;
+  border-radius: 4px 1px;
+  border: 1px solid #2d2d2d;
+  transform: translateZ(-1px);
+  transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
 }
 
 .card span {
