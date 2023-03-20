@@ -73,6 +73,15 @@ export default function Home() {
             <h2>Docs</h2>
             <p>Explore zkApps, how to build one & in-depth references</p>
           </a>
+          <a
+            href="https://docs.minaprotocol.com/zkapps/tutorials/hello-world"
+            className={styles.card}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h2>Tutorials</h2>
+            <p>Learn with step-by-step SnarkyJS tutorials</p>
+          </a>
          
         </div> 
       </main>
