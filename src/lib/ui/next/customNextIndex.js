@@ -91,6 +91,15 @@ export default function Home() {
             <h2>Questions</h2>
             <p>Ask questions on our Discord</p>
           </a>
+          <a
+            href="https://zkappsformina.com/"
+            className={styles.card}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <h2>Examples</h2>
+            <p>Play with deployed zkApps and view their code</p>
+          </a>
          
         </div> 
       </main>
