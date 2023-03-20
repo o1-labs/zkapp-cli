@@ -59,6 +59,11 @@ export default function Home() {
             <code className={styles.code}>SnarkyJS</code>
           </p>
         </div>  
+          <p>
+            Get started by editing&nbsp;
+            <code className={styles.code}>src/pages/index.tsx</code>
+          </p>
+      
       </main>
      </>
   );
