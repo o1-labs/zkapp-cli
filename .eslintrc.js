@@ -14,5 +14,5 @@ module.exports = {
   rules: {
     'no-constant-condition': 'off',
   },
-  ignorePatterns: ['*.md', '**/*.css'],
+  ignorePatterns: ['*.md', '**/*.css', '**/*.png', '**/*.svg'],
 };
