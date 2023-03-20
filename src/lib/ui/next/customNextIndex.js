@@ -70,7 +70,17 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <h2>Docs</h2>
+            <h2>
+              <span>Docs</span>
+              <Image
+                src="/assets/arrow-right-small.svg"
+                alt="Mina Logo"
+                width={16}
+                height={16}
+                priority
+              />
+            
+            </h2>
             <p>Explore zkApps, how to build one & in-depth references</p>
           </a>
           <a
@@ -79,7 +89,17 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <h2>Tutorials</h2>
+            <h2>
+              <span>Tutorials</span>
+              <Image
+                src="/assets/arrow-right-small.svg"
+                alt="Mina Logo"
+                width={16}
+                height={16}
+                priority
+              />            
+            
+            </h2>
             <p>Learn with step-by-step SnarkyJS tutorials</p>
           </a>
           <a
@@ -88,7 +108,16 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <h2>Questions</h2>
+            <h2>
+              <span>Questions</span>
+              <Image
+                src="/assets/arrow-right-small.svg"
+                alt="Mina Logo"
+                width={16}
+                height={16}
+                priority
+              />              
+            </h2>
             <p>Ask questions on our Discord</p>
           </a>
           <a
@@ -97,7 +126,17 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <h2>Examples</h2>
+            <h2>
+              <span>Examples</span>
+              <Image
+                src="/assets/arrow-right-small.svg"
+                alt="Mina Logo"
+                width={16}
+                height={16}
+
+                priority
+              />            
+            </h2>
             <p>Play with deployed zkApps and view their code</p>
           </a>
          
