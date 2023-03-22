@@ -30,6 +30,7 @@
   transform-style: preserve-3d;
   transition: background 200ms, border 200ms;
 }
+
 .card:after {
   content: '';
   position: absolute;
@@ -43,6 +44,7 @@
 .card span {
   display: inline-block;
   transition: transform 200ms;
+  font-size: 1.2rem;
 }
 
 .card h2 {
@@ -56,7 +58,7 @@
 .card p {
   margin: 0;
   opacity: 0.6;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   max-width: 30ch;
 }

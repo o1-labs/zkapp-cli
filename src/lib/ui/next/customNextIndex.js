@@ -95,7 +95,7 @@ export default function Home() {
               <div>
               <Image
                 src="/assets/arrow-right-small.svg"
-                alt="Mina Logo"
+                alt="right arrow small"
                 width={16}
                 height={16}
                 priority
@@ -115,7 +115,7 @@ export default function Home() {
               <div>
               <Image
                 src="/assets/arrow-right-small.svg"
-                alt="Mina Logo"
+                alt="right arrow small"
                 width={16}
                 height={16}
                 priority
@@ -135,7 +135,7 @@ export default function Home() {
               <div>
               <Image
                 src="/assets/arrow-right-small.svg"
-                alt="Mina Logo"
+                alt="right arrow small"
                 width={16}
                 height={16}
 
