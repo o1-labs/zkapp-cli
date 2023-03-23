@@ -33,7 +33,7 @@ export default function Home() {
     })();
   }, []);
 
-  return (
+return (
     <>
       <Head>
         <title>zkApp cli</title>
@@ -54,15 +54,15 @@ export default function Home() {
             }}
             priority
           />
-          <p style={{ width: '100%' }}>
+          <p className={styles.tagline}>
             Built with&nbsp;
             <code className={styles.code}>SnarkyJS</code>
           </p>
-        </div>  
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
+        </div>
+        <p className={styles.start}>
+          Get started by editing&nbsp;
+          <code className={styles.code}>src/pages/index.tsx</code>
+        </p>
         <div className={styles.grid}>
           <a
             href="https://docs.minaprotocol.com/zkapps"
@@ -71,15 +71,15 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <h2>
-              <span>Docs</span>
+              <span>DOCS</span>
               <div>
-              <Image
-                src="/assets/arrow-right-small.svg"
-                alt="Mina Logo"
-                width={16}
-                height={16}
-                priority
-              />
+                <Image
+                  src="/assets/arrow-right-small.svg"
+                  alt="Mina Logo"
+                  width={16}
+                  height={16}
+                  priority
+                />
               </div>
             </h2>
             <p>Explore zkApps, how to build one & in-depth references</p>
@@ -91,15 +91,15 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <h2>
-              <span>Tutorials</span>
+              <span>TUTORIALS</span>
               <div>
-              <Image
-                src="/assets/arrow-right-small.svg"
-                alt="right arrow small"
-                width={16}
-                height={16}
-                priority
-              />            
+                <Image
+                  src="/assets/arrow-right-small.svg"
+                  alt="Mina Logo"
+                  width={16}
+                  height={16}
+                  priority
+                />
               </div>
             </h2>
             <p>Learn with step-by-step SnarkyJS tutorials</p>
@@ -111,16 +111,16 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <h2>
-              <span>Questions</span>
+              <span>QUESTIONS</span>
               <div>
-              <Image
-                src="/assets/arrow-right-small.svg"
-                alt="right arrow small"
-                width={16}
-                height={16}
-                priority
-              />
-              </div>              
+                <Image
+                  src="/assets/arrow-right-small.svg"
+                  alt="Mina Logo"
+                  width={16}
+                  height={16}
+                  priority
+                />
+              </div>
             </h2>
             <p>Ask questions on our Discord</p>
           </a>
@@ -131,24 +131,22 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <h2>
-              <span>Examples</span>
+              <span>EXAMPLES</span>
               <div>
-              <Image
-                src="/assets/arrow-right-small.svg"
-                alt="right arrow small"
-                width={16}
-                height={16}
-
-                priority
-              />
-              </div>            
+                <Image
+                  src="/assets/arrow-right-small.svg"
+                  alt="Mina Logo"
+                  width={16}
+                  height={16}
+                  priority
+                />
+              </div>
             </h2>
             <p>Play with deployed zkApps and view their code</p>
           </a>
-         
-        </div> 
+        </div>
       </main>
-     </>
+    </>
   );
 }
 
