@@ -712,6 +712,12 @@ export default {
 `;
 
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
+
+  // Adds landing page assets directory and files to Nuxt project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'nuxt', 'assets'),
+    path.join('ui', 'assets')
+  );
 }
 
 /**
