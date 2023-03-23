@@ -519,7 +519,8 @@ async function scaffoldNext(projectName) {
     {
     "compilerOptions": {
         "target": "es2020",
-        "module": "es2022",
+        "module": "esnext",
+        "lib": ["dom", "dom.iterable","esnext"],
         "strict": true,
         "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
         "skipLibCheck": true,
@@ -534,6 +535,10 @@ async function scaffoldNext(projectName) {
         "noFallthroughCasesInSwitch": true,
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
+        "noEmit": true,
+        "incremental": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
         "paths": {
           "@/*": ["./src/*"]
     }
