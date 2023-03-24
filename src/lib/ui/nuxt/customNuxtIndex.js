@@ -39,7 +39,27 @@ module.exports = `
           </div>
         </h2>
         <p>Explore zkApps, how to build one & in-depth references</p>
-      </a>    
+      </a>
+      <a
+        href="https://docs.minaprotocol.com/zkapps/tutorials/hello-world"
+        class="card"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <h2>
+          <span>TUTORIALS</span>
+          <div>
+            <img
+              src="~/assets/arrow-right-small.svg"
+              alt="Mina Logo"
+              width="{16}"
+              height="{16}"
+              priority
+            />
+          </div>
+        </h2>
+        <p>Learn with step-by-step SnarkyJS tutorials</p>
+      </a>          
     </div>
   </main>
 </template>
