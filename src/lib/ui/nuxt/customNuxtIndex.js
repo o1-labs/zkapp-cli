@@ -59,7 +59,27 @@ module.exports = `
           </div>
         </h2>
         <p>Learn with step-by-step SnarkyJS tutorials</p>
-      </a>          
+      </a>
+     <a
+        href="https://discord.gg/minaprotocol"
+        class="card"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <h2>
+          <span>QUESTIONS</span>
+          <div>
+            <img
+              src="~/assets/arrow-right-small.svg"
+              alt="Mina Logo"
+              width="{16}"
+              height="{16}"
+              priority
+            />
+          </div>
+        </h2>
+        <p>Ask questions on our Discord</p>
+      </a>                
     </div>
   </main>
 </template>
