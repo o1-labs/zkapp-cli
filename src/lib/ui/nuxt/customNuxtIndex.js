@@ -18,7 +18,29 @@ module.exports = `
     <p class="start">
       Get started by editing&nbsp;
       <code class="code">pages/index.vue</code>
-    </p>    
+    </p>
+    <div class="grid">
+      <a
+        href="https://docs.minaprotocol.com/zkapps"
+        class="card"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <h2>
+          <span>DOCS</span>
+          <div>
+            <img
+              src="~/assets/arrow-right-small.svg"
+              alt="Mina Logo"
+              width="{16}"
+              height="{16}"
+              priority
+            />
+          </div>
+        </h2>
+        <p>Explore zkApps, how to build one & in-depth references</p>
+      </a>    
+    </div>
   </main>
 </template>
 `;
