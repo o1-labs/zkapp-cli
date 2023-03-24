@@ -110,6 +110,7 @@ import Vue from 'vue'
 export default Vue.extend({
   name: 'IndexPage',
 })
-</script>
-<style src="~/assets/styles/Home.module.css" />
+<style scoped>
+@import '~/assets/styles/Home.module.css';
+</style>
 `;
