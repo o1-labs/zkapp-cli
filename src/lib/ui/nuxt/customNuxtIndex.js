@@ -79,7 +79,27 @@ module.exports = `
           </div>
         </h2>
         <p>Ask questions on our Discord</p>
-      </a>                
+      </a>
+      <a
+        href="https://zkappsformina.com/"
+        class="card"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <h2>
+          <span>EXAMPLES</span>
+          <div>
+            <img
+              src="~/assets/arrow-right-small.svg"
+              alt="Mina Logo"
+              width="{16}"
+              height="{16}"
+              priority
+            />
+          </div>
+        </h2>
+        <p>Play with deployed zkApps and view their code</p>
+      </a>                      
     </div>
   </main>
 </template>
