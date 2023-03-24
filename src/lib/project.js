@@ -8,6 +8,7 @@ const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
+const customNuxtIndex = require('../lib/ui/nuxt/customNuxtIndex');
 
 const shExec = util.promisify(sh.exec);
 
@@ -682,35 +683,35 @@ function scaffoldNuxt() {
   pkgJson.devDependencies['nuxt-vite'] = '0.*';
   fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
-  const customNuxtIndex = `
-<template>
-<Tutorial />
-</template>
+  //   const customNuxtIndex = `
+  // <template>
+  // <Tutorial />
+  // </template>
 
-<script>
-import { isReady, Mina, PublicKey } from 'snarkyjs'
+  // <script>
+  // import { isReady, Mina, PublicKey } from 'snarkyjs'
 
-export default {
-  async mounted() {
-    await isReady
+  // export default {
+  //   async mounted() {
+  //     await isReady
 
-    const { Add } = await import('../../contracts/build/src/')
-    // Update this to use the address (public key) for your zkApp account
-    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
-    const zkAppAddress = ''
-    // This should be removed once the zkAppAddress is updated.
-    if (!zkAppAddress) {
-      console.error(
-        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
-      )
-    }
-    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
-  }
-}
-</script>
-`;
-
+  //     const { Add } = await import('../../contracts/build/src/')
+  //     // Update this to use the address (public key) for your zkApp account
+  //     // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
+  //     // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
+  //     const zkAppAddress = ''
+  //     // This should be removed once the zkAppAddress is updated.
+  //     if (!zkAppAddress) {
+  //       console.error(
+  //         'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
+  //       )
+  //     }
+  //     const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
+  //   }
+  // }
+  // </script>
+  // `;
+  // Adds landing page to Nuxt project.
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
 
   // Adds landing page assets directory and files to Nuxt project.
