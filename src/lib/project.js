@@ -676,6 +676,12 @@ function scaffoldNuxt() {
     `
   );
 
+  // Adds global css styles to scaffold
+  newNuxtConfig = newNuxtConfig.replace(
+    'css: [ ]',
+    'css: [~/assets/styles/globals.css]'
+  );
+
   fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
 
   // Add vite as a devDependency in the nuxt UI project.
