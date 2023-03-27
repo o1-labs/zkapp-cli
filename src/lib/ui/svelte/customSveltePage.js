@@ -25,8 +25,7 @@ module.exports = `
 
     </script>
 <svelte:head>
-  <title>Home</title>
-  <meta name="description" content="Svelte demo app" />
+  <title>zkApp CLI</title>
 </svelte:head>
 <main class="main">
   <div class="center">
@@ -44,7 +43,7 @@ module.exports = `
   </div>
   <p class="start">
     Get started by editing&nbsp;
-    <code class="code">pages/index.vue</code>
+    <code class="code">src/+page.svelte</code>
   </p>
   <div class="grid">
     <a
