@@ -354,6 +354,12 @@ function scaffoldSvelte() {
     path.join('ui', 'src', 'routes', '+layout.svelte'),
     customLayoutSvelte
   );
+
+  // Adds landing styles directory and files to SvelteKit project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'svelte', 'styles'),
+    path.join('ui', 'src')
+  );
 }
 
 async function scaffoldNext(projectName) {
@@ -464,6 +470,7 @@ async function scaffoldNext(projectName) {
     path.join('ui', 'src/pages', '_app.tsx'),
     path.join('ui', 'src/pages', '_app.page.tsx')
   );
+
   sh.mv(
     path.join('ui', 'src/pages', 'index.tsx'),
     path.join('ui', 'src/pages', 'index.page.tsx')
