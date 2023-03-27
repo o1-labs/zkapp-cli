@@ -9,6 +9,7 @@ const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
 const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
+const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
 
 const shExec = util.promisify(sh.exec);
 
@@ -347,6 +348,11 @@ function scaffoldSvelte() {
   fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     customPageSvelte
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', '+layout.svelte'),
+    customLayoutSvelte
   );
 }
 
