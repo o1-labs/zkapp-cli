@@ -12,7 +12,7 @@ module.exports = `
     const { Add } = await import('../../../contracts/build/src/')
     // Update this to use the address (public key) for your zkApp account
     // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
+    // Berkeley Testnet B62qk33E2Kg31SBSpAGUDkjzDGHk9LFt2N1vKFyHy3ezXdd6eiJeAqa
     const zkAppAddress = ''
     // This should be removed once the zkAppAddress is updated.
     if (!zkAppAddress) {
