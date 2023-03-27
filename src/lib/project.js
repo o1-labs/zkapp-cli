@@ -314,79 +314,38 @@ function scaffoldSvelte() {
 	// from the referenced tsconfig.json - TypeScript does not merge them in
 }
   `;
-
+  let useTypescript;
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
+    useTypescript = true;
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
     }
   }
 
-  const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
+  const viteConfigFileName = useTypescript
+    ? 'vite.config.ts'
+    : 'vite.config.js';
+
+  const vitConfig = fs.readFileSync(
+    path.join('ui', viteConfigFileName),
+    'utf8'
+  );
 
   const customViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `,
     optimizeDeps: { esbuildOptions: { target: 'es2020' } }
-  };`
+  });`
   );
 
-  fs.writeFileSync(path.join('ui', 'vite.config.js'), customViteConfig);
+  fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
 
   const pageSvelte = fs.readFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     'utf8'
-  );
-
-  const contractImport = `
-  import { onMount } from "svelte";
-  import { isReady, Mina, PublicKey } from 'snarkyjs';
-
-  onMount(async () => {
-    await isReady;  
-
-    const { Add } = await import('../../../contracts/build/src/')
-    // Update this to use the address (public key) for your zkApp account
-    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
-    const zkAppAddress = ''
-    // This should be removed once the zkAppAddress is updated.
-    if (!zkAppAddress) {
-      console.error(
-        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
-      );
-    }
-    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
-  });
-`;
-
-  let customPageSvelte;
-  // A script tag will be added if a user generates a skelton project from the svelte prompt
-  if (!pageSvelte.includes('<script>')) {
-    customPageSvelte = pageSvelte.replace(
-      '<h1>',
-      `
-    <script>
-    ${contractImport}
-    </script>
-
-    <h1>
-    `
-    );
-  } else {
-    customPageSvelte = pageSvelte.replace(
-      '</script>',
-      `
-${contractImport}
-</script>`
-    );
-  }
-
-  fs.writeFileSync(
-    path.join('ui', 'src', 'routes', '+page.svelte'),
-    customPageSvelte
   );
 }
 
