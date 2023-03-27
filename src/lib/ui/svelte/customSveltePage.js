@@ -121,5 +121,7 @@ module.exports = `
     </a>
   </div>
 </main>
-
+<style>
+ @import '../styles/Home.module.css';
+</style>
 `;
