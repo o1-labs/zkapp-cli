@@ -1,26 +1,26 @@
-/* @font-face {
-	font-family: 'ABC Monument Grotesk';
-	font-style: normal;
-	font-weight: normal;
-	src: url('~/assets/fonts/ABCMonumentGrotesk-Regular.woff2') format('woff2'),
-		url('~/assets/fonts/ABCMonumentGrotesk-Regular.woff') format('woff');
+@font-face {
+  font-family: 'ABC Monument Grotesk';
+  font-style: normal;
+  font-weight: normal;
+  src: url('$lib/assets/fonts/ABCMonumentGrotesk-Regular.woff2') format('woff2'),
+    url('$lib/assets/fonts/ABCMonumentGrotesk-Regular.woff') format('woff');
 }
 
 @font-face {
-	font-family: 'ABC Monument Grotesk Light';
-	font-style: normal;
-	font-weight: 100;
-	src: url('~/assets/fonts/ABCMonumentGrotesk-Light.woff2') format('woff2'),
-		url('~/assets/fonts/ABCMonumentGrotesk-Light.woff') format('woff');
+  font-family: 'ABC Monument Grotesk Light';
+  font-style: normal;
+  font-weight: 100;
+  src: url('$lib/assets/fonts/ABCMonumentGrotesk-Light.woff2') format('woff2'),
+    url('$lib/assets/fonts/ABCMonumentGrotesk-Light.woff') format('woff');
 }
 
 @font-face {
-	font-family: 'ABC Monument Grotesk Bold';
-	font-style: normal;
-	font-weight: bold;
-	src: url('~/assets/fonts/ABCMonumentGrotesk-Bold.woff2') format('woff2'),
-		url('~/assets/fonts/ABCMonumentGrotesk-Bold.woff') format('woff');
-} */
+  font-family: 'ABC Monument Grotesk Bold';
+  font-style: normal;
+  font-weight: bold;
+  src: url('$lib/assets/fonts/ABCMonumentGrotesk-Bold.woff2') format('woff2'),
+    url('$lib/assets/fonts/ABCMonumentGrotesk-Bold.woff') format('woff');
+}
 
 :root {
   --max-width: 1100px;
