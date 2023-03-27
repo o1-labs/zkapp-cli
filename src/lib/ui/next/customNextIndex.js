@@ -125,13 +125,13 @@ return (
             <p>Ask questions on our Discord</p>
           </a>
           <a
-            href="https://zkappsformina.com/"
+            href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
             className={styles.card}
             target="_blank"
             rel="noopener noreferrer"
           >
             <h2>
-              <span>EXAMPLES</span>
+              <span>DEPLOY</span>
               <div>
                 <Image
                   src="/assets/arrow-right-small.svg"
@@ -142,7 +142,7 @@ return (
                 />
               </div>
             </h2>
-            <p>Play with deployed zkApps and view their code</p>
+            <p>Deploy a zkApp</p>
           </a>
         </div>
       </main>
