@@ -284,6 +284,7 @@ function scaffoldSvelte() {
     stdio: 'inherit',
     shell: true,
   });
+
   sh.cp(
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
@@ -316,15 +317,16 @@ function scaffoldSvelte() {
 	// from the referenced tsconfig.json - TypeScript does not merge them in
 }
   `;
-  let useTypescript;
+  let useTypescript = true;
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
+    fs.readFileSync(path.join('ui', 'tsconfig.json'));
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
-    useTypescript = true;
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
     }
+    useTypescript = false;
   }
 
   const viteConfigFileName = useTypescript
@@ -345,6 +347,9 @@ function scaffoldSvelte() {
 
   fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
 
+  // Remove Sveltkit demo pages and components if found
+  fs.emptyDirSync(path.join('ui', 'src', 'routes'));
+
   fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     customPageSvelte
@@ -363,7 +368,8 @@ function scaffoldSvelte() {
     path.join('ui', 'src', 'styles')
   );
 
-  fs.mkdirsSync(path.join('ui', 'src', 'lib'));
+  // Remove Sveltkit demo lib and assets if found
+  fs.emptyDirSync(path.join('ui', 'src', 'lib'));
 
   // Adds landing page lib directory and files to SvelteKit project.
   fs.copySync(
