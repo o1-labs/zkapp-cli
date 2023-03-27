@@ -8,6 +8,7 @@ const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
+const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 
 const shExec = util.promisify(sh.exec);
 
@@ -343,9 +344,9 @@ function scaffoldSvelte() {
 
   fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
 
-  const pageSvelte = fs.readFileSync(
+  fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
-    'utf8'
+    customPageSvelte
   );
 }
 
