@@ -1,5 +1,6 @@
 module.exports = `
-<style>
- @import '../styles/Home.module.css';
-</style>
+<script>
+  import '../styles/globals.css'
+</script>
+<slot/>
 `;
