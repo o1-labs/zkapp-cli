@@ -101,12 +101,12 @@ module.exports = `
       <p>Ask questions on our Discord</p>
     </a>
     <a
-      href="https://zkappsformina.com/"
+      href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
       class="card"
       target="_blank"
       rel="noopener noreferrer">
       <h2>
-        <span>EXAMPLES</span>
+        <span>DEPOLY</span>
         <div>
           <img
             src={arrowRightSmall}
@@ -116,7 +116,7 @@ module.exports = `
             priority />
         </div>
       </h2>
-      <p>Play with deployed zkApps and view their code</p>
+      <p>Deploy a zkApp</p>
     </a>
   </div>
 </main>
