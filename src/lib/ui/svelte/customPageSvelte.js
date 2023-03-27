@@ -23,7 +23,7 @@ module.exports = `
     const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
   });
 
-    </script>
+</script>
 <svelte:head>
   <title>zkApp CLI</title>
 </svelte:head>

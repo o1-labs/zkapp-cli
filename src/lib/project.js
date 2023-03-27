@@ -355,16 +355,20 @@ function scaffoldSvelte() {
     customLayoutSvelte
   );
 
+  fs.mkdirsSync(path.join('ui', 'src', 'styles'));
+
   // Adds landing page styles directory and files to SvelteKit project.
   fs.copySync(
     path.join(__dirname, 'ui', 'svelte', 'styles'),
-    path.join('ui', 'src')
+    path.join('ui', 'src', 'styles')
   );
+
+  fs.mkdirsSync(path.join('ui', 'src', 'lib'));
 
   // Adds landing page lib directory and files to SvelteKit project.
   fs.copySync(
     path.join(__dirname, 'ui', 'svelte', 'lib'),
-    path.join('ui', 'src')
+    path.join('ui', 'src', 'lib')
   );
 }
 
