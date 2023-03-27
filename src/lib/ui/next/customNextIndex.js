@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Image from 'next/image';
 import styles from '../styles/Home.module.css';
 import { useEffect, useState } from 'react';
-import type { Add } from '../../../contracts/src/';
 import {
   Mina,
   isReady,
