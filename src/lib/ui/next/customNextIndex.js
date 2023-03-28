@@ -41,6 +41,10 @@ return (
       </Head>
       <main className={styles.main}>
         <div className={styles.center}>
+          <a
+            href="https://minaprotocol.com/"
+            target="_blank"
+            rel="noopener noreferrer">
           <Image
             className={styles.logo}
             src="/assets/HeroMinaLogo_gray.svg"
@@ -53,6 +57,7 @@ return (
             }}
             priority
           />
+          </a>
           <p className={styles.tagline}>
             Built with&nbsp;
             <code className={styles.code}>SnarkyJS</code>
