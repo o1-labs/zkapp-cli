@@ -29,13 +29,18 @@ module.exports = `
 </svelte:head>
 <main class="main">
   <div class="center">
-    <img
-      class="logo"
-      src={heroMinaLogo}
-      alt="Mina Logo"
-      width="191"
-      height="174"
-      priority />
+    <a
+    href="https://minaprotocol.com/"
+    target="_blank"
+    rel="noopener noreferrer">
+      <img
+        class="logo"
+        src={heroMinaLogo}
+        alt="Mina Logo"
+        width="191"
+        height="174"
+        priority />
+    </a>
     <p class="tagline">
       Built with&nbsp;
       <code class="code">SnarkyJS</code>
