@@ -111,7 +111,7 @@ module.exports = `
       target="_blank"
       rel="noopener noreferrer">
       <h2>
-        <span>DEPOLY</span>
+        <span>DEPLOY</span>
         <div>
           <img
             src={arrowRightSmall}
