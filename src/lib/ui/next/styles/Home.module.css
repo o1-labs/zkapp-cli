@@ -120,20 +120,26 @@
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
-    inset: 0 0 0 0;
-    transform: translateZ(1px);
-    transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
+    color: #ffff;
+    background: linear-gradient(
+        0deg,
+        rgba(45, 45, 45, 0.66),
+        rgba(45, 45, 45, 0.66)
+      ),
+      url('$lib/assets/button-hover-light.png');
+    border: 1px solid #2d2d2d;
+    background-size: 100% 100%;
+    transform: translateZ(-1px);
   }
 
   .card:hover:after {
-    box-shadow: 0.7em 0.6em 0 0 #ff603b;
-    inset: 0 0 0 0;
-    transition: ease-in 300ms, border 50ms ease-in 100ms;
+    border: 1px solid rgba(0, 0, 0, 0);
+    transform: translate(-0.4rem, -0.4rem);
+    transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
   }
 
-  .card:hover div {
-    transform: translateX(1rem);
-    transition: ease-in 300ms, border 50ms ease-in 100ms;
+  .card:hover img {
+    filter: brightness(0) invert(1);
   }
 }
 
