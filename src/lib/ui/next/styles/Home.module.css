@@ -10,7 +10,7 @@
   font-family: var(--font-monument-light);
   font-size: 0.938rem;
   padding-top: 1rem;
-  letter-spacing: 0.2rem;
+  letter-spacing: 0.19 rem;
 }
 
 .start {
@@ -65,6 +65,7 @@
   font-weight: 600;
   margin-bottom: 0.7rem;
   justify-content: space-between;
+  letter-spacing: 0.08rem;
   padding-right: 1rem;
 }
 
