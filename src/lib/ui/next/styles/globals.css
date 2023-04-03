@@ -44,11 +44,6 @@ body {
   font-family: 'ABC Monument Grotesk';
 }
 
-body {
-  background: url('/assets/mina-gradient-bg.png');
-  background-size: cover;
-}
-
 a {
   color: inherit;
   text-decoration: none;
