@@ -53,51 +53,12 @@ export default function GradientBG({ children }) {
 
     this.color = color;
 
-    //this.direction = Math.random() > 0.5 ? -1 : 1;
     this.direction = Math.random() > 0.1 ? -1 : 1;
-    //this.velocity = (Math.random() * 100 + 800) * 0.01 * this.direction;
+
     this.velocity = (Math.random() * 100 + 100) * 0.01 * this.direction;
-
-    this.update = function () {
-      // Change direction if boundaries reached
-      if (this.x.c <= this.x.min || this.x.c >= this.x.max) {
-        this.x.dir *= -1;
-      }
-
-      if (this.y.c <= this.y.min || this.y.c >= this.y.max) {
-        this.y.dir *= -1;
-      }
-
-      if (this.w.c <= this.w.min || this.w.c >= this.w.max) {
-        this.w.dir *= -1;
-      }
-
-      if (this.h.c <= this.h.min || this.h.c >= this.h.max) {
-        this.h.dir *= -1;
-      }
-
-      if (this.color.a <= 0 || this.color.a >= 0.75) {
-        this.color.dir *= -1;
-      }
-
-      this.x.c += 0.005 * this.x.dir;
-      this.y.c += 0.005 * this.y.dir;
-
-      this.w.c += 0.005 * this.w.dir;
-      this.h.c += 0.005 * this.h.dir;
-    };
-
-    this.render = function (ctx) {
-      ctx.restore();
-
-      ctx.fillStyle = this.color.toString();
-      ctx.fillRect(this.x.c, this.y.c, this.w.c, this.h.c);
-    };
   }
 
   function updatePixel(pixel) {
-    // Change direction if boundaries reached
-    // console.log('Updatepixel', pixel);
     if (pixel.x.c <= pixel.x.min || pixel.x.c >= pixel.x.max) {
       pixel.x.dir *= -1;
     }
