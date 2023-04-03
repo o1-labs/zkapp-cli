@@ -494,6 +494,12 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
+  // Adds landing page components directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'components'),
+    path.join('ui', 'src', 'components')
+  );
+
   // Adds landing page style directory and files to NextJS project.
   fs.copySync(
     path.join(__dirname, 'ui', 'next', 'styles'),
