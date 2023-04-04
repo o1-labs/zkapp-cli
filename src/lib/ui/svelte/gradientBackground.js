@@ -106,7 +106,6 @@ module.exports = `
   function animate() {
     paint()
     animationFrameId = window.requestAnimationFrame(animate)
-    console.log(animationFrameId)
   }
 
   onMount(() => {
