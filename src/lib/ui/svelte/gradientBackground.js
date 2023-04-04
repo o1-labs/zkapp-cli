@@ -123,7 +123,7 @@ module.exports = `
     ]
 
     animate()
-    return () => Window.cancelAnimationFrame(animationFrameId)
+    return () => window.cancelAnimationFrame(animationFrameId)
   })
 </script>
 
@@ -159,6 +159,9 @@ module.exports = `
     width: 110%;
     height: 110%;
     filter: blur(150px);
+  }
+  .container {
+    postion: relative;
   }
 </style>
 

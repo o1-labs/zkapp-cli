@@ -10,6 +10,7 @@ const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
 const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
+const gradientBackground = require('./ui/svelte/gradientBackground');
 
 const shExec = util.promisify(sh.exec);
 
@@ -358,6 +359,11 @@ function scaffoldSvelte() {
   fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+layout.svelte'),
     customLayoutSvelte
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', 'gradientBackground.svelte'),
+    gradientBackground
   );
 
   fs.mkdirsSync(path.join('ui', 'src', 'styles'));
