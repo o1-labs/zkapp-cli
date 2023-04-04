@@ -114,6 +114,8 @@
 
 .logo {
   position: relative;
+  mix-blend-mode: difference;
+  filter: invert(0.7);
 }
 
 /* Enable hover only on non-touch devices */
