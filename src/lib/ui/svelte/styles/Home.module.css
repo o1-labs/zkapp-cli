@@ -120,7 +120,13 @@
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
     color: #ffff;
-    background: url('$lib/assets/button-hover.png');
+    background: linear-gradient(
+        0deg,
+        rgba(45, 45, 45, 0.66),
+        rgba(45, 45, 45, 0.66)
+      ),
+      url('$lib/assets/button-hover-light.png');
+    border: 1px solid #2d2d2d;
     background-size: 100% 100%;
     transform: translateZ(-1px);
   }
