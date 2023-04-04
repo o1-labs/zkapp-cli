@@ -11,12 +11,14 @@
   font-size: 0.938rem;
   padding-top: 1rem;
   letter-spacing: 0.19rem;
+  z-index: 99;
 }
 
 .start {
   font-family: var(--font-monument-light);
   font-size: 1.25rem;
   letter-spacing: 0.1rem;
+  z-index: 99;
 }
 
 .code {

@@ -47,13 +47,13 @@ module.exports = `
           priority />
       </a>
       <p class="tagline">
-        Built with&nbsp;
+        Built with
         <code class="code">SnarkyJS</code>
       </p>
     </div>
     <p class="start">
-      Get started by editing&nbsp;
-      <code class="code">src/+page.svelte</code>
+      Get started by editing
+      <code class="code">src/routes/+page.svelte</code>
     </p>
     <div class="grid">
       <a
@@ -72,7 +72,7 @@ module.exports = `
               priority />
           </div>
         </h2>
-        <p>Explore zkApps, how to build one & in-depth references</p>
+        <p>Explore zkApps, how to build one, & in-depth references</p>
       </a>
       <a
         href="https://docs.minaprotocol.com/zkapps/tutorials/hello-world"
