@@ -160,21 +160,16 @@
 
   .grid {
     grid-template-columns: 1fr;
-    margin-bottom: 120px;
     max-width: 320px;
-    text-align: center;
+    grid-template-rows: repeat(4, minmax(25%, auto));
   }
 
   .card {
-    padding: 1rem 2.5rem;
+    padding: 1.5rem;
   }
 
   .card h2 {
     margin-bottom: 0.5rem;
-  }
-
-  .center {
-    padding: 8rem 0 6rem;
   }
 
   .center::before {
