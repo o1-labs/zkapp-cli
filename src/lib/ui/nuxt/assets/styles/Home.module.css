@@ -6,17 +6,60 @@
   padding: 5rem;
   min-height: 100vh;
 }
+
+.background {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.background::before {
+  background: url('~/assets/hash-pattern.png');
+  z-index: 1;
+  -webkit-mask-image: linear-gradient(20deg, #000 25%, transparent);
+  mask-image: linear-gradient(20deg, #000 25%, transparent);
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.background-gradients {
+  display: block;
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  filter: blur(150px);
+}
+
+.container {
+  position: relative;
+  height: 100vh;
+}
+
 .tagline {
   font-family: var(--font-monument-light);
   font-size: 0.938rem;
   padding-top: 1rem;
-  letter-spacing: 0.2rem;
+  letter-spacing: 0.19rem;
+  z-index: 99;
 }
 
 .start {
   font-family: var(--font-monument-light);
   font-size: 1.25rem;
   letter-spacing: 0.1rem;
+  z-index: 99;
 }
 
 .code {
@@ -65,7 +108,7 @@
   font-weight: 600;
   margin-bottom: 0.7rem;
   justify-content: space-between;
-  padding-right: 1rem;
+  letter-spacing: 0.13rem;
 }
 
 .card h2 div {
@@ -90,49 +133,35 @@
   padding: 6rem 0;
 }
 
-.center::before {
-  border-radius: 50%;
-  width: 480px;
-  height: 360px;
-  margin-left: -400px;
-}
-
-.center::after {
-  width: 240px;
-  height: 180px;
-  z-index: -1;
-}
-
-.center::before,
-.center::after {
-  content: '';
-  left: 50%;
-  position: absolute;
-  filter: blur(45px);
-  transform: translateZ(0);
-}
-
 .logo {
   position: relative;
+  mix-blend-mode: difference;
+  filter: invert(0.7);
 }
 
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
-    inset: 0 0 0 0;
-    transform: translateZ(1px);
-    transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
+    color: #ffff;
+    background: linear-gradient(
+        0deg,
+        rgba(45, 45, 45, 0.66),
+        rgba(45, 45, 45, 0.66)
+      ),
+      url('~/assets/button-hover-light.png');
+    border: 1px solid #2d2d2d;
+    background-size: 100% 100%;
+    transform: translateZ(-1px);
   }
 
   .card:hover:after {
-    box-shadow: 0.7em 0.6em 0 0 #ff603b;
-    inset: 0 0 0 0;
-    transition: ease-in 300ms, border 50ms ease-in 100ms;
+    border: 0px solid rgba(0, 0, 0, 0);
+    transform: translate(-0.4rem, -0.4rem);
+    transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
   }
 
-  .card:hover div {
-    transform: translateX(1rem);
-    transition: ease-in 300ms, border 50ms ease-in 100ms;
+  .card:hover img {
+    filter: brightness(0) invert(1);
   }
 }
 
@@ -150,26 +179,24 @@
 
   .grid {
     grid-template-columns: 1fr;
-    margin-bottom: 120px;
     max-width: 320px;
-    text-align: center;
+    grid-template-rows: repeat(4, minmax(25%, auto));
+  }
+
+  .start {
+    margin: 0 5rem;
   }
 
   .card {
-    padding: 1rem 2.5rem;
+    padding: 1.5rem;
   }
 
   .card h2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
   }
 
   .center {
-    padding: 8rem 0 6rem;
-  }
-
-  .center::before {
-    transform: none;
-    height: 300px;
+    padding: 5rem 0;
   }
 }
 
@@ -177,14 +204,5 @@
 @media (min-width: 701px) and (max-width: 1120px) {
   .grid {
     grid-template-columns: repeat(2, 50%);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
   }
 }
