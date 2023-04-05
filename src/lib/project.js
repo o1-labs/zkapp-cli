@@ -362,7 +362,7 @@ function scaffoldSvelte() {
   );
 
   fs.writeFileSync(
-    path.join('ui', 'src', 'routes', 'gradientBackground.svelte'),
+    path.join('ui', 'src', 'routes', 'GradientBG.svelte'),
     gradientBackground
   );
 

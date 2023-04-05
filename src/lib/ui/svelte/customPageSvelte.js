@@ -2,7 +2,7 @@ module.exports = `
 <script>
   import heroMinaLogo from '$lib/assets/HeroMinaLogo.svg'
   import arrowRightSmall from '$lib/assets/arrow-right-small.svg'
-  import GradientBG from './gradientBackground.svelte'
+  import GradientBG from './GradientBG.svelte'
   import { onMount } from 'svelte'
   import { isReady, Mina, PublicKey } from 'snarkyjs'
 
