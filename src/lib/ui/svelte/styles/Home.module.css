@@ -18,6 +18,7 @@
   pointer-events: none;
   z-index: 0;
 }
+
 .background::before {
   background: url('$lib/assets/hash-pattern.png');
   z-index: 1;
@@ -30,6 +31,7 @@
   right: 0;
   bottom: 0;
 }
+
 .background-gradients {
   display: block;
   position: absolute;
@@ -39,8 +41,10 @@
   height: 110%;
   filter: blur(150px);
 }
+
 .container {
   position: relative;
+  height: 100vh;
 }
 
 .tagline {
@@ -129,28 +133,6 @@
   padding: 6rem 0;
 }
 
-.center::before {
-  border-radius: 50%;
-  width: 480px;
-  height: 360px;
-  margin-left: -400px;
-}
-
-.center::after {
-  width: 240px;
-  height: 180px;
-  z-index: -1;
-}
-
-.center::before,
-.center::after {
-  content: '';
-  left: 50%;
-  position: absolute;
-  filter: blur(45px);
-  transform: translateZ(0);
-}
-
 .logo {
   position: relative;
   mix-blend-mode: difference;
@@ -201,17 +183,20 @@
     grid-template-rows: repeat(4, minmax(25%, auto));
   }
 
+  .start {
+    margin: 0 5rem;
+  }
+
   .card {
     padding: 1.5rem;
   }
 
   .card h2 {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
   }
 
-  .center::before {
-    transform: none;
-    height: 300px;
+  .center {
+    padding: 5rem 0;
   }
 }
 
@@ -219,14 +204,5 @@
 @media (min-width: 701px) and (max-width: 1120px) {
   .grid {
     grid-template-columns: repeat(2, 50%);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
   }
 }
