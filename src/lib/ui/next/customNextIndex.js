@@ -44,7 +44,7 @@ export default function Home() {
             >
               <Image
                 className={styles.logo}
-                src="/assets/HeroMinaLogo_gray.svg"
+                src="/assets/HeroMinaLogo.svg"
                 alt="Mina Logo"
                 width={191}
                 height={174}
