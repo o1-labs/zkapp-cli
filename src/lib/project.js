@@ -9,6 +9,7 @@ const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
 const customNuxtIndex = require('../lib/ui/nuxt/customNuxtIndex');
+const nuxtGradientBackground = require('../lib/ui/nuxt/nuxtGradientBackground');
 
 const shExec = util.promisify(sh.exec);
 
@@ -690,6 +691,13 @@ function scaffoldNuxt() {
   fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
+
+  fs.mkdirsSync(path.join('ui', 'components'));
+
+  fs.writeFileSync(
+    path.join('ui', 'components', 'GradientBG.vue'),
+    nuxtGradientBackground
+  );
 
   // Adds landing page assets directory and files to Nuxt project.
   fs.copySync(
