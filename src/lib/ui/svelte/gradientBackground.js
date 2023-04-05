@@ -127,41 +127,7 @@ module.exports = `
 </script>
 
 <style>
-  .background {
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .background::before {
-    background: url('$lib/assets/hash-pattern.png');
-    z-index: 1;
-    -webkit-mask-image: linear-gradient(20deg, #000 25%, transparent);
-    mask-image: linear-gradient(20deg, #000 25%, transparent);
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-  .background-gradients {
-    display: block;
-    position: absolute;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
-    filter: blur(150px);
-  }
-  .container {
-    postion: relative;
-  }
+  @import '../styles/Home.module.css';
 </style>
 
 <svelte:head>
@@ -174,5 +140,4 @@ module.exports = `
 <div class="container">
   <slot />
 </div>
-
 `;
