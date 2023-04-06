@@ -630,7 +630,6 @@ loadCOIServiceWorker();
 }
 
 function scaffoldNuxt() {
-  console.log("  Choose 'no version control' when prompted.");
   spawnSync('npx', ['nuxi', 'init', 'ui'], {
     stdio: 'inherit',
     shell: true,
@@ -665,7 +664,7 @@ function scaffoldNuxt() {
   fs.writeFileSync(path.join('ui', 'nuxt.config.ts'), newNuxtConfig);
 
   const appVue = fs.readFileSync(path.join('ui', 'app.vue'), 'utf8');
-  // Replaces the nuxt welcome page with the index landing page at the root of the nuxt project
+  // Replace the nuxt welcome page with the index landing page at the root of the nuxt project
   const newAppVue = appVue.replace('Welcome', 'Page');
   fs.writeFileSync(path.join('ui', 'app.vue'), newAppVue);
 
