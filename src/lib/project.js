@@ -664,6 +664,10 @@ function scaffoldNuxt() {
 
   fs.writeFileSync(path.join('ui', 'nuxt.config.ts'), newNuxtConfig);
 
+  const appVue = fs.readFileSync(path.join('ui', 'app.vue'), 'utf8');
+  // Replaces the nuxt welcome page with the index landing page at the root of the nuxt project
+  const newAppVue = appVue.replace('Welcome', 'Page');
+  fs.writeFileSync(path.join('ui', 'app.vue'), newAppVue);
   // Add vite as a devDependency in the nuxt UI project.
   let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
   pkgJson.devDependencies['nuxt-vite'] = '0.*';
