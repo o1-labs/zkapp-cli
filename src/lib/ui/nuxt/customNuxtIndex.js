@@ -108,12 +108,11 @@ module.exports = `
 
 <script lang="ts">
 import { onMounted } from 'vue'
-// import { Mina, isReady, PublicKey } from 'snarkyjs'
 import GradientBG from '~/components/GradientBG.vue'
 
 onMounted(async () => {
   const { Mina, isReady, PublicKey } = await import('snarkyjs')
-  const { Add } = await import('../../../contracts/build/src/')
+  const { Add } = await import('../../contracts/build/src/')
 
   await isReady
   // Update this to use the address (public key) for your zkApp account
@@ -132,4 +131,5 @@ onMounted(async () => {
 <style scoped>
 @import '~/assets/styles/Home.module.css';
 </style>
+
 `;
