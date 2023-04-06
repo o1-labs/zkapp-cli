@@ -631,10 +631,11 @@ loadCOIServiceWorker();
 
 function scaffoldNuxt() {
   console.log("  Choose 'no version control' when prompted.");
-  spawnSync('npx', ['create-nuxt-app@latest', 'ui'], {
+  spawnSync('npx', ['nuxi', 'init', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
+
   if (fs.existsSync(path.join('ui', '.git'))) {
     sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
   }
@@ -649,7 +650,7 @@ function scaffoldNuxt() {
   let newNuxtConfig = nuxtConfig.replace(
     'export default {',
     `
-  export default {  
+  export default {
     serverMiddleware: ['middleware/headers'],
 
     vite: {
@@ -665,7 +666,7 @@ function scaffoldNuxt() {
       'export default {',
       `
   export default {
-    ssr: false, 
+    ssr: false,
     `
     );
   }
@@ -689,6 +690,7 @@ function scaffoldNuxt() {
   let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
   pkgJson.devDependencies['nuxt-vite'] = '0.*';
   fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
+  fs.mkdirSync(path.join('ui', 'pages'));
 
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
 
