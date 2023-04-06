@@ -645,46 +645,24 @@ function scaffoldNuxt() {
     path.join('ui', 'middleware')
   );
 
-  // Read in the NuxtJS config file and add the middleware and vite config.
-  const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
+  // Read in the NuxtJS config file and add the middleware, vite config, and global css styles to scaffold.
+  const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.ts'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
-    'export default {',
+    'export default defineNuxtConfig({',
     `
-  export default {
+  export default defineNuxtConfig({
     serverMiddleware: ['middleware/headers'],
 
     vite: {
       build: { target: "es2020" },
       optimizeDeps: { esbuildOptions: { target: "es2020" } },
     },
+
+    css: ['~/assets/styles/globals.css']
   `
   );
 
-  // Set ssr to false if it was set to true in nuxt scaffold
-  if (!newNuxtConfig.includes('ssr')) {
-    newNuxtConfig = newNuxtConfig.replace(
-      'export default {',
-      `
-  export default {
-    ssr: false,
-    `
-    );
-  }
-
-  newNuxtConfig = newNuxtConfig.replace(
-    'buildModules: [',
-    `
-  buildModules: ["nuxt-vite",
-    `
-  );
-
-  // Adds global css styles to scaffold
-  newNuxtConfig = newNuxtConfig.replace(
-    'css: [',
-    `css: ['~/assets/styles/globals.css'`
-  );
-
-  fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
+  fs.writeFileSync(path.join('ui', 'nuxt.config.ts'), newNuxtConfig);
 
   // Add vite as a devDependency in the nuxt UI project.
   let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
