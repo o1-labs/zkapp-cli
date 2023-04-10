@@ -187,21 +187,17 @@
   }
 
   .start {
-    margin: 0 5rem;
+    margin-bottom: 2rem;
     padding-left: 0.5rem;
+    text-align: center;
   }
 
   .card {
     padding: 0.8rem 1rem 0.6rem 1rem;
   }
 
-  .start code {
-    display: block;
-    margin-top: 0.5rem;
-  }
-
   .center {
-    padding: 0 0 4rem 0.3rem;
+    padding: 0 0 3rem 0.3rem;
   }
 }
 

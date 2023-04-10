@@ -53,12 +53,12 @@ export default function Home() {
             </a>
             <p className={styles.tagline}>
               built with
-              <code className={styles.code}>SnarkyJS</code>
+              <code className={styles.code}> SnarkyJS</code>
             </p>
           </div>
           <p className={styles.start}>
             Get started by editing
-            <code className={styles.code}>src/routes/+page.svelte</code>
+            <code className={styles.code}> src/routes/+page.svelte</code>
           </p>
           <div className={styles.grid}>
             <a
@@ -119,7 +119,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Ask questions on our Discord Server</p>
+              <p>Ask questions on our Discord server</p>
             </a>
             <a
               href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
@@ -139,7 +139,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Deploy a zkApp to Berkeley testnet</p>
+              <p>Deploy a zkApp to Berkeley Testnet</p>
             </a>
           </div>
         </main>
