@@ -9,7 +9,6 @@
 @font-face {
   font-family: 'ABC Monument Grotesk Light';
   font-style: normal;
-
   src: url('/assets/fonts/ABCMonumentGrotesk-Light.woff2') format('woff2'),
     url('/assets/fonts/ABCMonumentGrotesk-Light.woff') format('woff');
 }
