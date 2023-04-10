@@ -382,6 +382,14 @@ function scaffoldSvelte() {
     path.join(__dirname, 'ui', 'svelte', 'lib'),
     path.join('ui', 'src', 'lib')
   );
+
+  // Removes sveltekit static assets
+  fs.emptydirSync(path.join('ui', 'static'));
+
+  fs.copySync(
+    path.join(__dirname, 'ui', 'svelte', 'favicon.png'),
+    path.join('ui', 'static', 'favicon.png')
+  );
 }
 
 async function scaffoldNext(projectName) {
