@@ -609,6 +609,7 @@ async function scaffoldNext(projectName) {
         isWindows ? 'NUL' : '"/dev/null" 2>&1'
       }`
     );
+
     sh.cp(
       path.join(
         'node_modules',
