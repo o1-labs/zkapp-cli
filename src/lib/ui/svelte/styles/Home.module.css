@@ -49,9 +49,9 @@
 
 .tagline {
   font-family: var(--font-monument-light);
-  font-size: 0.938rem;
+  font-size: 0.875rem;
   padding-top: 1rem;
-  letter-spacing: 0.19rem;
+  letter-spacing: 0.082rem;
   z-index: 99;
 }
 
@@ -72,10 +72,11 @@
   width: var(--max-width);
   max-width: 100%;
   margin-bottom: 3rem;
+  justify-items: center;
 }
 
 .card {
-  padding: 1rem 1.2rem;
+  padding: 0.8rem 1rem;
   gap: 0.5rem;
   margin: 1rem;
   background: rgba(var(--card-rgb), 0);
@@ -84,6 +85,7 @@
   border-radius: 4px 1px;
   transform-style: preserve-3d;
   transition: background 200ms, border 200ms;
+  width: 14rem;
 }
 
 .card:after {
@@ -118,8 +120,9 @@
 .card p {
   margin: 0;
   opacity: 0.6;
-  font-size: 0.75rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  padding-right: 0.72rem;
+  line-height: 1.3;
   max-width: 30ch;
   font-weight: 300;
 }
@@ -185,18 +188,20 @@
 
   .start {
     margin: 0 5rem;
+    padding-left: 0.5rem;
   }
 
   .card {
-    padding: 1.5rem;
+    padding: 0.8rem 1rem 0.6rem 1rem;
   }
 
-  .card h2 {
-    margin-bottom: 0.3rem;
+  .start code {
+    display: block;
+    margin-top: 0.5rem;
   }
 
   .center {
-    padding: 5rem 0;
+    padding: 0 0 3rem 0.3rem;
   }
 }
 
