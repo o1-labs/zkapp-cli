@@ -21,5 +21,6 @@ module.exports = {
     '**/*.svg',
     '**/*.woff',
     '**/*.woff2',
+    '**/*.ico',
   ],
 };
