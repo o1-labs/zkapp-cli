@@ -1,7 +1,7 @@
 module.exports = `
 import Head from 'next/head';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Mina, isReady, PublicKey, fetchAccount } from 'snarkyjs';
 import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
@@ -10,20 +10,20 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       await isReady;
+
       const { Add } = await import('../../../contracts/build/src/');
 
-      // Update this to use the address (public key) for your zkApp account
+      // Update this to use the address (public key) for your zkApp account.
       // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-      // Berkeley Testnet B62qk33E2Kg31SBSpAGUDkjzDGHk9LFt2N1vKFyHy3ezXdd6eiJeAqa
+      // Berkeley Testnet B62qpqtmdVSmXVVGqzGoA8QhLJR9zZiRzy36KPf6u1e1hgCAHAdzchR .
       const zkAppAddress = '';
       // This should be removed once the zkAppAddress is updated.
       if (!zkAppAddress) {
         console.error(
-          'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4'
+          'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qk33E2Kg31SBSpAGUDkjzDGHk9LFt2N1vKFyHy3ezXdd6eiJeAqa'
         );
       }
-
-      // const zkApp = new Add(PublicKey.fromBase58(zkAppAddress));
+      //const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
     })();
   }, []);
 
@@ -46,23 +46,19 @@ export default function Home() {
                 className={styles.logo}
                 src="/assets/HeroMinaLogo.svg"
                 alt="Mina Logo"
-                width={191}
-                height={174}
-                style={{
-                  minWidth: '100%',
-                  height: 'auto'
-                }}
+                width="191"
+                height="174"
                 priority
               />
             </a>
             <p className={styles.tagline}>
-              Built with&nbsp;
+              built with
               <code className={styles.code}>SnarkyJS</code>
             </p>
           </div>
           <p className={styles.start}>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
+            Get started by editing
+            <code className={styles.code}>src/routes/+page.svelte</code>
           </p>
           <div className={styles.grid}>
             <a
@@ -83,7 +79,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Explore zkApps, how to build one & in-depth references</p>
+              <p>Explore zkApps, how to build one, and in-depth references</p>
             </a>
             <a
               href="https://docs.minaprotocol.com/zkapps/tutorials/hello-world"
@@ -106,7 +102,7 @@ export default function Home() {
               <p>Learn with step-by-step SnarkyJS tutorials</p>
             </a>
             <a
-              href="https://discord.com/invite/minaprotocol"
+              href="https://discord.gg/minaprotocol"
               className={styles.card}
               target="_blank"
               rel="noopener noreferrer"
@@ -123,7 +119,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Ask questions on our Discord</p>
+              <p>Ask questions on our Discord Server</p>
             </a>
             <a
               href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
@@ -143,7 +139,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Deploy a zkApp</p>
+              <p>Deploy a zkApp to Berkeley testnet</p>
             </a>
           </div>
         </main>
@@ -151,5 +147,4 @@ export default function Home() {
     </>
   );
 }
-
 `;
