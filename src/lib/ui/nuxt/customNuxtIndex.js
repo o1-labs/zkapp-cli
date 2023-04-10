@@ -3,21 +3,27 @@ module.exports = `
   <GradientBG>
     <main class="main">
       <div class="center">
-        <img
-          class="logo"
-          src="~/assets/HeroMinaLogo.svg"
-          alt="Mina Logo"
-          width="191"
-          height="174"
-          priority
-        />
+        <a
+          href="https://minaprotocol.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            class="logo"
+            src="~/assets/HeroMinaLogo.svg"
+            alt="Mina Logo"
+            width="191"
+            height="174"
+            priority
+          />
+        </a>
         <p class="tagline">
-          Built with&nbsp;
+          built with
           <code class="code">SnarkyJS</code>
         </p>
       </div>
       <p class="start">
-        Get started by editing&nbsp;
+        Get started by editing
         <code class="code">pages/index.vue</code>
       </p>
       <div class="grid">
@@ -39,7 +45,7 @@ module.exports = `
               />
             </div>
           </h2>
-          <p>Explore zkApps, how to build one & in-depth references</p>
+          <p>Explore zkApps, how to build one, and in-depth references</p>
         </a>
         <a
           href="https://docs.minaprotocol.com/zkapps/tutorials/hello-world"
@@ -79,16 +85,16 @@ module.exports = `
               />
             </div>
           </h2>
-          <p>Ask questions on our Discord</p>
+          <p>Ask questions on our Discord Server</p>
         </a>
         <a
-          href="https://zkappsformina.com/"
+          href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
           class="card"
           target="_blank"
           rel="noopener noreferrer"
         >
           <h2>
-            <span>EXAMPLES</span>
+            <span>DEPLOY</span>
             <div>
               <img
                 src="~/assets/arrow-right-small.svg"
@@ -99,7 +105,7 @@ module.exports = `
               />
             </div>
           </h2>
-          <p>Play with deployed zkApps and view their code</p>
+          <p>Deploy a zkApp to Berkeley testnet</p>
         </a>
       </div>
     </main>
@@ -116,9 +122,9 @@ export default {
       const { Add } = await import('../../contracts/build/src/')
 
       await isReady
-      // Update this to use the address (public key) for your zkApp account
+      // Update this to use the address (public key) for your zkApp account.
       // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-      // Berkeley Testnet B62qk33E2Kg31SBSpAGUDkjzDGHk9LFt2N1vKFyHy3ezXdd6eiJeAqa
+      // Berkeley Testnet B62qpqtmdVSmXVVGqzGoA8QhLJR9zZiRzy36KPf6u1e1hgCAHAdzchR .
       const zkAppAddress = ''
       // This should be removed once the zkAppAddress is updated.
       if (!zkAppAddress) {
@@ -134,4 +140,5 @@ export default {
 <style scoped>
 @import '~/assets/styles/Home.module.css';
 </style>
+
 `;
