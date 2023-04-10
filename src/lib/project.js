@@ -506,6 +506,9 @@ async function scaffoldNext(projectName) {
     path.join('ui', 'src', 'styles')
   );
 
+  // Removes create-next-app assets
+  fs.emptydirSync(path.join('ui', 'public'));
+
   // Adds landing page assets directory and files to NextJS project.
   fs.copySync(
     path.join(__dirname, 'ui', 'next', 'assets'),
