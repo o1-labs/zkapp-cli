@@ -684,6 +684,13 @@ function scaffoldNuxt() {
     path.join(__dirname, 'ui', 'nuxt', 'assets'),
     path.join('ui', 'assets')
   );
+  // Removes nuxt static assets
+  fs.emptydirSync(path.join('ui', 'public'));
+
+  fs.copySync(
+    path.join(__dirname, 'ui', 'nuxt', 'favicon.ico'),
+    path.join('ui', 'public', 'favicon.ico')
+  );
 }
 
 /**
