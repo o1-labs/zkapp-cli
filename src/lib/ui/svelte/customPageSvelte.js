@@ -109,7 +109,7 @@ module.exports = `
               priority />
           </div>
         </h2>
-        <p>Ask questions on our Discord Server</p>
+        <p>Ask questions on our Discord server</p>
       </a>
       <a
         href="https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp"
@@ -127,10 +127,9 @@ module.exports = `
               priority />
           </div>
         </h2>
-        <p>Deploy a zkApp to Berkeley testnet</p>
+        <p>Deploy a zkApp to Berkeley Testnet</p>
       </a>
     </div>
   </main>
 </GradientBG>
-
 `;

@@ -348,7 +348,7 @@ function scaffoldSvelte() {
 
   fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
 
-  // Remove Sveltkit demo pages and components if found
+  // Remove Sveltekit demo pages and components if found
   fs.emptyDirSync(path.join('ui', 'src', 'routes'));
 
   fs.writeFileSync(
@@ -383,7 +383,7 @@ function scaffoldSvelte() {
     path.join('ui', 'src', 'lib')
   );
 
-  // Removes sveltekit static assets
+  // Removes Sveltekit static assets
   fs.emptydirSync(path.join('ui', 'static'));
 
   fs.copySync(
