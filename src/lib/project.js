@@ -284,6 +284,7 @@ function scaffoldSvelte() {
     stdio: 'inherit',
     shell: true,
   });
+
   sh.cp(
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
@@ -638,10 +639,12 @@ function scaffoldNuxt() {
   if (fs.existsSync(path.join('ui', '.git'))) {
     sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
   }
-  sh.mkdir(path.join('ui', 'middleware'));
-  sh.cp(
+
+  // Add server middleware file to setCOOP and COEP
+  fs.mkdirSync(path.join('ui', 'server', 'middleware'), { recursive: true });
+  fs.copySync(
     path.join(__dirname, 'ui', 'nuxt', 'headers.js'),
-    path.join('ui', 'middleware')
+    path.join('ui', 'server', 'middleware', 'headers.js')
   );
 
   // Read in the NuxtJS config file and add the middleware, vite config, and global css styles to scaffold.
@@ -650,8 +653,7 @@ function scaffoldNuxt() {
     'export default defineNuxtConfig({',
     `
   export default defineNuxtConfig({
-    serverMiddleware: ['middleware/headers'],
-
+    
     vite: {
       build: { target: "es2020" },
       optimizeDeps: { esbuildOptions: { target: "es2020" } },
