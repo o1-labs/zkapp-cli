@@ -130,10 +130,6 @@ module.exports = `
   @import '../styles/Home.module.css';
 </style>
 
-<svelte:head>
-  <title>zkApp CLI</title>
-</svelte:head>
-
 <div class="background">
   <canvas class="background-gradients" width="6" height="6" />
 </div>

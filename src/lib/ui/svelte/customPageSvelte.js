@@ -7,18 +7,17 @@ module.exports = `
   import { isReady, Mina, PublicKey } from 'snarkyjs'
 
   onMount(async () => {
-    await isReady
-
     const { Add } = await import('../../../contracts/build/src/')
 
+    await isReady
     // Update this to use the address (public key) for your zkApp account.
     // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qpqtmdVSmXVVGqzGoA8QhLJR9zZiRzy36KPf6u1e1hgCAHAdzchR .
+    // Berkeley Testnet B62qkwohsqTBPsvhYE8cPZSpzJMgoKn4i1LQRuBAtVXWpaT4dgH6WoA .
     const zkAppAddress = ''
     // This should be removed once the zkAppAddress is updated.
     if (!zkAppAddress) {
       console.error(
-        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qk33E2Kg31SBSpAGUDkjzDGHk9LFt2N1vKFyHy3ezXdd6eiJeAqa',
+        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qkwohsqTBPsvhYE8cPZSpzJMgoKn4i1LQRuBAtVXWpaT4dgH6WoA',
       )
     }
     //const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
@@ -30,7 +29,7 @@ module.exports = `
 </style>
 
 <svelte:head>
-  <title>zkApp CLI</title>
+  <title>Mina zkApp UI</title>
 </svelte:head>
 <GradientBG>
   <main class="main">
