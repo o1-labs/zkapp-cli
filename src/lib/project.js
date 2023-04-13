@@ -395,21 +395,6 @@ function scaffoldSvelte() {
 }
 
 async function scaffoldNext(projectName) {
-  const tsPrompt = new Select({
-    message: (state) =>
-      message(state, 'Do you want your NextJS project to use TypeScript?'),
-    choices: ['no', 'yes'],
-    prefix: (state) => prefix(state),
-  });
-
-  let useTypescript;
-  try {
-    useTypescript = (await tsPrompt.run()) == 'yes';
-  } catch (err) {
-    // If ctrl+c is pressed it will throw.
-    return;
-  }
-
   const ghPagesPrompt = new Select({
     message: (state) =>
       message(
@@ -439,7 +424,6 @@ async function scaffoldNext(projectName) {
     '--src-dir',
     '--import-alias "@/*"',
   ];
-  if (useTypescript) args.push('--ts');
 
   spawnSync('npx', args, {
     stdio: 'inherit',
@@ -448,7 +432,20 @@ async function scaffoldNext(projectName) {
 
   sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
   // Read in the NextJS config file and add the middleware.
+
+  let useTypescript = true;
+  try {
+    // Determine if generated project is a ts project by looking for a tsconfig file
+    fs.readFileSync(path.join('ui', 'tsconfig.json'));
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(err);
+    }
+    useTypescript = false;
+  }
+
   const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
+
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
@@ -633,7 +630,9 @@ async function scaffoldNext(projectName) {
     const indexPagesFileName = useTypescript
       ? 'index.page.tsx'
       : 'index.page.js';
-
+    const reactCOIServiceWorkerFileName = useTypescript
+      ? 'reactCOIServiceWorker.tsx'
+      : 'reactCOIServiceWorker.js';
     sh.mv(
       path.join('ui', 'src/pages', appFileName),
       path.join('ui', 'src/pages', appPagesFileName)
@@ -660,7 +659,7 @@ export default function`
     );
 
     fs.writeFileSync(
-      path.join('ui', 'src', 'pages', 'reactCOIServiceWorker.tsx'),
+      path.join('ui', 'src', 'pages', reactCOIServiceWorkerFileName),
       `
 export {}
 
