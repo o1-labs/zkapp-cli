@@ -117,25 +117,27 @@ function animate() {
 }
 
 export default {
-  mounted() {
+  setup() {
+    onMounted(() => {
     canvas = document.querySelector('.background-gradients')
-    ctx = canvas.getContext('2d')
-    ctx.save()
+      ctx = canvas.getContext('2d')
+      ctx.save()
 
-    pixels = [
-      new Pixel(1, 1, 3, 4, new Color(252, 70, 67, 0.8)),
-      new Pixel(0, 0, 1, 1, new Color(0, 0, 98, 1)),
-      new Pixel(0, 3, 2, 2, new Color(11, 100, 62, 0.8)),
-      new Pixel(4, 0, 4, 3, new Color(190, 94, 75, 0.8)),
-      new Pixel(3, 1, 1, 2, new Color(324, 98, 50, 0.1)),
-    ]
+      pixels = [
+        new Pixel(1, 1, 3, 4, new Color(252, 70, 67, 0.8)),
+        new Pixel(0, 0, 1, 1, new Color(0, 0, 98, 1)),
+        new Pixel(0, 3, 2, 2, new Color(11, 100, 62, 0.8)),
+        new Pixel(4, 0, 4, 3, new Color(190, 94, 75, 0.8)),
+        new Pixel(3, 1, 1, 2, new Color(324, 98, 50, 0.1)),
+      ]
 
-    animate()
-  },
-
-  unmounted() {
-    window.cancelAnimationFrame(animationFrameId)
+      animate()
+    });
+    onUnmounted(()=>{
+      window.cancelAnimationFrame(animationFrameId)
+    })
   }
+
 }
 </script>
 <style scoped>
