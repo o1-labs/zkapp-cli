@@ -450,7 +450,7 @@ async function scaffoldNext(projectName) {
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
+
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -488,7 +488,7 @@ async function scaffoldNext(projectName) {
 
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
-  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
 
   fs.writeFileSync(
     path.join('ui', 'src/pages', indexFileName),
@@ -496,21 +496,33 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
-  sh.mv(
-    path.join('ui', 'src/pages', '_app.tsx'),
-    path.join('ui', 'src/pages', '_app.page.tsx')
+  // Adds landing page components directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'components'),
+    path.join('ui', 'src', 'components')
   );
 
-  sh.mv(
-    path.join('ui', 'src/pages', 'index.tsx'),
-    path.join('ui', 'src/pages', 'index.page.tsx')
+  // Adds landing page style directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'styles'),
+    path.join('ui', 'src', 'styles')
+  );
+
+  // Removes create-next-app assets
+  fs.emptydirSync(path.join('ui', 'public'));
+
+  // Adds landing page assets directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'assets'),
+    path.join('ui', 'public', 'assets')
   );
 
   const tsconfig = `
     {
     "compilerOptions": {
         "target": "es2020",
-        "module": "es2022",
+        "module": "esnext",
+        "lib": ["dom", "dom.iterable","esnext"],
         "strict": true,
         "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
         "skipLibCheck": true,
@@ -525,6 +537,10 @@ async function scaffoldNext(projectName) {
         "noFallthroughCasesInSwitch": true,
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
+        "noEmit": true,
+        "incremental": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
         "paths": {
           "@/*": ["./src/*"]
     }
@@ -548,6 +564,7 @@ async function scaffoldNext(projectName) {
       path.join('ui', 'next.config.js'),
       'utf8'
     );
+
     console.log(
       'Using project name ' +
         projectName +
@@ -569,6 +586,14 @@ async function scaffoldNext(projectName) {
       `config.optimization.minimizer = [];
     return config;`
     );
+
+    // update papage extensions
+    newNextConfig = nextConfig.replace(
+      'reactStrictMode: false,',
+      `reactStrictMode: false,
+  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
+    );
+
     fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
     // Add some scripts to the package.json
@@ -589,6 +614,7 @@ async function scaffoldNext(projectName) {
         isWindows ? 'NUL' : '"/dev/null" 2>&1'
       }`
     );
+
     sh.cp(
       path.join(
         'node_modules',
@@ -599,17 +625,37 @@ async function scaffoldNext(projectName) {
     );
     sh.cd('..');
 
-    let apptsx = fs.readFileSync(
-      path.join('ui', 'src', 'pages', '_app.page.tsx'),
+    const appFileName = useTypescript ? '_app.tsx' : '_app.js';
+    const appPagesFileName = useTypescript ? '_app.page.tsx' : '_app.page.js';
+    const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
+    const indexPagesFileName = useTypescript
+      ? 'index.page.tsx'
+      : 'index.page.js';
+
+    sh.mv(
+      path.join('ui', 'src/pages', appFileName),
+      path.join('ui', 'src/pages', appPagesFileName)
+    );
+    sh.mv(
+      path.join('ui', 'src/pages', indexFileName),
+      path.join('ui', 'src/pages', indexPagesFileName)
+    );
+
+    let appFile = fs.readFileSync(
+      path.join('ui', 'src', 'pages', appPagesFileName),
       'utf8'
     );
-    apptsx = apptsx.replace(
+
+    appFile = appFile.replace(
       'export default function',
       `import './reactCOIServiceWorker';
 
 export default function`
     );
-    fs.writeFileSync(path.join('ui', 'src', 'pages', '_app.page.tsx'), apptsx);
+    fs.writeFileSync(
+      path.join('ui', 'src', 'pages', appPagesFileName),
+      appFile
+    );
 
     fs.writeFileSync(
       path.join('ui', 'src', 'pages', 'reactCOIServiceWorker.tsx'),
