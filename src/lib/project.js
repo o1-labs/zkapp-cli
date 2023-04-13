@@ -10,6 +10,9 @@ const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
 const customNuxtIndex = require('../lib/ui/nuxt/customNuxtIndex');
 const nuxtGradientBackground = require('../lib/ui/nuxt/nuxtGradientBackground');
+const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
+const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
+const gradientBackground = require('./ui/svelte/gradientBackground');
 
 const shExec = util.promisify(sh.exec);
 
@@ -317,79 +320,77 @@ function scaffoldSvelte() {
 	// from the referenced tsconfig.json - TypeScript does not merge them in
 }
   `;
-
+  let useTypescript = true;
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
+    fs.readFileSync(path.join('ui', 'tsconfig.json'));
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
     }
+    useTypescript = false;
   }
 
-  const vitConfig = fs.readFileSync(path.join('ui', 'vite.config.js'), 'utf8');
+  const viteConfigFileName = useTypescript
+    ? 'vite.config.ts'
+    : 'vite.config.js';
+
+  const vitConfig = fs.readFileSync(
+    path.join('ui', viteConfigFileName),
+    'utf8'
+  );
 
   const customViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `,
     optimizeDeps: { esbuildOptions: { target: 'es2020' } }
-  };`
+  });`
   );
 
-  fs.writeFileSync(path.join('ui', 'vite.config.js'), customViteConfig);
+  fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
 
-  const pageSvelte = fs.readFileSync(
-    path.join('ui', 'src', 'routes', '+page.svelte'),
-    'utf8'
-  );
-
-  const contractImport = `
-  import { onMount } from "svelte";
-  import { isReady, Mina, PublicKey } from 'snarkyjs';
-
-  onMount(async () => {
-    await isReady;  
-
-    const { Add } = await import('../../../contracts/build/src/')
-    // Update this to use the address (public key) for your zkApp account
-    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
-    const zkAppAddress = ''
-    // This should be removed once the zkAppAddress is updated.
-    if (!zkAppAddress) {
-      console.error(
-        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
-      );
-    }
-    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
-  });
-`;
-
-  let customPageSvelte;
-  // A script tag will be added if a user generates a skelton project from the svelte prompt
-  if (!pageSvelte.includes('<script>')) {
-    customPageSvelte = pageSvelte.replace(
-      '<h1>',
-      `
-    <script>
-    ${contractImport}
-    </script>
-
-    <h1>
-    `
-    );
-  } else {
-    customPageSvelte = pageSvelte.replace(
-      '</script>',
-      `
-${contractImport}
-</script>`
-    );
-  }
+  // Remove Sveltekit demo pages and components if found
+  fs.emptyDirSync(path.join('ui', 'src', 'routes'));
 
   fs.writeFileSync(
     path.join('ui', 'src', 'routes', '+page.svelte'),
     customPageSvelte
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', '+layout.svelte'),
+    customLayoutSvelte
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'src', 'routes', 'GradientBG.svelte'),
+    gradientBackground
+  );
+
+  fs.mkdirsSync(path.join('ui', 'src', 'styles'));
+
+  // Adds landing page styles directory and files to SvelteKit project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'svelte', 'styles'),
+    path.join('ui', 'src', 'styles')
+  );
+
+  // Remove Sveltkit demo lib and assets if found
+  fs.emptyDirSync(path.join('ui', 'src', 'lib'));
+
+  // Adds landing page lib directory and files to SvelteKit project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'svelte', 'lib'),
+    path.join('ui', 'src', 'lib')
+  );
+
+  // Removes Sveltekit static assets
+  fs.emptydirSync(path.join('ui', 'static'));
+
+  fs.copySync(
+    path.join(__dirname, 'ui', 'svelte', 'favicon.png'),
+    path.join('ui', 'static', 'favicon.png')
   );
 }
 
@@ -451,7 +452,7 @@ async function scaffoldNext(projectName) {
   let newNextConfig = nextConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `
-  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],
+
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -489,7 +490,7 @@ async function scaffoldNext(projectName) {
 
   fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
-  const indexFileName = useTypescript ? 'index.tsx' : 'index.jsx';
+  const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
 
   fs.writeFileSync(
     path.join('ui', 'src/pages', indexFileName),
@@ -497,20 +498,33 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
-  sh.mv(
-    path.join('ui', 'src/pages', '_app.tsx'),
-    path.join('ui', 'src/pages', '_app.page.tsx')
+  // Adds landing page components directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'components'),
+    path.join('ui', 'src', 'components')
   );
-  sh.mv(
-    path.join('ui', 'src/pages', 'index.tsx'),
-    path.join('ui', 'src/pages', 'index.page.tsx')
+
+  // Adds landing page style directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'styles'),
+    path.join('ui', 'src', 'styles')
+  );
+
+  // Removes create-next-app assets
+  fs.emptydirSync(path.join('ui', 'public'));
+
+  // Adds landing page assets directory and files to NextJS project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'next', 'assets'),
+    path.join('ui', 'public', 'assets')
   );
 
   const tsconfig = `
     {
     "compilerOptions": {
         "target": "es2020",
-        "module": "es2022",
+        "module": "esnext",
+        "lib": ["dom", "dom.iterable","esnext"],
         "strict": true,
         "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
         "skipLibCheck": true,
@@ -525,6 +539,10 @@ async function scaffoldNext(projectName) {
         "noFallthroughCasesInSwitch": true,
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
+        "noEmit": true,
+        "incremental": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
         "paths": {
           "@/*": ["./src/*"]
     }
@@ -548,6 +566,7 @@ async function scaffoldNext(projectName) {
       path.join('ui', 'next.config.js'),
       'utf8'
     );
+
     console.log(
       'Using project name ' +
         projectName +
@@ -569,6 +588,14 @@ async function scaffoldNext(projectName) {
       `config.optimization.minimizer = [];
     return config;`
     );
+
+    // update papage extensions
+    newNextConfig = nextConfig.replace(
+      'reactStrictMode: false,',
+      `reactStrictMode: false,
+  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
+    );
+
     fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
     // Add some scripts to the package.json
@@ -589,6 +616,7 @@ async function scaffoldNext(projectName) {
         isWindows ? 'NUL' : '"/dev/null" 2>&1'
       }`
     );
+
     sh.cp(
       path.join(
         'node_modules',
@@ -599,17 +627,37 @@ async function scaffoldNext(projectName) {
     );
     sh.cd('..');
 
-    let apptsx = fs.readFileSync(
-      path.join('ui', 'src', 'pages', '_app.page.tsx'),
+    const appFileName = useTypescript ? '_app.tsx' : '_app.js';
+    const appPagesFileName = useTypescript ? '_app.page.tsx' : '_app.page.js';
+    const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
+    const indexPagesFileName = useTypescript
+      ? 'index.page.tsx'
+      : 'index.page.js';
+
+    sh.mv(
+      path.join('ui', 'src/pages', appFileName),
+      path.join('ui', 'src/pages', appPagesFileName)
+    );
+    sh.mv(
+      path.join('ui', 'src/pages', indexFileName),
+      path.join('ui', 'src/pages', indexPagesFileName)
+    );
+
+    let appFile = fs.readFileSync(
+      path.join('ui', 'src', 'pages', appPagesFileName),
       'utf8'
     );
-    apptsx = apptsx.replace(
+
+    appFile = appFile.replace(
       'export default function',
       `import './reactCOIServiceWorker';
 
 export default function`
     );
-    fs.writeFileSync(path.join('ui', 'src', 'pages', '_app.page.tsx'), apptsx);
+    fs.writeFileSync(
+      path.join('ui', 'src', 'pages', appPagesFileName),
+      appFile
+    );
 
     fs.writeFileSync(
       path.join('ui', 'src', 'pages', 'reactCOIServiceWorker.tsx'),

@@ -1,0 +1,209 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 5rem;
+  min-height: 100vh;
+}
+
+.background {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.background::before {
+  background: url('$lib/assets/hash-pattern.png');
+  z-index: 1;
+  -webkit-mask-image: linear-gradient(20deg, #000 25%, transparent);
+  mask-image: linear-gradient(20deg, #000 25%, transparent);
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.background-gradients {
+  display: block;
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  filter: blur(150px);
+}
+
+.container {
+  position: relative;
+  height: 100vh;
+}
+
+.tagline {
+  font-family: var(--font-monument-light);
+  font-size: 0.875rem;
+  padding-top: 1rem;
+  letter-spacing: 0.082rem;
+  z-index: 99;
+}
+
+.start {
+  font-family: var(--font-monument-light);
+  font-size: 1.25rem;
+  letter-spacing: 0.1rem;
+  z-index: 99;
+}
+
+.code {
+  font-family: var(--font-monument-bold);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(25%, auto));
+  width: var(--max-width);
+  max-width: 100%;
+  margin-bottom: 3rem;
+  justify-items: center;
+}
+
+.card {
+  padding: 0.8rem 1rem;
+  gap: 0.5rem;
+  margin: 1rem;
+  background: rgba(var(--card-rgb), 0);
+  background-color: rgb(255, 255, 255);
+  border: 1px solid #2d2d2d;
+  border-radius: 4px 1px;
+  transform-style: preserve-3d;
+  transition: background 200ms, border 200ms;
+  width: 14rem;
+}
+
+.card:after {
+  content: '';
+  position: absolute;
+  inset: 0.4rem -0.4rem -0.4rem 0.4rem;
+  border-radius: 4px 1px;
+  border: 1px solid #2d2d2d;
+  transform: translateZ(-1px);
+  transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
+}
+
+.card span {
+  display: inline-block;
+  transition: transform 200ms;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.card h2 {
+  display: flex;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+  justify-content: space-between;
+  letter-spacing: 0.13rem;
+}
+
+.card h2 div {
+  display: flex;
+}
+
+.card p {
+  margin: 0;
+  opacity: 0.6;
+  font-size: 0.875rem;
+  padding-right: 0.72rem;
+  line-height: 1.3;
+  max-width: 30ch;
+  font-weight: 300;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 6rem 0;
+}
+
+.logo {
+  position: relative;
+  mix-blend-mode: difference;
+  filter: invert(0.7);
+}
+
+/* Enable hover only on non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    color: #ffff;
+    background: linear-gradient(
+        0deg,
+        rgba(45, 45, 45, 0.66),
+        rgba(45, 45, 45, 0.66)
+      ),
+      url('$lib/assets/button-hover-light.png');
+    border: 1px solid #2d2d2d;
+    background-size: 100% 100%;
+    transform: translateZ(-1px);
+  }
+
+  .card:hover:after {
+    border: 0px solid rgba(0, 0, 0, 0);
+    transform: translate(-0.4rem, -0.4rem);
+    transition: transform 200ms ease-in 0ms, border 50ms ease-in 100ms;
+  }
+
+  .card:hover img {
+    filter: brightness(0) invert(1);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .card:hover span {
+    transform: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .content {
+    padding: 4rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+    grid-template-rows: repeat(4, minmax(25%, auto));
+  }
+
+  .start {
+    margin-bottom: 2rem;
+    padding-left: 0.5rem;
+    text-align: center;
+  }
+
+  .card {
+    padding: 0.8rem 1rem 0.6rem 1rem;
+  }
+
+  .center {
+    padding: 0 0 3rem 0.3rem;
+  }
+}
+
+/* Tablet and Smaller Desktop */
+@media (min-width: 701px) and (max-width: 1120px) {
+  .grid {
+    grid-template-columns: repeat(2, 50%);
+  }
+}
