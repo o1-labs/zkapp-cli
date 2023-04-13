@@ -8,6 +8,8 @@ const { prompt, Select } = require('enquirer');
 const { spawnSync } = require('child_process');
 const { red, green, reset } = require('chalk');
 const customNextIndex = require('../lib/ui/next/customNextIndex');
+const customNuxtIndex = require('../lib/ui/nuxt/customNuxtIndex');
+const nuxtGradientBackground = require('../lib/ui/nuxt/nuxtGradientBackground');
 const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
 const gradientBackground = require('./ui/svelte/gradientBackground');
@@ -677,90 +679,68 @@ loadCOIServiceWorker();
 }
 
 function scaffoldNuxt() {
-  console.log("  Choose 'no version control' when prompted.");
-  spawnSync('npx', ['create-nuxt-app@latest', 'ui'], {
+  spawnSync('npx', ['nuxi', 'init', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
+
   if (fs.existsSync(path.join('ui', '.git'))) {
     sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
   }
-  sh.mkdir(path.join('ui', 'middleware'));
-  sh.cp(
+
+  // Add server middleware file to setCOOP and COEP
+  fs.mkdirSync(path.join('ui', 'server', 'middleware'), { recursive: true });
+  fs.copySync(
     path.join(__dirname, 'ui', 'nuxt', 'headers.js'),
-    path.join('ui', 'middleware')
+    path.join('ui', 'server', 'middleware', 'headers.js')
   );
 
-  // Read in the NuxtJS config file and add the middleware and vite config.
-  const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.js'), 'utf8');
+  // Read in the NuxtJS config file and add the middleware, vite config, and global css styles to scaffold.
+  const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.ts'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
-    'export default {',
+    'export default defineNuxtConfig({',
     `
-  export default {  
-    serverMiddleware: ['middleware/headers'],
-
+  export default defineNuxtConfig({
+    
     vite: {
       build: { target: "es2020" },
       optimizeDeps: { esbuildOptions: { target: "es2020" } },
     },
+
+    css: ['~/assets/styles/globals.css']
   `
   );
 
-  // Set ssr to false if it was set to true in nuxt scaffold
-  if (!newNuxtConfig.includes('ssr')) {
-    newNuxtConfig = newNuxtConfig.replace(
-      'export default {',
-      `
-  export default {
-    ssr: false, 
-    `
-    );
-  }
+  fs.writeFileSync(path.join('ui', 'nuxt.config.ts'), newNuxtConfig);
 
-  newNuxtConfig = newNuxtConfig.replace(
-    'buildModules: [',
-    `
-  buildModules: ["nuxt-vite",
-    `
-  );
+  const appVue = fs.readFileSync(path.join('ui', 'app.vue'), 'utf8');
+  // Replace the nuxt welcome page with the index landing page at the root of the nuxt project
+  const newAppVue = appVue.replace('Welcome', 'Page');
+  fs.writeFileSync(path.join('ui', 'app.vue'), newAppVue);
 
-  fs.writeFileSync(path.join('ui', 'nuxt.config.js'), newNuxtConfig);
-
-  // Add vite as a devDependency in the nuxt UI project.
-  let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
-  pkgJson.devDependencies['nuxt-vite'] = '0.*';
-  fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
-
-  const customNuxtIndex = `
-<template>
-<Tutorial />
-</template>
-
-<script>
-import { isReady, Mina, PublicKey } from 'snarkyjs'
-
-export default {
-  async mounted() {
-    await isReady
-
-    const { Add } = await import('../../contracts/build/src/')
-    // Update this to use the address (public key) for your zkApp account
-    // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
-    // Berkeley Testnet B62qisn669bZqsh8yMWkNyCA7RvjrL6gfdr3TQxymDHNhTc97xE5kNV
-    const zkAppAddress = ''
-    // This should be removed once the zkAppAddress is updated.
-    if (!zkAppAddress) {
-      console.error(
-        'The following error is caused because the zkAppAddress has an empty string as the public key. Update the zkAppAddress with the public key for your zkApp account, or try this address for an example "Add" smart contract that we deployed to Berkeley Testnet: B62qqkb7hD1We6gEfrcqosKt9C398VLp1WXeTo1i9boPoqF7B1LxHg4',
-      )
-    }
-    const zkApp = new Add(PublicKey.fromBase58(zkAppAddress))
-  }
-}
-</script>
-`;
+  fs.mkdirSync(path.join('ui', 'pages'));
 
   fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
+
+  fs.mkdirsSync(path.join('ui', 'components'));
+
+  fs.writeFileSync(
+    path.join('ui', 'components', 'GradientBG.vue'),
+    nuxtGradientBackground
+  );
+
+  // Adds landing page assets directory and files to Nuxt project.
+  fs.copySync(
+    path.join(__dirname, 'ui', 'nuxt', 'assets'),
+    path.join('ui', 'assets')
+  );
+  // Removes nuxt static assets
+  fs.emptydirSync(path.join('ui', 'public'));
+
+  fs.copySync(
+    path.join(__dirname, 'ui', 'nuxt', 'favicon.ico'),
+    path.join('ui', 'public', 'favicon.ico')
+  );
 }
 
 /**
