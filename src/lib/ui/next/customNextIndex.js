@@ -8,9 +8,7 @@ import styles from '../styles/Home.module.css';
 export default function Home() {
   useEffect(() => {
     (async () => {
-      const { Mina, isReady, PublicKey, fetchAccount } = await import(
-        'snarkyjs'
-      );
+      const { Mina, isReady, PublicKey } = await import('snarkyjs');
       const { Add } = await import('../../../contracts/build/src/');
 
       await isReady;
@@ -60,7 +58,7 @@ export default function Home() {
           </div>
           <p className={styles.start}>
             Get started by editing
-            <code className={styles.code}> src/routes/+page.svelte</code>
+            <code className={styles.code}> src/pages/index.tsx</code>
           </p>
           <div className={styles.grid}>
             <a
