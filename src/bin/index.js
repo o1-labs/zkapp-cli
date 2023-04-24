@@ -56,7 +56,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     ['file [name]', 'f [name]'],
-    'Create a file and the corresponding test file',
+    'Create a file and generate the corresponding test file',
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
