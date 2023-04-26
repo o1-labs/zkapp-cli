@@ -30,9 +30,9 @@ node build/src/interact.js berkeley
 Error.stackTraceLimit = 1000;
 
 // parse config and private key from file
-type Config = { networks: Record<string, { url: string; keyPath: string }> };
+type Config = { deployAliases: Record<string, { url: string; keyPath: string }> };
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
-let config = configJson.networks[network];
+let config = configJson.deployAliases[network];
 let key: { privateKey: string } = JSON.parse(
   await fs.readFile(config.keyPath, 'utf8')
 );
