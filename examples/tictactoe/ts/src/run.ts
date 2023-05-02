@@ -15,14 +15,11 @@ import {
   PrivateKey,
   PublicKey,
   Mina,
-  shutdown,
-  isReady,
   AccountUpdate,
   Signature,
 } from 'snarkyjs';
 import { TicTacToe, Board } from './tictactoe.js';
 
-await isReady;
 let Local = Mina.LocalBlockchain({ proofsEnabled: false });
 Mina.setActiveInstance(Local);
 const [
@@ -108,7 +105,6 @@ let isNextPlayer2 = zkApp.nextIsPlayer2.get();
 
 console.log('did someone win?', isNextPlayer2 ? 'Player 1!' : 'Player 2!');
 // cleanup
-await shutdown();
 
 async function makeMove(
   currentPlayer: PublicKey,

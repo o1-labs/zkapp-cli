@@ -1,7 +1,5 @@
 import { TicTacToe } from './tictactoe';
 import {
-  isReady,
-  shutdown,
   Field,
   Bool,
   PrivateKey,
@@ -19,17 +17,12 @@ describe('tictactoe', () => {
     zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
-    await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     [{ publicKey: player1, privateKey: player1Key }, { publicKey: player2 }] =
       Local.testAccounts;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-  });
-
-  afterAll(() => {
-    setTimeout(shutdown, 0);
   });
 
   it('generates and deploys tictactoe', async () => {
