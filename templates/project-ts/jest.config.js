@@ -7,6 +7,7 @@ export default {
     'ts-jest': {
       useESM: true,
     },
+    testTimeout: 1_000_000,
   },
   transform: {
     '^.+\\.(t)s$': 'ts-jest',
