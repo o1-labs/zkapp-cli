@@ -12,7 +12,7 @@
  * Build the project: `$ npm run build`
  * Run with node:     `$ node build/src/interact.js <network>`.
  */
-import { Mina, PrivateKey, shutdown } from 'snarkyjs';
+import { Mina, PrivateKey } from 'snarkyjs';
 import fs from 'fs/promises';
 import { Add } from './Add.js';
 
@@ -30,7 +30,9 @@ node build/src/interact.js berkeley
 Error.stackTraceLimit = 1000;
 
 // parse config and private key from file
-type Config = { deployAliases: Record<string, { url: string; keyPath: string }> };
+type Config = {
+  deployAliases: Record<string, { url: string; keyPath: string }>;
+};
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
 let config = configJson.deployAliases[network];
 let key: { privateKey: string } = JSON.parse(
@@ -66,4 +68,3 @@ as soon as the transaction is included in a block:
 https://berkeley.minaexplorer.com/transaction/${sentTx.hash()}
 `);
 }
-shutdown();
