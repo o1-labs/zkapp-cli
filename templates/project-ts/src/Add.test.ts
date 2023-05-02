@@ -20,7 +20,7 @@ describe('Add', () => {
     zkApp: Add;
 
   beforeAll(async () => {
-    await Add.compile();
+    if (proofsEnabled) await Add.compile();
   });
 
   beforeEach(() => {
