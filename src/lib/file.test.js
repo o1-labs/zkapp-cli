@@ -1,5 +1,5 @@
 const path = require('path');
-const { file, parsePath, pathExists } = require('./file');
+const { parsePath } = require('./file');
 
 describe('file.js', () => {
   describe('file()', () => {
