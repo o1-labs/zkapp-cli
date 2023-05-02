@@ -92,6 +92,7 @@ async function example(example) {
     `\n  npm run start`;
 
   console.log(_green(str));
+  process.exit(0);
 }
 
 /**
