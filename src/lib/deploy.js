@@ -463,6 +463,7 @@ async function deploy({ alias, yes }) {
     `\n  ${getTxnUrl(graphQLUrl, txn)}`;
 
   log(green(str));
+  process.exit(0);
 }
 
 // Get the desired blockchain explorer url with txn hash
