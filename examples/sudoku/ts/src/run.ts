@@ -11,7 +11,7 @@
  */
 import { Sudoku, SudokuZkApp } from './sudoku.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
-import { AccountUpdate, Mina, PrivateKey, shutdown } from 'snarkyjs';
+import { AccountUpdate, Mina, PrivateKey } from 'snarkyjs';
 
 // setup
 const Local = Mina.LocalBlockchain();
@@ -72,6 +72,3 @@ await tx.prove();
 await tx.sign([senderKey]).send();
 
 console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
-
-// cleanup
-await shutdown();

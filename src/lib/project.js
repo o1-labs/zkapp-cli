@@ -344,7 +344,7 @@ function scaffoldSvelte() {
   const customViteConfig = vitConfig.replace(
     /^}(.*?)$/gm, // Search for the last '}' in the file.
     `,
-    optimizeDeps: { esbuildOptions: { target: 'es2020' } }
+    optimizeDeps: { esbuildOptions: { target: 'esnext' } }
   });`
   );
 
@@ -453,8 +453,9 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('node_modules/snarkyjs'),
-    }
+      snarkyjs: require('path').resolve('node_modules/snarkyjs')
+    };
+    config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
   // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
@@ -702,8 +703,8 @@ function scaffoldNuxt() {
   export default defineNuxtConfig({
     
     vite: {
-      build: { target: "es2020" },
-      optimizeDeps: { esbuildOptions: { target: "es2020" } },
+      build: { target: "esnext" },
+      optimizeDeps: { esbuildOptions: { target: "esnext" } },
     },
 
     css: ['~/assets/styles/globals.css']

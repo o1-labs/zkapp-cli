@@ -100,6 +100,8 @@ async function deploy({ alias, yes }) {
       )
     );
     log(red(`Please correct your config.json and try again.`));
+
+    process.exit(1);
     return;
   }
 
@@ -196,9 +198,7 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { isReady, shutdown, PrivateKey, Mina, Bool } = await import(
-    snarkyjsImportPath
-  );
+  let { PrivateKey, Mina, Bool } = await import(snarkyjsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
@@ -215,7 +215,7 @@ async function deploy({ alias, yes }) {
         `  Transaction relayer node is offline. Please try again or use a different "url" for this deploy alias in your config.json`
       )
     );
-    await shutdown();
+
     return;
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
     log(
@@ -223,7 +223,8 @@ async function deploy({ alias, yes }) {
         `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this deploy alias in your config.json`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
 
@@ -246,7 +247,8 @@ async function deploy({ alias, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this deploy alias.`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
 
@@ -258,7 +260,8 @@ async function deploy({ alias, yes }) {
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
 
@@ -272,11 +275,10 @@ async function deploy({ alias, yes }) {
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
-
-  await isReady;
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
@@ -331,7 +333,8 @@ async function deploy({ alias, yes }) {
         `  The "fee" property is not specified for this deploy alias in config.json. Please update your config.json and try again.`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
@@ -347,7 +350,8 @@ async function deploy({ alias, yes }) {
         `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
       )
     );
-    await shutdown();
+
+    process.exit(1);
     return;
   }
 
@@ -454,7 +458,7 @@ async function deploy({ alias, yes }) {
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
     log(red(getErrorMessage(txn)));
-    await shutdown();
+    process.exit(1);
     return;
   }
 
@@ -467,7 +471,7 @@ async function deploy({ alias, yes }) {
     `\n  ${getTxnUrl(graphQLUrl, txn)}`;
 
   log(green(str));
-  await shutdown();
+  process.exit(0);
 }
 
 // Get the desired blockchain explorer url with txn hash

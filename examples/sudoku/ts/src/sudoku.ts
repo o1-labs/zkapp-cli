@@ -5,15 +5,12 @@ import {
   Bool,
   state,
   State,
-  isReady,
   Poseidon,
   Struct,
   Circuit,
 } from 'snarkyjs';
 
 export { Sudoku, SudokuZkApp };
-
-await isReady;
 
 class Sudoku extends Struct({
   value: Circuit.array(Circuit.array(Field, 9), 9),
@@ -97,8 +94,8 @@ class SudokuZkApp extends SmartContract {
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
-    let sudokuHash = this.sudokuHash.get(); // get the hash from the blockchain
-    this.sudokuHash.assertEquals(sudokuHash); // precondition that links this.sudokuHash.get() to the actual on-chain state
+    let sudokuHash = this.sudokuHash.getAndAssertEquals();
+
     sudokuInstance
       .hash()
       .assertEquals(sudokuHash, 'sudoku matches the one committed on-chain');

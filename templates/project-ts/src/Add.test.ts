@@ -1,13 +1,5 @@
 import { Add } from './Add';
-import {
-  isReady,
-  shutdown,
-  Field,
-  Mina,
-  PrivateKey,
-  PublicKey,
-  AccountUpdate,
-} from 'snarkyjs';
+import { Field, Mina, PrivateKey, PublicKey, AccountUpdate } from 'snarkyjs';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -28,8 +20,7 @@ describe('Add', () => {
     zkApp: Add;
 
   beforeAll(async () => {
-    await isReady;
-    if (proofsEnabled) Add.compile();
+    if (proofsEnabled) await Add.compile();
   });
 
   beforeEach(() => {
@@ -42,13 +33,6 @@ describe('Add', () => {
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new Add(zkAppAddress);
-  });
-
-  afterAll(() => {
-    // `shutdown()` internally calls `process.exit()` which will exit the running Jest process early.
-    // Specifying a timeout of 0 is a workaround to defer `shutdown()` until Jest is done running all tests.
-    // This should be fixed with https://github.com/MinaProtocol/mina/issues/10943
-    setTimeout(shutdown, 0);
   });
 
   async function localDeploy() {

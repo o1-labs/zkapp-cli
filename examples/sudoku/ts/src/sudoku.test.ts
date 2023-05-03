@@ -1,13 +1,6 @@
 import { Sudoku, SudokuZkApp } from './sudoku';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
-import {
-  isReady,
-  shutdown,
-  PrivateKey,
-  PublicKey,
-  Mina,
-  AccountUpdate,
-} from 'snarkyjs';
+import { PrivateKey, PublicKey, Mina, AccountUpdate } from 'snarkyjs';
 
 describe('sudoku', () => {
   let zkApp: SudokuZkApp,
@@ -18,7 +11,6 @@ describe('sudoku', () => {
     senderKey: PrivateKey;
 
   beforeEach(async () => {
-    await isReady;
     let Local = Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     sender = Local.testAccounts[0].publicKey;
@@ -27,10 +19,6 @@ describe('sudoku', () => {
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new SudokuZkApp(zkAppAddress);
     sudoku = generateSudoku(0.5);
-  });
-
-  afterAll(() => {
-    setTimeout(shutdown, 0);
   });
 
   it('accepts a correct solution', async () => {
