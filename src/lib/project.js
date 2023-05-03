@@ -704,8 +704,8 @@ function scaffoldNuxt() {
   export default defineNuxtConfig({
     
     vite: {
-      build: { target: "es2020" },
-      optimizeDeps: { esbuildOptions: { target: "es2020" } },
+      build: { target: "esnext" },
+      optimizeDeps: { esbuildOptions: { target: "esnext" } },
     },
 
     css: ['~/assets/styles/globals.css']
