@@ -100,6 +100,8 @@ async function deploy({ alias, yes }) {
       )
     );
     log(red(`Please correct your config.json and try again.`));
+
+    process.exit(1);
     return;
   }
 
@@ -222,6 +224,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
 
@@ -245,6 +248,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
 
@@ -257,6 +261,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
 
@@ -271,6 +276,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
 
@@ -328,6 +334,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
@@ -344,6 +351,7 @@ async function deploy({ alias, yes }) {
       )
     );
 
+    process.exit(1);
     return;
   }
 
@@ -450,7 +458,7 @@ async function deploy({ alias, yes }) {
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
     log(red(getErrorMessage(txn)));
-
+    process.exit(1);
     return;
   }
 
