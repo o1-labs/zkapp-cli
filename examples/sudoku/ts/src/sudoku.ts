@@ -5,15 +5,12 @@ import {
   Bool,
   state,
   State,
-  isReady,
   Poseidon,
   Struct,
   Circuit,
 } from 'snarkyjs';
 
 export { Sudoku, SudokuZkApp };
-
-await isReady;
 
 class Sudoku extends Struct({
   value: Circuit.array(Circuit.array(Field, 9), 9),
