@@ -187,7 +187,8 @@ async function fetchProjectTemplate() {
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
+    const src = 'github:o1-labs/zkapp-cli#release-0.7.7';
+    // const src = 'github:o1-labs/zkapp-cli#main';
     await gittar.fetch(src, { force: true });
 
     // Note: Extract will overwrite any existing dir's contents. Ensure
@@ -453,8 +454,9 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('node_modules/snarkyjs'),
-    }
+      snarkyjs: require('path').resolve('node_modules/snarkyjs')
+    };
+    config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
   // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
