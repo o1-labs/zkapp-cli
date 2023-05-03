@@ -121,10 +121,9 @@ import GradientBG from '~/components/GradientBG.vue'
 export default {
   setup() {
     onMounted(async () => {
-      const { Mina, isReady, PublicKey } = await import('snarkyjs')
+      const { Mina, PublicKey } = await import('snarkyjs')
       const { Add } = await import('../../contracts/build/src/')
 
-      await isReady
       // Update this to use the address (public key) for your zkApp account.
       // To try it out, you can try this address for an example "Add" smart contract that we've deployed to
       // Berkeley Testnet B62qkwohsqTBPsvhYE8cPZSpzJMgoKn4i1LQRuBAtVXWpaT4dgH6WoA.
