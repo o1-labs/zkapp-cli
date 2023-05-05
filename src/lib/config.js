@@ -141,6 +141,17 @@ async function config() {
       },
       result: (val) => val.trim().replace(/ /, ''),
     },
+
+    {
+      type: 'input',
+      name: 'feepayer',
+
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Pick an account to pay transaction fees:');
+      },
+      result: (val) => val.trim().replace(/ /, ''),
+    },
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
