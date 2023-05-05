@@ -148,7 +148,7 @@ async function config() {
 
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Pick an account to pay transaction fees:');
+        return style('Choose an account to pay transaction fees:');
       },
       result: (val) => val.trim().replace(/ /, ''),
     },
