@@ -167,10 +167,19 @@ async function config() {
         return style('Account private key (base58):');
       },
     },
+    {
+      type: 'input',
+      name: 'feepayerAlias',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an alias for this account:');
+      },
+    },
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee } = response;
+
   if (!deployAliasName || !url || !fee) return;
 
   const keyPair = await step(
@@ -184,8 +193,6 @@ async function config() {
       return keyPair;
     }
   );
-
-  await step;
 
   await step(`Add deploy alias to config.json`, async () => {
     config.deployAliases[deployAliasName] = {
