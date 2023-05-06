@@ -141,16 +141,23 @@ async function config() {
       },
       result: (val) => val.trim().replace(/ /, ''),
     },
-
     {
-      type: 'input',
+      type: 'select',
       name: 'feepayer',
-
+      choices: [
+        {
+          name: 'Recover fee-payer account from an existing base58 private key',
+          value: 'recover',
+        },
+        { name: 'Create a new fee-payer key pair', value: 'create' },
+      ],
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose an account to pay transaction fees:');
       },
-      result: (val) => val.trim().replace(/ /, ''),
+      result() {
+        return this.focused.value;
+      },
     },
   ]);
 
@@ -169,6 +176,8 @@ async function config() {
       return keyPair;
     }
   );
+
+  await step;
 
   await step(`Add deploy alias to config.json`, async () => {
     config.deployAliases[deployAliasName] = {
