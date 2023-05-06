@@ -159,6 +159,14 @@ async function config() {
         return this.focused.value;
       },
     },
+    {
+      type: 'input',
+      name: 'feepayerKey',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Account private key (base58):');
+      },
+    },
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
