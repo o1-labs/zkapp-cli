@@ -190,6 +190,8 @@ async function config() {
 
   if (!deployAliasName || !url || !fee) return;
 
+  await step(`Create feepayer key pair `, async () => {});
+
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
     async () => {
