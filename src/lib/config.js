@@ -166,6 +166,9 @@ async function config() {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Account private key (base58):');
       },
+      skip() {
+        return this.state.answers.feepayer !== 'recover';
+      },
     },
     {
       type: 'input',
