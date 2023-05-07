@@ -174,6 +174,11 @@ async function config() {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose an alias for this account:');
       },
+      validate: async (val) => {
+        val = val.toLowerCase().trim().replace(' ', '-');
+        if (!val) return red('Fee-payer alias is required.');
+        return true;
+      },
     },
   ]);
 
