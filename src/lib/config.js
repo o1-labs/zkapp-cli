@@ -191,8 +191,7 @@ async function config() {
   if (!deployAliasName || !url || !fee) return;
 
   await step(`Create feepayer key pair `, async () => {
-    const client = new Client({ network: 'testnet' });
-    return client.genKeys();
+    return createKeypair();
   });
 
   const keyPair = await step(
@@ -229,6 +228,11 @@ async function config() {
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
+}
+
+function createKeypair() {
+  const client = new Client({ network: 'testnet' });
+  return client.genKeys();
 }
 
 function getExplorerName(graphQLUrl) {
