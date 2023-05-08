@@ -190,7 +190,10 @@ async function config() {
 
   if (!deployAliasName || !url || !fee) return;
 
-  await step(`Create feepayer key pair `, async () => {});
+  await step(`Create feepayer key pair `, async () => {
+    const client = new Client({ network: 'testnet' });
+    return client.genKeys();
+  });
 
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
