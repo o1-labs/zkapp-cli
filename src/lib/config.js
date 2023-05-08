@@ -194,7 +194,7 @@ async function config() {
   if (!deployAliasName || !url || !fee) return;
 
   const feepayerKeyPair = await step(
-    `Create feepayer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json `,
+    `Create feepayer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
     async () => {
       const keyPair = createKeyPair('testnet');
 
@@ -225,6 +225,7 @@ async function config() {
     config.deployAliases[deployAliasName] = {
       url,
       keyPath: `keys/${deployAliasName}.json`,
+      feepayerAliasName,
       fee,
     };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
