@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const findPrefix = require('find-npm-prefix');
+const os = require('os');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const { step } = require('./helpers');
@@ -16,6 +17,8 @@ const log = console.log;
 async function config() {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
+  // Get users home directory path.
+  const HOME_DIR = os.homedir();
 
   let config;
   try {
