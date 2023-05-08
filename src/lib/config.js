@@ -191,14 +191,13 @@ async function config() {
   if (!deployAliasName || !url || !fee) return;
 
   await step(`Create feepayer key pair `, async () => {
-    return createKeypair();
+    return createKeyPair();
   });
 
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
     async () => {
-      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-      let keyPair = client.genKeys();
+      const keyPair = createKeyPair();
       fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
         spaces: 2,
       });
@@ -230,7 +229,7 @@ async function config() {
   log(green(str));
 }
 
-function createKeypair() {
+function createKeyPair() {
   const client = new Client({ network: 'testnet' });
   return client.genKeys();
 }
