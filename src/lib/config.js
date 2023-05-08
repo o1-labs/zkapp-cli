@@ -35,6 +35,29 @@ async function config() {
     return;
   }
 
+  let IsfeepayerCached = false;
+  let cachedFeePayer;
+  // Check if feepayer keys have previous been store on a users dir
+  try {
+    let cachedfeepayerAliases = fs.readdirSync(
+      `${HOME_DIR}/.cache/zkapp-cli/keys/`
+    );
+
+    cachedfeepayerAliases = cachedfeepayerAliases
+      .filter((fileName) => fileName.includes('json'))
+      .map((name) => name.slice(0, -5));
+
+    // TODO: Add select prompt when multiple feepayors are cached
+    cachedFeePayer = cachedfeepayerAliases[0];
+    IsfeepayerCached = true;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(err);
+    }
+    log(red(str));
+    return;
+  }
+
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
   if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
     Object.assign(config, { deployAliases: config.networks });
