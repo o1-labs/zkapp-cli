@@ -1,6 +1,7 @@
 const sh = require('child_process').execSync;
 const fs = require('fs-extra');
 const path = require('path');
+const os = require('os');
 const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
@@ -24,6 +25,8 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
 async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
+  // Get users home directory path.
+  const HOME_DIR = os.homedir();
 
   let config;
   try {
@@ -265,10 +268,27 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
-  let privateKey;
+  // Attempt to import the zkApp private key from the `keys` directory and the feepayor private key. These keys will be used to deploy the zkApp.
+  let feepayerPrivateKeyBase58;
+  let zkAppPrivateKeyBase58;
+  const { feepayerKeyPath } = config.deployAliases[alias];
   try {
-    privateKey = fs.readJSONSync(`${DIR}/keys/${alias}.json`).privateKey;
+    feepayerPrivateKeyBase58 = fs.readJSONSync(feepayerKeyPath).privateKey;
+  } catch (_) {
+    log(
+      red(
+        `  Failed to find the feepayer private key.\n  Please make sure your config.json has the correct 'feepayerKeyPath' property.`
+      )
+    );
+
+    process.exit(1);
+    return;
+  }
+
+  try {
+    zkAppPrivateKeyBase58 = fs.readJSONSync(
+      `${DIR}/keys/${alias}.json`
+    ).privateKey;
   } catch (_) {
     log(
       red(
