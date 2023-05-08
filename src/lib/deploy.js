@@ -360,15 +360,15 @@ async function deploy({ alias, yes }) {
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
-  const zkAppAddressBase58 = zkAppAddress.toBase58();
-  const accountQuery = getAccountQuery(zkAppAddressBase58);
+  const feepayerAddressBase58 = feepayerAddress.toBase58();
+  const accountQuery = getAccountQuery(feepayerAddressBase58);
   const accountResponse = await sendGraphQL(graphQLUrl, accountQuery);
 
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
     log(
       red(
-        `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
+        `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
     );
 
