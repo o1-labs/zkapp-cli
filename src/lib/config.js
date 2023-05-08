@@ -225,6 +225,7 @@ async function config() {
     config.deployAliases[deployAliasName] = {
       url,
       keyPath: `keys/${deployAliasName}.json`,
+      feepayerKeyPath: `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
       feepayerAliasName,
       fee,
     };
