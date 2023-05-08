@@ -274,7 +274,8 @@ async function deploy({ alias, yes }) {
   const { feepayerKeyPath } = config.deployAliases[alias];
   try {
     feepayerPrivateKeyBase58 = fs.readJSONSync(feepayerKeyPath).privateKey;
-  } catch (_) {
+  } catch (error) {
+    cann;
     log(
       red(
         `  Failed to find the feepayer private key.\n  Please make sure your config.json has the correct 'feepayerKeyPath' property.`
@@ -300,6 +301,7 @@ async function deploy({ alias, yes }) {
     return;
   }
 
+  const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
   const feepayorPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
@@ -406,9 +408,10 @@ async function deploy({ alias, yes }) {
     );
   }
   let transactionJson = transaction.json;
-
+  let { feepayerAliasName } = config.deployAliases[alias];
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
+    [bold('Fee-Payer Alias'), reset(feepayerAliasName)],
     [bold('Url'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
