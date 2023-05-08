@@ -35,8 +35,9 @@ async function config() {
     return;
   }
 
-  let IsfeepayerCached = false;
-  let cachedFeePayer;
+  let isFeepayerCached = false;
+  let cachedFeePayerAlias;
+  let cachedFeePayerAddress;
   // Check if feepayer keys have previous been store on a users dir
   try {
     let cachedfeepayerAliases = fs.readdirSync(
@@ -48,8 +49,12 @@ async function config() {
       .map((name) => name.slice(0, -5));
 
     // TODO: Add select prompt when multiple feepayors are cached
-    cachedFeePayer = cachedfeepayerAliases[0];
-    IsfeepayerCached = true;
+    cachedFeePayerAlias = cachedfeepayerAliases[0];
+
+    cachedFeePayerAddress = fs.readJSONSync(
+      `${HOME_DIR}/.cache/zkapp-cli/keys/${cachedFeePayerAlias}.json`
+    ).publicKey;
+    isFeepayerCached = true;
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
@@ -166,6 +171,30 @@ async function config() {
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
+    },
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: [
+        {
+          name: `Use stored account ${cachedFeePayerAlias} (public key: ${cachedFeePayerAddress}) `,
+          value: 'cache',
+        },
+        {
+          name: 'Use a different account (select to see options)',
+          value: 'other',
+        },
+      ],
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an account to pay transaction fees:');
+      },
+      result() {
+        return this.focused.value;
+      },
+      skip() {
+        return !isFeepayerCached; // Only display this prompt question if feeyper is cached
+      },
     },
     {
       type: 'select',
