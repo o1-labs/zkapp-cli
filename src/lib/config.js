@@ -193,25 +193,25 @@ async function config() {
 
   if (!deployAliasName || !url || !fee) return;
 
-  await step(
+  const feepayerKeyPair = await step(
     `Create feepayer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json `,
     async () => {
-      const feepayerKeyPair = createKeyPair('testnet');
+      const keyPair = createKeyPair('testnet');
 
       fs.outputJsonSync(
         `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-        feepayerKeyPair,
+        keyPair,
         {
           spaces: 2,
         }
       );
 
-      return feepayerKeyPair;
+      return keyPair;
     }
   );
 
-  const keyPair = await step(
-    `Create key pair at keys/${deployAliasName}.json`,
+  await step(
+    `Create zkApp key pair at keys/${deployAliasName}.json`,
     async () => {
       const keyPair = createKeyPair('testnet');
       fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
@@ -238,7 +238,7 @@ async function config() {
     `\nSuccess!\n` +
     `\nNext steps:` +
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
-      keyPair.publicKey
+      feepayerKeyPair.publicKey
     )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
