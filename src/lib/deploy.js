@@ -300,9 +300,10 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
-  let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
-  let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
+  const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
+  const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
+  const feepayorPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
+  const feepayerAddress = feepayorPrivateKey.toPublicKey(); //  The public key of the feepayer
 
   // figure out if the zkApp has a @method init() - in that case we need to create a proof,
   // so we need to compile no matter what, and we show a separate step to create the proof
