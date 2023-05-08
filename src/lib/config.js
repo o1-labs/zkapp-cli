@@ -175,7 +175,7 @@ async function config() {
     },
     {
       type: 'input',
-      name: 'feepayerAlias',
+      name: 'feepayerAliasName',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose an alias for this account:');
@@ -189,13 +189,26 @@ async function config() {
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAliasName, url, fee } = response;
+  const { deployAliasName, url, fee, feepayerAliasName } = response;
 
   if (!deployAliasName || !url || !fee) return;
 
-  await step(`Create feepayer key pair `, async () => {
-    return createKeyPair('testnet');
-  });
+  await step(
+    `Create feepayer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json `,
+    async () => {
+      const feepayerKeyPair = createKeyPair('testnet');
+
+      fs.outputJsonSync(
+        `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+        feepayerKeyPair,
+        {
+          spaces: 2,
+        }
+      );
+
+      return feepayerKeyPair;
+    }
+  );
 
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
