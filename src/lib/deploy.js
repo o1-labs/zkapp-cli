@@ -268,7 +268,7 @@ async function deploy({ alias, yes }) {
   // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
   let privateKey;
   try {
-    privateKey = fs.readJSONSync(`${DIR}/keys/${alias}.json`).privateKey;
+    privateKey = fs.readJSONSync(`${DIR}/${config.deployAliases[alias].keyPath}`).privateKey;
   } catch (_) {
     log(
       red(
