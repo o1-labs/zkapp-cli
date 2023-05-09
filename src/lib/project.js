@@ -412,17 +412,16 @@ async function scaffoldNext(projectName) {
     // If ctrl+c is pressed it will throw.
     return;
   }
-  console.log(
-    ' Choose no to use experimental `app/` directory with this project'
-  );
+
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
-    'create-next-app@latest',
+    'create-next-app@13.4.1',
     'ui',
     '--use-npm',
     '--src-dir',
     '--import-alias "@/*"',
+    '--no-app',
   ];
 
   spawnSync('npx', args, {
