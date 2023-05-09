@@ -423,6 +423,7 @@ async function scaffoldNext(projectName) {
     '--use-npm',
     '--src-dir',
     '--import-alias "@/*"',
+    '--no-app',
   ];
 
   spawnSync('npx', args, {
