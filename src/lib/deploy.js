@@ -283,8 +283,8 @@ async function deploy({ alias, yes }) {
   }
 
   try {
-    zkAppPrivateKeyBase58 = fs.readJSONSync(
-      `${DIR}/keys/${alias}.json`
+    privateKey = fs.readJSONSync(
+      `${DIR}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {
     log(
