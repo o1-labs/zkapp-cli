@@ -198,7 +198,7 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { PrivateKey, Mina, Bool } = await import(snarkyjsImportPath);
+  let { PrivateKey, Mina } = await import(snarkyjsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
@@ -268,7 +268,9 @@ async function deploy({ alias, yes }) {
   // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
   let privateKey;
   try {
-    privateKey = fs.readJSONSync(`${DIR}/${config.deployAliases[alias].keyPath}`).privateKey;
+    privateKey = fs.readJSONSync(
+      `${DIR}/${config.deployAliases[alias].keyPath}`
+    ).privateKey;
   } catch (_) {
     log(
       red(
@@ -360,14 +362,7 @@ async function deploy({ alias, yes }) {
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: zkAppAddress, fee }, () => {
       let zkapp = new zkApp(zkAppAddress);
-      zkapp.deploy({ verificationKey, zkappKey: zkAppPrivateKey });
-      // manually patch the tx (TODO: have this implemented properly in snarkyjs)
-      // remove the nonce precondition
-      zkapp.self.body.preconditions.account.nonce.isSome = Bool(false);
-      // don't increment the nonce
-      zkapp.self.body.incrementNonce = Bool(false);
-      // use full commitment (means with include the fee payer in the signature, so we're protected against replays)
-      zkapp.self.body.useFullCommitment = Bool(true);
+      zkapp.deploy({ verificationKey });
     });
     return { tx, json: tx.sign([zkAppPrivateKey]).toJSON() };
   });
