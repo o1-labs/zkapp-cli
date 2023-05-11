@@ -36,12 +36,20 @@ async function config() {
   }
 
   let isFeepayerCached = false;
-  let cachedFeePayerAlias;
+  let defaultFeePayerAlias;
   let cachedFeepayerAliases;
-  let cachedFeePayerAddress;
+  let defaultFeePayerAddress;
 
   try {
-    cachedFeepayerAliases = getCachedFeePayerAlias(HOME_DIR);
+    cachedFeepayerAliases = getCachedFeePayerAliases(HOME_DIR);
+    defaultFeePayerAlias = cachedFeepayerAliases[0];
+    defaultFeePayerAddress = getCachedFeePayerAddress(
+      HOME_DIR,
+      defaultFeePayerAlias
+    );
+
+    console.log('cachedFeepayerAliases', cachedFeepayerAliases);
+    console.log('default feepayer', defaultFeePayerAddress);
     isFeepayerCached = true;
   } catch (err) {
     if (err.code !== 'ENOENT') {
@@ -163,7 +171,7 @@ async function config() {
       name: 'feepayer',
       choices: [
         {
-          name: `Use stored account ${cachedFeePayerAlias} (public key: ${cachedFeePayerAddress}) `,
+          name: `Use stored account ${defaultFeePayerAlias} (public key: ${defaultFeePayerAddress}) `,
           value: 'cache',
         },
         {
@@ -292,13 +300,21 @@ async function config() {
 }
 
 // Check if feepayer alias/aliases are stored on users machine and returns an array of them.
-function getCachedFeePayerAlias(directory) {
+function getCachedFeePayerAliases(directory) {
   let aliases = fs.readdirSync(`${directory}/.cache/zkapp-cli/keys/`);
 
   aliases = aliases
     .filter((fileName) => fileName.includes('json'))
     .map((name) => name.slice(0, -5));
   return aliases;
+}
+
+function getCachedFeePayerAddress(directory, feePayorAlias) {
+  const address = fs.readJSONSync(
+    `${directory}/.cache/zkapp-cli/keys/${feePayorAlias}.json`
+  ).publicKey;
+
+  return address;
 }
 
 function createKeyPair(network) {
