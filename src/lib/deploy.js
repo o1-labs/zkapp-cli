@@ -1,7 +1,6 @@
 const sh = require('child_process').execSync;
 const fs = require('fs-extra');
 const path = require('path');
-const os = require('os');
 const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
@@ -25,8 +24,6 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
 async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
-  // Get users home directory path.
-  const HOME_DIR = os.homedir();
 
   let config;
   try {
@@ -286,7 +283,7 @@ async function deploy({ alias, yes }) {
   }
 
   try {
-    privateKey = fs.readJSONSync(
+    zkAppPrivateKeyBase58 = fs.readJSONSync(
       `${DIR}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {

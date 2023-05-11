@@ -37,23 +37,11 @@ async function config() {
 
   let isFeepayerCached = false;
   let cachedFeePayerAlias;
+  let cachedFeepayerAliases;
   let cachedFeePayerAddress;
-  // Check if feepayer keys have previous been store on a users dir
+
   try {
-    let cachedfeepayerAliases = fs.readdirSync(
-      `${HOME_DIR}/.cache/zkapp-cli/keys/`
-    );
-
-    cachedfeepayerAliases = cachedfeepayerAliases
-      .filter((fileName) => fileName.includes('json'))
-      .map((name) => name.slice(0, -5));
-
-    // TODO: Add select prompt when multiple feepayors are cached
-    cachedFeePayerAlias = cachedfeepayerAliases[0];
-
-    cachedFeePayerAddress = fs.readJSONSync(
-      `${HOME_DIR}/.cache/zkapp-cli/keys/${cachedFeePayerAlias}.json`
-    ).publicKey;
+    cachedFeepayerAliases = getCachedFeePayerAlias(HOME_DIR);
     isFeepayerCached = true;
   } catch (err) {
     if (err.code !== 'ENOENT') {
@@ -301,6 +289,16 @@ async function config() {
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
+}
+
+// Check if feepayer alias/aliases are stored on users machine and returns an array of them.
+function getCachedFeePayerAlias(directory) {
+  let aliases = fs.readdirSync(`${directory}/.cache/zkapp-cli/keys/`);
+
+  aliases = aliases
+    .filter((fileName) => fileName.includes('json'))
+    .map((name) => name.slice(0, -5));
+  return aliases;
 }
 
 function createKeyPair(network) {
