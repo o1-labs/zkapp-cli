@@ -59,8 +59,6 @@ async function config() {
     if (err.code !== 'ENOENT') {
       console.error(err);
     }
-    log(red(str));
-    return;
   }
 
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
@@ -201,7 +199,7 @@ async function config() {
       name: 'feepayer',
       choices: [
         {
-          name: 'Recover fee-payer account from an existing base58 private key',
+          name: `Recover fee-payer account from an existing base58 private key`,
           value: 'recover',
         },
         { name: 'Create a new fee-payer key pair', value: 'create' },
@@ -212,6 +210,9 @@ async function config() {
       },
       result() {
         return this.focused.value;
+      },
+      skip() {
+        return this.state.answers.feepayer === 'cache';
       },
     },
     {
@@ -236,6 +237,9 @@ async function config() {
         val = val.toLowerCase().trim().replace(' ', '-');
         if (!val) return red('Fee-payer alias is required.');
         return true;
+      },
+      skip() {
+        return this.state.answers.feepayer === 'cache';
       },
     },
   ]);
