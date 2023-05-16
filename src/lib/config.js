@@ -172,7 +172,7 @@ async function config() {
       choices: [
         {
           name: `Use stored account ${defaultFeePayerAlias} (public key: ${defaultFeePayerAddress}) `,
-          value: 'cache',
+          value: 'defaultCache',
         },
         {
           name: 'Use a different account (select to see options)',
@@ -208,7 +208,7 @@ async function config() {
         return this.focused.value;
       },
       skip() {
-        return this.state.answers.feepayer === 'cache';
+        return this.state.answers.feepayer === 'defaultCache';
       },
     },
     {
@@ -218,6 +218,12 @@ async function config() {
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose another saved feeyper:');
+      },
+      skip() {
+        return (
+          (this.state.answers.feepayer === 'defaultCache') |
+          (cachedFeepayerAliases.length === 1)
+        );
       },
     },
     {
