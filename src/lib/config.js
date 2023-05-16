@@ -193,17 +193,7 @@ async function config() {
     {
       type: 'select',
       name: 'feepayer',
-      choices: [
-        {
-          name: `Recover fee-payer account from an existing base58 private key`,
-          value: 'recover',
-        },
-        { name: 'Create a new fee-payer key pair', value: 'create' },
-      ],
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose an account to pay transaction fees:');
-      },
+      choices: getFeepayorChoices(cachedFeepayerAliases),
       result() {
         return this.focused.value;
       },
@@ -322,6 +312,25 @@ function getCachedFeePayerAliases(directory) {
     .filter((fileName) => fileName.includes('json'))
     .map((name) => name.slice(0, -5));
   return aliases;
+}
+
+function getFeepayorChoices(cachedFeepayerAliases) {
+  const choices = [
+    {
+      name: `Recover fee-payer account from an existing base58 private key`,
+      value: 'recover',
+    },
+    { name: 'Create a new fee-payer key pair', value: 'create' },
+  ];
+
+  // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
+  if (cachedFeepayerAliases.length > 1)
+    choices.push({
+      name: 'Choose another saved feeyper:',
+      value: 'alternateCachedfeePayer',
+    });
+
+  return choices;
 }
 
 function getCachedFeePayerAddress(directory, feePayorAlias) {
