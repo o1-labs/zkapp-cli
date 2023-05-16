@@ -212,6 +212,15 @@ async function config() {
       },
     },
     {
+      type: 'select',
+      name: 'feePayorAlias',
+      choices: cachedFeepayerAliases,
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose another saved feeyper:');
+      },
+    },
+    {
       type: 'input',
       name: 'feepayerKey',
       message: (state) => {
