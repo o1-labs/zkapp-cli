@@ -1,5 +1,8 @@
 const ora = require('ora');
+const fs = require('fs-extra');
+const Client = require('mina-signer');
 const { green, red } = require('chalk');
+const findPrefix = require('find-npm-prefix');
 
 /**
  * Helper for any steps for a consistent UX.
@@ -24,6 +27,71 @@ async function step(str, fn) {
   }
 }
 
+/**
+ * Read and return the config file
+ */
+async function configRead(path) {
+  const configPath = path ? path : await projRoot();
+  let config;
+  try {
+    config = fs.readJSONSync(`${configPath}/config.json`);
+  } catch (err) {
+    let str;
+    if (err.code === 'ENOENT') {
+      str = `config.json not found. Make sure you're in a zkApp project.`;
+    } else {
+      str = 'Unable to read config.json.';
+      console.error(err);
+    }
+    console.log(red(str));
+    return;
+  }
+  return config;
+}
+
+/**
+ * Root of the zkapp project
+ * @returns {Promise<string>}
+ */
+async function projRoot() {
+  const DIR = await findPrefix(process.cwd());
+  return DIR;
+}
+
+/**
+ * Generate a keypair for the given network and write to the specified path/deployAliasName
+ * @param {string} network Default: 'testnet'
+ * @param {string} path Default: ./keys
+ * @param {string} deployAliasName Required
+ * @returns {Promise<Keypair>}
+ */
+async function genKeys({ network, path, deployAliasName }) {
+  const keyDir = path ? path : `${await projRoot()}/keys`;
+
+  // make sure we don't overwrite a key
+  const keys = fs
+    .readdirSync(keyDir)
+    .map((fname) => fname.substring(0, fname.lastIndexOf('.')));
+  if (keys.includes(deployAliasName)) {
+    console.error(red(`keys/${deployAliasName}.json already exists!`));
+    console.error(
+      red(`It must be deleted to create a new keypair under this name.`)
+    );
+    process.exit(1);
+  }
+
+  const net = network ? network : 'testnet';
+  const client = new Client({ network: net });
+  let keyPair = client.genKeys();
+  fs.outputJsonSync(`${keyDir}/${deployAliasName}.json`, keyPair, {
+    spaces: 2,
+  });
+  return keyPair;
+}
+
 module.exports = {
   step,
+  genKeys,
+  projRoot,
+  configRead,
 };

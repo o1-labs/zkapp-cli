@@ -1,11 +1,10 @@
 const sh = require('child_process').execSync;
 const fs = require('fs-extra');
 const path = require('path');
-const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const glob = require('fast-glob');
-const { step } = require('./helpers');
+const { step, configRead, projRoot } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
 
@@ -23,23 +22,8 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  */
 async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
-
-  let config;
-  try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(red(str));
-    return;
-  }
-
+  const DIR = await projRoot();
+  const config = await configRead();
   const latestCliVersion = await getLatestCliVersion();
   const installedCliVersion = await getInstalledCliVersion();
 
@@ -102,7 +86,6 @@ async function deploy({ alias, yes }) {
     log(red(`Please correct your config.json and try again.`));
 
     process.exit(1);
-    return;
   }
 
   await step('Build project', async () => {
