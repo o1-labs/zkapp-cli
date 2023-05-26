@@ -59,6 +59,19 @@ async function projRoot() {
 }
 
 /**
+ * Key names
+ * @param {string} path Path to keys directory. Default to ./keys
+ * @returns {Promise<Array<string>>}
+ */
+async function keyNames(path) {
+  const keysDir = path ? path : `${await projRoot()}/keys`;
+  const keys = fs
+    .readdirSync(keysDir)
+    .map((fname) => fname.substring(0, fname.lastIndexOf('.')));
+  return keys;
+}
+
+/**
  * Generate a keypair for the given network and write to the specified path/deployAliasName
  * @param {string} network Default: 'testnet'
  * @param {string} path Default: ./keys
@@ -69,9 +82,7 @@ async function genKeys({ network, path, deployAliasName }) {
   const keyDir = path ? path : `${await projRoot()}/keys`;
 
   // make sure we don't overwrite a key
-  const keys = fs
-    .readdirSync(keyDir)
-    .map((fname) => fname.substring(0, fname.lastIndexOf('.')));
+  const keys = await keyNames();
   if (keys.includes(deployAliasName)) {
     console.error(red(`keys/${deployAliasName}.json already exists!`));
     console.error(
@@ -92,6 +103,7 @@ async function genKeys({ network, path, deployAliasName }) {
 module.exports = {
   step,
   genKeys,
+  keyNames,
   projRoot,
   configRead,
 };

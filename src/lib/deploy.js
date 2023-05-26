@@ -208,7 +208,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Find the users file to import the smart contract from
@@ -232,7 +231,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Attempt to import the smart contract class to deploy from the user's file.
@@ -245,7 +243,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
@@ -262,7 +259,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
@@ -320,7 +316,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
@@ -337,7 +332,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   let transaction = await step('Build transaction', async () => {
@@ -437,7 +431,6 @@ async function deploy({ alias, yes }) {
     // Note that the thrown error object is already console logged via step().
     log(red(getErrorMessage(txn)));
     process.exit(1);
-    return;
   }
 
   const str =
