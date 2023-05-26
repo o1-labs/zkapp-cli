@@ -1,10 +1,8 @@
 const fs = require('fs-extra');
-const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
-const { step } = require('./helpers');
+const { step, configRead, projRoot, genKeys } = require('./helpers');
 const { green, red, bold, gray, reset } = require('chalk');
-const Client = require('mina-signer');
 
 const log = console.log;
 
@@ -14,23 +12,8 @@ const log = console.log;
  * @returns {Promise<void>}
  */
 async function config() {
-  // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
-
-  let config;
-  try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(red(str));
-    return;
-  }
+  const DIR = await projRoot();
+  const config = await configRead();
 
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
   if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
@@ -74,7 +57,7 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new deploy alias:');
+  log('Add a new deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
   // add a custom deploy alias.
@@ -149,14 +132,7 @@ async function config() {
 
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
-    async () => {
-      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-      let keyPair = client.genKeys();
-      fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
-        spaces: 2,
-      });
-      return keyPair;
-    }
+    await genKeys({ deployAliasName }) // TODO: Make this configurable for mainnet and testnet.
   );
 
   await step(`Add deploy alias to config.json`, async () => {
@@ -183,11 +159,36 @@ async function config() {
   log(green(str));
 }
 
+/**
+ * Display the contents of `config.json`
+ * @param {string} alias Name of the deploy alias
+ * @returns {Promise<void>}
+ */
+async function configShow(alias) {
+  const config = await configRead();
+  if (!alias) {
+    log(config);
+    return;
+  }
+  // deploy alias must exist to display
+  const aliases = Object.keys(config.deployAliases);
+  if (!aliases.includes(alias)) {
+    console.error(red(`Invalid deploy alias: ${alias}`));
+    log('Available deploy aliases:', aliases);
+    return;
+  }
+  log('Deploy alias:', alias);
+  log(config.deployAliases[alias]);
+  return;
+}
+
 function getExplorerName(graphQLUrl) {
   return new URL(graphQLUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
+
 module.exports = {
   config,
+  configShow,
 };
