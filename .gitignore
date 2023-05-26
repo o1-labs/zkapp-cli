@@ -1,6 +1,7 @@
 # NodeJS
 node_modules
 coverage
+build
 
 # Editor
 .vscode
