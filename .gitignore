@@ -8,3 +8,6 @@ build
 
 # System
 .DS_Store
+
+# Testing
+config.json

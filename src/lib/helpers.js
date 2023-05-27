@@ -4,6 +4,8 @@ const Client = require('mina-signer');
 const { green, red } = require('chalk');
 const findPrefix = require('find-npm-prefix');
 
+const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
+
 /**
  * Helper for any steps for a consistent UX.
  * @template T
@@ -106,4 +108,5 @@ module.exports = {
   keyNames,
   projRoot,
   configRead,
+  DEFAULT_GRAPHQL,
 };

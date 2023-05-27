@@ -4,14 +4,12 @@ const path = require('path');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const glob = require('fast-glob');
-const { step, configRead, projRoot } = require('./helpers');
+const { step, configRead, projRoot, DEFAULT_GRAPHQL } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
-
-const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
  * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
