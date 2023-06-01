@@ -1,12 +1,18 @@
 const fs = require('fs-extra');
-const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
-const { step } = require('./helpers');
+const {
+  step,
+  configRead,
+  projRoot,
+  genKeys,
+  DEFAULT_GRAPHQL,
+} = require('./helpers');
 const { green, red, bold, gray, reset } = require('chalk');
-const Client = require('mina-signer');
 
 const log = console.log;
+
+const DEFAULT_FEE = '0.1';
 
 /**
  * Show existing deploy aliases in `config.json` and allow a user to add a new
@@ -14,23 +20,8 @@ const log = console.log;
  * @returns {Promise<void>}
  */
 async function config() {
-  // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
-
-  let config;
-  try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(red(str));
-    return;
-  }
+  const DIR = await projRoot();
+  const config = await configRead();
 
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
   if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
@@ -74,7 +65,7 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new deploy alias:');
+  log('Add a new deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
   // add a custom deploy alias.
@@ -116,30 +107,29 @@ async function config() {
       name: 'url',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set the Mina GraphQL API URL to deploy to:');
+        return style(`Set the Mina GraphQL API URL to deploy to
+  Press enter for default ${DEFAULT_GRAPHQL}:`);
       },
       prefix: formatPrefixSymbol,
-      validate: (val) => {
-        if (!val) return red('Url is required.');
-        return true;
-      },
-      result: (val) => val.trim().replace(/ /, ''),
+      result: (val) => (val ? val.trim().replace(/ /, '') : DEFAULT_GRAPHQL),
     },
     {
       type: 'input',
       name: 'fee',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set transaction fee to use when deploying (in MINA):');
+        return style(
+          `Set transaction fee to use when deploying (in MINA)\n  Press enter for defualt ${DEFAULT_FEE}`
+        );
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return red('Fee is required.');
+        if (!val) return true;
         if (isNaN(val)) return red('Fee must be a number.');
         if (val < 0) return red("Fee can't be negative.");
         return true;
       },
-      result: (val) => val.trim().replace(/ /, ''),
+      result: (val) => (val ? val.trim().replace(/ /, '') : DEFAULT_FEE),
     },
   ]);
 
@@ -147,16 +137,10 @@ async function config() {
   const { deployAliasName, url, fee } = response;
   if (!deployAliasName || !url || !fee) return;
 
+  // TODO allow user to choose an existing key or generate new
   const keyPair = await step(
     `Create key pair at keys/${deployAliasName}.json`,
-    async () => {
-      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-      let keyPair = client.genKeys();
-      fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
-        spaces: 2,
-      });
-      return keyPair;
-    }
+    async () => await genKeys({ deployAliasName }) // TODO: Make this configurable for mainnet and testnet.
   );
 
   await step(`Add deploy alias to config.json`, async () => {
@@ -172,15 +156,41 @@ async function config() {
     config.deployAliases[deployAliasName]?.url
   );
 
-  const str =
-    `\nSuccess!\n` +
+  const success = `\nSuccess!\n` + `\nNew deploy alias: ${deployAliasName}`;
+  log(green(success));
+  log(config.deployAliases[deployAliasName]);
+
+  const nextSteps =
     `\nNext steps:` +
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       keyPair.publicKey
     )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
-  log(green(str));
+  log(green(nextSteps));
+}
+
+/**
+ * Display the contents of `config.json`
+ * @param {string} alias Name of the deploy alias
+ * @returns {Promise<void>}
+ */
+async function configShow(alias) {
+  const config = await configRead();
+  if (!alias) {
+    log(config);
+    return;
+  }
+  // deploy alias must exist to display
+  const aliases = Object.keys(config.deployAliases);
+  if (!aliases.includes(alias)) {
+    console.error(red(`Invalid deploy alias: ${alias}`));
+    log('Available deploy aliases:', aliases);
+    return;
+  }
+  log('Deploy alias:', alias);
+  log(config.deployAliases[alias]);
+  return;
 }
 
 function getExplorerName(graphQLUrl) {
@@ -188,6 +198,8 @@ function getExplorerName(graphQLUrl) {
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
+
 module.exports = {
   config,
+  configShow,
 };

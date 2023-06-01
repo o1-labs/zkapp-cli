@@ -1,18 +1,15 @@
 const sh = require('child_process').execSync;
 const fs = require('fs-extra');
 const path = require('path');
-const findPrefix = require('find-npm-prefix');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const glob = require('fast-glob');
-const { step } = require('./helpers');
+const { step, configRead, projRoot, DEFAULT_GRAPHQL } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
 
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
-
-const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
  * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
@@ -23,23 +20,8 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  */
 async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
-
-  let config;
-  try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(red(str));
-    return;
-  }
-
+  const DIR = await projRoot();
+  const config = await configRead();
   const latestCliVersion = await getLatestCliVersion();
   const installedCliVersion = await getInstalledCliVersion();
 
@@ -102,7 +84,6 @@ async function deploy({ alias, yes }) {
     log(red(`Please correct your config.json and try again.`));
 
     process.exit(1);
-    return;
   }
 
   await step('Build project', async () => {
@@ -225,7 +206,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Find the users file to import the smart contract from
@@ -249,7 +229,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Attempt to import the smart contract class to deploy from the user's file.
@@ -262,7 +241,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
@@ -279,7 +257,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
@@ -337,7 +314,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
@@ -354,7 +330,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   let transaction = await step('Build transaction', async () => {
@@ -454,7 +429,6 @@ async function deploy({ alias, yes }) {
     // Note that the thrown error object is already console logged via step().
     log(red(getErrorMessage(txn)));
     process.exit(1);
-    return;
   }
 
   const str =

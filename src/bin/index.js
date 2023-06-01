@@ -4,8 +4,10 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const { project } = require('../lib/project');
 const { file } = require('../lib/file');
-const { config } = require('../lib/config');
+const { config, configShow } = require('../lib/config');
+const { configSet } = require('../lib/configSet');
 const { deploy } = require('../lib/deploy');
+const { genKeyPair } = require('../lib/keypair');
 const { example } = require('../lib/example');
 const { system } = require('../lib/system');
 const chalk = require('chalk');
@@ -60,7 +62,25 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     (argv) => file(argv.name)
   )
-  .command(['config'], 'Add a new deploy alias', {}, config)
+  .command(
+    ['config [show [alias]]'],
+    'Add a new deploy alias or display properties',
+    {
+      show: {
+        description: 'Display the config file',
+        demand: false,
+        boolean: true,
+        hidden: false,
+      },
+      alias: {
+        description: 'Display properties of the deploy alias',
+        demand: false,
+        string: true,
+        hidden: false,
+      },
+    },
+    (argv) => (argv.show ? configShow(argv.alias) : config())
+  )
   .command(
     ['deploy [alias]'],
     'Deploy or redeploy a zkApp',
@@ -78,6 +98,31 @@ yargs(hideBin(process.argv))
     async (argv) => await deploy(argv)
   )
   .command(
+    ['set <alias> <prop> <value>'],
+    'Set a new property value for the alias',
+    {
+      alias: { demand: true, string: true, hidden: false },
+      prop: { demand: true, string: true, hidden: false },
+      value: { demand: true, string: true, hidden: false },
+    },
+    async (argv) =>
+      await configSet({ alias: argv.alias, prop: argv.prop, value: argv.value })
+  )
+  .command(
+    [
+      'keypair <alias> [network]',
+      'key <alias> [network]',
+      'k <alias> [network]',
+    ],
+    'Generate a new keypair for the given network and display the public key',
+    {
+      alias: { demand: true, string: true, hidden: false },
+      network: { demand: false, string: true, hidden: false },
+    },
+    async (argv) =>
+      await genKeyPair({ deployAliasName: argv.alias, network: argv.network })
+  )
+  .command(
     ['example [name]', 'e [name]'],
     'Create an example project',
     {
@@ -90,7 +135,7 @@ yargs(hideBin(process.argv))
     },
     async (argv) => await example(argv.name)
   )
-  .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
+  .command(['system', 'sys'], 'Show system info', {}, system)
   .alias('h', 'help')
   .alias('v', 'version')
 
