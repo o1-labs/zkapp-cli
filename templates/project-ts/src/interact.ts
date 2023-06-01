@@ -10,22 +10,19 @@
  *
  * To run locally:
  * Build the project: `$ npm run build`
- * Run with node:     `$ node build/src/interact.js <network>`.
+ * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import { Mina, PrivateKey } from 'snarkyjs';
 import fs from 'fs/promises';
 import { Add } from './Add.js';
 
 // check command line arg
-let network = process.argv[2];
-if (!network)
-  throw Error(`Missing <network> argument.
+let deployAlias = process.argv[2];
+if (!deployAlias)
+  throw Error(`Missing <deployAlias> argument.
 
 Usage:
-node build/src/interact.js <network>
-
-Example:
-node build/src/interact.js berkeley
+node build/src/interact.js <deployAlias>
 `);
 Error.stackTraceLimit = 1000;
 
@@ -34,7 +31,7 @@ type Config = {
   deployAliases: Record<string, { url: string; keyPath: string }>;
 };
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
-let config = configJson.deployAliases[network];
+let config = configJson.deployAliases[deployAlias];
 let key: { privateKey: string } = JSON.parse(
   await fs.readFile(config.keyPath, 'utf8')
 );
