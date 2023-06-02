@@ -20,17 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - 2023-05-03
 
 ### Changed
-
-- Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
-- Add state.getAndAssertEquals() to examples and test contracts.
-- Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest SnarkyJS release.
-- Exit the cli config and deploy processes on success and error.
-- Increase the template/example project jest test timeout.
-  [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
+- Release `0.8.0` [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
+  - Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
+  - Add state.getAndAssertEquals() to examples and test contracts.
+  - Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest SnarkyJS release.
+  - Exit the cli config and deploy processes on success and error.
+  - Increase the template/example project jest test timeout.
+ 
 
 - Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
 
-  -Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
+ - Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
 
 ## [0.7.6] - 2023-04-25
 
