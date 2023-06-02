@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.2] - 2023-05-12
 
-Clean up deploy and log full errors to the console. [#408](https://github.com/o1-labs/zkapp-cli/pull/408)
+- Clean up deploy and log full errors to the console. [#408](https://github.com/o1-labs/zkapp-cli/pull/408)
 
 ### Changed
 
@@ -15,7 +15,7 @@ Clean up deploy and log full errors to the console. [#408](https://github.com/o1
 
 ### Changed
 
-Update NextJS UI scaffold defaults. [#402](https://github.com/o1-labs/zkapp-cli/pull/402)
+- Update NextJS UI scaffold defaults. [#402](https://github.com/o1-labs/zkapp-cli/pull/402)
 
 ## [0.8.0] - 2023-05-03
 
@@ -28,22 +28,25 @@ Update NextJS UI scaffold defaults. [#402](https://github.com/o1-labs/zkapp-cli/
 - Increase the template/example project jest test timeout.
   [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
 
-Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
-Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
+- Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
+
+  -Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
 
 ## [0.7.6] - 2023-04-25
 
 ### Changed
 
-Remove postinstall script to speed up zkApp cli installations and upgrades [#391](https://github.com/o1-labs/zkapp-cli/pull/391)
+- Remove postinstall script to speed up zkApp cli installations and upgrades [#391](https://github.com/o1-labs/zkapp-cli/pull/391)
 
-UI scaffold updates. [#388](https://github.com/o1-labs/zkapp-cli/pull/388)
+- UI scaffold updates. [#388](https://github.com/o1-labs/zkapp-cli/pull/388)
 
 ### Added
 
-Landing page with next steps for Nuxt UI scaffold. [#386](https://github.com/o1-labs/zkapp-cli/pull/386)
-Landing page with next steps for Svelte UI scaffold. [#385](https://github.com/o1-labs/zkapp-cli/pull/385)
-Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o1-labs/zkapp-cli/pull/384)
+- Landing page with next steps for Nuxt UI scaffold. [#386](https://github.com/o1-labs/zkapp-cli/pull/386)
+
+- Landing page with next steps for Svelte UI scaffold. [#385](https://github.com/o1-labs/zkapp-cli/pull/385)
+
+- Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o1-labs/zkapp-cli/pull/384)
 
 ## [0.7.5] - 2023-03-16
 
@@ -71,7 +74,7 @@ Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o
 
 ## [0.7.1] - 2023-02-27
 
-Update for snarkyjs state getting fix. [#367](https://github.com/o1-labs/zkapp-cli/pull/367)
+- Update for snarkyjs state getting fix. [#367](https://github.com/o1-labs/zkapp-cli/pull/367)
 
 ## [0.7.0] - 2023-02-14
 
@@ -91,13 +94,13 @@ Update for snarkyjs state getting fix. [#367](https://github.com/o1-labs/zkapp-c
 
 ### Added
 
-Show desired blockchain explorer transaction urls [#358](https://github.com/o1-labs/zkapp-cli/pull/358)
+- Show desired blockchain explorer transaction urls [#358](https://github.com/o1-labs/zkapp-cli/pull/358)
 
 ## [0.6.1] - 2023-01-030
 
 ### Changed
 
-Bug fixes. [#353](https://github.com/o1-labs/zkapp-cli/pull/347)
+- Bug fixes. [#353](https://github.com/o1-labs/zkapp-cli/pull/347)
 
 ## [0.6.0] - 2023-01-018
 
