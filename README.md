@@ -186,6 +186,10 @@ git remote add upstream https://github.com/o1-labs/zkapp-cli.git
 npm install
 npm link # makes it available globally on your system
 
+# You can also use the following commands if you have previously run `npm link`
+# against the different version of `zkapp-cli` (say, after the branches switch):
+# npm r zkapp-cli -g && npm install && npm run build --if-present && npm link
+
 git checkout -b upstream/main
 # Make desired changes and commit
 git push origin <your-branch>

@@ -1,5 +1,6 @@
 # NodeJS
 node_modules
+build
 coverage
 
 # Editor
@@ -7,3 +8,6 @@ coverage
 
 # System
 .DS_Store
+
+# Reports
+reports
