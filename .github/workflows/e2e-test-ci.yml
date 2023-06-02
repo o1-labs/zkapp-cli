@@ -21,6 +21,8 @@ jobs:
           npm link
       - name: Install Playwright Dependencies
         run: npm run e2e:install
+      - name: Prepare CLI testing library
+        run: npm run e2e:prepare:lib
       - name: Execute E2E Tests on ${{ matrix.os }}
         run: npm run e2e:test
         env:

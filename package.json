@@ -23,6 +23,7 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --silent",
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
     "e2e:prepare:local": "npm r zkapp-cli -g && npm install && npm run build --if-present && npm link",
+    "e2e:prepare:lib": "node ./tests/build-helper.mjs",
     "e2e:install": "npx playwright install --with-deps",
     "e2e:test": "npm run clean && npx playwright test",
     "e2e:test:smoke": "npm run e2e:test --grep @smoke",
@@ -75,6 +76,7 @@
     "jest": "^27.2.1",
     "lint-staged": "^11.1.2",
     "prettier": "^2.6.2",
+    "replace-in-file": "^7.0.1",
     "rimraf": "^5.0.1",
     "typescript": "^4.7.2"
   },
