@@ -1,5 +1,7 @@
 import replace from 'replace-in-file';
 
+// Workaround for https://github.com/gmrchk/cli-testing-library/pull/12
+
 const options = {
   files: './node_modules/@gmrchk/cli-testing-library/lib/createExecute.js',
   from: /cwd: runFrom \? path_1.default.join\(base, runFrom\) : path_1\.default\.join\(base\),/g,
