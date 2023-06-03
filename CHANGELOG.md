@@ -5,17 +5,102 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2023-05-12
+
+- Clean up deploy and log full errors to the console. [#408](https://github.com/o1-labs/zkapp-cli/pull/408)
+
+### Changed
+
+## [0.8.1] - 2023-05-03
+
+### Changed
+
+- Update NextJS UI scaffold defaults. [#402](https://github.com/o1-labs/zkapp-cli/pull/402)
+
+## [0.8.0] - 2023-05-03
+
+### Changed
+- Release `0.8.0` [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
+  - Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
+  - Add state.getAndAssertEquals() to examples and test contracts.
+  - Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest SnarkyJS release.
+  - Exit the cli config and deploy processes on success and error.
+  - Increase the template/example project jest test timeout.
+ 
+
+- Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
+
+ - Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
+
+## [0.7.6] - 2023-04-25
+
+### Changed
+
+- Remove postinstall script to speed up zkApp cli installations and upgrades [#391](https://github.com/o1-labs/zkapp-cli/pull/391)
+
+- UI scaffold updates. [#388](https://github.com/o1-labs/zkapp-cli/pull/388)
+
+### Added
+
+- Landing page with next steps for Nuxt UI scaffold. [#386](https://github.com/o1-labs/zkapp-cli/pull/386)
+
+- Landing page with next steps for Svelte UI scaffold. [#385](https://github.com/o1-labs/zkapp-cli/pull/385)
+
+- Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o1-labs/zkapp-cli/pull/384)
+
+## [0.7.5] - 2023-03-16
+
+### Added
+
+- Adds an Interactive flow for UI scaffolds. [#382](https://github.com/o1-labs/zkapp-cli/pull/382)
+
+## [0.7.4] - 2023-03-011
+
+### Changed
+
+- Bug fixes. [#378](https://github.com/o1-labs/zkapp-cli/pull/378)
+
+## [0.7.3] - 2023-03-09
+
+### Changed
+
+- Updates the template projects to use the SnarkyJS version of `0.9.*`. [#376](https://github.com/o1-labs/zkapp-cli/pull/376)
+
+## [0.7.2] - 2023-03-07
+
+### Changed
+
+- Upgraded SnarkyJS to `0.9.2`. [#367](https://github.com/o1-labs/zkapp-cli/pull/367)
+
+## [0.7.1] - 2023-02-27
+
+- Update for snarkyjs state getting fix. [#367](https://github.com/o1-labs/zkapp-cli/pull/367)
+
+## [0.7.0] - 2023-02-14
+
+### Changed
+
+- Upgraded SnarkyJS to `0.9.0`. [#367](https://github.com/o1-labs/zkapp-cli/pull/367)
+
+## [0.6.3] - 2023-02-14
+
+### Changed
+
+- Add timeout to warm gittar cache step during zkapp-cli install or upgrade. [#362](https://github.com/o1-labs/zkapp-cli/pull/362)
+
+- Update 'networks' in config.json to 'deployAliases'. [#360](https://github.com/o1-labs/zkapp-cli/pull/360)
+
 ## [0.6.2] - 2023-02-02
 
 ### Added
 
-Show desired blockchain explorer transaction urls [#358](https://github.com/o1-labs/zkapp-cli/pull/358)
+- Show desired blockchain explorer transaction urls [#358](https://github.com/o1-labs/zkapp-cli/pull/358)
 
 ## [0.6.1] - 2023-01-030
 
 ### Changed
 
-Bug fixes. [#353](https://github.com/o1-labs/zkapp-cli/pull/347)
+- Bug fixes. [#353](https://github.com/o1-labs/zkapp-cli/pull/347)
 
 ## [0.6.0] - 2023-01-018
 
