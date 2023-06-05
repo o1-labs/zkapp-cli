@@ -207,11 +207,11 @@ async function config() {
       choices: cachedFeepayerAliases,
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose another saved feeyper:');
+        return style('Choose another saved feeypayer:');
       },
       skip() {
         return (
-          (this.state.answers.feepayer === 'defaultCache') |
+          (this.state.answers.feepayer !== 'alternateCachedfeePayer') |
           (cachedFeepayerAliases.length === 1)
         );
       },
@@ -232,7 +232,7 @@ async function config() {
       name: 'feepayerAliasName',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose an alias for this account:');
+        return style('Choose an alias for this account');
       },
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
@@ -240,13 +240,19 @@ async function config() {
         return true;
       },
       skip() {
-        return this.state.answers.feepayer === 'cache';
+        const { feepayer } = this.state.answers;
+        return (
+          (feepayer === 'defaultCache') |
+          (feepayer === 'alternateCachedFeepayer')
+        );
       },
     },
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee, feepayerAliasName } = response;
+
+  console.log('response', response);
 
   if (!deployAliasName || !url || !fee) return;
 
@@ -311,6 +317,7 @@ function getCachedFeePayerAliases(directory) {
   aliases = aliases
     .filter((fileName) => fileName.includes('json'))
     .map((name) => name.slice(0, -5));
+  console.log('aliases', aliases);
   return aliases;
 }
 
@@ -326,8 +333,8 @@ function getFeepayorChoices(cachedFeepayerAliases) {
   // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
   if (cachedFeepayerAliases.length > 1)
     choices.push({
-      name: 'Choose another saved feeyper:',
-      value: 'alternateCachedfeePayer',
+      name: 'Choose another saved feeypayer',
+      value: 'alternateCachedFeepayer',
     });
 
   return choices;
