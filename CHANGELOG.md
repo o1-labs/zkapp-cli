@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update SnarkyJS cli minor version dependancy and template peer dependency to `0.11.*` [#426](https://github.com/o1-labs/zkapp-cli/pull/426)
+- Release `0.9.0` [#426](https://github.com/o1-labs/zkapp-cli/pull/426)
+ - SnarkyJS minor version dependency updated in cli package.json to 0.11.*.
+ - SnarkyJS minor version peer dependency updated in template/example contract package.json to 0.11.*.
+ - Replace deprecated `Circuit.if` with `Provable.if` in the `tictactoe` example.
+ - Replace deprecated `Circuit.array` with `Provable.Array` in the `sudoku` example.
 
 ## [0.8.2] - 2023-05-12
 
