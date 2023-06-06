@@ -10,7 +10,7 @@ import {
   state,
   method,
   Bool,
-  Circuit,
+  Provable,
   Signature,
 } from 'snarkyjs';
 
@@ -66,7 +66,7 @@ class Board {
         toUpdate.and(this.board[i][j].isSome).assertEquals(false);
 
         // copy the board (or update if this is the cell the player wants to play)
-        this.board[i][j] = Circuit.if(
+        this.board[i][j] = Provable.if(
           toUpdate,
           new Optional(new Bool(true), playerToken),
           this.board[i][j]
