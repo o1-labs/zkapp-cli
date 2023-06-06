@@ -10,24 +10,29 @@ import {
   state,
   method,
   Bool,
-  Circuit,
+  Provable,
   Signature,
+  Struct,
 } from 'snarkyjs';
 
 export { Board, TicTacToe };
 
-class Optional<T> {
-  isSome: Bool;
-  value: T;
+function Optional<T>(type: Provable<T>) {
+  return class Optional_ extends Struct({ isSome: Bool, value: type }) {
+    constructor(isSome: boolean | Bool, value: T) {
+      super({ isSome: Bool(isSome), value });
+    }
 
-  constructor(isSome: Bool, value: T) {
-    this.isSome = isSome;
-    this.value = value;
-  }
+    toFields() {
+      return Optional_.toFields(this);
+    }
+  };
 }
 
+class OptionalBool extends Optional(Bool) {}
+
 class Board {
-  board: Optional<Bool>[][];
+  board: OptionalBool[][];
 
   constructor(serializedBoard: Field) {
     const bits = serializedBoard.toBits(18);
@@ -37,7 +42,7 @@ class Board {
       for (let j = 0; j < 3; j++) {
         const isPlayed = bits[i * 3 + j];
         const player = bits[i * 3 + j + 9];
-        row.push(new Optional(isPlayed, player));
+        row.push(new OptionalBool(isPlayed, player));
       }
       board.push(row);
     }
@@ -66,9 +71,9 @@ class Board {
         toUpdate.and(this.board[i][j].isSome).assertEquals(false);
 
         // copy the board (or update if this is the cell the player wants to play)
-        this.board[i][j] = Circuit.if(
+        this.board[i][j] = Provable.if(
           toUpdate,
-          new Optional(new Bool(true), playerToken),
+          new OptionalBool(true, playerToken),
           this.board[i][j]
         );
       }
