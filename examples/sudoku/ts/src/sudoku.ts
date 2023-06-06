@@ -7,13 +7,13 @@ import {
   State,
   Poseidon,
   Struct,
-  Circuit,
+  Provable,
 } from 'snarkyjs';
 
 export { Sudoku, SudokuZkApp };
 
 class Sudoku extends Struct({
-  value: Circuit.array(Circuit.array(Field, 9), 9),
+  value: Provable.Array(Provable.Array(Field, 9), 9),
 }) {
   static from(value: number[][]) {
     return new Sudoku({ value: value.map((row) => row.map(Field)) });
