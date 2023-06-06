@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.2] - 2023-05-12
-
-- Clean up deploy and log full errors to the console. [#408](https://github.com/o1-labs/zkapp-cli/pull/408)
+## [0.9.0] - 2023-06-06
 
 ### Changed
+
+- Update SnarkyJS cli minor version dependancy and template peer dependency to `0.11.*` [#426](https://github.com/o1-labs/zkapp-cli/pull/426)
+
+## [0.8.2] - 2023-05-12
+
+### Changed
+
+- Clean up deploy and log full errors to the console. [#408](https://github.com/o1-labs/zkapp-cli/pull/408)
 
 ## [0.8.1] - 2023-05-03
 
