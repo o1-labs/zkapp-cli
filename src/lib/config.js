@@ -117,7 +117,7 @@ async function config() {
     return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
   }
 
-  const response = await prompt([
+  let response = await prompt([
     {
       type: 'input',
       name: 'deployAliasName',
@@ -184,6 +184,7 @@ async function config() {
         return style('Choose an account to pay transaction fees:');
       },
       result() {
+        console.log('result in use stored prompt', this.focused);
         return this.focused.value;
       },
       skip() {
@@ -198,7 +199,8 @@ async function config() {
         return this.focused.value;
       },
       skip() {
-        return this.state.answers.feepayer === 'defaultCache';
+        console.log('result in select alternate alias', this.state.answers);
+        return this.state.answers.feepayer !== 'other';
       },
     },
     {
@@ -212,7 +214,7 @@ async function config() {
       skip() {
         return (
           (this.state.answers.feepayer !== 'alternateCachedfeePayer') |
-          (cachedFeepayerAliases.length === 1)
+          (cachedFeepayerAliases?.length === 1)
         );
       },
     },
@@ -224,7 +226,7 @@ async function config() {
         return style('Account private key (base58):');
       },
       skip() {
-        return this.state.answers.feepayer !== 'recover';
+        return this.state.answers.feepayer === 'recover';
       },
     },
     {
@@ -236,11 +238,12 @@ async function config() {
       },
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
-        if (!val) return red('Fee-payer alias is required.');
+        if (!val) return red('Feepayer alias is required.');
         return true;
       },
       skip() {
         const { feepayer } = this.state.answers;
+        console.log('feepayer in skip choose alias', this.state.answers);
         return (
           (feepayer === 'defaultCache') |
           (feepayer === 'alternateCachedFeepayer')
@@ -331,7 +334,7 @@ function getFeepayorChoices(cachedFeepayerAliases) {
   ];
 
   // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
-  if (cachedFeepayerAliases.length > 1)
+  if (cachedFeepayerAliases?.length > 1)
     choices.push({
       name: 'Choose another saved feeypayer',
       value: 'alternateCachedFeepayer',
