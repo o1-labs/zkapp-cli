@@ -168,7 +168,7 @@ async function config() {
     },
   ];
 
-  const initialFeePayorPrompts = [
+  const initialFeepayerPrompts = [
     {
       type: 'select',
       name: 'feepayer',
@@ -217,10 +217,42 @@ async function config() {
     },
   ];
 
-  let response = await prompt([
+  const initialPromptResponse = await prompt([
     ...deployAliasPrompts,
-    ...initialFeePayorPrompts,
+    ...initialFeepayerPrompts,
   ]);
+
+  const recoverFeepayerPrompts = [
+    {
+      type: 'input',
+      name: 'feepayerKey',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Account private key (base58):');
+      },
+      skip() {
+        return this.state.answers.feepayer !== 'create';
+      },
+    },
+    {
+      type: 'input',
+      name: 'feepayerAliasName',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an alias for this account');
+      },
+      validate: async (val) => {
+        val = val.toLowerCase().trim().replace(' ', '-');
+        if (!val) return red('Fee-payer alias is required.');
+        return true;
+      },
+    },
+  ];
+
+  let recoverFeepayerResponse;
+  if (initialPromptResponse.feepayer === 'recover') {
+    recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
+  }
 
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee, feepayerAliasName } = response;
