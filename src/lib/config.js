@@ -117,7 +117,7 @@ async function config() {
     return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
   }
 
-  let response = await prompt([
+  const deployAliasPrompts = [
     {
       type: 'input',
       name: 'deployAliasName',
@@ -166,6 +166,10 @@ async function config() {
       },
       result: (val) => val.trim().replace(/ /, ''),
     },
+  ];
+
+  let response = await prompt([
+    ...deployAliasPrompts,
     {
       type: 'select',
       name: 'feepayer',
@@ -361,6 +365,7 @@ function getExplorerName(graphQLUrl) {
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
+
 module.exports = {
   config,
 };
