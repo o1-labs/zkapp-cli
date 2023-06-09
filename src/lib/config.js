@@ -268,10 +268,40 @@ async function config() {
     ]);
   }
 
-  // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAliasName, url, fee, feepayerAliasName } = response;
+  let feepayerAliasResponse;
 
-  console.log('response', response);
+  if (
+    (initialPromptResponse.feepayer !== 'defaultCache') &
+    (otherFeepayerResponse.feePayor !== 'alternateCachedFeepayer')
+  ) {
+    feepayerAliasResponse = await prompt([
+      {
+        type: 'input',
+        name: 'feepayerAliasName',
+        message: (state) => {
+          const style = state.submitted && !state.cancelled ? green : reset;
+          return style('Choose an alias for this account');
+        },
+        validate: async (val) => {
+          val = val.toLowerCase().trim().replace(' ', '-');
+          if (!val) return red('Fee-payer alias is required.');
+          return true;
+        },
+      },
+    ]);
+  }
+
+  const promptResponse = {
+    ...initialPromptResponse,
+    ...recoverFeepayerResponse,
+    ...otherFeepayerResponse,
+    ...feepayerAliasResponse,
+  };
+
+  // If user presses "ctrl + c" during interactive prompt, exit.
+  const { deployAliasName, url, fee, feepayerAliasName } = promptResponse;
+
+  console.log('prompt response', promptResponse);
 
   if (!deployAliasName || !url || !fee) return;
 
