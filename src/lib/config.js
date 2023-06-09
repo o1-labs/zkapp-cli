@@ -254,6 +254,20 @@ async function config() {
     recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
   }
 
+  let otherFeepayerResponse;
+  if (initialPromptResponse.feepayer === 'other') {
+    otherFeepayerResponse = await prompt([
+      {
+        type: 'select',
+        name: 'feepayer',
+        choices: getFeepayorChoices(cachedFeepayerAliases),
+        result() {
+          return this.focused.value;
+        },
+      },
+    ]);
+  }
+
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee, feepayerAliasName } = response;
 
