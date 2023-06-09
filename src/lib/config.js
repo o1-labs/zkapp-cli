@@ -168,8 +168,29 @@ async function config() {
     },
   ];
 
-  let response = await prompt([
-    ...deployAliasPrompts,
+  const initialFeePayorPrompts = [
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: [
+        {
+          name: `Recover fee-payer account from an existing base58 private key`,
+          value: 'recover',
+        },
+        { name: 'Create a new feepayer key pair', value: 'create' },
+      ],
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an account to pay transaction fees:');
+      },
+      result() {
+        return this.focused.value;
+      },
+      skip() {
+        return isFeepayerCached; // The prompt is only displayed if a feepayor has not been previously cached
+      },
+    },
+
     {
       type: 'select',
       name: 'feepayer',
@@ -188,72 +209,17 @@ async function config() {
         return style('Choose an account to pay transaction fees:');
       },
       result() {
-        console.log('result in use stored prompt', this.focused);
         return this.focused.value;
       },
       skip() {
         return !isFeepayerCached; // Only display this prompt question if feeyper is cached
       },
     },
-    {
-      type: 'select',
-      name: 'feepayer',
-      choices: getFeepayorChoices(cachedFeepayerAliases),
-      result() {
-        return this.focused.value;
-      },
-      skip() {
-        console.log('result in select alternate alias', this.state.answers);
-        return this.state.answers.feepayer !== 'other';
-      },
-    },
-    {
-      type: 'select',
-      name: 'feePayorAlias',
-      choices: cachedFeepayerAliases,
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose another saved feeypayer:');
-      },
-      skip() {
-        return (
-          (this.state.answers.feepayer !== 'alternateCachedfeePayer') |
-          (cachedFeepayerAliases?.length === 1)
-        );
-      },
-    },
-    {
-      type: 'input',
-      name: 'feepayerKey',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Account private key (base58):');
-      },
-      skip() {
-        return this.state.answers.feepayer === 'recover';
-      },
-    },
-    {
-      type: 'input',
-      name: 'feepayerAliasName',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose an alias for this account');
-      },
-      validate: async (val) => {
-        val = val.toLowerCase().trim().replace(' ', '-');
-        if (!val) return red('Feepayer alias is required.');
-        return true;
-      },
-      skip() {
-        const { feepayer } = this.state.answers;
-        console.log('feepayer in skip choose alias', this.state.answers);
-        return (
-          (feepayer === 'defaultCache') |
-          (feepayer === 'alternateCachedFeepayer')
-        );
-      },
-    },
+  ];
+
+  let response = await prompt([
+    ...deployAliasPrompts,
+    ...initialFeePayorPrompts,
   ]);
 
   // If user presses "ctrl + c" during interactive prompt, exit.
