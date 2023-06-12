@@ -41,9 +41,9 @@ async function config() {
   let defaultFeePayerAddress;
 
   try {
-    cachedFeepayerAliases = getCachedFeePayerAliases(HOME_DIR);
+    cachedFeepayerAliases = getCachedFeepayerAliases(HOME_DIR);
     defaultFeePayerAlias = cachedFeepayerAliases[0];
-    defaultFeePayerAddress = getCachedFeePayerAddress(
+    defaultFeePayerAddress = getCachedFeepayerAddress(
       HOME_DIR,
       defaultFeePayerAlias
     );
@@ -217,11 +217,6 @@ async function config() {
     },
   ];
 
-  const initialPromptResponse = await prompt([
-    ...deployAliasPrompts,
-    ...initialFeepayerPrompts,
-  ]);
-
   const recoverFeepayerPrompts = [
     {
       type: 'input',
@@ -249,6 +244,11 @@ async function config() {
     },
   ];
 
+  const initialPromptResponse = await prompt([
+    ...deployAliasPrompts,
+    ...initialFeepayerPrompts,
+  ]);
+
   let recoverFeepayerResponse;
   if (initialPromptResponse.feepayer === 'recover') {
     recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
@@ -271,8 +271,8 @@ async function config() {
   let feepayerAliasResponse;
 
   if (
-    (initialPromptResponse.feepayer !== 'defaultCache') &
-    (otherFeepayerResponse.feePayor !== 'alternateCachedFeepayer')
+    (initialPromptResponse?.feepayer !== 'defaultCache') &
+    (otherFeepayerResponse?.feepayor !== 'alternateCachedFeepayer')
   ) {
     feepayerAliasResponse = await prompt([
       {
@@ -360,7 +360,7 @@ async function config() {
 }
 
 // Check if feepayer alias/aliases are stored on users machine and returns an array of them.
-function getCachedFeePayerAliases(directory) {
+function getCachedFeepayerAliases(directory) {
   let aliases = fs.readdirSync(`${directory}/.cache/zkapp-cli/keys/`);
 
   aliases = aliases
@@ -389,7 +389,7 @@ function getFeepayorChoices(cachedFeepayerAliases) {
   return choices;
 }
 
-function getCachedFeePayerAddress(directory, feePayorAlias) {
+function getCachedFeepayerAddress(directory, feePayorAlias) {
   const address = fs.readJSONSync(
     `${directory}/.cache/zkapp-cli/keys/${feePayorAlias}.json`
   ).publicKey;
