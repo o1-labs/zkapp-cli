@@ -283,8 +283,8 @@ async function config() {
   let feepayerAliasResponse;
 
   if (
-    (initialPromptResponse?.feepayer !== 'defaultCache') |
-    (otherFeepayerResponse?.feepayor !== 'alternateCachedFeepayer')
+    (initialPromptResponse?.feepayer !== 'defaultCache') &
+    (otherFeepayerResponse?.feepayer !== 'alternateCachedFeepayer')
   ) {
     feepayerAliasResponse = await prompt([
       {
