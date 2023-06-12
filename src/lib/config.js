@@ -265,13 +265,25 @@ async function config() {
           return this.focused.value;
         },
       },
+      {
+        type: 'select',
+        name: 'feePayerAlias',
+        choices: cachedFeepayerAliases,
+        message: (state) => {
+          const style = state.submitted && !state.cancelled ? green : reset;
+          return style('Choose another saved fee-payer:');
+        },
+        skip() {
+          return this.state.answers.feepayer !== 'alternateCachedFeepayer';
+        },
+      },
     ]);
   }
 
   let feepayerAliasResponse;
 
   if (
-    (initialPromptResponse?.feepayer !== 'defaultCache') &
+    (initialPromptResponse?.feepayer !== 'defaultCache') |
     (otherFeepayerResponse?.feepayor !== 'alternateCachedFeepayer')
   ) {
     feepayerAliasResponse = await prompt([
