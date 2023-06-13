@@ -64,6 +64,85 @@ const prompts = {
       result: (val) => val.trim().replace(/ /, ''),
     },
   ],
+
+  initialFeepayerPrompts: (
+    defaultFeePayerAlias,
+    defaultFeePayerAddress,
+    isFeepayerCached
+  ) => [
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: [
+        {
+          name: `Recover fee-payer account from an existing base58 private key`,
+          value: 'recover',
+        },
+        { name: 'Create a new feepayer key pair', value: 'create' },
+      ],
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an account to pay transaction fees:');
+      },
+      result() {
+        return this.focused.value;
+      },
+      skip() {
+        return isFeepayerCached; // The prompt is only displayed if a feepayor has not been previously cached
+      },
+    },
+
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: [
+        {
+          name: `Use stored account ${defaultFeePayerAlias} (public key: ${defaultFeePayerAddress}) `,
+          value: 'defaultCache',
+        },
+        {
+          name: 'Use a different account (select to see options)',
+          value: 'other',
+        },
+      ],
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an account to pay transaction fees:');
+      },
+      result() {
+        return this.focused.value;
+      },
+      skip() {
+        return !isFeepayerCached; // Only display this prompt question if feeyper is cached
+      },
+    },
+  ],
+  recoverFeepayerPrompts: [
+    {
+      type: 'input',
+      name: 'feepayerKey',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Account private key (base58):');
+      },
+      skip() {
+        return this.state.answers.feepayer !== 'create';
+      },
+    },
+    {
+      type: 'input',
+      name: 'feepayerAliasName',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an alias for this account');
+      },
+      validate: async (val) => {
+        val = val.toLowerCase().trim().replace(' ', '-');
+        if (!val) return red('Fee-payer alias is required.');
+        return true;
+      },
+    },
+  ],
 };
 module.exports = {
   prompts,
