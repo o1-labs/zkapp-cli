@@ -100,7 +100,7 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new deploy alias:');
+  console.log('Enter values to create a deploy alias:');
 
   // TODO: Later, show pre-configured list to choose from or let user
   // add a custom deploy alias.
@@ -190,8 +190,6 @@ async function config() {
 
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee, feepayerAliasName } = promptResponse;
-
-  console.log('prompt response', promptResponse);
 
   if (!deployAliasName || !url || !fee) return;
 
