@@ -65,7 +65,7 @@ async function config() {
   }
 
   // Build table of existing deploy aliases found in their config.json
-  let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
+  let tableData = [[bold('Name'), bold('URL'), bold('Smart Contract')]];
   for (const deployAliasName in config.deployAliases) {
     const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
