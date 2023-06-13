@@ -20,7 +20,7 @@ const prompts = {
       name: 'deployAliasName',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose a name (can be anything):');
+        return style('Create a name (can be anything):');
       },
       prefix: formatPrefixSymbol,
       validate: async (val) => {
@@ -75,6 +75,27 @@ const prompts = {
       name: 'feepayer',
       choices: [
         {
+          name: `Recover fee-payer account from an existing base58 private key`,
+          value: 'recover',
+        },
+        { name: 'Create a new feepayer key pair', value: 'create' },
+      ],
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose an account to pay transaction fees:');
+      },
+      result() {
+        return this.focused.value;
+      },
+      skip() {
+        return isFeepayerCached; // The prompt is only displayed if a feepayor has not been previously cached
+      },
+    },
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: [
+        {
           name: `Use stored account ${defaultFeePayerAlias} (public key: ${defaultFeePayerAddress}) `,
           value: 'defaultCache',
         },
@@ -92,27 +113,6 @@ const prompts = {
       },
       skip() {
         return !isFeepayerCached; // Only display this prompt question if feeyper is cached
-      },
-    },
-    {
-      type: 'select',
-      name: 'feepayer',
-      choices: [
-        {
-          name: `Recover fee-payer account from an existing base58 private key`,
-          value: 'recover',
-        },
-        { name: 'Create a new feepayer key pair', value: 'create' },
-      ],
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose an account to pay transaction fees:');
-      },
-      result() {
-        return this.focused.value;
-      },
-      skip() {
-        return isFeepayerCached; // The prompt is only displayed if a feepayor has not been previously cached
       },
     },
   ],
