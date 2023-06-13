@@ -84,11 +84,18 @@ const prompts = {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose an account to pay transaction fees:');
       },
-      result() {
-        return this.focused.value;
-      },
+
       skip() {
         return isFeepayerCached; // The prompt is only displayed if a feepayor has not been previously cached
+      },
+      result() {
+        // Workaround for a bug in enquirer that returns the first value of choices when the
+        // question is skipped https://github.com/enquirer/enquirer/issues/340 .
+        // This returns the previous prompt value if prompt is skipped.
+        if (isFeepayerCached) {
+          return this.state.answers.feepayer;
+        }
+        return this.focused.value;
       },
     },
     {
@@ -108,11 +115,17 @@ const prompts = {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Choose an account to pay transaction fees:');
       },
-      result() {
-        return this.focused.value;
-      },
       skip() {
-        return !isFeepayerCached; // Only display this prompt question if feeyper is cached
+        return !isFeepayerCached; // Only display this prompt question if feeypayer is cached
+      },
+      result() {
+        // Workaround for a bug in enquirer that returns the first value of choices when the
+        // question is skipped https://github.com/enquirer/enquirer/issues/340 .
+        // This returns the previous prompt value if prompt is skipped.
+        if (!isFeepayerCached) {
+          return this.state.answers.feepayer;
+        }
+        return this.focused.value;
       },
     },
   ],
@@ -126,6 +139,15 @@ const prompts = {
       },
       skip() {
         return this.state.answers.feepayer !== 'create';
+      },
+      result() {
+        // Workaround for a bug in enquirer that returns the first value of choices when the
+        // question is skipped https://github.com/enquirer/enquirer/issues/340 .
+        // This returns the previous prompt value if prompt is skipped.
+        if (this.state.answers.feepayer !== 'create') {
+          return this.state.answers.feepayer;
+        }
+        return this.focused.value;
       },
     },
     {
