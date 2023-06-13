@@ -75,10 +75,10 @@ const prompts = {
       name: 'feepayer',
       choices: [
         {
-          name: `Recover feepayer account from an existing base58 private key`,
+          name: `Recover fee payer account from an existing base58 private key`,
           value: 'recover',
         },
-        { name: 'Create a new feepayer key pair', value: 'create' },
+        { name: 'Create a new fee payer key pair', value: 'create' },
       ],
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
@@ -159,7 +159,7 @@ const prompts = {
       },
       validate: async (val) => {
         val = val.toLowerCase().trim().replace(' ', '-');
-        if (!val) return red('Feepayer alias is required.');
+        if (!val) return red('Fee payer alias is required.');
         return true;
       },
     },
