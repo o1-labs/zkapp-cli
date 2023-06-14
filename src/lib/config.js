@@ -7,6 +7,7 @@ const { step } = require('./helpers');
 const { green, red, bold, gray, reset } = require('chalk');
 const Client = require('mina-signer');
 const { prompts } = require('./prompts');
+const { fetchAccount, PublicKey } = require('snarkyjs');
 
 const log = console.log;
 
@@ -168,13 +169,27 @@ async function config() {
 
   console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAliasName, url, fee, feepayer, feepayerAliasName } =
-    promptResponse;
+  const {
+    deployAliasName,
+    url,
+    fee,
+    feepayer,
+    feepayerAliasName,
+    feepayerKey,
+  } = promptResponse;
 
   // create -> generate new key pair with feepayerAliasName
   // recover -> take feepayerkey and recover public key -> add to config.json -> prompt adding <alias> <keypath>
   // defaultCache -> add defaultCache feepayer alias and keypair path to config.json -> using saved key pair
   // alternateCache -> use alternatCach aliasname -> add alias and keypair to config.json using saved key pair
+
+  // import snarkyjs from the user directory
+  let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
+
+  if (process.platform === 'win32') {
+    snarkyjsImportPath = 'file://' + snarkyjsImportPath;
+  }
+  let { PrivateKey } = await import(snarkyjsImportPath);
 
   if (!deployAliasName || !url || !fee) return;
 
@@ -183,7 +198,12 @@ async function config() {
     case 'create':
       feepayerKeyPair = await createKeyPairStep();
       break;
-
+    case 'recover':
+      feepayerKeyPair = await recoverKeyPairStep();
+      break;
+    case 'defaultCache':
+      feepayerKeyPair = await recoverKeyPairStep();
+      break;
     default:
       break;
   }
@@ -202,6 +222,30 @@ async function config() {
           }
         );
 
+        return keyPair;
+      }
+    );
+  }
+
+  async function recoverKeyPairStep() {
+    return await step(
+      `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+      async () => {
+        const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey); //  The private key of the feepayer
+        const feepayerAddress = feepayorPrivateKey.toPublicKey();
+
+        const keyPair = `{ "privateKey": ${feepayerKey}, 
+        "publicKey": ${PublicKey.toBase58(feepayerAddress)}`;
+
+        console.log('keyPair');
+
+        fs.outputJsonSync(
+          `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+          keyPair,
+          {
+            spaces: 2,
+          }
+        );
         return keyPair;
       }
     );
