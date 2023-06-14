@@ -143,10 +143,11 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().replace(' ', '-');
+        val = val.toLowerCase().trim().spilt(' ').join('-');
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
+      result: (val) => val.toLowerCase().trim().spilt(' ').join('-'),
     },
     {
       type: 'input',
@@ -168,10 +169,11 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().replace(' ', '-');
+        val = val.toLowerCase().trim().spilt(' ').join('-');
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
+      result: (val) => val.toLowerCase().trim().spilt(' ').join('-'),
     },
   ],
 
