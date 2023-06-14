@@ -122,7 +122,7 @@ const prompts = {
         // Workaround for a bug in enquirer that returns the first value of choices when the
         // question is skipped https://github.com/enquirer/enquirer/issues/340 .
         // This returns the previous prompt value if prompt is skipped.
-        this.state.feepayerAlias;
+
         if (!isFeepayerCached) {
           return this.state.answers.feepayer;
         }

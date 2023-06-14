@@ -169,14 +169,8 @@ async function config() {
 
   console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const {
-    deployAliasName,
-    url,
-    fee,
-    feepayer,
-    feepayerAliasName,
-    feepayerKey,
-  } = promptResponse;
+  let { deployAliasName, url, fee, feepayer, feepayerAliasName, feepayerKey } =
+    promptResponse;
 
   // create -> generate new key pair with feepayerAliasName
   // recover -> take feepayerkey and recover public key -> add to config.json -> prompt adding <alias> <keypath>
@@ -202,7 +196,10 @@ async function config() {
       feepayerKeyPair = await recoverKeyPairStep();
       break;
     case 'defaultCache':
-      feepayerKeyPair = await recoverKeyPairStep();
+      feepayerKeyPair = await savedKeyPairStep(
+        defaultFeepayerAlias,
+        defaultFeepayerAddress
+      );
       break;
     default:
       break;
@@ -245,6 +242,20 @@ async function config() {
           {
             spaces: 2,
           }
+        );
+        return keyPair;
+      }
+    );
+  }
+  // Adds the fee payer alias and keypath to the config.json
+  async function savedKeyPairStep(alias, address) {
+    return await step(
+      `Use stored fee payer ${alias} (public key: ${address}) `,
+
+      async () => {
+        feepayerAliasName = alias;
+        const keyPair = fs.readJSONSync(
+          `${HOME_DIR}/.cache/zkapp-cli/keys/${alias}.json`
         );
         return keyPair;
       }
