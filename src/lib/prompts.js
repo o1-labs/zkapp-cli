@@ -66,8 +66,8 @@ const prompts = {
   ],
 
   initialFeepayerPrompts: (
-    defaultFeePayerAlias,
-    defaultFeePayerAddress,
+    defaultFeepayerAlias,
+    defaultFeepayerAddress,
     isFeepayerCached
   ) => [
     {
@@ -103,7 +103,7 @@ const prompts = {
       name: 'feepayer',
       choices: [
         {
-          name: `Use stored account ${defaultFeePayerAlias} (public key: ${defaultFeePayerAddress}) `,
+          name: `Use stored account ${defaultFeepayerAlias} (public key: ${defaultFeepayerAddress}) `,
           value: 'defaultCache',
         },
         {
@@ -122,6 +122,7 @@ const prompts = {
         // Workaround for a bug in enquirer that returns the first value of choices when the
         // question is skipped https://github.com/enquirer/enquirer/issues/340 .
         // This returns the previous prompt value if prompt is skipped.
+        this.state.feepayerAlias;
         if (!isFeepayerCached) {
           return this.state.answers.feepayer;
         }

@@ -37,16 +37,16 @@ async function config() {
   }
 
   let isFeepayerCached = false;
-  let defaultFeePayerAlias;
+  let defaultFeepayerAlias;
   let cachedFeepayerAliases;
-  let defaultFeePayerAddress;
+  let defaultFeepayerAddress;
 
   try {
     cachedFeepayerAliases = getCachedFeepayerAliases(HOME_DIR);
-    defaultFeePayerAlias = cachedFeepayerAliases[0];
-    defaultFeePayerAddress = getCachedFeepayerAddress(
+    defaultFeepayerAlias = cachedFeepayerAliases[0];
+    defaultFeepayerAddress = getCachedFeepayerAddress(
       HOME_DIR,
-      defaultFeePayerAlias
+      defaultFeepayerAlias
     );
 
     isFeepayerCached = true;
@@ -119,18 +119,20 @@ async function config() {
   const initialPromptResponse = await prompt([
     ...prompts.deployAliasPrompts(config),
     ...prompts.initialFeepayerPrompts(
-      defaultFeePayerAlias,
-      defaultFeePayerAddress,
+      defaultFeepayerAlias,
+      defaultFeepayerAddress,
       isFeepayerCached
     ),
   ]);
 
   let recoverFeepayerResponse;
+  let feepayerAliasResponse;
+  let otherFeepayerResponse;
+
   if (initialPromptResponse.feepayer === 'recover') {
     recoverFeepayerResponse = await prompt(prompts.recoverFeepayerPrompts);
   }
 
-  let otherFeepayerResponse;
   if (initialPromptResponse.feepayer === 'other') {
     otherFeepayerResponse = await prompt([
       {
@@ -143,7 +145,7 @@ async function config() {
       },
       {
         type: 'select',
-        name: 'feePayerAlias',
+        name: 'alternateCachedFeepayerAlias',
         choices: cachedFeepayerAliases,
         message: (state) => {
           const style = state.submitted && !state.cancelled ? green : reset;
@@ -162,29 +164,18 @@ async function config() {
         },
       },
     ]);
+
+    if (otherFeepayerResponse.feepayer === 'recover') {
+      recoverFeepayerResponse = await prompt(prompts.recoverFeepayerPrompts);
+    }
+
+    if (otherFeepayerResponse.feepayer === 'create') {
+      feepayerAliasResponse = await prompt(prompts.feepayerAliasPrompt);
+    }
   }
 
-  let feepayerAliasResponse;
-
-  if (
-    (initialPromptResponse?.feepayer !== 'defaultCache') &
-    (otherFeepayerResponse?.feepayer !== 'alternateCachedFeepayer')
-  ) {
-    feepayerAliasResponse = await prompt([
-      {
-        type: 'input',
-        name: 'feepayerAliasName',
-        message: (state) => {
-          const style = state.submitted && !state.cancelled ? green : reset;
-          return style('Create an alias for this account');
-        },
-        validate: async (val) => {
-          val = val.toLowerCase().trim().replace(' ', '-');
-          if (!val) return red('Fee payer alias is required.');
-          return true;
-        },
-      },
-    ]);
+  if (initialPromptResponse?.feepayer === 'create') {
+    feepayerAliasResponse = await prompt(prompts.feepayerAliasPrompt);
   }
 
   const promptResponse = {
@@ -194,6 +185,7 @@ async function config() {
     ...feepayerAliasResponse,
   };
 
+  console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
   const { deployAliasName, url, fee, feepayerAliasName } = promptResponse;
 
@@ -260,7 +252,7 @@ function getCachedFeepayerAliases(directory) {
   aliases = aliases
     .filter((fileName) => fileName.includes('json'))
     .map((name) => name.slice(0, -5));
-  console.log('aliases', aliases);
+
   return aliases;
 }
 
@@ -276,7 +268,7 @@ function getFeepayorChoices(cachedFeepayerAliases) {
   // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
   if (cachedFeepayerAliases?.length > 1)
     choices.push({
-      name: 'Choose another saved feeypayer',
+      name: 'Choose another saved fee payer',
       value: 'alternateCachedFeepayer',
     });
 
