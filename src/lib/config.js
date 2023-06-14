@@ -121,6 +121,7 @@ async function config() {
     initialFeepayerPrompts,
     recoverFeepayerPrompts,
     otherFeepayerPrompts,
+    feepayerAliasPrompt,
   } = prompts;
 
   const initialPromptResponse = await prompt([
@@ -167,26 +168,44 @@ async function config() {
 
   console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAliasName, url, fee, feepayerAliasName } = promptResponse;
+  const { deployAliasName, url, fee, feepayer, feepayerAliasName } =
+    promptResponse;
+
+  // create -> generate new key pair with feepayerAliasName
+  // recover -> take feepayerkey and recover public key -> add to config.json -> prompt adding <alias> <keypath>
+  // defaultCache -> add defaultCache feepayer alias and keypair path to config.json -> using saved key pair
+  // alternateCache -> use alternatCach aliasname -> add alias and keypair to config.json using saved key pair
 
   if (!deployAliasName || !url || !fee) return;
 
-  const feepayerKeyPair = await step(
-    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-    async () => {
-      const keyPair = createKeyPair('testnet');
+  let feepayerKeyPair;
+  switch (feepayer) {
+    case 'create':
+      feepayerKeyPair = await createKeyPairStep();
+      break;
 
-      fs.outputJsonSync(
-        `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-        keyPair,
-        {
-          spaces: 2,
-        }
-      );
+    default:
+      break;
+  }
 
-      return keyPair;
-    }
-  );
+  async function createKeyPairStep() {
+    return await step(
+      `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+      async () => {
+        const keyPair = createKeyPair('testnet');
+
+        fs.outputJsonSync(
+          `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+          keyPair,
+          {
+            spaces: 2,
+          }
+        );
+
+        return keyPair;
+      }
+    );
+  }
 
   await step(
     `Create zkApp key pair at keys/${deployAliasName}.json`,
