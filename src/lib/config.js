@@ -116,9 +116,16 @@ async function config() {
     return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
   }
 
+  const {
+    deployAliasPrompts,
+    initialFeepayerPrompts,
+    recoverFeepayerPrompts,
+    otherFeepayerPrompts,
+  } = prompts;
+
   const initialPromptResponse = await prompt([
-    ...prompts.deployAliasPrompts(config),
-    ...prompts.initialFeepayerPrompts(
+    ...deployAliasPrompts(config),
+    ...initialFeepayerPrompts(
       defaultFeepayerAlias,
       defaultFeepayerAddress,
       isFeepayerCached
@@ -130,52 +137,25 @@ async function config() {
   let otherFeepayerResponse;
 
   if (initialPromptResponse.feepayer === 'recover') {
-    recoverFeepayerResponse = await prompt(prompts.recoverFeepayerPrompts);
-  }
-
-  if (initialPromptResponse.feepayer === 'other') {
-    otherFeepayerResponse = await prompt([
-      {
-        type: 'select',
-        name: 'feepayer',
-        choices: getFeepayorChoices(cachedFeepayerAliases),
-        result() {
-          return this.focused.value;
-        },
-      },
-      {
-        type: 'select',
-        name: 'alternateCachedFeepayerAlias',
-        choices: cachedFeepayerAliases,
-        message: (state) => {
-          const style = state.submitted && !state.cancelled ? green : reset;
-          return style('Choose another saved fee payer:');
-        },
-        skip() {
-          return this.state.answers.feepayer !== 'alternateCachedFeepayer';
-        },
-        result() {
-          // Workaround for a bug in enquirer that returns the first value of choices when the
-          // question is skipped https://github.com/enquirer/enquirer/issues/340 .
-          // This returns the previous prompt value if prompt is skipped.
-          if (this.state.answers.feepayer !== 'alternateCachedFeepayer') {
-            return this.state.answers.feepayer;
-          }
-        },
-      },
-    ]);
-
-    if (otherFeepayerResponse.feepayer === 'recover') {
-      recoverFeepayerResponse = await prompt(prompts.recoverFeepayerPrompts);
-    }
-
-    if (otherFeepayerResponse.feepayer === 'create') {
-      feepayerAliasResponse = await prompt(prompts.feepayerAliasPrompt);
-    }
+    recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
   }
 
   if (initialPromptResponse?.feepayer === 'create') {
-    feepayerAliasResponse = await prompt(prompts.feepayerAliasPrompt);
+    feepayerAliasResponse = await prompt(feepayerAliasPrompt);
+  }
+
+  if (initialPromptResponse.feepayer === 'other') {
+    otherFeepayerResponse = await prompt(
+      otherFeepayerPrompts(cachedFeepayerAliases)
+    );
+
+    if (otherFeepayerResponse.feepayer === 'recover') {
+      recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
+    }
+
+    if (otherFeepayerResponse.feepayer === 'create') {
+      feepayerAliasResponse = await prompt(feepayerAliasPrompt);
+    }
   }
 
   const promptResponse = {
@@ -254,25 +234,6 @@ function getCachedFeepayerAliases(directory) {
     .map((name) => name.slice(0, -5));
 
   return aliases;
-}
-
-function getFeepayorChoices(cachedFeepayerAliases) {
-  const choices = [
-    {
-      name: `Recover fee payer account from an existing base58 private key`,
-      value: 'recover',
-    },
-    { name: 'Create a new fee payer key pair', value: 'create' },
-  ];
-
-  // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
-  if (cachedFeepayerAliases?.length > 1)
-    choices.push({
-      name: 'Choose another saved fee payer',
-      value: 'alternateCachedFeepayer',
-    });
-
-  return choices;
 }
 
 function getCachedFeepayerAddress(directory, feePayorAlias) {

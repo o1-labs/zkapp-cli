@@ -168,7 +168,49 @@ const prompts = {
       },
     },
   ],
+
+  otherFeepayerPrompts: (cachedFeepayerAliases) => [
+    {
+      type: 'select',
+      name: 'feepayer',
+      choices: getFeepayorChoices(cachedFeepayerAliases),
+      result() {
+        return this.focused.value;
+      },
+    },
+    {
+      type: 'select',
+      name: 'alternateCachedFeepayerAlias',
+      choices: cachedFeepayerAliases,
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Choose another saved fee payer:');
+      },
+      skip() {
+        return this.state.answers.feepayer !== 'alternateCachedFeepayer';
+      },
+    },
+  ],
 };
+
+function getFeepayorChoices(cachedFeepayerAliases) {
+  const choices = [
+    {
+      name: `Recover fee payer account from an existing base58 private key`,
+      value: 'recover',
+    },
+    { name: 'Create a new fee payer key pair', value: 'create' },
+  ];
+
+  // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
+  if (cachedFeepayerAliases?.length > 1)
+    choices.push({
+      name: 'Choose another saved fee payer',
+      value: 'alternateCachedFeepayer',
+    });
+
+  return choices;
+}
 module.exports = {
   prompts,
 };
