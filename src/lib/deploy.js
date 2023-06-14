@@ -377,7 +377,7 @@ async function deploy({ alias, yes }) {
   let transaction = await step('Build transaction', async () => {
     let Network = Mina.Network(graphQLUrl);
     Mina.setActiveInstance(Network);
-    let tx = await Mina.transaction({ sender: zkAppAddress, fee }, () => {
+    let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
       let zkapp = new zkApp(zkAppAddress);
       zkapp.deploy({ verificationKey });
     });
