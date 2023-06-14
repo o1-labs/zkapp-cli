@@ -149,7 +149,9 @@ const prompts = {
       name: 'feepayerKey',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Account private key (base58):');
+        return style(`Account private key (base58):
+  NOTE: the private key will be stored in plain text on this computer.
+  Do NOT use an account which holds a substantial amount of MINA.`);
       },
     },
   ],
