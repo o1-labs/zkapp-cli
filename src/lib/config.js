@@ -7,8 +7,8 @@ const { step } = require('./helpers');
 const { green, red, bold, gray, reset } = require('chalk');
 const Client = require('mina-signer');
 const { prompts } = require('./prompts');
-const { fetchAccount, PublicKey } = require('snarkyjs');
-
+const { PrivateKey, PublicKey } = require('snarkyjs');
+const HOME_DIR = os.homedir();
 const log = console.log;
 
 /**
@@ -20,7 +20,7 @@ async function config() {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
   // Get users home directory path.
-  const HOME_DIR = os.homedir();
+  // const HOME_DIR = os.homedir();
 
   let config;
   try {
@@ -169,97 +169,42 @@ async function config() {
 
   console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
-  let { deployAliasName, url, fee, feepayer, feepayerAliasName, feepayerKey } =
-    promptResponse;
-
-  // create -> generate new key pair with feepayerAliasName
-  // recover -> take feepayerkey and recover public key -> add to config.json -> prompt adding <alias> <keypath>
-  // defaultCache -> add defaultCache feepayer alias and keypair path to config.json -> using saved key pair
-  // alternateCache -> use alternatCach aliasname -> add alias and keypair to config.json using saved key pair
-
-  // import snarkyjs from the user directory
-  let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
-
-  if (process.platform === 'win32') {
-    snarkyjsImportPath = 'file://' + snarkyjsImportPath;
-  }
-  let { PrivateKey } = await import(snarkyjsImportPath);
+  let {
+    deployAliasName,
+    url,
+    fee,
+    feepayer,
+    feepayerAliasName,
+    feepayerKey,
+    alternateCachedFeepayerAlias,
+  } = promptResponse;
 
   if (!deployAliasName || !url || !fee) return;
 
   let feepayerKeyPair;
   switch (feepayer) {
     case 'create':
-      feepayerKeyPair = await createKeyPairStep();
+      feepayerKeyPair = await createKeyPairStep(HOME_DIR, feepayerAliasName);
       break;
     case 'recover':
-      feepayerKeyPair = await recoverKeyPairStep();
+      feepayerKeyPair = await recoverKeyPairStep(
+        HOME_DIR,
+        feepayerKey,
+        feepayerAliasName
+      );
       break;
     case 'defaultCache':
       feepayerKeyPair = await savedKeyPairStep(
+        HOME_DIR,
         defaultFeepayerAlias,
         defaultFeepayerAddress
       );
       break;
+    case 'alternateCachedFeepayer':
+      feepayerKeyPair = await savedKeyPairStep(alternateCachedFeepayerAlias);
+      break;
     default:
       break;
-  }
-
-  async function createKeyPairStep() {
-    return await step(
-      `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-      async () => {
-        const keyPair = createKeyPair('testnet');
-
-        fs.outputJsonSync(
-          `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-          keyPair,
-          {
-            spaces: 2,
-          }
-        );
-
-        return keyPair;
-      }
-    );
-  }
-
-  async function recoverKeyPairStep() {
-    return await step(
-      `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-      async () => {
-        const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey); //  The private key of the feepayer
-        const feepayerAddress = feepayorPrivateKey.toPublicKey();
-
-        const keyPair = `{ "privateKey": ${feepayerKey}, 
-        "publicKey": ${PublicKey.toBase58(feepayerAddress)}`;
-
-        console.log('keyPair');
-
-        fs.outputJsonSync(
-          `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-          keyPair,
-          {
-            spaces: 2,
-          }
-        );
-        return keyPair;
-      }
-    );
-  }
-  // Adds the fee payer alias and keypath to the config.json
-  async function savedKeyPairStep(alias, address) {
-    return await step(
-      `Use stored fee payer ${alias} (public key: ${address}) `,
-
-      async () => {
-        feepayerAliasName = alias;
-        const keyPair = fs.readJSONSync(
-          `${HOME_DIR}/.cache/zkapp-cli/keys/${alias}.json`
-        );
-        return keyPair;
-      }
-    );
   }
 
   await step(
@@ -287,6 +232,7 @@ async function config() {
   const explorerName = getExplorerName(
     config.deployAliases[deployAliasName]?.url
   );
+  console.log('feepayerKeyPair', feepayerKeyPair);
 
   const str =
     `\nSuccess!\n` +
@@ -297,6 +243,65 @@ async function config() {
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
+}
+
+// Creates a new feepayer key pair
+async function createKeyPairStep(directory, feepayerAliasName) {
+  return await step(
+    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+    async () => {
+      const keyPair = createKeyPair('testnet');
+
+      fs.outputJsonSync(
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+        keyPair,
+        {
+          spaces: 2,
+        }
+      );
+      return keyPair;
+    }
+  );
+}
+
+async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
+  return await step(
+    `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+    async () => {
+      const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey);
+      const feepayerAddress = feepayorPrivateKey.toPublicKey();
+
+      const keyPair = {
+        privateKey: $feepayerKey,
+        publicKey: PublicKey.toBase58(feepayerAddress),
+      };
+
+      fs.outputJsonSync(
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+        keyPair,
+        {
+          spaces: 2,
+        }
+      );
+      return keyPair;
+    }
+  );
+}
+// Returns a cached keypair from a given feepayer alias
+async function savedKeyPairStep(directory, alias, address) {
+  const keyPair = fs.readJSONSync(
+    `${directory}/.cache/zkapp-cli/keys/${alias}.json`
+  );
+
+  if (!address) address = keyPair.publicKey;
+  return await step(
+    `Use stored fee payer ${alias} (public key: ${address}) `,
+
+    async () => {
+      feepayerAliasName = alias;
+      return keyPair;
+    }
+  );
 }
 
 // Check if feepayer alias/aliases are stored on users machine and returns an array of them.
