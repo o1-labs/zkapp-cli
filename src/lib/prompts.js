@@ -132,24 +132,27 @@ const prompts = {
   recoverFeepayerPrompts: [
     {
       type: 'input',
+      name: 'feepayerAliasName',
+      message: (state) => {
+        const style = state.submitted && !state.cancelled ? green : reset;
+        return style('Create an alias for this account');
+      },
+      validate: async (val) => {
+        val = val.toLowerCase().trim().replace(' ', '-');
+        if (!val) return red('Fee payer alias is required.');
+        return true;
+      },
+    },
+    {
+      type: 'input',
       name: 'feepayerKey',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Account private key (base58):');
       },
-      skip() {
-        return this.state.answers.feepayer !== 'create';
-      },
-      result() {
-        // Workaround for a bug in enquirer that returns the first value of choices when the
-        // question is skipped https://github.com/enquirer/enquirer/issues/340 .
-        // This returns the previous prompt value if prompt is skipped.
-        if (this.state.answers.feepayer !== 'create') {
-          return this.state.answers.feepayer;
-        }
-        return this.focused.value;
-      },
     },
+  ],
+  feepayerAliasPrompt: [
     {
       type: 'input',
       name: 'feepayerAliasName',
