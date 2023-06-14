@@ -19,8 +19,6 @@ const log = console.log;
 async function config() {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
-  // Get users home directory path.
-  // const HOME_DIR = os.homedir();
 
   let config;
   try {
@@ -167,7 +165,6 @@ async function config() {
     ...feepayerAliasResponse,
   };
 
-  console.log('prompt response', promptResponse);
   // If user presses "ctrl + c" during interactive prompt, exit.
   let {
     deployAliasName,
@@ -232,7 +229,6 @@ async function config() {
   const explorerName = getExplorerName(
     config.deployAliases[deployAliasName]?.url
   );
-  console.log('feepayerKeyPair', feepayerKeyPair);
 
   const str =
     `\nSuccess!\n` +
