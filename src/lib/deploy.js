@@ -401,7 +401,7 @@ async function deploy({ alias, yes }) {
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
     [bold('Fee-Payer Alias'), reset(feepayerAliasName)],
-    [bold('Url'), reset(config.deployAliases[alias].url)],
+    [bold('URL'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
