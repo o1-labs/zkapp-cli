@@ -1,4 +1,4 @@
-const { green, red, bold, gray, reset } = require('chalk');
+const { green, red, reset } = require('chalk');
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.

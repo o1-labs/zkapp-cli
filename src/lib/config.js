@@ -4,7 +4,7 @@ const os = require('os');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const { step } = require('./helpers');
-const { green, red, bold, gray, reset } = require('chalk');
+const { green, red, bold, gray } = require('chalk');
 const Client = require('mina-signer');
 const { prompts } = require('./prompts');
 const { PrivateKey, PublicKey } = require('snarkyjs');
@@ -99,22 +99,6 @@ async function config() {
 
   console.log('Enter values to create a deploy alias:');
 
-  // TODO: Later, show pre-configured list to choose from or let user
-  // add a custom deploy alias.
-
-  function formatPrefixSymbol(state) {
-    // Shows a cyan question mark when not submitted.
-    // Shows a green check mark when submitted.
-    // Shows a red "x" if ctrl+C is pressed.
-
-    // Can't override the validating prefix or styling unfortunately
-    // https://github.com/enquirer/enquirer/blob/8d626c206733420637660ac7c2098d7de45e8590/lib/prompt.js#L125
-    // if (state.validating) return ''; // use no symbol, instead of pointer
-
-    if (!state.submitted) return state.symbols.question;
-    return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
-  }
-
   const {
     deployAliasPrompts,
     initialFeepayerPrompts,
@@ -191,6 +175,7 @@ async function config() {
       );
       break;
     case 'defaultCache':
+      feepayerAliasName = defaultFeepayerAlias;
       feepayerKeyPair = await savedKeyPairStep(
         HOME_DIR,
         defaultFeepayerAlias,
@@ -198,7 +183,11 @@ async function config() {
       );
       break;
     case 'alternateCachedFeepayer':
-      feepayerKeyPair = await savedKeyPairStep(alternateCachedFeepayerAlias);
+      feepayerAliasName = alternateCachedFeepayerAlias;
+      feepayerKeyPair = await savedKeyPairStep(
+        HOME_DIR,
+        alternateCachedFeepayerAlias
+      );
       break;
     default:
       break;
@@ -268,7 +257,7 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
       const feepayerAddress = feepayorPrivateKey.toPublicKey();
 
       const keyPair = {
-        privateKey: $feepayerKey,
+        privateKey: feepayerKey,
         publicKey: PublicKey.toBase58(feepayerAddress),
       };
 
@@ -290,11 +279,11 @@ async function savedKeyPairStep(directory, alias, address) {
   );
 
   if (!address) address = keyPair.publicKey;
+
   return await step(
     `Use stored fee payer ${alias} (public key: ${address}) `,
 
     async () => {
-      feepayerAliasName = alias;
       return keyPair;
     }
   );
