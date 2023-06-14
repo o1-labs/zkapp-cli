@@ -78,7 +78,11 @@ const prompts = {
           name: `Recover fee payer account from an existing base58 private key`,
           value: 'recover',
         },
-        { name: 'Create a new fee payer key pair', value: 'create' },
+        {
+          name: `Create a new fee payer key pair
+  NOTE: the private key will be stored in plain text on this computer.`,
+          value: 'create',
+        },
       ],
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
@@ -201,7 +205,11 @@ function getFeepayorChoices(cachedFeepayerAliases) {
       name: `Recover fee payer account from an existing base58 private key`,
       value: 'recover',
     },
-    { name: 'Create a new fee payer key pair', value: 'create' },
+    {
+      name: `Create a new fee payer key pair
+  NOTE: the private key will be stored in plain text on this computer.`,
+      value: 'create',
+    },
   ];
 
   // Displays an additional prompt to select a different feepayer if more than one feepayer is cached
