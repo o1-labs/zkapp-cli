@@ -381,7 +381,10 @@ async function deploy({ alias, yes }) {
       let zkapp = new zkApp(zkAppAddress);
       zkapp.deploy({ verificationKey });
     });
-    return { tx, json: tx.sign([zkAppPrivateKey]).toJSON() };
+    return {
+      tx,
+      json: tx.sign([zkAppPrivateKey, feepayorPrivateKey]).toJSON(),
+    };
   });
 
   if (isInitMethod) {
@@ -391,7 +394,9 @@ async function deploy({ alias, yes }) {
         await transaction.tx.prove();
         return {
           tx: transaction.tx,
-          json: transaction.tx.sign([zkAppPrivateKey]).toJSON(),
+          json: transaction.tx
+            .sign([zkAppPrivateKey, feepayorPrivateKey])
+            .toJSON(),
         };
       }
     );
