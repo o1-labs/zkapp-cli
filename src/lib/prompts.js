@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const { green, red, reset } = chalk;
+const { PrivateKey } = require('snarkyjs');
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.
@@ -144,11 +145,11 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().spilt(' ').join('-');
+        val = val.toLowerCase().trim().split(' ').join('-');
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
-      result: (val) => val.toLowerCase().trim().spilt(' ').join('-'),
+      result: (val) => val.toLowerCase().trim().split(' ').join('-'),
     },
     {
       type: 'input',
@@ -159,6 +160,16 @@ const prompts = {
   NOTE: the private key will be stored in plain text on this computer.
   Do NOT use an account which holds a substantial amount of MINA.`);
       },
+      validate: async (val) => {
+        val = val.trim();
+        try {
+          PrivateKey.fromBase58(val);
+        } catch (err) {
+          return red('Enter a valid private key.');
+        }
+        return true;
+      },
+      result: (val) => val.trim(),
     },
   ],
   feepayerAliasPrompt: [
@@ -170,11 +181,11 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().spilt(' ').join('-');
+        val = val.toLowerCase().trim().split(' ').join('-');
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
-      result: (val) => val.toLowerCase().trim().spilt(' ').join('-'),
+      result: (val) => val.toLowerCase().trim().split(' ').join('-'),
     },
   ],
 
