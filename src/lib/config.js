@@ -127,7 +127,10 @@ async function config() {
   }
 
   if (initialPromptResponse?.feepayer === 'create') {
-    feepayerAliasResponse = await prompt(feepayerAliasPrompt);
+    console.log('inside create if');
+    feepayerAliasResponse = await prompt(
+      feepayerAliasPrompt(cachedFeepayerAliases)
+    );
   }
 
   if (initialPromptResponse.feepayer === 'other') {
