@@ -40,10 +40,16 @@ type Config = {
 };
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
 let config = configJson.deployAliases[deployAlias];
-let key: { privateKey: string } = JSON.parse(
+let feepayerKeyBase58: { privateKey: string } = JSON.parse(
+  await fs.readFile(config.feepayerKeyPath, 'utf8')
+).privateKey;
+
+let zkAppKeyBase58: { privateKey: string } = JSON.parse(
   await fs.readFile(config.keyPath, 'utf8')
-);
-let zkAppKey = PrivateKey.fromBase58(key.privateKey);
+).privateKey;
+
+let feepayerKey = PrivateKey.fromBase58(feepayerKeyBase58.privateKey);
+let zkAppKey = PrivateKey.fromBase58(zkAppKeyBase58.privateKey);
 
 // set up Mina instance and contract we interact with
 const Network = Mina.Network(config.url);
