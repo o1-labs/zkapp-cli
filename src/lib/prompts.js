@@ -1,4 +1,5 @@
-const { green, red, reset } = require('chalk');
+const chalk = require('chalk');
+const { green, red, reset } = chalk;
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.
@@ -107,7 +108,7 @@ const prompts = {
       name: 'feepayer',
       choices: [
         {
-          name: `Use stored account ${defaultFeepayerAlias} (public key: ${defaultFeepayerAddress}) `,
+          name: chalk`Use stored account {bold ${defaultFeepayerAlias}} (public key: {bold ${defaultFeepayerAddress}}) `,
           value: 'defaultCache',
         },
         {
