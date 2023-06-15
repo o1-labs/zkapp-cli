@@ -246,10 +246,9 @@ async function config() {
 
 // Creates a new feepayer key pair
 async function createKeyPairStep(directory, feepayerAliasName) {
-  feepayerAliasName = undefined;
   if (!feepayerAliasName) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`  Invalid fee payer alias ${feepayerAliasName}" .`));
+    log(red(`Invalid fee payer alias ${feepayerAliasName}.`));
     return;
   }
   return await step(
@@ -296,7 +295,7 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
 async function savedKeyPairStep(directory, feepayerAliasName, address) {
   if (!feepayerAliasName) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`  Invalid fee payer alias: ${feepayerAliasName} .`));
+    log(red(`Invalid fee payer alias: ${feepayerAliasName}.`));
     process.exit(1);
   }
   const keyPair = fs.readJSONSync(
