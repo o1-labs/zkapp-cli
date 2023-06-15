@@ -28,7 +28,15 @@ Error.stackTraceLimit = 1000;
 
 // parse config and private key from file
 type Config = {
-  deployAliases: Record<string, { url: string; keyPath: string }>;
+  deployAliases: Record<
+    string,
+    {
+      url: string;
+      keyPath: string;
+      feepayerKeyPath: string;
+      feepayerAliasName: string;
+    }
+  >;
 };
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
 let config = configJson.deployAliases[deployAlias];
