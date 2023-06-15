@@ -121,7 +121,9 @@ async function config() {
   let otherFeepayerResponse;
 
   if (initialPromptResponse.feepayer === 'recover') {
-    recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
+    recoverFeepayerResponse = await prompt(
+      recoverFeepayerPrompts(cachedFeepayerAliases)
+    );
   }
 
   if (initialPromptResponse?.feepayer === 'create') {
@@ -134,11 +136,15 @@ async function config() {
     );
 
     if (otherFeepayerResponse.feepayer === 'recover') {
-      recoverFeepayerResponse = await prompt(recoverFeepayerPrompts);
+      recoverFeepayerResponse = await prompt(
+        recoverFeepayerPrompts(cachedFeepayerAliases)
+      );
     }
 
     if (otherFeepayerResponse.feepayer === 'create') {
-      feepayerAliasResponse = await prompt(feepayerAliasPrompt);
+      feepayerAliasResponse = await prompt(
+        feepayerAliasPrompt(cachedFeepayerAliases)
+      );
     }
   }
 

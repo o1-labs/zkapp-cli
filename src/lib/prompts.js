@@ -136,7 +136,7 @@ const prompts = {
       },
     },
   ],
-  recoverFeepayerPrompts: [
+  recoverFeepayerPrompts: (cachedFeepayerAliases) => [
     {
       type: 'input',
       name: 'feepayerAliasName',
@@ -146,6 +146,8 @@ const prompts = {
       },
       validate: async (val) => {
         val = val.toLowerCase().trim().split(' ').join('-');
+        if (cachedFeepayerAliases.includes(val))
+          return red(`Fee payer alias ${val} already exists`);
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
@@ -172,7 +174,7 @@ const prompts = {
       result: (val) => val.trim(),
     },
   ],
-  feepayerAliasPrompt: [
+  feepayerAliasPrompt: (cachedFeepayerAliases) => [
     {
       type: 'input',
       name: 'feepayerAliasName',
@@ -182,6 +184,8 @@ const prompts = {
       },
       validate: async (val) => {
         val = val.toLowerCase().trim().split(' ').join('-');
+        if (cachedFeepayerAliases.includes(val))
+          return red(`Fee payer alias ${val} already exists`);
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
