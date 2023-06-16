@@ -40,20 +40,21 @@ type Config = {
 };
 let configJson: Config = JSON.parse(await fs.readFile('config.json', 'utf8'));
 let config = configJson.deployAliases[deployAlias];
-let feepayerKeyBase58: { privateKey: string } = JSON.parse(
+let feepayerKeysBase58: { privateKey: string } = JSON.parse(
   await fs.readFile(config.feepayerKeyPath, 'utf8')
-).privateKey;
+);
 
-let zkAppKeyBase58: { privateKey: string } = JSON.parse(
+let zkAppKeysBase58: { privateKey: string } = JSON.parse(
   await fs.readFile(config.keyPath, 'utf8')
-).privateKey;
+);
 
-let feepayerKey = PrivateKey.fromBase58(feepayerKeyBase58.privateKey);
-let zkAppKey = PrivateKey.fromBase58(zkAppKeyBase58.privateKey);
+let feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
+let zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);
 
 // set up Mina instance and contract we interact with
 const Network = Mina.Network(config.url);
 Mina.setActiveInstance(Network);
+let feepayerAddress = feepayerKey.toPublicKey();
 let zkAppAddress = zkAppKey.toPublicKey();
 let zkApp = new Add(zkAppAddress);
 
@@ -63,7 +64,7 @@ await Add.compile();
 
 // call update() and send transaction
 console.log('build transaction and create proof...');
-let tx = await Mina.transaction({ sender: zkAppAddress, fee: 0.1e9 }, () => {
+let tx = await Mina.transaction({ sender: feepayerAddress, fee: 0.1e9 }, () => {
   zkApp.update();
 });
 await tx.prove();
