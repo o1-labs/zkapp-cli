@@ -69,7 +69,7 @@ let tx = await Mina.transaction({ sender: feepayerAddress, fee: 0.1e9 }, () => {
 });
 await tx.prove();
 console.log('send transaction...');
-let sentTx = await tx.sign([zkAppKey]).send();
+let sentTx = await tx.sign([feepayerKey]).send();
 
 if (sentTx.hash() !== undefined) {
   console.log(`
