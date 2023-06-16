@@ -198,7 +198,7 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { PrivateKey, Mina } = await import(snarkyjsImportPath);
+  let { PrivateKey, Mina, AccountUpdate } = await import(snarkyjsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
@@ -378,6 +378,7 @@ async function deploy({ alias, yes }) {
     let Network = Mina.Network(graphQLUrl);
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
+      AccountUpdate.fundNewAccount(feepayerAddress);
       let zkapp = new zkApp(zkAppAddress);
       zkapp.deploy({ verificationKey });
     });
