@@ -164,7 +164,7 @@ async function config() {
     url,
     fee,
     feepayer,
-    feepayerAliasName,
+    feepayerAlias,
     feepayerKey,
     alternateCachedFeepayerAlias,
   } = promptResponse;
@@ -174,17 +174,17 @@ async function config() {
   let feepayerKeyPair;
   switch (feepayer) {
     case 'create':
-      feepayerKeyPair = await createKeyPairStep(HOME_DIR, feepayerAliasName);
+      feepayerKeyPair = await createKeyPairStep(HOME_DIR, feepayerAlias);
       break;
     case 'recover':
       feepayerKeyPair = await recoverKeyPairStep(
         HOME_DIR,
         feepayerKey,
-        feepayerAliasName
+        feepayerAlias
       );
       break;
     case 'defaultCache':
-      feepayerAliasName = defaultFeepayerAlias;
+      feepayerAlias = defaultFeepayerAlias;
       feepayerKeyPair = await savedKeyPairStep(
         HOME_DIR,
         defaultFeepayerAlias,
@@ -192,7 +192,7 @@ async function config() {
       );
       break;
     case 'alternateCachedFeepayer':
-      feepayerAliasName = alternateCachedFeepayerAlias;
+      feepayerAlias = alternateCachedFeepayerAlias;
       feepayerKeyPair = await savedKeyPairStep(
         HOME_DIR,
         alternateCachedFeepayerAlias
@@ -214,16 +214,16 @@ async function config() {
   );
 
   await step(`Add deploy alias to config.json`, async () => {
-    if (!feepayerAliasName) {
+    if (!feepayerAlias) {
       // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
-      log(red(`Invalid fee payer alias ${feepayerAliasName}" .`));
+      log(red(`Invalid fee payer alias ${feepayerAlias}" .`));
       process.exit(1);
     }
     config.deployAliases[deployAliasName] = {
       url,
       keyPath: `keys/${deployAliasName}.json`,
-      feepayerKeyPath: `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
-      feepayerAliasName,
+      feepayerKeyPath: `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+      feepayerAlias,
       fee,
     };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
@@ -245,19 +245,19 @@ async function config() {
 }
 
 // Creates a new feepayer key pair
-async function createKeyPairStep(directory, feepayerAliasName) {
-  if (!feepayerAliasName) {
+async function createKeyPairStep(directory, feepayerAlias) {
+  if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias ${feepayerAliasName}.`));
+    log(red(`Invalid fee payer alias ${feepayerAlias}.`));
     return;
   }
   return await step(
-    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
     async () => {
       const keyPair = createKeyPair('testnet');
 
       fs.outputJsonSync(
-        `${directory}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
         keyPair,
         {
           spaces: 2,
@@ -268,9 +268,9 @@ async function createKeyPairStep(directory, feepayerAliasName) {
   );
 }
 
-async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
+async function recoverKeyPairStep(directory, feepayerKey, feepayerAlias) {
   return await step(
-    `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+    `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
     async () => {
       const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey);
       const feepayerAddress = feepayorPrivateKey.toPublicKey();
@@ -281,7 +281,7 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
       };
 
       fs.outputJsonSync(
-        `${directory}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`,
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
         keyPair,
         {
           spaces: 2,
@@ -292,20 +292,20 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAliasName) {
   );
 }
 // Returns a cached keypair from a given feepayer alias
-async function savedKeyPairStep(directory, feepayerAliasName, address) {
-  if (!feepayerAliasName) {
+async function savedKeyPairStep(directory, feepayerAlias, address) {
+  if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias: ${feepayerAliasName}.`));
+    log(red(`Invalid fee payer alias: ${feepayerAlias}.`));
     process.exit(1);
   }
   const keyPair = fs.readJSONSync(
-    `${directory}/.cache/zkapp-cli/keys/${feepayerAliasName}.json`
+    `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`
   );
 
   if (!address) address = keyPair.publicKey;
 
   return await step(
-    `Use stored fee payer ${feepayerAliasName} (public key: ${address}) `,
+    `Use stored fee payer ${feepayerAlias} (public key: ${address}) `,
 
     async () => {
       return keyPair;

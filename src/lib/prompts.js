@@ -139,7 +139,7 @@ const prompts = {
   recoverFeepayerPrompts: (cachedFeepayerAliases) => [
     {
       type: 'input',
-      name: 'feepayerAliasName',
+      name: 'feepayerAlias',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Create an alias for this account');
@@ -185,7 +185,7 @@ const prompts = {
   feepayerAliasPrompt: (cachedFeepayerAliases) => [
     {
       type: 'input',
-      name: 'feepayerAliasName',
+      name: 'feepayerAlias',
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style('Create an alias for this account');
