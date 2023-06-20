@@ -1,11 +1,14 @@
 const fs = require('fs-extra');
 const findPrefix = require('find-npm-prefix');
+const os = require('os');
 const { prompt } = require('enquirer');
 const { table, getBorderCharacters } = require('table');
 const { step } = require('./helpers');
-const { green, red, bold, gray, reset } = require('chalk');
+const { green, red, bold, gray } = require('chalk');
 const Client = require('mina-signer');
-
+const { prompts } = require('./prompts');
+const { PrivateKey, PublicKey } = require('snarkyjs');
+const HOME_DIR = os.homedir();
 const log = console.log;
 
 /**
@@ -32,6 +35,26 @@ async function config() {
     return;
   }
 
+  let isFeepayerCached = false;
+  let defaultFeepayerAlias;
+  let cachedFeepayerAliases;
+  let defaultFeepayerAddress;
+
+  try {
+    cachedFeepayerAliases = getCachedFeepayerAliases(HOME_DIR);
+    defaultFeepayerAlias = cachedFeepayerAliases[0];
+    defaultFeepayerAddress = getCachedFeepayerAddress(
+      HOME_DIR,
+      defaultFeepayerAlias
+    );
+
+    isFeepayerCached = true;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(err);
+    }
+  }
+
   // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
   if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
     Object.assign(config, { deployAliases: config.networks });
@@ -39,7 +62,7 @@ async function config() {
   }
 
   // Build table of existing deploy aliases found in their config.json
-  let tableData = [[bold('Name'), bold('Url'), bold('Smart Contract')]];
+  let tableData = [[bold('Name'), bold('URL'), bold('Smart Contract')]];
   for (const deployAliasName in config.deployAliases) {
     const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
@@ -74,84 +97,115 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Add a new deploy alias:');
+  console.log('Enter values to create a deploy alias:');
 
-  // TODO: Later, show pre-configured list to choose from or let user
-  // add a custom deploy alias.
+  const {
+    deployAliasPrompts,
+    initialFeepayerPrompts,
+    recoverFeepayerPrompts,
+    otherFeepayerPrompts,
+    feepayerAliasPrompt,
+  } = prompts;
 
-  function formatPrefixSymbol(state) {
-    // Shows a cyan question mark when not submitted.
-    // Shows a green check mark when submitted.
-    // Shows a red "x" if ctrl+C is pressed.
-
-    // Can't override the validating prefix or styling unfortunately
-    // https://github.com/enquirer/enquirer/blob/8d626c206733420637660ac7c2098d7de45e8590/lib/prompt.js#L125
-    // if (state.validating) return ''; // use no symbol, instead of pointer
-
-    if (!state.submitted) return state.symbols.question;
-    return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
-  }
-
-  const response = await prompt([
-    {
-      type: 'input',
-      name: 'deployAliasName',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Choose a name (can be anything):');
-      },
-      prefix: formatPrefixSymbol,
-      validate: async (val) => {
-        val = val.toLowerCase().trim().replace(' ', '-');
-        if (!val) return red('Name is required.');
-        if (Object.keys(config.deployAliases).includes(val)) {
-          return red('Name already exists.');
-        }
-        return true;
-      },
-      result: (val) => val.toLowerCase().trim().replace(' ', '-'),
-    },
-    {
-      type: 'input',
-      name: 'url',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set the Mina GraphQL API URL to deploy to:');
-      },
-      prefix: formatPrefixSymbol,
-      validate: (val) => {
-        if (!val) return red('Url is required.');
-        return true;
-      },
-      result: (val) => val.trim().replace(/ /, ''),
-    },
-    {
-      type: 'input',
-      name: 'fee',
-      message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
-        return style('Set transaction fee to use when deploying (in MINA):');
-      },
-      prefix: formatPrefixSymbol,
-      validate: (val) => {
-        if (!val) return red('Fee is required.');
-        if (isNaN(val)) return red('Fee must be a number.');
-        if (val < 0) return red("Fee can't be negative.");
-        return true;
-      },
-      result: (val) => val.trim().replace(/ /, ''),
-    },
+  const initialPromptResponse = await prompt([
+    ...deployAliasPrompts(config),
+    ...initialFeepayerPrompts(
+      defaultFeepayerAlias,
+      defaultFeepayerAddress,
+      isFeepayerCached
+    ),
   ]);
 
+  let recoverFeepayerResponse;
+  let feepayerAliasResponse;
+  let otherFeepayerResponse;
+
+  if (initialPromptResponse.feepayer === 'recover') {
+    recoverFeepayerResponse = await prompt(
+      recoverFeepayerPrompts(cachedFeepayerAliases)
+    );
+  }
+
+  if (initialPromptResponse?.feepayer === 'create') {
+    console.log('inside create if');
+    feepayerAliasResponse = await prompt(
+      feepayerAliasPrompt(cachedFeepayerAliases)
+    );
+  }
+
+  if (initialPromptResponse.feepayer === 'other') {
+    otherFeepayerResponse = await prompt(
+      otherFeepayerPrompts(cachedFeepayerAliases)
+    );
+
+    if (otherFeepayerResponse.feepayer === 'recover') {
+      recoverFeepayerResponse = await prompt(
+        recoverFeepayerPrompts(cachedFeepayerAliases)
+      );
+    }
+
+    if (otherFeepayerResponse.feepayer === 'create') {
+      feepayerAliasResponse = await prompt(
+        feepayerAliasPrompt(cachedFeepayerAliases)
+      );
+    }
+  }
+
+  const promptResponse = {
+    ...initialPromptResponse,
+    ...recoverFeepayerResponse,
+    ...otherFeepayerResponse,
+    ...feepayerAliasResponse,
+  };
+
   // If user presses "ctrl + c" during interactive prompt, exit.
-  const { deployAliasName, url, fee } = response;
+  let {
+    deployAliasName,
+    url,
+    fee,
+    feepayer,
+    feepayerAlias,
+    feepayerKey,
+    alternateCachedFeepayerAlias,
+  } = promptResponse;
+
   if (!deployAliasName || !url || !fee) return;
 
-  const keyPair = await step(
-    `Create key pair at keys/${deployAliasName}.json`,
+  let feepayerKeyPair;
+  switch (feepayer) {
+    case 'create':
+      feepayerKeyPair = await createKeyPairStep(HOME_DIR, feepayerAlias);
+      break;
+    case 'recover':
+      feepayerKeyPair = await recoverKeyPairStep(
+        HOME_DIR,
+        feepayerKey,
+        feepayerAlias
+      );
+      break;
+    case 'defaultCache':
+      feepayerAlias = defaultFeepayerAlias;
+      feepayerKeyPair = await savedKeyPairStep(
+        HOME_DIR,
+        defaultFeepayerAlias,
+        defaultFeepayerAddress
+      );
+      break;
+    case 'alternateCachedFeepayer':
+      feepayerAlias = alternateCachedFeepayerAlias;
+      feepayerKeyPair = await savedKeyPairStep(
+        HOME_DIR,
+        alternateCachedFeepayerAlias
+      );
+      break;
+    default:
+      break;
+  }
+
+  await step(
+    `Create zkApp key pair at keys/${deployAliasName}.json`,
     async () => {
-      const client = new Client({ network: 'testnet' }); // TODO: Make this configurable for mainnet and testnet.
-      let keyPair = client.genKeys();
+      const keyPair = createKeyPair('testnet');
       fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
         spaces: 2,
       });
@@ -160,9 +214,16 @@ async function config() {
   );
 
   await step(`Add deploy alias to config.json`, async () => {
+    if (!feepayerAlias) {
+      // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
+      log(red(`Invalid fee payer alias ${feepayerAlias}" .`));
+      process.exit(1);
+    }
     config.deployAliases[deployAliasName] = {
       url,
       keyPath: `keys/${deployAliasName}.json`,
+      feepayerKeyPath: `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+      feepayerAlias,
       fee,
     };
     fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
@@ -176,11 +237,104 @@ async function config() {
     `\nSuccess!\n` +
     `\nNext steps:` +
     `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
-      keyPair.publicKey
+      feepayerKeyPair.publicKey
     )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
   log(green(str));
+}
+
+// Creates a new feepayer key pair
+async function createKeyPairStep(directory, feepayerAlias) {
+  if (!feepayerAlias) {
+    // No fee payer alias, return early to prevent generating key pair with undefined alias
+    log(red(`Invalid fee payer alias ${feepayerAlias}.`));
+    return;
+  }
+  return await step(
+    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+    async () => {
+      const keyPair = createKeyPair('testnet');
+
+      fs.outputJsonSync(
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+        keyPair,
+        {
+          spaces: 2,
+        }
+      );
+      return keyPair;
+    }
+  );
+}
+
+async function recoverKeyPairStep(directory, feepayerKey, feepayerAlias) {
+  return await step(
+    `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+    async () => {
+      const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey);
+      const feepayerAddress = feepayorPrivateKey.toPublicKey();
+
+      const keyPair = {
+        privateKey: feepayerKey,
+        publicKey: PublicKey.toBase58(feepayerAddress),
+      };
+
+      fs.outputJsonSync(
+        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+        keyPair,
+        {
+          spaces: 2,
+        }
+      );
+      return keyPair;
+    }
+  );
+}
+// Returns a cached keypair from a given feepayer alias
+async function savedKeyPairStep(directory, feepayerAlias, address) {
+  if (!feepayerAlias) {
+    // No fee payer alias, return early to prevent generating key pair with undefined alias
+    log(red(`Invalid fee payer alias: ${feepayerAlias}.`));
+    process.exit(1);
+  }
+  const keyPair = fs.readJSONSync(
+    `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`
+  );
+
+  if (!address) address = keyPair.publicKey;
+
+  return await step(
+    `Use stored fee payer ${feepayerAlias} (public key: ${address}) `,
+
+    async () => {
+      return keyPair;
+    }
+  );
+}
+
+// Check if feepayer alias/aliases are stored on users machine and returns an array of them.
+function getCachedFeepayerAliases(directory) {
+  let aliases = fs.readdirSync(`${directory}/.cache/zkapp-cli/keys/`);
+
+  aliases = aliases
+    .filter((fileName) => fileName.includes('json'))
+    .map((name) => name.slice(0, -5));
+
+  return aliases;
+}
+
+function getCachedFeepayerAddress(directory, feePayorAlias) {
+  const address = fs.readJSONSync(
+    `${directory}/.cache/zkapp-cli/keys/${feePayorAlias}.json`
+  ).publicKey;
+
+  return address;
+}
+
+function createKeyPair(network) {
+  const client = new Client({ network });
+  return client.genKeys();
 }
 
 function getExplorerName(graphQLUrl) {
@@ -188,6 +342,7 @@ function getExplorerName(graphQLUrl) {
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
+
 module.exports = {
   config,
 };

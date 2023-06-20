@@ -198,7 +198,7 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     snarkyjsImportPath = 'file://' + snarkyjsImportPath;
   }
-  let { PrivateKey, Mina } = await import(snarkyjsImportPath);
+  let { PrivateKey, Mina, AccountUpdate } = await import(snarkyjsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
@@ -265,10 +265,25 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  // Attempt to import the private key from the `keys` directory. This private key will be used to deploy the zkApp.
-  let privateKey;
+  // Attempt to import the zkApp private key from the `keys` directory and the feepayor private key. These keys will be used to deploy the zkApp.
+  let feepayerPrivateKeyBase58;
+  let zkAppPrivateKeyBase58;
+  const { feepayerKeyPath } = config.deployAliases[alias];
   try {
-    privateKey = fs.readJSONSync(
+    feepayerPrivateKeyBase58 = fs.readJSONSync(feepayerKeyPath).privateKey;
+  } catch (error) {
+    log(
+      red(
+        `  Failed to find the feepayer private key.\n  Please make sure your config.json has the correct 'feepayerKeyPath' property.`
+      )
+    );
+
+    process.exit(1);
+    return;
+  }
+
+  try {
+    zkAppPrivateKeyBase58 = fs.readJSONSync(
       `${DIR}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {
@@ -282,9 +297,11 @@ async function deploy({ alias, yes }) {
     return;
   }
 
-  let zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
-  let zkAppPrivateKey = PrivateKey.fromBase58(privateKey); //  The private key of the zkApp
-  let zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
+  const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
+  const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
+  const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
+  const feepayorPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
+  const feepayerAddress = feepayorPrivateKey.toPublicKey(); //  The public key of the feepayer
 
   // figure out if the zkApp has a @method init() - in that case we need to create a proof,
   // so we need to compile no matter what, and we show a separate step to create the proof
@@ -341,15 +358,15 @@ async function deploy({ alias, yes }) {
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
-  const zkAppAddressBase58 = zkAppAddress.toBase58();
-  const accountQuery = getAccountQuery(zkAppAddressBase58);
+  const feepayerAddressBase58 = feepayerAddress.toBase58();
+  const accountQuery = getAccountQuery(feepayerAddressBase58);
   const accountResponse = await sendGraphQL(graphQLUrl, accountQuery);
 
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
     log(
       red(
-        `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${zkAppAddressBase58}" has previously been funded.`
+        `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
     );
 
@@ -360,11 +377,15 @@ async function deploy({ alias, yes }) {
   let transaction = await step('Build transaction', async () => {
     let Network = Mina.Network(graphQLUrl);
     Mina.setActiveInstance(Network);
-    let tx = await Mina.transaction({ sender: zkAppAddress, fee }, () => {
+    let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
+      AccountUpdate.fundNewAccount(feepayerAddress);
       let zkapp = new zkApp(zkAppAddress);
       zkapp.deploy({ verificationKey });
     });
-    return { tx, json: tx.sign([zkAppPrivateKey]).toJSON() };
+    return {
+      tx,
+      json: tx.sign([zkAppPrivateKey, feepayorPrivateKey]).toJSON(),
+    };
   });
 
   if (isInitMethod) {
@@ -374,16 +395,19 @@ async function deploy({ alias, yes }) {
         await transaction.tx.prove();
         return {
           tx: transaction.tx,
-          json: transaction.tx.sign([zkAppPrivateKey]).toJSON(),
+          json: transaction.tx
+            .sign([zkAppPrivateKey, feepayorPrivateKey])
+            .toJSON(),
         };
       }
     );
   }
   let transactionJson = transaction.json;
-
+  let { feepayerAliasName } = config.deployAliases[alias];
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
-    [bold('Url'), reset(config.deployAliases[alias].url)],
+    [bold('Fee-Payer Alias'), reset(feepayerAliasName)],
+    [bold('URL'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
