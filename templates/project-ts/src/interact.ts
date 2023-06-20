@@ -34,7 +34,7 @@ type Config = {
       url: string;
       keyPath: string;
       feepayerKeyPath: string;
-      feepayerAliasName: string;
+      feepayerAlias: string;
     }
   >;
 };
