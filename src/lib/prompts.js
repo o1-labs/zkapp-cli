@@ -26,14 +26,21 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: async (val) => {
-        val = val.toLowerCase().trim().replace(' ', '-');
+        val = val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-');
         if (!val) return red('Name is required.');
         if (Object.keys(config.deployAliases).includes(val)) {
           return red('Name already exists.');
         }
         return true;
       },
-      result: (val) => val.toLowerCase().trim().replace(' ', '-'),
+      result: (val) =>
+        val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-'),
     },
     {
       type: 'input',
