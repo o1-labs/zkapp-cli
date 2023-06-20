@@ -60,20 +60,23 @@ let feepayerAddress = feepayerKey.toPublicKey();
 let zkAppAddress = zkAppKey.toPublicKey();
 let zkApp = new Add(zkAppAddress);
 
+let sentTx;
 // compile the contract to create prover keys
 console.log('compile the contract...');
 await Add.compile();
-
-// call update() and send transaction
-console.log('build transaction and create proof...');
-let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
-  zkApp.update();
-});
-await tx.prove();
-console.log('send transaction...');
-let sentTx = await tx.sign([feepayerKey]).send();
-
-if (sentTx.hash() !== undefined) {
+try {
+  // call update() and send transaction
+  console.log('build transaction and create proof...');
+  let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
+    zkApp.update();
+  });
+  await tx.prove();
+  console.log('send transaction...');
+  sentTx = await tx.sign([feepayerKey]).send();
+} catch (err) {
+  console.log(err);
+}
+if (sentTx?.hash() !== undefined) {
   console.log(`
 Success! Update transaction sent.
 
