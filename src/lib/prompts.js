@@ -145,13 +145,21 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().split(' ').join('-');
+        val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-');
+
         if (cachedFeepayerAliases?.includes(val))
           return red(`Fee payer alias ${val} already exists`);
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
-      result: (val) => val.toLowerCase().trim().split(' ').join('-'),
+      result: (val) =>
+        val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-'),
     },
     {
       type: 'input',
@@ -183,13 +191,21 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val = val.toLowerCase().trim().split(' ').join('-');
+        val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-');
+
         if (cachedFeepayerAliases?.includes(val))
           return red(`Fee payer alias ${val} already exists`);
         if (!val) return red('Fee payer alias is required.');
         return true;
       },
-      result: (val) => val.toLowerCase().trim().split(' ').join('-'),
+      result: (val) =>
+        val
+          .toLowerCase()
+          .trim()
+          .replace(/\s{1,}/g, '-'),
     },
   ],
 
