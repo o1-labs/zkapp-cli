@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2023-06-20
+
+### Added
+
+- Add new config option to create or select a third party fee payer account. [#424] (https://github.com/o1-labs/zkapp-cli/pull/424)
+  - Update the interact.ts script to run with the third party fee payer.
+
 ## [0.9.1] - 2023-06-17
 
 ### Changed
 
-- Upate the Svelte UI scaffold vite config [#432] (https://github.com/o1-labs/zkapp-cli/pull/427)
+- Upate the Svelte UI scaffold vite config. [#432] (https://github.com/o1-labs/zkapp-cli/pull/432)
 
 ## [0.9.0] - 2023-06-06
 
