@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Upate the Svelte UI scaffold vite config. [#432] (https://github.com/o1-labs/zkapp-cli/pull/432)
+- Update the Svelte UI scaffold vite config. [#432] (https://github.com/o1-labs/zkapp-cli/pull/432)
 
 ## [0.9.0] - 2023-06-06
 
