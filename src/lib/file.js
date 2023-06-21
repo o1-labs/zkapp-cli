@@ -59,9 +59,9 @@ describe('${projName}.js', () => {
 }
 
 /**
- * parsePath() parses cwd & user's desired name with optional path.
+ * parsePath() parses cwd & user's specified name with optional path.
  * @param {string} cwd   Current working directory. E.g. process.cwd().
- * @param {string} _path User's desired filename with optional path.
+ * @param {string} _path User's specified filename with optional path.
  *                       E.g. `path/to/name` or `name` (with no path).
  * @returns {{fullPath: string, projName: string, userPath: string}}
  */

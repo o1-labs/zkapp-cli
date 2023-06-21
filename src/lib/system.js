@@ -3,7 +3,7 @@ const sh = require('child_process').execSync;
 
 function system() {
   const installedSnarkyJSversion = getInstalledSnarkyJSversion();
-  console.log('Please include the following when submitting a Github issue:');
+  console.log('Be sure to include the following system information when submitting a GitHub issue:');
   envinfo
     .run(
       {

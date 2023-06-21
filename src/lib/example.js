@@ -216,7 +216,7 @@ function kebabCase(str) {
 
 /**
  * Fetch an example & place in the `src` directory.
- * @param {string} example     Name of the example, as found in our Github repo.
+ * @param {string} example     Name of the example, as found in our GitHub repo.
  * @param {string} name        Destination dir name.
  * @param {string} lang        ts or js
  * @returns {Promise<boolean>} True if successful; false if not.
@@ -269,7 +269,7 @@ function isEmpty(path) {
 }
 
 /**
- * Given a desired directory name, will return that dir name if it is available,
+ * Given a specified directory name, will return that dir name if it is available,
  * or the next next available dir name with a numeric suffix: <dirName><#>.
  * @param {string} str Desired dir name.
  * @param {number} i   Counter for the recursive function.
