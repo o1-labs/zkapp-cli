@@ -26,7 +26,7 @@ async function config() {
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
+      str = `config.json not found. Make sure you're in a zkApp project directory.`;
     } else {
       str = 'Unable to read config.json.';
       console.error(err);

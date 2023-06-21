@@ -31,7 +31,7 @@ async function deploy({ alias, yes }) {
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project.`;
+      str = `config.json not found. Make sure you're in a zkApp project directory.`;
     } else {
       str = 'Unable to read config.json.';
       console.error(err);
@@ -48,7 +48,7 @@ async function deploy({ alias, yes }) {
     config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
-    log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
+    log(red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`));
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
     return;
@@ -70,7 +70,7 @@ async function deploy({ alias, yes }) {
         // Makes the step text green upon success, else uses reset.
         const style =
           state.submitted && !state.cancelled ? state.styles.success : reset;
-        return style('Which deploy alias would you like to deploy to?');
+        return style('Which deploy alias do you want to deploy to?');
       },
       prefix: (state) => {
         // Shows a cyan question mark when not submitted.
@@ -137,7 +137,7 @@ async function deploy({ alias, yes }) {
     return { smartContracts };
   });
 
-  // Identify which smart contract should be deployed for this deploy alias.
+  // Identify which smart contract to be deployed for this deploy alias.
   let contractName = chooseSmartContract(config, build, alias);
 
   // If no smart contract is specified for this deploy alias in config.json &
@@ -244,7 +244,7 @@ async function deploy({ alias, yes }) {
   } catch (_) {
     log(
       red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you desire to deploy to this deploy alias.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you want to deploy to this deploy alias.`
       )
     );
 
@@ -493,7 +493,7 @@ async function deploy({ alias, yes }) {
   process.exit(0);
 }
 
-// Get the desired blockchain explorer url with txn hash
+// Get the specified blockchain explorer url with txn hash
 function getTxnUrl(graphQLUrl, txn) {
   const MINASCAN_BASE_URL = `https://minascan.io/berkeley/zk-transaction/`;
   const MINA_EXPLORER_BASE_URL = `https://berkeley.minaexplorer.com/transaction/`;
@@ -542,7 +542,7 @@ async function getInstalledCliVersion() {
 While SnarkyJS and the zkApp CLI have a major version of 0,
 a change of the minor version represents a breaking change.
 When SnarkyJS and the zkApp CLI have a major version of 1 or higher,
-changes to the major version of the zkApp CLI will represnt
+changes to the major version of the zkApp CLI will represent
 breaking changes, following semver.
 */
 function hasBreakingChanges(version1, version2) {
@@ -580,7 +580,7 @@ async function findSmartContracts(path) {
 }
 
 /**
- * Choose which smart contract should be deployed for this deploy alias.
+ * Choose which smart contract to deploy for this deploy alias.
  * @param {object} config  The config.json in object format.
  * @param {object} deploy  The build/build.json in object format.
  * @param {string} deployAliasName The deploy alias name.
