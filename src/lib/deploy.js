@@ -50,7 +50,7 @@ async function deploy({ alias, yes }) {
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(red(`You are using an old zkapp-cli version ${installedCliVersion}.`));
     log(red(`The current version is ${latestCliVersion}.`));
-    log(red('Run `npm update -g zkapp-cli && npm update snarkyjs`.'));
+    log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
     return;
   }
 
