@@ -89,7 +89,7 @@ const prompts = {
         },
         {
           name: `Create a new fee payer key pair
-  NOTE: the private key will be stored in plain text on this computer.`,
+  NOTE: The private key is created on this computer and is stored in plain text.`,
           value: 'create',
         },
       ],
@@ -174,7 +174,7 @@ const prompts = {
       message: (state) => {
         const style = state.submitted && !state.cancelled ? green : reset;
         return style(`Account private key (base58):
-  NOTE: the private key will be stored in plain text on this computer.
+  NOTE: The private key is created on this computer and is stored in plain text.
   Do NOT use an account which holds a substantial amount of MINA.`);
       },
       validate: async (val) => {
@@ -248,7 +248,7 @@ function getFeepayorChoices(cachedFeepayerAliases) {
     },
     {
       name: `Create a new fee payer key pair
-  NOTE: the private key will be stored in plain text on this computer.`,
+  NOTE: The private key is created on this computer and is stored in plain text.`,
       value: 'create',
     },
   ];
