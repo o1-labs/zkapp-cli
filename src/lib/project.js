@@ -22,7 +22,7 @@ const isWindows = process.platform === 'win32';
  * Create a new zkApp project with recommended dir structure, Prettier config,
  * testing lib, etc. Warns if already exists and does NOT overwrite.
  * @param {object} argv - The arguments object provided by yargs.
- * @param {string} argv.name - The user's desired project name.
+ * @param {string} argv.name - The user's specified project name.
  * @param {string} argv.ui - The name of the UI framework to use.
  * @return {Promise<void>}
  */
@@ -59,7 +59,7 @@ async function project({ name, ui }) {
     ui = res.ui;
   }
 
-  sh.mkdir('-p', name); // Create path/to/dir with their desired name
+  sh.mkdir('-p', name); // Create path/to/dir with their specified name
   sh.cd(name); // Set dir for shell commands. Doesn't change user's dir in their CLI.
 
   // If user wants a UI framework installed alongside their smart contract,
@@ -402,7 +402,7 @@ async function scaffoldNext(projectName) {
     message: (state) =>
       message(
         state,
-        'Do you want to setup your project for deployment to Github Pages?'
+        'Do you want to set up your project for deployment to GitHub Pages?'
       ),
     choices: ['no', 'yes'],
     prefix: (state) => prefix(state),
