@@ -48,7 +48,9 @@ async function deploy({ alias, yes }) {
     config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
-    log(red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`));
+    log(
+      red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`)
+    );
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
     return;
@@ -406,7 +408,7 @@ async function deploy({ alias, yes }) {
   let { feepayerAliasName } = config.deployAliases[alias];
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
-    [bold('Fee-Payer Alias'), reset(feepayerAliasName)],
+    [bold('Fee Payer Alias'), reset(feepayerAliasName)],
     [bold('URL'), reset(config.deployAliases[alias].url)],
     [bold('Smart Contract'), reset(contractName)],
   ];

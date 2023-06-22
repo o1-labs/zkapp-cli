@@ -569,8 +569,8 @@ async function scaffoldNext(projectName) {
 
     console.log(
       'Using project name ' +
-      projectName +
-      ' for GitHub repo name. Change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
+        projectName +
+        ' for GitHub repo name. Change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
     );
 
     let newNextConfig = nextConfig.replace(
