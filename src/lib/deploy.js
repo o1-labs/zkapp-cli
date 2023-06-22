@@ -48,7 +48,9 @@ async function deploy({ alias, yes }) {
     config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
-    log(red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`));
+    log(
+      red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`)
+    );
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
     return;
@@ -403,11 +405,11 @@ async function deploy({ alias, yes }) {
     );
   }
   let transactionJson = transaction.json;
-  let { feepayerAliasName } = config.deployAliases[alias];
+  let { feepayerAlias, url } = config.deployAliases[alias];
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
-    [bold('Fee-Payer Alias'), reset(feepayerAliasName)],
-    [bold('URL'), reset(config.deployAliases[alias].url)],
+    [bold('Fee Payer Alias'), reset(feepayerAlias)],
+    [bold('URL'), reset(url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
@@ -655,11 +657,11 @@ async function sendGraphQL(graphQLUrl, query) {
   }
 }
 
-function sendZkAppQuery(acountUpdatesJson) {
+function sendZkAppQuery(accountUpdatesJson) {
   return `
   mutation {
     sendZkapp(input: {
-      zkappCommand: ${removeJsonQuotes(acountUpdatesJson)}
+      zkappCommand: ${removeJsonQuotes(accountUpdatesJson)}
     }) { zkapp
       {
         id

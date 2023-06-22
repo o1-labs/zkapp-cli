@@ -5,15 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2023-06-22
+
+### Changed
+
+- Update cli prompt language and upgrade version instructions [#437](https://github.com/o1-labs/zkapp-cli/pull/437) & [#438](https://github.com/o1-labs/zkapp-cli/pull/438)
+
+## [0.10.0] - 2023-06-20
+
+### Added
+
+- Add new config option to create or select a third party fee payer account. [#424] (https://github.com/o1-labs/zkapp-cli/pull/424)
+  - Update the interact.ts script to run with the third party fee payer.
+
+## [0.9.1] - 2023-06-17
+
+### Changed
+
+- Update the Svelte UI scaffold vite config. [#432] (https://github.com/o1-labs/zkapp-cli/pull/432)
+
 ## [0.9.0] - 2023-06-06
 
 ### Changed
 
 - Release `0.9.0` [#426](https://github.com/o1-labs/zkapp-cli/pull/426)
- - SnarkyJS minor version dependency updated in cli package.json to 0.11.*.
- - SnarkyJS minor version peer dependency updated in template/example contract package.json to 0.11.*.
- - Replace deprecated `Circuit.if` with `Provable.if` in the `tictactoe` example.
- - Replace deprecated `Circuit.array` with `Provable.Array` in the `sudoku` example.
+  - SnarkyJS minor version dependency updated in cli package.json to 0.11.*.
+  - SnarkyJS minor version peer dependency updated in template/example contract package.json to 0.11.*.
+  - Replace deprecated `Circuit.if` with `Provable.if` in the `tictactoe` example.
+  - Replace deprecated `Circuit.array` with `Provable.Array` in the `sudoku` example.
 
 ## [0.8.2] - 2023-05-12
 

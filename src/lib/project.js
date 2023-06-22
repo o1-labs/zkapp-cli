@@ -569,8 +569,8 @@ async function scaffoldNext(projectName) {
 
     console.log(
       'Using project name ' +
-      projectName +
-      ' for GitHub repo name. Change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
+        projectName +
+        ' for GitHub repo name. Change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
     );
 
     let newNextConfig = nextConfig.replace(
@@ -601,17 +601,19 @@ async function scaffoldNext(projectName) {
     // Add some scripts to the package.json
     let x = fs.readJSONSync(`ui/package.json`);
     x.scripts['export'] = 'next export';
-    const deployScript = `next build && next export && ${isWindows
+    const deployScript = `next build && next export && ${
+      isWindows
         ? `type nul > ${path.join('out', '.nojekyll')}`
         : `touch ${path.join('out', '.nojekyll')}`
-      }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
+    }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
     x.scripts['deploy'] = deployScript;
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
     sh.cd('ui');
     await step(
       'COI-ServiceWorker: NPM install',
-      `npm install coi-serviceworker --save > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'
+      `npm install coi-serviceworker --save > ${
+        isWindows ? 'NUL' : '"/dev/null" 2>&1'
       }`
     );
 
