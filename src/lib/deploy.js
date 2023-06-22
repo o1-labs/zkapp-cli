@@ -405,11 +405,11 @@ async function deploy({ alias, yes }) {
     );
   }
   let transactionJson = transaction.json;
-  let { feepayerAlias } = config.deployAliases[alias];
+  let { feepayerAlias, url } = config.deployAliases[alias];
   const settings = [
     [bold('Deploy Alias'), reset(alias)],
     [bold('Fee Payer Alias'), reset(feepayerAlias)],
-    [bold('URL'), reset(config.deployAliases[alias].url)],
+    [bold('URL'), reset(url)],
     [bold('Smart Contract'), reset(contractName)],
   ];
 
