@@ -15,6 +15,7 @@ test.describe('zkApp-CLI', () => {
 
         expect(code).toBe(0);
         expect(targetCliOutput).toMatch(versionRegex);
+        expect(stdout).toHaveLength(1);
         expect(stderr).toHaveLength(0);
       });
     }
