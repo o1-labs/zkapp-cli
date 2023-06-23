@@ -48,7 +48,9 @@ async function deploy({ alias, yes }) {
     config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
-    log(red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`));
+    log(
+      red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`)
+    );
     log(red(`The current version is ${latestCliVersion}.`));
     log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
     return;
