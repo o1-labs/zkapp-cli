@@ -13,11 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.0] - 2023-06-20
 
-### Added
+## Added
 
-- Add new config option to create or select a third party fee payer account. [#424] (https://github.com/o1-labs/zkapp-cli/pull/424)
-  - Update the interact.ts script to run with the third party fee payer.
+- Third-party fee payer accounts for deployment transactions can be used across multiple projects [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
+    - A new `zk config` option creates or selects a third-party fee payer account. 
 
+## Fixed
+
+- A fee payer tries to pay the fee using signature authorization (proofs are not supported). If the zkApp account is used as fee payer after deployment, the transaction was rejected because the permissions of the account would be violated, breaking all re-deployments and the interact.ts script in the template project. [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
 ## [0.9.1] - 2023-06-17
 
 ### Changed
