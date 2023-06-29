@@ -80,11 +80,11 @@ Next steps:
 This command creates a directory containing a new project template, fully set up and ready for local development.
 
 - See the included [README](templates/project-ts/README.md) for usage instructions.
-  All of the usual commands are available: `npm run build`, `npm run test`, `npm run coverage`, and so on
-- A GitHub repo is automatically initialized in the project directory. For consistency and by convention, we use `main` as the default Git branch.
+  All of the usual commands are available: `npm run build`, `npm run test`, `npm run coverage`, and so on.
+- A GitHub repo is automatically initialized in the project directory. For consistency and by convention, we use `main` as the default development branch.
 - A [GitHub Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is 
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
-- Code style consistency (via Prettier) and linting (via ES Lint) are automatically enforced using Git pre-commit hooks. This CI requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
+- Code style consistency (using Prettier) and linting (using ES Lint) is automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
 ## Create an example project
 
@@ -150,7 +150,7 @@ A deploy alias consists of:
 
   A fee payer account is required. If you don't have a fee payer account, you are prompted to select one of these options:
 
-  - Recover fee payer account from an existing base58 private key
+  - Recover a fee payer account from an existing base58 private key
   - Create a new fee payer key pair
 
 ### Deploy your smart contract
