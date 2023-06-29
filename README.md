@@ -1,18 +1,20 @@
 # Mina zkApp CLI
 
-The Mina zkApp CLI allows you to scaffold, write, test, and  deploy zkApps (zero-knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices. 
+The Mina zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices. 
 
 Apps are written using [SnarkyJS](https://docs.minaprotocol.com/en/zkapps/snarkyjs-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. SnarkyJS is automatically included when you create a project using the Mina zkApp CLI.
 
 ## Getting Started
 
-To get started, read through this README file and the Mina Protocol [zkApp Developer](https://docs.minaprotocol.com/zkapps) docs. 
+Read through this README file and the Mina Protocol [zkApp Developer](https://docs.minaprotocol.com/zkapps) docs. 
 
 Build foundational knowledge by completing the guided steps in the [zkApp Developer Tutorials](https://docs.minaprotocol.com/zkapps/tutorials).
 
 ## Get Involved
 
 To learn about ways to participate and interact with community members, see the Mina [Online Communities](https://docs.minaprotocol.com/participate/online-communities) docs. 
+
+Contributions are always appreciated. See the zkApp CLI [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/README.md) guidelines.
 
 ## Install the Mina zkApp CLI
 
@@ -79,10 +81,10 @@ This command creates a directory containing a new project template, fully set up
 
 - See the included [README](templates/project-ts/README.md) for usage instructions.
   All of the usual commands are available: `npm run build`, `npm run test`, `npm run coverage`, and so on
-- A Git repo is automatically initialized in the project directory automatically. For consistency and by convention, we use `main` as the default Git branch.
+- A GitHub repo is automatically initialized in the project directory. For consistency and by convention, we use `main` as the default Git branch.
 - A [GitHub Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is 
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
-- Code style consistency (via Prettier) and linting (via ES Lint) are automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit to Git, for example, `git commit -m 'feat: add awesome feature'`.
+- Code style consistency (via Prettier) and linting (via ES Lint) are automatically enforced using Git pre-commit hooks. This CI requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
 ## Create an example project
 
@@ -131,9 +133,25 @@ The auto-generated `config.json` file contains your deployment-related configura
 
 Run the `zk config` command to add a new deployment configuration to this file.
 
-This interactive command is interactive prompts you to specify a name (can be anything), URL to deploy to, and fee (in
-MINA) to be used when sending your deploy transaction. The URL is the Mina GraphQL API that will receive your deploy transaction and broadcast it to the Mina network.
-Note that this URL is significant because it also determines which network you will be deploying to (e.g. QANet, Testnet, Mainnet, etc).
+Respond to the interactive command prompts to build or update a deploy alias. 
+
+A deploy alias consists of:
+
+- A self-describing name. This tutorial uses `berkeley`. The deploy alias name can be anything and does not have to match the network name.
+- The Mina GraphQL API URL that defines the network that receives your deploy transaction and broadcasts it to the appropriate Mina network (Testnet, Devnet, Mainnet, and so on)
+- The transaction fee (in MINA) to use when deploying
+- Two key pairs:
+
+  - A key pair for the zkApp account. Public and private keys to use in your application are automatically generated in `keys/berkeley.json`.
+
+  - A key pair to use as a fee payer account for updates and deployments. Public and private keys are stored on your local computer and can be used across multiple projects.
+
+- Fee payer account alias 
+
+  A fee payer account is required. If you don't have a fee payer account, you are prompted to select one of these options:
+
+  - Recover fee payer account from an existing base58 private key
+  - Create a new fee payer key pair
 
 ### Deploy your smart contract
 
@@ -146,12 +164,9 @@ zk deploy // shows a list of aliases in your project to choose from
 _**Deployment is supported only to Berkeley Testnet. 
 zkApp programmability is not yet available on the Mina Mainnet.**_
 
-The `deploy` command allows you to deploy a smart contract to your desired
-alias. You must run `zk config` once before deploying to set up a
-deploy alias with the required details. Then run `zk deploy <alias>` or `zk deploy` (and select the alias from the list shown) and type `yes` or `y` to
-confirm when prompted.
+After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias. 
 
-Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` it automatically deploys this _same_ smart contract in the future when deploying to this alias.
+Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` this _same_ smart contract automatically deploys to this alias. See [Tutorial 3: Deploy to a Live Network](https://docs.minaprotocol.com/zkapps/tutorials/deploying-to-a-network).
 
 ## License
 

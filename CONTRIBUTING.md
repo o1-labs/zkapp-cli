@@ -6,7 +6,7 @@ SnarkyJS helps developers build apps powered by zero-knowledge (zk) cryptography
 
 The best way to contribute to the Mina zkApp CLI is to help us test it broadly to ensure it works as expected on all platforms.
 
-By contributing, you can help us improve the functionality and user experience of the zkApp CLI which in turn helps you build better projects. To ensure a smooth and effective collaboration, please follow these contribution guidelines.
+By contributing, you can help us improve the functionality and user experience of the zkApp CLI, which in turn helps you build better projects. To ensure a smooth and effective collaboration, please follow these contribution guidelines.
 
 ## Code of Conduct
 
@@ -19,11 +19,11 @@ To see if others have also experienced the issue:
 
 - Ask questions in the Mina Protocol Discord in the  [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) channel on Mina Protocol Discord. 
 - Participate and ask questions in [zkApps Developers Office Hours](/participate/office-hours).
-- Check to see if the bug was already reported by searching on GitHub under [Issues](https://github.com/o1-labs/zkapp-cli/issues).
+- Check if the bug was already reported by searching on GitHub under [Issues](https://github.com/o1-labs/zkapp-cli/issues).
 
 If you don't find an open issue addressing the problem, open a new one. Be sure to include a title and clear description, as much relevant information as possible, and the output of the `zk system` command. This information includes your OS, NodeJS, and zkapp-cli versions to help us reproduce the issue.
 
-After you open an issue, it might not see activity right away unless it is a "Everything is on Fire and the World is Coming to an End" kind of bug. That doesn't mean we don't care about your bug, just that there are a lot of issues and pull requests to get through. Other people with the same problem can find your issue, and confirm the bug, and may collaborate with you on fixing it. If you know how to fix the bug, go ahead and open a pull request.
+After you open an issue, it might not see activity immediately unless it is a "Everything is on Fire and the World is Coming to an End" kind of bug. That doesn't mean we don't care about your bug, just that there are a lot of issues and pull requests to get through. Other people with the same problem can find your issue, confirm the bug, and may collaborate with you on fixing it. If you know how to fix the bug, go ahead and open a pull request.
 
 ## Clone the Repository
 
@@ -73,7 +73,7 @@ Provide a helpful, informative PR title that includes the context and page you a
 
 Start by creating a draft pull request. Create your draft PR early, even if your work is just beginning or incomplete. Your draft PR indicates to the community that you're working on something and provides a space for conversations early in the development process. Merging is blocked for Draft PRs, so they provide a safe place to experiment and invite comments.
 
-All pull requests must go through the code review process. As the PR submitter, you are responsible for addressing each comment and suggestion in the **Files changed** view during the review process.
+All pull requests must go through the code review process. As the PR submitter, you must address each comment and suggestion in the **Files changed** view during the review process.
 
 If your PR is a fork, the code maintainers will merge the approved PR.
 
