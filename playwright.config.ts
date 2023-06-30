@@ -1,4 +1,5 @@
 import { type PlaywrightTestConfig } from '@playwright/test';
+import { getMinaMockedGraphQlEndpoint } from './tests/utils/network-utils.mjs';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -78,6 +79,11 @@ const config: PlaywrightTestConfig = {
     //   testIgnore: ['**/cli/**/*.spec.ts'],
     // },
   ],
+  webServer: {
+    command: 'npm run e2e:start:mina-mocked-graphql',
+    url: getMinaMockedGraphQlEndpoint(),
+    timeout: 30 * 1000,
+  },
 };
 
 export default config;
