@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { Constants } from './common-utils.mjs';
 
 function getValidUrlOrNUll(url) {
   try {
@@ -14,10 +15,10 @@ function isGraphQlEndpointAvailable(url) {
 
   const { hostname, port, pathname } = validUrl;
   const options = {
-    method: 'GET',
+    method: 'POST',
     hostname,
     port,
-    path: pathname + '?query=' + encodeURIComponent('query {syncStatus}'),
+    path: pathname,
     headers: {
       'Content-Type': 'application/json',
       Accept: '*/*',
@@ -26,24 +27,25 @@ function isGraphQlEndpointAvailable(url) {
   };
 
   return new Promise((resolve) => {
-    const req = http.request(options, (response) =>
+    const request = http.request(options, (response) =>
       resolve(/2\d\d/.test(`${response.statusCode}`) === true)
     );
-    req.on('timeout', () => resolve(false));
-    req.on('error', () => resolve(false));
-    req.end();
+    request.on('timeout', () => resolve(false));
+    request.on('error', () => resolve(false));
+    request.write(JSON.stringify({ query: 'query {syncStatus}' }));
+    request.end();
   });
 }
 
 export function getMinaMockedGraphQlEndpoint() {
   return `http://localhost:${
-    process.env.MINA_MOCKED_GRAPHQL_PORT ?? 8282
+    process.env.MINA_MOCKED_GRAPHQL_PORT ?? Constants.MINA_MOCKED_GRAPHQL_PORT
   }/graphql`;
 }
 
 export async function getMinaGraphQlEndpoint() {
   const minaGraphQlEndpoint = `http://localhost:${
-    process.env.MINA_GRAPHQL_PORT ?? 8080
+    process.env.MINA_GRAPHQL_PORT ?? Constants.MINA_GRAPHQL_PORT
   }/graphql`;
   const minaMockedGraphQlEndpoint = getMinaMockedGraphQlEndpoint();
 
