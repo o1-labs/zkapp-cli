@@ -18,14 +18,13 @@ const requestListener = function (request, response) {
     }
     case '/graphql': {
       if (request.method !== 'POST') {
-        response.writeHead(405);
-        response.end(JSON.stringify({ error: '405 Method Not Allowed' }));
+        response.writeHead(200);
+        response.end(JSON.stringify({ application: applicationName }));
       } else {
         request.on('data', function (chunk) {
           const query = JSON.parse(chunk)
             .query.replace(/(?:\r\n|\r|\n)/g, '')
             .replace(/\s{2,}/g, ' ');
-          // console.log(`-- -> Received query: ${query}`);
 
           if (query.includes('{ syncStatus }')) {
             console.log('-> Mocking sync status response');

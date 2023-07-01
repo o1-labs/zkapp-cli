@@ -47,9 +47,8 @@ export async function getMinaGraphQlEndpoint() {
   const minaGraphQlEndpoint = `http://localhost:${
     process.env.MINA_GRAPHQL_PORT ?? Constants.MINA_GRAPHQL_PORT
   }/graphql`;
-  const minaMockedGraphQlEndpoint = getMinaMockedGraphQlEndpoint();
 
   return (await isGraphQlEndpointAvailable(minaGraphQlEndpoint))
     ? minaGraphQlEndpoint
-    : minaMockedGraphQlEndpoint;
+    : getMinaMockedGraphQlEndpoint();
 }
