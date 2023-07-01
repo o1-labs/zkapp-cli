@@ -9,13 +9,13 @@ function getValidUrlOrNUll(url) {
   }
 }
 
-function isGraphQlEndpointAvailable(url) {
+function isEndpointAvailable(url, isMinaGraphQlEndpoint = true) {
   const validUrl = getValidUrlOrNUll(url);
   if (!validUrl) return Promise.resolve(false);
 
   const { hostname, port, pathname } = validUrl;
   const options = {
-    method: 'POST',
+    method: isMinaGraphQlEndpoint ? 'POST' : 'GET',
     hostname,
     port,
     path: pathname,
@@ -32,23 +32,56 @@ function isGraphQlEndpointAvailable(url) {
     );
     request.on('timeout', () => resolve(false));
     request.on('error', () => resolve(false));
-    request.write(JSON.stringify({ query: 'query {syncStatus}' }));
+    if (isMinaGraphQlEndpoint) {
+      request.write(JSON.stringify({ query: 'query {syncStatus}' }));
+    }
     request.end();
   });
 }
 
-export function getMinaMockedGraphQlEndpoint() {
+function getMockedEndpointsServiceEndpoint() {
   return `http://localhost:${
-    process.env.MINA_MOCKED_GRAPHQL_PORT ?? Constants.MINA_MOCKED_GRAPHQL_PORT
-  }/graphql`;
+    process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
+    Constants.mockedEndpointsServicePort
+  }`;
+}
+
+export function getMinaMockedGraphQlEndpoint() {
+  return `${getMockedEndpointsServiceEndpoint()}/graphql`;
 }
 
 export async function getMinaGraphQlEndpoint() {
   const minaGraphQlEndpoint = `http://localhost:${
-    process.env.MINA_GRAPHQL_PORT ?? Constants.MINA_GRAPHQL_PORT
+    process.env.MINA_GRAPHQL_PORT ?? Constants.minaGraphQlPort
   }/graphql`;
 
-  return (await isGraphQlEndpointAvailable(minaGraphQlEndpoint))
+  return (await isEndpointAvailable(minaGraphQlEndpoint))
     ? minaGraphQlEndpoint
     : getMinaMockedGraphQlEndpoint();
+}
+
+export async function getMinaAccountsManagerEndpoint(
+  isForAccountAcquisition = true
+) {
+  const accountsManagerPort =
+    process.env.MINA_ACCOUNTS_MANAGER_PORT ?? Constants.minaAccountsManagerPort;
+  const mockedAccountsManagerPort =
+    process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
+    Constants.mockedEndpointsServicePort;
+
+  if (isForAccountAcquisition) {
+    return (await isEndpointAvailable(
+      `http://localhost:${accountsManagerPort}`,
+      false
+    ))
+      ? `http://localhost:${accountsManagerPort}/acquire-account`
+      : `http://localhost:${mockedAccountsManagerPort}/acquire-account`;
+  } else {
+    return (await isEndpointAvailable(
+      `http://localhost:${accountsManagerPort}`,
+      false
+    ))
+      ? `http://localhost:${accountsManagerPort}/release-account`
+      : `http://localhost:${mockedAccountsManagerPort}/release-account`;
+  }
 }

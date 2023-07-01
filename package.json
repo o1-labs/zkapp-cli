@@ -24,7 +24,7 @@
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
     "e2e:prepare:cli": "npm r zkapp-cli -g && npm install && npm run build --if-present && npm link",
     "e2e:prepare:lib": "node ./tests/helpers/build-helper.mjs",
-    "e2e:start:mina-mocked-graphql": "node ./tests/mocks/mina-mocked-graphql.mjs",
+    "e2e:start:mocked-endpoints": "node ./tests/mocks/mocked-endpoints.mjs",
     "e2e:install": "npx playwright-core install --with-deps",
     "e2e:test": "npm run clean && npx playwright test",
     "e2e:test:smoke": "npm run e2e:test --grep @smoke",

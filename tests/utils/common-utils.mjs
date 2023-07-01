@@ -1,20 +1,32 @@
 export class Constants {
-  static MINA_GRAPHQL_PORT = 8080;
-  static MINA_MOCKED_GRAPHQL_PORT = 8282;
+  static get minaGraphQlPort() {
+    return 8080;
+  }
+  static get minaAccountsManagerPort() {
+    return 8181;
+  }
+  static get mockedEndpointsServicePort() {
+    return 8282;
+  }
 
-  static GRAPHQL_SYNC_STATUS_RESPONSE = {
-    data: {
-      syncStatus: 'SYNCED',
-    },
-  };
-  static GRAPHQL_NONCE_FETCHING_RESPONSE = {
-    data: {
-      account: {
-        nonce: '999',
+  static get syncStatusGraphQlResponse() {
+    return {
+      data: {
+        syncStatus: 'SYNCED',
       },
-    },
-  };
-  static getGraphQlAccountDetailsFetchingResponse(publicKey) {
+    };
+  }
+  static get nonceFetchingGraphQlResponse() {
+    return {
+      data: {
+        account: {
+          nonce: '999',
+        },
+      },
+    };
+  }
+
+  static getAccountDetailsFetchingGraphQlResponse(publicKey) {
     return {
       data: {
         account: {
@@ -70,15 +82,65 @@ export class Constants {
       },
     };
   }
-  static GRAPHQL_TRANSACTION_RESPONSE = {
-    data: {
-      sendZkapp: {
-        zkapp: {
-          id: '1234567890',
-          hash: '5Ju6e5WfkVhdp1PAVhAJoLxqgWZT17FVkFaTnU6XvPkGwUHdDvqC',
-          failureReason: null,
+  static get transactionGraphQlResponse() {
+    return {
+      data: {
+        sendZkapp: {
+          zkapp: {
+            id: '1234567890',
+            hash: '5Ju6e5WfkVhdp1PAVhAJoLxqgWZT17FVkFaTnU6XvPkGwUHdDvqC',
+            failureReason: null,
+          },
         },
       },
-    },
-  };
+    };
+  }
+  static get accounts() {
+    return [
+      {
+        pk: 'B62qq1miZzh8QMumJ2dhJSvPxdeShGQ2G2cH4YXwxNLpPSvKdRVTb3q',
+        sk: 'EKEnVLUhYHDJvgmgQu5SzaV8MWKNfhAXYSkLBRk5KEfudWZRbs4P',
+      },
+      {
+        pk: 'B62qq6f3enRpmGsWBaJMstwQjQiRdAnyAZ6CbKrcJFgFidRnWZyJkje',
+        sk: 'EKEXS3qUZRhxDzExtuAaQVHtxLzt8A3fqS7o7iL9NpvdATsshvB6',
+      },
+      {
+        pk: 'B62qkBw74e5D3yZLAFTCK3yktG4TZtq4wSfjPrxKr9Psxu29oEZWpvw',
+        sk: 'EKF3qRhoze6r6bgF5uRmhMkEahfZJHHQ3hzxqCbPvaNzdhxMVCQh',
+      },
+      {
+        pk: 'B62qrDMuC4Vu3x6Kcr6YpBYsFsrshpyyH6MWX4cs5UNN2b9syT3rHNX',
+        sk: 'EKFd1GxnQ53H3shreTB2VzQJxECz9DE9NjorrkfKyEuKCsHDHVSE',
+      },
+      {
+        pk: 'B62qo2C5mvFGtmTdHVAynh2ZgD3kG6QbN6pMqnoCYsaFyCsxHuskFVe',
+        sk: 'EKFTtvEvxDbMLGfmktofYT1Art7imjTQjUctvpuzbD5bzm9PxHrG',
+      },
+      {
+        pk: 'B62qmYHbjp4oDCNRNgHf1YLPQWQkVZ49Q6DLXmA9UdoERa9q29piAAo',
+        sk: 'EKEHLiY4THpcrHaKNqj9yPCCS9gBFCF5P2ZQSULeAyjUZRyDXV2Z',
+      },
+      {
+        pk: 'B62qiYg67MzbxgsHv9EPxANUk9EyKWLdPFVc6sdvECF2ktZoguHRRbg',
+        sk: 'EKDpKJFP7UYUgFDxDQX8mprMtoFJHorK8dQfT6c1RmyCJLVDgFnB',
+      },
+      {
+        pk: 'B62qmKLqCjz7j4Wj1yodmsr9xDtGaiMz538NMY39D9dpukZJtEmsSFr',
+        sk: 'EKEKGDyC13jpwTacYGbpr6nvhaifmMss5cEuYXYHyxYCoD656Cff',
+      },
+      {
+        pk: 'B62qoY1SU63CQR2kyU3ra38s9AD66hyLsxRx91gkpEm3Y9sUcer5x5k',
+        sk: 'EKFT7AEhreTdud8prVgfvrGnXd8W45mVftwSPmm4o4okQDLN9Eei',
+      },
+      {
+        pk: 'B62qkEdNmGbUVaUnVtwMeMo9G1QBgfp9c3K7j4FbmXn21zG8ssvaPvi',
+        sk: 'EKEJru1CaxwBKMZZzoKEpD1HPCF77htS2VgqoVz6dBaCRoTtmFCy',
+      },
+    ];
+  }
+}
+
+export function generateRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }

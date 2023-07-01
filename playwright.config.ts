@@ -80,7 +80,7 @@ const config: PlaywrightTestConfig = {
     // },
   ],
   webServer: {
-    command: 'npm run e2e:start:mina-mocked-graphql',
+    command: 'npm run e2e:start:mocked-endpoints',
     url: getMinaMockedGraphQlEndpoint(),
     timeout: 30 * 1000,
   },
