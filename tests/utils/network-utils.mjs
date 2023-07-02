@@ -1,3 +1,4 @@
+import fetch, { Headers } from 'node-fetch';
 import http from 'node:http';
 import { Constants } from './common-utils.mjs';
 
@@ -39,7 +40,7 @@ function isEndpointAvailable(url, isMinaGraphQlEndpoint = true) {
   });
 }
 
-function getMockedEndpointsServiceEndpoint() {
+export function getMockedEndpointsServiceEndpoint() {
   return `http://localhost:${
     process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
     Constants.mockedEndpointsServicePort
@@ -84,4 +85,36 @@ export async function getMinaAccountsManagerEndpoint(
       ? `http://localhost:${accountsManagerPort}/release-account`
       : `http://localhost:${mockedAccountsManagerPort}/release-account`;
   }
+}
+
+export async function acquireAvailableAccount(isRegularAccount = true) {
+  const endpoint =
+    (await getMinaAccountsManagerEndpoint()) +
+    `?isRegularAccount=${isRegularAccount}`;
+  console.info(`Acquiring account using Mina Accounts-Manager: ${endpoint}`);
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
+    headers: new Headers({ 'Content-Type': 'application/json' }),
+  });
+
+  const json = await response.json();
+  console.info(`Mina Accounts-Manager response: ${JSON.stringify(json)}`);
+  return json;
+}
+
+export async function releaseAcquiredAccount(account) {
+  const endpoint = await getMinaAccountsManagerEndpoint(false);
+  console.info(
+    `Releasing account with public key '${account.pk}' using Mina Accounts-Manager: ${endpoint}`
+  );
+
+  const response = await fetch(endpoint, {
+    method: 'PUT',
+    headers: new Headers({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(account),
+  });
+
+  const json = await response.json();
+  console.info(`Mina Accounts-Manager response: ${JSON.stringify(json)}`);
 }

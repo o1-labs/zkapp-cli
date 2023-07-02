@@ -26,36 +26,58 @@ const requestListener = function (request, response) {
         response.writeHead(200);
         response.end(JSON.stringify({ application: applicationName }));
       } else {
+        let requestData = '';
+
         request.on('data', function (chunk) {
-          const query = JSON.parse(chunk)
-            .query.replace(/(?:\r\n|\r|\n)/g, '')
-            .replace(/\s{2,}/g, ' ');
+          requestData += chunk;
+          if (requestData.length > 1e7) {
+            request.connection.destroy();
+          }
+        });
+        request.on('end', function () {
+          try {
+            const query = JSON.parse(requestData)
+              .query.replace(/(?:\r\n|\r|\n)/g, '')
+              .replace(/\s{2,}/g, ' ');
 
-          if (query.includes('{ syncStatus }')) {
-            console.log('-> Mocking sync status GraphQL response');
-            response.writeHead(200);
-            response.end(JSON.stringify(Constants.syncStatusGraphQlResponse));
-          } else if (query.includes('{ nonce }')) {
-            console.log('-> Mocking nonce fetching GraphQL response');
-            response.writeHead(200);
-            response.end(
-              JSON.stringify(Constants.nonceFetchingGraphQlResponse)
-            );
-          } else if (query.includes(' zkappState ')) {
-            const startIndex = query.indexOf('publicKey: "') + 12;
-            const publicKey = query.substring(startIndex, startIndex + 55);
+            if (query.includes('{ syncStatus }')) {
+              console.log('-> Mocking sync status GraphQL response');
+              response.writeHead(200);
+              response.end(JSON.stringify(Constants.syncStatusGraphQlResponse));
+            } else if (query.includes('{ nonce }')) {
+              console.log('-> Mocking nonce fetching GraphQL response');
+              response.writeHead(200);
+              response.end(
+                JSON.stringify(Constants.nonceFetchingGraphQlResponse)
+              );
+            } else if (query.includes(' zkappState ')) {
+              const startIndex = query.indexOf('publicKey: "') + 12;
+              const publicKey = query.substring(startIndex, startIndex + 55);
 
-            console.log('-> Mocking account details fetching GraphQL response');
-            response.writeHead(200);
+              console.log(
+                '-> Mocking account details fetching GraphQL response'
+              );
+              response.writeHead(200);
+              response.end(
+                JSON.stringify(
+                  Constants.getAccountDetailsFetchingGraphQlResponse(publicKey)
+                )
+              );
+            } else if (query.includes(' zkappCommand: ')) {
+              console.log('-> Mocking transaction GraphQL response');
+              response.writeHead(200);
+              response.end(
+                JSON.stringify(Constants.transactionGraphQlResponse)
+              );
+            } else {
+              response.writeHead(200);
+              response.end(JSON.stringify({ application: applicationName }));
+            }
+          } catch (_) {
+            response.writeHead(500);
             response.end(
-              JSON.stringify(
-                Constants.getAccountDetailsFetchingGraphQlResponse(publicKey)
-              )
+              JSON.stringify({ error: '500 Internal Server Error' })
             );
-          } else if (query.includes(' zkappCommand: ')) {
-            console.log('-> Mocking transaction GraphQL response');
-            response.writeHead(200);
-            response.end(JSON.stringify(Constants.transactionGraphQlResponse));
           }
         });
       }
@@ -74,11 +96,28 @@ const requestListener = function (request, response) {
       break;
     }
     case '/release-account': {
+      let publicKey = 'N/A';
+      let requestData = '';
+
       console.log('-> Mocking account release response');
-      response.writeHead(200);
-      response.end(
-        JSON.stringify({ message: 'Account is set to be released.' })
-      );
+      request.on('data', function (chunk) {
+        requestData += chunk;
+        if (requestData.length > 1e7) {
+          request.connection.destroy();
+        }
+      });
+      request.on('end', function () {
+        try {
+          publicKey = JSON.parse(requestData).pk;
+        } catch (_) {}
+
+        response.writeHead(200);
+        response.end(
+          JSON.stringify({
+            message: `Account with public key '${publicKey}' is set to be released.`,
+          })
+        );
+      });
       break;
     }
     default: {

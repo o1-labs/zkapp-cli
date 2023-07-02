@@ -1,5 +1,5 @@
 import { type PlaywrightTestConfig } from '@playwright/test';
-import { getMinaMockedGraphQlEndpoint } from './tests/utils/network-utils.mjs';
+import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.mjs';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -81,7 +81,7 @@ const config: PlaywrightTestConfig = {
   ],
   webServer: {
     command: 'npm run e2e:start:mocked-endpoints',
-    url: getMinaMockedGraphQlEndpoint(),
+    url: getMockedEndpointsServiceEndpoint(),
     timeout: 30 * 1000,
   },
 };

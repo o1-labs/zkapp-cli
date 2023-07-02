@@ -8,7 +8,6 @@ export class Constants {
   static get mockedEndpointsServicePort() {
     return 8282;
   }
-
   static get syncStatusGraphQlResponse() {
     return {
       data: {
@@ -25,7 +24,6 @@ export class Constants {
       },
     };
   }
-
   static getAccountDetailsFetchingGraphQlResponse(publicKey) {
     return {
       data: {
