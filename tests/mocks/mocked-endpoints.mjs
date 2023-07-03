@@ -26,16 +26,18 @@ const requestListener = function (request, response) {
         response.writeHead(200);
         response.end(JSON.stringify({ application: applicationName }));
       } else {
-        let requestData = '';
-
+        const chunks = [];
         request.on('data', function (chunk) {
-          requestData += chunk;
-          if (requestData.length > 1e7) {
-            request.connection.destroy();
-          }
+          chunks.push(chunk);
         });
         request.on('end', function () {
           try {
+            let requestData = Buffer.concat(chunks);
+            switch (request.headers['Content-Type']) {
+              case 'application/json':
+                requestData = requestData.toString();
+                break;
+            }
             const query = JSON.parse(requestData)
               .query.replace(/(?:\r\n|\r|\n)/g, '')
               .replace(/\s{2,}/g, ' ');
