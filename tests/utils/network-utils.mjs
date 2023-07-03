@@ -1,4 +1,3 @@
-import fetch, { Headers } from 'node-fetch';
 import http from 'node:http';
 import { Constants } from './common-utils.mjs';
 
@@ -35,6 +34,43 @@ function isEndpointAvailable(url, isMinaGraphQlEndpoint = true) {
     request.on('error', () => resolve(false));
     if (isMinaGraphQlEndpoint) {
       request.write(JSON.stringify({ query: 'query {syncStatus}' }));
+    }
+    request.end();
+  });
+}
+
+function httpRequest(method, endpoint, data = null) {
+  const { hostname, port, pathname, searchParams } =
+    getValidUrlOrNUll(endpoint);
+  const options = {
+    method,
+    hostname,
+    port,
+    path: pathname + `?${searchParams.toString()}`,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: '*/*',
+    },
+    timeout: 30 * 1000,
+  };
+
+  return new Promise((resolve, reject) => {
+    const request = http.request(options, (response) => {
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', () => {
+        let responseData = Buffer.concat(chunks);
+        switch (response.headers['Content-Type']) {
+          case 'application/json':
+            responseData = responseData.toString();
+            break;
+        }
+        resolve(JSON.parse(responseData));
+      });
+    });
+    request.on('error', reject);
+    if (data) {
+      request.write(JSON.stringify(data));
     }
     request.end();
   });
@@ -92,15 +128,9 @@ export async function acquireAvailableAccount(isRegularAccount = true) {
     (await getMinaAccountsManagerEndpoint()) +
     `?isRegularAccount=${isRegularAccount}`;
   console.info(`Acquiring account using Mina Accounts-Manager: ${endpoint}`);
-
-  const response = await fetch(endpoint, {
-    method: 'GET',
-    headers: new Headers({ 'Content-Type': 'application/json' }),
-  });
-
-  const json = await response.json();
-  console.info(`Mina Accounts-Manager response: ${JSON.stringify(json)}`);
-  return json;
+  const response = await httpRequest('GET', endpoint);
+  console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
+  return response;
 }
 
 export async function releaseAcquiredAccount(account) {
@@ -108,13 +138,6 @@ export async function releaseAcquiredAccount(account) {
   console.info(
     `Releasing account with public key '${account.pk}' using Mina Accounts-Manager: ${endpoint}`
   );
-
-  const response = await fetch(endpoint, {
-    method: 'PUT',
-    headers: new Headers({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(account),
-  });
-
-  const json = await response.json();
-  console.info(`Mina Accounts-Manager response: ${JSON.stringify(json)}`);
+  const response = await httpRequest('PUT', endpoint, account);
+  console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
 }
