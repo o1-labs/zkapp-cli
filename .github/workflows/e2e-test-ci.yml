@@ -1,13 +1,62 @@
 name: E2E Tests
 on: [push, pull_request]
 jobs:
-  test:
+  against-real-network:
     timeout-minutes: 90
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         node: [16, 18]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
+    services:
+      mina-local-network:
+        image: us-west1-docker.pkg.dev/o1labs-192920/mina-local-network/mina-local-network:rampup-latest-lightnet
+        env:
+          NETWORK_TYPE: 'single-node'
+          PROOF_LEVEL: 'none'
+        ports:
+          - 3085:3085
+          - 8080:8080
+          - 8181:8181
+    steps:
+      - uses: actions/checkout@v3
+      - name: Make helper script executable
+        run: chmod +x tests/scripts/wait-for-sync.sh
+        shell: bash
+      - name: Wait for Docker container services to be ready
+        run: ./tests/scripts/wait-for-sync.sh 8080
+        shell: bash
+      - name: Setup NodeJS ${{ matrix.node }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install Node Dependencies, build and link the CLI app
+        run: |
+          npm ci
+          npm run build --if-present
+          npm link
+      - name: Install Playwright Dependencies
+        run: npm run e2e:install
+      - name: Prepare CLI testing library
+        run: npm run e2e:prepare:lib
+      - name: Execute E2E Tests on ${{ matrix.os }}
+        run: npm run e2e:test
+        env:
+          CI: true
+      - name: Upload E2E Test Artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-tests-report-node${{ matrix.node }}-${{ matrix.os }}
+          path: reports/html-report/
+          retention-days: 30
+  against-mocked-network:
+    timeout-minutes: 90
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: [16, 18]
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Setup NodeJS ${{ matrix.node }}
