@@ -7,30 +7,22 @@ import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.m
 const config: PlaywrightTestConfig = {
   testDir: './tests',
   outputDir: './reports/test-artifacts',
-  /* Maximum time one test can run for. */
   timeout: 15 * 60 * 1000,
   expect: {
-    /**
-     * Maximum time expect() should wait for the condition to be met.
-     * For example in `await expect(locator).toHaveText();`
-     */
     timeout: 15 * 1000,
   },
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  // Run tests serially since we have global dependency on the cached Fee Payer now.
+  workers: 1,
+  fullyParallel: false,
+  // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 1,
-  /* Opt out of parallel tests (on CI). */
-  workers: process.env.CI ? '50%' : '25%',
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],
     ['html', { outputFolder: './reports/html-report', open: 'never' }],
     ['junit', { outputFile: './reports/test-execution-results.xml' }],
   ],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  // Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions.
   use: {
     browserName: 'chromium',
     actionTimeout: 0,
@@ -43,12 +35,8 @@ const config: PlaywrightTestConfig = {
     },
     video: 'on-first-retry',
     trace: 'retain-on-failure',
-    /* launchOptions: {
-      slowMo: 1_500,
-    }, */
   },
   testIgnore: ['*.js'],
-  /* Configure projects for major browsers */
   projects: [
     {
       name: 'cli',
