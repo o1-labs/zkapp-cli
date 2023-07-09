@@ -709,7 +709,7 @@ function scaffoldNuxt() {
       optimizeDeps: { esbuildOptions: { target: "esnext" } },
     },
 
-    css: ['~/assets/styles/globals.css']
+    css: ['~/assets/styles/globals.css'],
   `
   );
 

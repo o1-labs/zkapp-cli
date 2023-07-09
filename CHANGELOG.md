@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2023-07-09
+
+### Changed
+
+- Welcome page getting started text changed for the zkApp project generated with the `NextJS` UI framework ([#450](https://github.com/o1-labs/zkapp-cli/issues/450))
+
+## Fixed
+
+- Fix for zkApp project generation with `Nuxt` UI framework issue ([#449](https://github.com/o1-labs/zkapp-cli/issues/449))
+
 ## [0.10.1] - 2023-06-22
 
 ### Changed
@@ -16,11 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 - Third-party fee payer accounts for deployment transactions can be used across multiple projects [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
-    - A new `zk config` option creates or selects a third-party fee payer account. 
+  - A new `zk config` option creates or selects a third-party fee payer account.
 
 ## Fixed
 
 - A fee payer tries to pay the fee using signature authorization (proofs are not supported). If the zkApp account is used as fee payer after deployment, the transaction was rejected because the permissions of the account would be violated, breaking all re-deployments and the interact.ts script in the template project. [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
+
 ## [0.9.1] - 2023-06-17
 
 ### Changed
@@ -32,8 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Release `0.9.0` [#426](https://github.com/o1-labs/zkapp-cli/pull/426)
-  - SnarkyJS minor version dependency updated in cli package.json to 0.11.*.
-  - SnarkyJS minor version peer dependency updated in template/example contract package.json to 0.11.*.
+  - SnarkyJS minor version dependency updated in cli package.json to 0.11.\*.
+  - SnarkyJS minor version peer dependency updated in template/example contract package.json to 0.11.\*.
   - Replace deprecated `Circuit.if` with `Provable.if` in the `tictactoe` example.
   - Replace deprecated `Circuit.array` with `Provable.Array` in the `sudoku` example.
 
@@ -52,17 +63,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - 2023-05-03
 
 ### Changed
+
 - Release `0.8.0` [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
+
   - Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
   - Add state.getAndAssertEquals() to examples and test contracts.
   - Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest SnarkyJS release.
   - Exit the cli config and deploy processes on success and error.
   - Increase the template/example project jest test timeout.
- 
 
 - Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
 
- - Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
+- Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
 
 ## [0.7.6] - 2023-04-25
 
