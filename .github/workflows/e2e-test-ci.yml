@@ -1,7 +1,7 @@
 name: E2E Tests
 on: [push, pull_request]
 jobs:
-  against-real-network-on-linux:
+  against-real-network:
     timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
@@ -42,25 +42,36 @@ jobs:
         run: |
           git config --global user.email "e2e@o1labs.org"
           git config --global user.name "E2E Tests"
-      - name: Execute E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test
+      - name: Execute parallel E2E Tests on ${{ matrix.os }}
+        run: npm run e2e:test:parallel
         env:
           CI: true
-      - name: Upload E2E Test Artifacts
+      - name: Upload E2E Test Artifacts (parallel execution report)
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: e2e-tests-report-node${{ matrix.node }}-${{ matrix.os }}
+          name: e2e-parallel-tests-report-node${{ matrix.node }}-${{ matrix.os }}
           path: reports/html-report/
           retention-days: 30
-  against-mocked-network-on-macos:
+      # - name: Execute serial E2E Tests on ${{ matrix.os }}
+      #   run: npm run e2e:test:serial
+      #   env:
+      #     CI: true
+      # - name: Upload E2E Test Artifacts (serial execution report)
+      #   uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: e2e-serial-tests-report-node${{ matrix.node }}-${{ matrix.os }}
+      #     path: reports/html-report/
+      #     retention-days: 30
+  against-mocked-network:
     timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         node: [16, 18]
-        os: [macos-latest]
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Setup NodeJS ${{ matrix.node }}
@@ -78,54 +89,25 @@ jobs:
         run: |
           git config --global user.email "e2e@o1labs.org"
           git config --global user.name "E2E Tests"
-      - name: Execute E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test
+      - name: Execute parallel E2E Tests on ${{ matrix.os }}
+        run: npm run e2e:test:parallel
         env:
           CI: true
-      - name: Upload E2E Test Artifacts
+      - name: Upload E2E Test Artifacts (parallel execution report)
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: e2e-tests-report-node${{ matrix.node }}-${{ matrix.os }}
+          name: e2e-parallel-tests-report-node${{ matrix.node }}-${{ matrix.os }}
           path: reports/html-report/
           retention-days: 30
-  against-mocked-network-on-windows:
-    timeout-minutes: 45
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [16, 18]
-        os: [windows-latest]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup NodeJS ${{ matrix.node }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Install Node Dependencies, build and link the CLI app
-        run: |
-          npm ci
-          npm run build --if-present
-          npm link
-        shell: bash
-      - name: Install Playwright Dependencies
-        run: npm run e2e:install
-        shell: bash
-      - name: Configure Git
-        run: |
-          git config --global user.email "e2e@o1labs.org"
-          git config --global user.name "E2E Tests"
-        shell: bash
-      - name: Execute E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test
-        shell: bash
-        env:
-          CI: true
-      - name: Upload E2E Test Artifacts
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: e2e-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-          path: reports/html-report/
-          retention-days: 30
+      # - name: Execute serial E2E Tests on ${{ matrix.os }}
+      #   run: npm run e2e:test:serial
+      #   env:
+      #     CI: true
+      # - name: Upload E2E Test Artifacts (serial execution report)
+      #   uses: actions/upload-artifact@v3
+      #   if: always()
+      #   with:
+      #     name: e2e-serial-tests-report-node${{ matrix.node }}-${{ matrix.os }}
+      #     path: reports/html-report/
+      #     retention-days: 30

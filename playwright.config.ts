@@ -11,9 +11,6 @@ const config: PlaywrightTestConfig = {
   expect: {
     timeout: 15 * 1000,
   },
-  // Run tests serially because we have global dependency on the cached Fee Payer.
-  // TODO: Make some tests run in parallel and some serially. The problem is in the reporting data consolidation.
-  // TODO: For consideration: https://www.npmjs.com/package/playwright-merge-html-reports
   workers: '50%',
   fullyParallel: true,
   retries: 1,
