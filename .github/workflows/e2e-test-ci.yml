@@ -37,6 +37,10 @@ jobs:
           npm link
       - name: Install Playwright Dependencies
         run: npm run e2e:install
+      - name: Configure Git
+        run: |
+          git config --global user.email "e2e@o1labs.org"
+          git config --global user.name "E2E Tests"
       - name: Execute E2E Tests on ${{ matrix.os }}
         run: npm run e2e:test
         env:
@@ -68,6 +72,10 @@ jobs:
           npm link
       - name: Install Playwright Dependencies
         run: npm run e2e:install
+      - name: Configure Git
+        run: |
+          git config --global user.email "e2e@o1labs.org"
+          git config --global user.name "E2E Tests"
       - name: Execute E2E Tests on ${{ matrix.os }}
         run: npm run e2e:test
         env:

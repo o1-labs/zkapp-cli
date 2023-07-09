@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import { checkCommandSuccessfulExecution } from '../utils/validation-utils.mjs';
+import { checkCommandExecutionResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
   test('should return version information, @smoke @version', async () => {
@@ -14,7 +14,7 @@ test.describe('zkApp-CLI', () => {
         const targetCliOutput = stdout.at(-1);
         console.info(`[CLI StdOut] zk ${cliArg}: ${targetCliOutput}`);
 
-        checkCommandSuccessfulExecution(code, stderr);
+        checkCommandExecutionResults(code, stderr);
         expect(targetCliOutput).toMatch(versionRegex);
         expect(stdout).toHaveLength(1);
       });
