@@ -105,39 +105,44 @@ export async function getMinaAccountsManagerEndpoint(
   const mockedAccountsManagerPort =
     process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
     Constants.mockedEndpointsServicePort;
+  const endpointAction = isForAccountAcquisition
+    ? 'acquire-account'
+    : 'release-account';
+  const endpointPort = (await isEndpointAvailable(
+    `http://localhost:${accountsManagerPort}`,
+    false
+  ))
+    ? accountsManagerPort
+    : mockedAccountsManagerPort;
 
-  if (isForAccountAcquisition) {
-    return (await isEndpointAvailable(
-      `http://localhost:${accountsManagerPort}`,
-      false
-    ))
-      ? `http://localhost:${accountsManagerPort}/acquire-account`
-      : `http://localhost:${mockedAccountsManagerPort}/acquire-account`;
-  } else {
-    return (await isEndpointAvailable(
-      `http://localhost:${accountsManagerPort}`,
-      false
-    ))
-      ? `http://localhost:${accountsManagerPort}/release-account`
-      : `http://localhost:${mockedAccountsManagerPort}/release-account`;
-  }
+  return `http://localhost:${endpointPort}/${endpointAction}`;
 }
 
 export async function acquireAvailableAccount(isRegularAccount = true) {
-  const endpoint =
-    (await getMinaAccountsManagerEndpoint()) +
-    `?isRegularAccount=${isRegularAccount}`;
-  console.info(`Acquiring account using Mina Accounts-Manager: ${endpoint}`);
-  const response = await httpRequest('GET', endpoint);
-  console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
-  return response;
+  try {
+    const endpoint =
+      (await getMinaAccountsManagerEndpoint()) +
+      `?isRegularAccount=${isRegularAccount}`;
+    console.info(`Acquiring account using Mina Accounts-Manager: ${endpoint}`);
+    const response = await httpRequest('GET', endpoint);
+    console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
+    return response;
+  } catch (error) {
+    console.error(`Failed to acquire account: ${error}`);
+    throw error;
+  }
 }
 
 export async function releaseAcquiredAccount(account) {
-  const endpoint = await getMinaAccountsManagerEndpoint(false);
-  console.info(
-    `Releasing account with public key '${account.pk}' using Mina Accounts-Manager: ${endpoint}`
-  );
-  const response = await httpRequest('PUT', endpoint, account);
-  console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
+  try {
+    const endpoint = await getMinaAccountsManagerEndpoint(false);
+    console.info(
+      `Releasing account with public key '${account.pk}' using Mina Accounts-Manager: ${endpoint}`
+    );
+    const response = await httpRequest('PUT', endpoint, account);
+    console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
+  } catch (error) {
+    console.error(`Failed to release acquired account: ${error}`);
+    throw error;
+  }
 }

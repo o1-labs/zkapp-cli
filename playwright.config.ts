@@ -7,16 +7,15 @@ import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.m
 const config: PlaywrightTestConfig = {
   testDir: './tests',
   outputDir: './reports/test-artifacts',
-  timeout: 15 * 60 * 1000,
+  timeout: 10 * 60 * 1000,
   expect: {
     timeout: 15 * 1000,
   },
-  // Run tests serially since we have global dependency on the cached Fee Payer now.
+  // Run tests serially because we have global dependency on the cached Fee Payer.
+  // TODO: Make some tests run in parallel and some serially. The problem is in the reporting data consolidation.
   workers: 1,
   fullyParallel: false,
-  // Fail the build on CI if you accidentally left test.only in the source code.
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1,
+  retries: 1,
   reporter: [
     ['list'],
     ['html', { outputFolder: './reports/html-report', open: 'never' }],
@@ -26,7 +25,7 @@ const config: PlaywrightTestConfig = {
   use: {
     browserName: 'chromium',
     actionTimeout: 0,
-    headless: process.env.CI ? true : false,
+    headless: true,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     screenshot: {

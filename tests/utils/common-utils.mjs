@@ -1,4 +1,7 @@
 export class Constants {
+  static get cliPromptMsDelay() {
+    return 500;
+  }
   static get minaGraphQlPort() {
     return 8080;
   }
@@ -80,7 +83,7 @@ export class Constants {
       },
     };
   }
-  static get transactionGraphQlResponse() {
+  static get zkAppTransactionGraphQlResponse() {
     return {
       data: {
         sendZkapp: {
@@ -137,8 +140,35 @@ export class Constants {
       },
     ];
   }
+  static get specialCliKeys() {
+    return [
+      'arrowDown',
+      'arrowLeft',
+      'arrowRight',
+      'arrowUp',
+      'backSpace',
+      'delete',
+      'end',
+      'enter',
+      'escape',
+      'home',
+      'pageUp',
+      'pageDown',
+      'space',
+    ];
+  }
+  static get uiTypes() {
+    return ['next', 'svelte', 'nuxt', 'empty', 'none'];
+  }
+  static get skipUiTypeSelectionOptions() {
+    return [false, true];
+  }
 }
 
 export function generateRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function getBooleanFromString(string) {
+  return string != null && string != undefined && string.trim() === 'true';
 }
