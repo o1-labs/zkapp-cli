@@ -108,18 +108,18 @@ jobs:
           npm ci
           npm run build --if-present
           npm link
-        shell: cmd
+        shell: bash
       - name: Install Playwright Dependencies
         run: npm run e2e:install
-        shell: cmd
+        shell: bash
       - name: Configure Git
         run: |
           git config --global user.email "e2e@o1labs.org"
           git config --global user.name "E2E Tests"
-        shell: cmd
+        shell: bash
       - name: Execute E2E Tests on ${{ matrix.os }}
         run: npm run e2e:test
-        shell: cmd
+        shell: bash
         env:
           CI: true
       - name: Upload E2E Test Artifacts
