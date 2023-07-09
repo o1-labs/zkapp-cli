@@ -8,7 +8,7 @@ import { checkProjectGenerationResults } from '../utils/validation-utils.mjs';
 test.describe('zkApp-CLI', () => {
   // Tests for project generation of each UI type
   for (const uiType of Constants.uiTypes) {
-    test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @smoke @project @${uiType}-ui`, async () => {
+    test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
       for (const skipUiTypeSelection of Constants.skipUiTypeSelectionOptions) {
         await test.step(`Project generation and results validation ("skipUiTypeSelection=${skipUiTypeSelection}")`, async () => {
           const projectName = crypto.randomUUID();

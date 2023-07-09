@@ -3,7 +3,7 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { checkCommandExecutionResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
-  test('should return version information, @smoke @version', async () => {
+  test('should return version information, @parallel @smoke @version', async () => {
     const versionRegex = /^\d+\.\d+\.\d+$/i;
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
