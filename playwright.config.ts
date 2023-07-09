@@ -13,11 +13,12 @@ const config: PlaywrightTestConfig = {
   },
   // Run tests serially because we have global dependency on the cached Fee Payer.
   // TODO: Make some tests run in parallel and some serially. The problem is in the reporting data consolidation.
-  workers: 1,
-  fullyParallel: false,
+  // TODO: For consideration: https://www.npmjs.com/package/playwright-merge-html-reports
+  workers: '50%',
+  fullyParallel: true,
   retries: 1,
   reporter: [
-    ['list'],
+    [process.env.CI ? 'github' : 'list'],
     ['html', { outputFolder: './reports/html-report', open: 'never' }],
     ['junit', { outputFile: './reports/test-execution-results.xml' }],
   ],
