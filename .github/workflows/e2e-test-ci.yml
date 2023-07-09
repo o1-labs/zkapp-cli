@@ -2,7 +2,7 @@ name: E2E Tests
 on: [push, pull_request]
 jobs:
   against-real-network:
-    timeout-minutes: 90
+    timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -54,7 +54,7 @@ jobs:
           path: reports/html-report/
           retention-days: 30
   against-mocked-network:
-    timeout-minutes: 90
+    timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
