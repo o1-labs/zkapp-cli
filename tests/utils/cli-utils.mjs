@@ -35,10 +35,10 @@ export async function executeInteractiveCommand(options) {
     debug();
   }
 
-  for (let prompt in interactiveDialog) {
+  for (const prompt in interactiveDialog) {
     await waitForText(prompt.replace(/^#+/g, ''));
     const inputs = interactiveDialog[prompt];
-    for (let input of inputs) {
+    for (const input of inputs) {
       if (Constants.specialCliKeys.includes(input)) {
         // await wait(Constants.cliPromptMsDelay);
         await pressKey(input);
