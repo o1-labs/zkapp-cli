@@ -15,7 +15,7 @@ const config: PlaywrightTestConfig = {
   fullyParallel: true,
   retries: 1,
   reporter: [
-    [process.env.CI ? 'github' : 'list'],
+    ['list'],
     ['html', { outputFolder: './reports/html-report', open: 'never' }],
     ['junit', { outputFile: './reports/test-execution-results.xml' }],
   ],
