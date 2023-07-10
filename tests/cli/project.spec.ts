@@ -12,13 +12,14 @@ test.describe('zkApp-CLI', () => {
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
       test.skip(
         os.platform() === 'win32' && uiType === 'svelte',
-        'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED'
+        'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
       );
 
       for (const skipUiTypeSelection of Constants.skipUiTypeSelectionOptions) {
         await test.step(`Project generation and results validation ("skipUiTypeSelection=${skipUiTypeSelection}")`, async () => {
           const projectName = crypto.randomUUID();
-          const { spawn, cleanup, path } = await prepareEnvironment();
+          const { spawn, cleanup, path, ls, exists } =
+            await prepareEnvironment();
           console.info(`[Test Execution] Path: ${path}`);
 
           try {
@@ -28,7 +29,14 @@ test.describe('zkApp-CLI', () => {
               skipUiTypeSelection,
               spawn
             );
-            checkProjectGenerationResults(exitCode, stdOut);
+            await checkProjectGenerationResults(
+              projectName,
+              uiType,
+              stdOut,
+              exitCode,
+              ls,
+              exists
+            );
           } finally {
             await cleanup();
           }

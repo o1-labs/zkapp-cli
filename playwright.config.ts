@@ -7,11 +7,13 @@ import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.m
 const config: PlaywrightTestConfig = {
   testDir: './tests',
   outputDir: './reports/test-artifacts',
-  timeout: 30 * 60 * 1000,
+  timeout: 45 * 60 * 1000,
   expect: {
     timeout: 15 * 1000,
   },
-  workers: '50%',
+  // Please be aware that parallel tests execution causes tests flackiness.
+  // Consider using it for local development only.
+  workers: '25%',
   fullyParallel: true,
   retries: 1,
   reporter: [

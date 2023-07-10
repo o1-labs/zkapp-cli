@@ -79,10 +79,7 @@ export async function generateProject(
   switch (uiType) {
     case 'next': {
       if (!getBooleanFromString(process.env.CI)) {
-        // We need to run "create-next-app" in non-interactive mode otherwise project generation fails.
-        // Something to do with the way of sub-processes spawning, because, for example, we can do
-        // Svelte project generation in interactive mode without any issues.
-        // TODO: Fix library or switch to non-interactive mode for all project types globally.
+        // TODO: https://github.com/o1-labs/zkapp-cli/issues/453
         process.env.CI = true;
       }
       interactiveDialog = {
