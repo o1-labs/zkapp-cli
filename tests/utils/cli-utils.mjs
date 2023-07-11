@@ -1,9 +1,9 @@
 import { Constants, getBooleanFromString } from './common-utils.mjs';
 
-function generateInputsForUiTypeSelection(uiType) {
+function generateInputsForOptionSelection(option, options) {
   const inputs = [];
 
-  for (let i = 1; i <= Constants.uiTypes.indexOf(uiType); i++) {
+  for (let i = 1; i <= options.indexOf(option); i++) {
     inputs.push('arrowDown');
   }
 
@@ -61,18 +61,18 @@ export async function executeInteractiveCommand(options) {
 export async function generateProject(
   projectName,
   uiType,
-  skipUiTypeSelection,
+  skipInteractiveSelection,
   processHandler
 ) {
-  const cliArgs = skipUiTypeSelection ? `--ui ${uiType}` : '';
+  const cliArgs = skipInteractiveSelection ? `--ui ${uiType}` : '';
   const command = `project ${cliArgs} ${projectName}`.replace(/\s{2,}/g, ' ');
   let interactiveDialog = {};
 
-  if (!skipUiTypeSelection) {
+  if (!skipInteractiveSelection) {
     interactiveDialog = {
       ...interactiveDialog,
       'Create an accompanying UI project too?':
-        generateInputsForUiTypeSelection(uiType),
+        generateInputsForOptionSelection(uiType, Constants.uiTypes),
     };
   }
 
@@ -108,6 +108,39 @@ export async function generateProject(
       };
       break;
     }
+  }
+
+  const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
+    processHandler,
+    runner: 'zk',
+    command,
+    runFrom: undefined,
+    interactiveDialog,
+  });
+
+  console.info(`[Project CLI StdOut] zk ${command}: ${stdOut}`);
+  console.info(`[Project CLI StdErr] zk ${command}: ${stdErr}`);
+
+  return { exitCode, stdOut, stdErr };
+}
+
+export async function generateExampleProject(
+  exampleType,
+  skipInteractiveSelection,
+  processHandler
+) {
+  const cliArgs = skipInteractiveSelection ? `--name ${exampleType}` : '';
+  const command = `example ${cliArgs}`.replace(/\s{2,}/g, ' ');
+  let interactiveDialog = {};
+
+  if (!skipInteractiveSelection) {
+    interactiveDialog = {
+      ...interactiveDialog,
+      'Choose an example': generateInputsForOptionSelection(
+        exampleType,
+        Constants.exampleTypes
+      ),
+    };
   }
 
   const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({

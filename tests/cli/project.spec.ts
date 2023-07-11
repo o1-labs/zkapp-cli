@@ -15,8 +15,8 @@ test.describe('zkApp-CLI', () => {
         'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
       );
 
-      for (const skipUiTypeSelection of Constants.skipUiTypeSelectionOptions) {
-        await test.step(`Project generation and results validation ("skipUiTypeSelection=${skipUiTypeSelection}")`, async () => {
+      for (const skipInteractiveSelection of Constants.skipInteractiveSelectionOptions) {
+        await test.step(`Project generation and results validation ("skipInteractiveSelection=${skipInteractiveSelection}")`, async () => {
           const projectName = crypto.randomUUID();
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();
@@ -26,7 +26,7 @@ test.describe('zkApp-CLI', () => {
             let { exitCode, stdOut } = await generateProject(
               projectName,
               uiType,
-              skipUiTypeSelection,
+              skipInteractiveSelection,
               spawn
             );
             await checkProjectGenerationResults(

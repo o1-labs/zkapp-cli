@@ -37,6 +37,8 @@
     "e2e:install": "npx playwright-core install --with-deps",
     "e2e:test:parallel": "npm run clean && npx playwright test --grep @parallel",
     "e2e:test:serial": "npm run clean && npx playwright test --grep @serial --workers=1",
+    "e2e:list:parallel": "npm run e2e:test:parallel -- --list",
+    "e2e:list:serial": "npm run e2e:test:serial -- --list",
     "e2e:test:smoke": "npm run e2e:test --grep @smoke",
     "e2e:test:regression": "npm run e2e:test --grep-invert @smoke",
     "e2e:test:cli": "npm run e2e:test --project=cli tests/cli/",

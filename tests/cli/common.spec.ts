@@ -7,19 +7,20 @@ test.describe('zkApp-CLI', () => {
     const versionRegex = /^\d+\.\d+\.\d+$/i;
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
+    try {
+      for (const cliArg of ['-v', '--version']) {
+        await test.step(`Checking the "${cliArg}" case`, async () => {
+          const { code, stdout, stderr } = await execute('zk', cliArg);
+          const targetCliOutput = stdout.at(-1);
+          console.info(`[CLI StdOut] zk ${cliArg}: ${targetCliOutput}`);
 
-    for (const cliArg of ['-v', '--version']) {
-      await test.step(`Checking the "${cliArg}" case`, async () => {
-        const { code, stdout, stderr } = await execute('zk', cliArg);
-        const targetCliOutput = stdout.at(-1);
-        console.info(`[CLI StdOut] zk ${cliArg}: ${targetCliOutput}`);
-
-        checkCommandExecutionResults(code, stderr);
-        expect(targetCliOutput).toMatch(versionRegex);
-        expect(stdout).toHaveLength(1);
-      });
+          checkCommandExecutionResults(code, stderr);
+          expect(targetCliOutput).toMatch(versionRegex);
+          expect(stdout).toHaveLength(1);
+        });
+      }
+    } finally {
+      await cleanup();
     }
-
-    await cleanup();
   });
 });

@@ -1,21 +1,21 @@
 import { expect } from '@playwright/test';
 
-async function checkGeneratedSmartContractsFilesystem(
+async function checkSmartContractsFilesystem(
   path,
+  checkKeysExistence,
   listFilesystemFn,
   existsOnFilesystemFn
 ) {
+  expect(await existsOnFilesystemFn(path)).toBe(true);
   expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
-  expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
+  if (checkKeysExistence) {
+    expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
+  }
   expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
   expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
 }
 
-async function checkGeneratedUiFilesystem(
-  path,
-  listFilesystemFn,
-  existsOnFilesystemFn
-) {
+async function checkUiFilesystem(path, listFilesystemFn, existsOnFilesystemFn) {
   expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
   expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
 }
@@ -39,8 +39,7 @@ export async function checkProjectGenerationResults(
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success!');
   expect(stdOut).toContain('Next steps:');
-
-  expect(await existsOnFilesystemFn(`${projectName}`)).toBe(true);
+  expect(await existsOnFilesystemFn(`./${projectName}`)).toBe(true);
   expect(await existsOnFilesystemFn(`${projectName}/.git`)).toBe(true);
   expect((await listFilesystemFn(`./${projectName}`)).length).toBeGreaterThan(
     0
@@ -53,21 +52,19 @@ export async function checkProjectGenerationResults(
     case 'next':
     case 'svelte':
     case 'nuxt': {
-      await checkGeneratedSmartContractsFilesystem(
+      await checkSmartContractsFilesystem(
         contractsPath,
+        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
-      await checkGeneratedUiFilesystem(
-        uiPath,
-        listFilesystemFn,
-        existsOnFilesystemFn
-      );
+      await checkUiFilesystem(uiPath, listFilesystemFn, existsOnFilesystemFn);
       break;
     }
     case 'empty': {
-      await checkGeneratedSmartContractsFilesystem(
+      await checkSmartContractsFilesystem(
         contractsPath,
+        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
@@ -76,8 +73,9 @@ export async function checkProjectGenerationResults(
       break;
     }
     case 'none': {
-      await checkGeneratedSmartContractsFilesystem(
+      await checkSmartContractsFilesystem(
         `./${projectName}`,
+        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
@@ -85,4 +83,25 @@ export async function checkProjectGenerationResults(
       break;
     }
   }
+}
+
+export async function checkExampleProjectGenerationResults(
+  exampleType,
+  stdOut,
+  exitCode,
+  listFilesystemFn,
+  existsOnFilesystemFn
+) {
+  const path = `./${exampleType}`;
+  expect(exitCode).toBe(0);
+  expect(stdOut).toContain('Success!');
+  expect(stdOut).toContain('Next steps:');
+  await checkSmartContractsFilesystem(
+    path,
+    false,
+    listFilesystemFn,
+    existsOnFilesystemFn
+  );
+  expect(await existsOnFilesystemFn(`${path}/.git`)).toBe(true);
+  expect((await listFilesystemFn(`${path}/.git`)).length).toBeGreaterThan(0);
 }

@@ -11,6 +11,32 @@ export class Constants {
   static get mockedEndpointsServicePort() {
     return 8282;
   }
+  static get skipInteractiveSelectionOptions() {
+    return [false, true];
+  }
+  static get uiTypes() {
+    return ['next', 'svelte', 'nuxt', 'empty', 'none'];
+  }
+  static get exampleTypes() {
+    return ['sudoku', 'tictactoe'];
+  }
+  static get specialCliKeys() {
+    return [
+      'arrowDown',
+      'arrowLeft',
+      'arrowRight',
+      'arrowUp',
+      'backSpace',
+      'delete',
+      'end',
+      'enter',
+      'escape',
+      'home',
+      'pageUp',
+      'pageDown',
+      'space',
+    ];
+  }
   static get syncStatusGraphQlResponse() {
     return {
       data: {
@@ -139,29 +165,6 @@ export class Constants {
         sk: 'EKEJru1CaxwBKMZZzoKEpD1HPCF77htS2VgqoVz6dBaCRoTtmFCy',
       },
     ];
-  }
-  static get specialCliKeys() {
-    return [
-      'arrowDown',
-      'arrowLeft',
-      'arrowRight',
-      'arrowUp',
-      'backSpace',
-      'delete',
-      'end',
-      'enter',
-      'escape',
-      'home',
-      'pageUp',
-      'pageDown',
-      'space',
-    ];
-  }
-  static get uiTypes() {
-    return ['next', 'svelte', 'nuxt', 'empty', 'none'];
-  }
-  static get skipUiTypeSelectionOptions() {
-    return [false, true];
   }
 }
 

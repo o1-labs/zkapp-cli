@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-latest]
     services:
       mina-local-network:
-        image: us-west1-docker.pkg.dev/o1labs-192920/mina-local-network/mina-local-network:rampup-latest-lightnet
+        image: o1labs/mina-local-network:rampup-latest-lightnet
         env:
           NETWORK_TYPE: 'single-node'
           PROOF_LEVEL: 'none'
