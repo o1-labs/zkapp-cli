@@ -31,6 +31,11 @@
     "prepare": "husky install",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --silent",
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
+    "lint": "npm run prettier && npm run prettier-check && npm run eslint && npm run clean",
+    "eslint": "eslint . --ext .js,.ts --quiet --fix",
+    "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
+    "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
+    "upgrade-deps": "ncu -u",
     "e2e:prepare:cli": "npm r zkapp-cli -g && npm install && npm run build --if-present && npm link",
     "e2e:prepare:lib": "node ./tests/helpers/build-helper.mjs",
     "e2e:start:mocked-endpoints": "node ./tests/mocks/mocked-endpoints.mjs",
@@ -40,16 +45,7 @@
     "e2e:test": "npm run clean && npx playwright test --workers=1",
     "e2e:list:parallel": "npm run e2e:test:parallel -- --list",
     "e2e:list:serial": "npm run e2e:test:serial -- --list",
-    "e2e:test:smoke": "npm run e2e:test --grep @smoke",
-    "e2e:test:regression": "npm run e2e:test --grep-invert @smoke",
-    "e2e:test:cli": "npm run e2e:test --project=cli tests/cli/",
-    "e2e:test:ui": "npm run e2e:test tests/ui/",
-    "e2e:show-report": "npx playwright show-report reports/html-report",
-    "lint": "npm run prettier && npm run prettier-check && npm run eslint && npm run clean",
-    "eslint": "eslint . --ext .js,.ts --quiet --fix",
-    "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
-    "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
-    "upgrade-deps": "ncu -u"
+    "e2e:show-report": "npx playwright show-report reports/html-report"
   },
   "lint-staged": {
     "**/*": [
