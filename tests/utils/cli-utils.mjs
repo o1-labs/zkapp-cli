@@ -133,6 +133,12 @@ export async function generateExampleProject(
   const command = `example ${cliArgs}`.replace(/\s{2,}/g, ' ');
   let interactiveDialog = {};
 
+  if (getBooleanFromString(process.env.CI)) {
+    // Because of the way how it behaves in CI
+    // https://github.com/o1-labs/zkapp-cli/blob/f977c91ac11fe333b86317d6092c7a0d151a9529/src/lib/example.js#L113
+    delete process.env.CI;
+  }
+
   if (!skipInteractiveSelection) {
     interactiveDialog = {
       ...interactiveDialog,
