@@ -34,7 +34,7 @@ function nonceFetchingGraphQlResponseHandler(response) {
   response.end(JSON.stringify(Constants.nonceFetchingGraphQlResponse));
 }
 
-function accountDetailsFetchingGraphQlResponseHandler(response) {
+function accountDetailsFetchingGraphQlResponseHandler(query, response) {
   const startIndex = query.indexOf('publicKey: "') + 12;
   const publicKey = query.substring(startIndex, startIndex + 55);
 
@@ -78,7 +78,7 @@ function graphQlRouteHandler(request, response) {
         } else if (query.includes('{ nonce }')) {
           nonceFetchingGraphQlResponseHandler(response);
         } else if (query.includes(' zkappState ')) {
-          accountDetailsFetchingGraphQlResponseHandler(response);
+          accountDetailsFetchingGraphQlResponseHandler(query, response);
         } else if (query.includes(' zkappCommand: ')) {
           zkAppTransactionGraphQlResponseHandler(response);
         } else {
