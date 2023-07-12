@@ -32,43 +32,12 @@ jobs:
       - name: Wait for Docker container services to be ready
         run: ./tests/scripts/wait-for-sync.sh 8080
         shell: bash
-      - name: Setup NodeJS ${{ matrix.node }}
-        uses: actions/setup-node@v3
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
         with:
           node-version: ${{ matrix.node }}
-      - name: Install Node Dependencies, build and link the CLI app
-        run: |
-          npm ci
-          npm run build --if-present
-          npm link
-      - name: Install Playwright Dependencies
-        run: npm run e2e:install
-      - name: Configure Git
-        run: |
-          git config --global user.email "e2e@o1labs.org"
-          git config --global user.name "E2E Tests"
-      - name: Execute parallel E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test:parallel
-        env:
-          CI: true
-      - name: Upload E2E Test Artifacts (parallel execution report)
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: e2e-parallel-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-          path: reports/html-report/
-          retention-days: 30
-      # - name: Execute serial E2E Tests on ${{ matrix.os }}
-      #   run: npm run e2e:test:serial
-      #   env:
-      #     CI: true
-      # - name: Upload E2E Test Artifacts (serial execution report)
-      #   uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: e2e-serial-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-      #     path: reports/html-report/
-      #     retention-days: 30
+          os-type: ${{ matrix.os }}
+          shell: bash
   against-mocked-network-on-macos:
     timeout-minutes: 95
     runs-on: ${{ matrix.os }}
@@ -79,43 +48,12 @@ jobs:
         os: [macos-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Setup NodeJS ${{ matrix.node }}
-        uses: actions/setup-node@v3
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
         with:
           node-version: ${{ matrix.node }}
-      - name: Install Node Dependencies, build and link the CLI app
-        run: |
-          npm ci
-          npm run build --if-present
-          npm link
-      - name: Install Playwright Dependencies
-        run: npm run e2e:install
-      - name: Configure Git
-        run: |
-          git config --global user.email "e2e@o1labs.org"
-          git config --global user.name "E2E Tests"
-      - name: Execute parallel E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test:parallel
-        env:
-          CI: true
-      - name: Upload E2E Test Artifacts (parallel execution report)
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: e2e-parallel-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-          path: reports/html-report/
-          retention-days: 30
-      # - name: Execute serial E2E Tests on ${{ matrix.os }}
-      #   run: npm run e2e:test:serial
-      #   env:
-      #     CI: true
-      # - name: Upload E2E Test Artifacts (serial execution report)
-      #   uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: e2e-serial-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-      #     path: reports/html-report/
-      #     retention-days: 30
+          os-type: ${{ matrix.os }}
+          shell: bash
   against-mocked-network-on-windows:
     timeout-minutes: 95
     runs-on: ${{ matrix.os }}
@@ -126,40 +64,9 @@ jobs:
         os: [windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Setup NodeJS ${{ matrix.node }}
-        uses: actions/setup-node@v3
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
         with:
           node-version: ${{ matrix.node }}
-      - name: Install Node Dependencies, build and link the CLI app
-        run: |
-          npm ci
-          npm run build --if-present
-          npm link
-      - name: Install Playwright Dependencies
-        run: npm run e2e:install
-      - name: Configure Git
-        run: |
-          git config --global user.email "e2e@o1labs.org"
-          git config --global user.name "E2E Tests"
-      - name: Execute parallel E2E Tests on ${{ matrix.os }}
-        run: npm run e2e:test:parallel
-        env:
-          CI: true
-      - name: Upload E2E Test Artifacts (parallel execution report)
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: e2e-parallel-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-          path: reports/html-report/
-          retention-days: 30
-      # - name: Execute serial E2E Tests on ${{ matrix.os }}
-      #   run: npm run e2e:test:serial
-      #   env:
-      #     CI: true
-      # - name: Upload E2E Test Artifacts (serial execution report)
-      #   uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: e2e-serial-tests-report-node${{ matrix.node }}-${{ matrix.os }}
-      #     path: reports/html-report/
-      #     retention-days: 30
+          os-type: ${{ matrix.os }}
+          shell: powershell

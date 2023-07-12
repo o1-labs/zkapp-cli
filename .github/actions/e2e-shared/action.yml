@@ -1,0 +1,58 @@
+name: "Shared E2E Testing Steps"
+description: "Shared steps for the E2E testing jobs"
+inputs:
+  node-version:
+    description: "Node version"
+    required: true
+  os-type:
+    description: "OS type"
+    required: true
+  shell:
+    description: "Shell to use"
+    required: true
+    default: "bash"
+runs:
+  using: "composite"
+  steps:
+    - name: Setup NodeJS ${{ inputs.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+    - name: Install Node Dependencies, build and link the CLI app
+      run: |
+        npm ci
+        npm run build --if-present
+        npm link
+      shell: ${{ inputs.shell }}
+    - name: Install Playwright Dependencies
+      run: npm run e2e:install
+      shell: ${{ inputs.shell }}
+    - name: Configure Git
+      run: |
+        git config --global user.email "e2e@o1labs.org"
+        git config --global user.name "E2E Tests"
+      shell: ${{ inputs.shell }}
+    - name: Execute parallel E2E Tests on ${{ inputs.os-type }}
+      run: npm run e2e:test:parallel
+      shell: ${{ inputs.shell }}
+      env:
+        CI: "true"
+    - name: Upload E2E Test Artifacts (parallel execution report)
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-parallel-tests-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        path: reports/html-report/
+        retention-days: 30
+    # - name: Execute serial E2E Tests on ${{ inputs.os-type }}
+    #   run: npm run e2e:test:serial
+    #   shell: ${{ inputs.shell }}
+    #   env:
+    #     CI: "true"
+    # - name: Upload E2E Test Artifacts (serial execution report)
+    #   uses: actions/upload-artifact@v3
+    #   if: always()
+    #   with:
+    #     name: e2e-serial-tests-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
+    #     path: reports/html-report/
+    #     retention-days: 30

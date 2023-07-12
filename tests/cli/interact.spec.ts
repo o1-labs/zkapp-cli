@@ -10,7 +10,7 @@ import { Constants } from '../utils/common-utils.mjs';
 test.describe('Users', () => {
   // Tests for interaction with example projects of each type
   for (const exampleType of Constants.exampleTypes) {
-    test(`should be able to interact with an example zkApp project of ${exampleType.toUpperCase()} type, @parallel @smoke @example @${exampleType} @interaction`, async () => {
+    test(`should be able to interact with an example zkApp project of ${exampleType.toUpperCase()} type, @parallel @smoke @interaction @${exampleType}`, async () => {
       const { execute, spawn, cleanup, path } = await prepareEnvironment();
       console.info(`[Test Execution] Path: ${path}`);
 
