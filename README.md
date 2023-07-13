@@ -34,7 +34,7 @@ $ zk --version
 
 You are prompted to install the new version if you are running an earlier zkApp CLI minor version. For example, if you are running version 0.9.8, but the current version is 0.10.2, you are prompted to update. 
 
-You are not prompted to update if you are using an earlier patch version. For example, you are running 0.10.1, and the current version is 0.10.2). 
+You are not prompted to update if you are using an earlier patch version. For example, you are not notified to upgrade when you are running 0.10.1, and the current version is 0.10.2. 
 
 To update to the latest version of the Mina zkApp CLI:
 
