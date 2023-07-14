@@ -8,7 +8,6 @@ const glob = require('fast-glob');
 const { step } = require('./helpers');
 const fetch = require('node-fetch');
 const util = require('util');
-
 const { red, green, bold, reset } = require('chalk');
 const log = console.log;
 
@@ -227,7 +226,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Find the users file to import the smart contract from
@@ -251,7 +249,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   // Attempt to import the smart contract class to deploy from the user's file.
@@ -264,10 +261,9 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
-  // Attempt to import the zkApp private key from the `keys` directory and the feepayor private key. These keys will be used to deploy the zkApp.
+  // Attempt to import the zkApp private key from the `keys` directory and the feepayer private key. These keys will be used to deploy the zkApp.
   let feepayerPrivateKeyBase58;
   let zkAppPrivateKeyBase58;
   const { feepayerKeyPath } = config.deployAliases[alias];
@@ -281,7 +277,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
 
   try {
@@ -296,14 +291,12 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
-
   const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
-  const feepayorPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
-  const feepayerAddress = feepayorPrivateKey.toPublicKey(); //  The public key of the feepayer
+  const feepayerPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
+  const feepayerAddress = feepayerPrivateKey.toPublicKey(); //  The public key of the feepayer
 
   // figure out if the zkApp has a @method init() - in that case we need to create a proof,
   // so we need to compile no matter what, and we show a separate step to create the proof
@@ -356,7 +349,6 @@ async function deploy({ alias, yes }) {
     );
 
     process.exit(1);
-    return;
   }
   fee = `${Number(fee) * 1e9}`; // in nanomina (1 billion = 1.0 mina)
 
@@ -386,7 +378,7 @@ async function deploy({ alias, yes }) {
     });
     return {
       tx,
-      json: tx.sign([zkAppPrivateKey, feepayorPrivateKey]).toJSON(),
+      json: tx.sign([zkAppPrivateKey, feepayerPrivateKey]).toJSON(),
     };
   });
 
@@ -398,7 +390,7 @@ async function deploy({ alias, yes }) {
         return {
           tx: transaction.tx,
           json: transaction.tx
-            .sign([zkAppPrivateKey, feepayorPrivateKey])
+            .sign([zkAppPrivateKey, feepayerPrivateKey])
             .toJSON(),
         };
       }
