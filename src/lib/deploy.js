@@ -386,7 +386,7 @@ async function deploy({ alias, yes }) {
     });
     return {
       tx,
-      json: tx.sign([zkAppPrivateKey, feepayorPrivateKey]).toJSON(),
+      json: tx.sign([zkAppPrivateKey, feepayerPrivateKey]).toJSON(),
     };
   });
 
@@ -398,7 +398,7 @@ async function deploy({ alias, yes }) {
         return {
           tx: transaction.tx,
           json: transaction.tx
-            .sign([zkAppPrivateKey, feepayorPrivateKey])
+            .sign([zkAppPrivateKey, feepayerPrivateKey])
             .toJSON(),
         };
       }
