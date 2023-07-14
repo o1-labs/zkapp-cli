@@ -1,12 +1,31 @@
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { generateProject } from '../utils/cli-utils.mjs';
-import { Constants } from '../utils/common-utils.mjs';
+import { Constants, getArrayValuesAsString } from '../utils/common-utils.mjs';
 import { checkProjectGenerationResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
+  test(`should not generate zkApp project for unknown UI type, @parallel @smoke @project @fail-cases`, async () => {
+    const cliArg = 'project --ui test deploy-me';
+    const { execute, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+    try {
+      const { code, stderr } = await execute('zk', cliArg);
+      console.info(`[CLI StdErr] zk ${cliArg}: ${JSON.stringify(stderr)}`);
+
+      expect(code).toBeGreaterThan(0);
+      expect(stderr.at(-1)).toContain(
+        `ui was "test". Must be one of: ${getArrayValuesAsString(
+          Constants.uiTypes
+        )}.`
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
   // Tests for project generation of each UI type
   for (const uiType of Constants.uiTypes) {
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
@@ -23,7 +42,7 @@ test.describe('zkApp-CLI', () => {
           console.info(`[Test Execution] Path: ${path}`);
 
           try {
-            let { exitCode, stdOut } = await generateProject(
+            const { exitCode, stdOut } = await generateProject(
               projectName,
               uiType,
               skipInteractiveSelection,

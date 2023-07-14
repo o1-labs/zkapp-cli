@@ -1,9 +1,13 @@
-import { Constants, getBooleanFromString } from './common-utils.mjs';
+import {
+  Constants,
+  feePayerCacheExists,
+  getBooleanFromString,
+} from './common-utils.mjs';
 
-function generateInputsForOptionSelection(option, options) {
+function generateInputsForOptionSelection(lookupOption, targetOptions) {
   const inputs = [];
 
-  for (let i = 1; i <= options.indexOf(option); i++) {
+  for (let i = 1; i <= targetOptions.indexOf(lookupOption); i++) {
     inputs.push('arrowDown');
   }
 
@@ -14,8 +18,14 @@ function generateInputsForOptionSelection(option, options) {
 export async function executeInteractiveCommand(options) {
   console.info(`[Command options]: ${JSON.stringify(options)}`);
 
-  const { processHandler, runner, command, runFrom, interactiveDialog } =
-    options;
+  const {
+    processHandler,
+    runner,
+    command,
+    runFrom,
+    waitForCompletion,
+    interactiveDialog,
+  } = options;
   const {
     debug,
     getStdout,
@@ -49,7 +59,9 @@ export async function executeInteractiveCommand(options) {
     }
   }
 
-  await waitForFinish();
+  if (waitForCompletion) {
+    await waitForFinish();
+  }
 
   const stdOut = getStdout();
   const stdErr = getStderr();
@@ -115,6 +127,7 @@ export async function generateProject(
     runner: 'zk',
     command,
     runFrom: undefined,
+    waitForCompletion: true,
     interactiveDialog,
   });
 
@@ -154,11 +167,83 @@ export async function generateExampleProject(
     runner: 'zk',
     command,
     runFrom: undefined,
+    waitForCompletion: true,
     interactiveDialog,
   });
 
-  console.info(`[Project CLI StdOut] zk ${command}: ${stdOut}`);
-  console.info(`[Project CLI StdErr] zk ${command}: ${stdErr}`);
+  console.info(`[Example CLI StdOut] zk ${command}: ${stdOut}`);
+  console.info(`[Example CLI StdErr] zk ${command}: ${stdErr}`);
+
+  return { exitCode, stdOut, stdErr };
+}
+
+export async function createDeploymentAlias(processHandler, options) {
+  const command = 'config';
+  const {
+    deploymentAlias,
+    feePayerAlias,
+    feePayerPrivateKey,
+    minaGraphQlEndpoint,
+    transactionFee,
+    interruptProcess,
+    runFrom,
+    waitForCompletion,
+  } = options;
+  let useAnotherAccountInteractiveDialog = {};
+
+  if (feePayerCacheExists()) {
+    useAnotherAccountInteractiveDialog = {
+      ...useAnotherAccountInteractiveDialog,
+      'Use stored account': ['arrowDown', 'enter'],
+    };
+  }
+
+  const interactiveDialog = {
+    'Create a name (can be anything)': [deploymentAlias, 'enter'],
+    'Set the Mina GraphQL API URL to deploy to': [minaGraphQlEndpoint, 'enter'],
+    'Set transaction fee to use when deploying (in MINA)': [
+      transactionFee,
+      'enter',
+    ],
+    ...useAnotherAccountInteractiveDialog,
+    'Recover fee payer account from an existing base58 private key': ['enter'],
+    'Create an alias for this account': [feePayerAlias, 'enter'],
+    'Account private key (base58)': [
+      feePayerPrivateKey,
+      interruptProcess ? 'ctrlc' : 'enter',
+    ],
+  };
+
+  const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
+    processHandler,
+    runner: 'zk',
+    command,
+    runFrom,
+    waitForCompletion,
+    interactiveDialog,
+  });
+
+  console.info(`[Config CLI StdOut] zk ${command}: ${stdOut}`);
+  console.info(`[Config CLI StdErr] zk ${command}: ${stdErr}`);
+
+  return { exitCode, stdOut, stdErr };
+}
+
+export async function maybeCreateDeploymentAlias(processHandler, options) {
+  const command = 'config';
+  const { runFrom, waitForCompletion, interactiveDialog } = options;
+
+  const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
+    processHandler,
+    runner: 'zk',
+    command,
+    runFrom,
+    waitForCompletion,
+    interactiveDialog,
+  });
+
+  console.info(`[Config CLI StdOut] zk ${command}: ${stdOut}`);
+  console.info(`[Config CLI StdErr] zk ${command}: ${stdErr}`);
 
   return { exitCode, stdOut, stdErr };
 }

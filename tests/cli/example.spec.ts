@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { generateExampleProject } from '../utils/cli-utils.mjs';
-import { Constants } from '../utils/common-utils.mjs';
+import { Constants, getArrayValuesAsString } from '../utils/common-utils.mjs';
 import { checkExampleProjectGenerationResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
-  test(`should not generate zkApp project for unknown example type, @parallel @smoke @example @fail-case`, async () => {
+  test(`should not generate zkApp project for unknown example type, @parallel @smoke @example @fail-cases`, async () => {
     const cliArg = 'example --name test';
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
@@ -15,7 +15,9 @@ test.describe('zkApp-CLI', () => {
 
       expect(code).toBeGreaterThan(0);
       expect(stderr.at(-1)).toContain(
-        'name was "test". Must be one of: "sudoku", "tictactoe".'
+        `name was "test". Must be one of: ${getArrayValuesAsString(
+          Constants.exampleTypes
+        )}.`
       );
     } finally {
       await cleanup();
@@ -32,7 +34,7 @@ test.describe('zkApp-CLI', () => {
           console.info(`[Test Execution] Path: ${path}`);
 
           try {
-            let { exitCode, stdOut } = await generateExampleProject(
+            const { exitCode, stdOut } = await generateExampleProject(
               exampleType,
               skipInteractiveSelection,
               spawn
