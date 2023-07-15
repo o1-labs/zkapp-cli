@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
+import fs from 'fs-extra';
 import crypto from 'node:crypto';
-import fs from 'node:fs';
 import { createDeploymentAlias, generateProject } from '../utils/cli-utils.mjs';
 import {
   Constants,
@@ -38,7 +38,7 @@ test.describe('zkApp-CLI', () => {
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
     const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
-    const { spawn, cleanup, path, readFile } = await prepareEnvironment();
+    const { spawn, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
@@ -50,6 +50,7 @@ test.describe('zkApp-CLI', () => {
           deploymentAlias,
           feePayerAlias,
           feePayerPrivateKey: feePayerAccount.sk,
+          feePayerType: 'recover',
           minaGraphQlEndpoint,
           transactionFee: '0.01',
           interruptProcess: true,
@@ -61,9 +62,7 @@ test.describe('zkApp-CLI', () => {
           fs.existsSync(`${Constants.feePayerCacheDir}/${feePayerAlias}`)
         ).toBeFalsy();
         expect(
-          JSON.stringify(
-            JSON.parse(await readFile(`./${projectName}/config.json`))
-          )
+          JSON.stringify(fs.readJsonSync(`${path}/${projectName}/config.json`))
         ).toEqual(JSON.stringify(Constants.defaultProjectConfig));
       });
     } finally {
@@ -74,13 +73,11 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
-  // TODO: Input fields validation (deployment alias, fee payer, etc.)
+  // TODO: Input fields validation (deployment alias, fee payer, etc.) including duplicates
+  // - https://github.com/o1-labs/zkapp-cli/issues/428
   // TODO: Deployment alias creation and validation
-  // - with and without already existing fee payer cache
+  // - with and without already existing fee payer cache (parallel and serial tests)
   // - fee payer cases
-  // - parallel and serial tests
   // - cleanup (for parallel - specific fee payer and serial - cache dir in general)
-  // - more than one deployment alias for project
-  // - duplicated deployment alias and/or fee payer alias
-  // - https://github.com/o1-labs/zkapp-cli/issues/456
+  // - more than 1 or 2 deployment alias for project
 });

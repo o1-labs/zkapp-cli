@@ -76,6 +76,7 @@
   "devDependencies": {
     "@playwright/test": "^1.36.0",
     "@shimkiv/cli-testing-library": "^0.1.7",
+    "@types/fs-extra": "^11.0.1",
     "@types/jest": "^27.5.1",
     "@typescript-eslint/eslint-plugin": "^5.26.0",
     "@typescript-eslint/parser": "^5.26.0",

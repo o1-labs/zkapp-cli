@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'fs-extra';
 import os from 'node:os';
 
 export class Constants {
@@ -22,6 +22,9 @@ export class Constants {
   }
   static get exampleTypes() {
     return ['sudoku', 'tictactoe'];
+  }
+  static get feePayerTypes() {
+    return ['recover', 'new', 'cached'];
   }
   static get feePayerCacheDir() {
     return `${os.homedir()}/.cache/zkapp-cli/keys`;
@@ -216,6 +219,20 @@ export function feePayerCacheExists() {
     fs.existsSync(Constants.feePayerCacheDir) &&
     !isEmptyDir(Constants.feePayerCacheDir)
   );
+}
+
+export function listCachedFeePayerAliases() {
+  if (feePayerCacheExists()) {
+    let aliases = fs.readdirSync(Constants.feePayerCacheDir);
+
+    aliases = aliases
+      .filter((fileName) => fileName.endsWith('.json'))
+      .map((name) => name.slice(0, -5));
+
+    return aliases;
+  } else {
+    return [];
+  }
 }
 
 export function cleanupFeePayerCache() {

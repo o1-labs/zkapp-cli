@@ -2,6 +2,7 @@ import {
   Constants,
   feePayerCacheExists,
   getBooleanFromString,
+  listCachedFeePayerAliases,
 } from './common-utils.mjs';
 
 function generateInputsForOptionSelection(lookupOption, targetOptions) {
@@ -183,19 +184,75 @@ export async function createDeploymentAlias(processHandler, options) {
     deploymentAlias,
     feePayerAlias,
     feePayerPrivateKey,
+    feePayerType,
     minaGraphQlEndpoint,
     transactionFee,
     interruptProcess,
     runFrom,
     waitForCompletion,
   } = options;
-  let useAnotherAccountInteractiveDialog = {};
+  let feePayerInteractiveDialog = {};
 
-  if (feePayerCacheExists()) {
-    useAnotherAccountInteractiveDialog = {
-      ...useAnotherAccountInteractiveDialog,
+  if (feePayerCacheExists() && feePayerType !== 'cached') {
+    feePayerInteractiveDialog = {
+      ...feePayerInteractiveDialog,
       'Use stored account': ['arrowDown', 'enter'],
     };
+  }
+
+  switch (feePayerType) {
+    case 'recover': {
+      feePayerInteractiveDialog = {
+        ...feePayerInteractiveDialog,
+        'Recover fee payer account from an existing base58 private key': [
+          'enter',
+        ],
+        'Create an alias for this account': [feePayerAlias, 'enter'],
+        'Account private key (base58)': [
+          feePayerPrivateKey,
+          interruptProcess ? 'ctrlc' : 'enter',
+        ],
+      };
+      break;
+    }
+    case 'new': {
+      feePayerInteractiveDialog = {
+        ...feePayerInteractiveDialog,
+        'Recover fee payer account from an existing base58 private key': [
+          'arrowDown',
+          'enter',
+        ],
+        'Create an alias for this account': [
+          feePayerAlias,
+          interruptProcess ? 'ctrlc' : 'enter',
+        ],
+      };
+      break;
+    }
+    case 'cached': {
+      if (feePayerCacheExists()) {
+        feePayerInteractiveDialog = {
+          ...feePayerInteractiveDialog,
+          'Use stored account': ['enter'],
+        };
+      }
+      break;
+    }
+    default: {
+      feePayerInteractiveDialog = {
+        ...feePayerInteractiveDialog,
+        'Recover fee payer account from an existing base58 private key': [
+          'arrowDown',
+          'arrowDown',
+          'enter',
+        ],
+        'Choose another saved fee payer': generateInputsForOptionSelection(
+          feePayerType,
+          listCachedFeePayerAliases()
+        ),
+      };
+      break;
+    }
   }
 
   const interactiveDialog = {
@@ -205,13 +262,7 @@ export async function createDeploymentAlias(processHandler, options) {
       transactionFee,
       'enter',
     ],
-    ...useAnotherAccountInteractiveDialog,
-    'Recover fee payer account from an existing base58 private key': ['enter'],
-    'Create an alias for this account': [feePayerAlias, 'enter'],
-    'Account private key (base58)': [
-      feePayerPrivateKey,
-      interruptProcess ? 'ctrlc' : 'enter',
-    ],
+    ...feePayerInteractiveDialog,
   };
 
   const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
