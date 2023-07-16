@@ -12,8 +12,8 @@ const config: PlaywrightTestConfig = {
     timeout: 15 * 1000,
   },
   // Please be aware that parallel tests execution causes tests flackiness.
-  // Usually caused by: ZlibError: zlib: invalid stored block lengths
-  // Please consider using it for local development only.
+  // Usually because of: ZlibError: zlib: invalid stored block lengths
+  // Consider to use it for local development only.
   workers: '25%',
   fullyParallel: true,
   retries: 1,
@@ -26,7 +26,7 @@ const config: PlaywrightTestConfig = {
   use: {
     browserName: 'chromium',
     actionTimeout: 0,
-    headless: true,
+    headless: process.env.CI ? true : false,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     screenshot: {

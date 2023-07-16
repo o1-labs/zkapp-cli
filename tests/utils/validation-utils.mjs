@@ -1,4 +1,7 @@
 import { expect } from '@playwright/test';
+import fs from 'fs-extra';
+import { Constants } from '../utils/common-utils.mjs';
+import { listCachedFeePayerAliases } from './common-utils.mjs';
 
 async function checkSmartContractsFilesystem(
   path,
@@ -104,4 +107,46 @@ export async function checkExampleProjectGenerationResults(
   );
   expect(await existsOnFilesystemFn(`${path}/.git`)).toBe(true);
   expect((await listFilesystemFn(`${path}/.git`)).length).toBeGreaterThan(0);
+}
+
+export function checkDeploymentAliasCreationResults(options) {
+  const {
+    workDir,
+    deploymentAlias,
+    feePayerAlias,
+    feePayerAccount,
+    minaGraphQlEndpoint,
+    transactionFee,
+    stdOut,
+    exitCode,
+  } = options;
+  const sanitizedDeploymentAlias = deploymentAlias
+    .trim()
+    .replace(/\s{1,}/g, '-');
+  const sanitizedFeePayerAlias = feePayerAlias.trim().replace(/\s{1,}/g, '-');
+  const cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
+  const cachedFeePayerAccount = fs.readJsonSync(cachedFeePayerAccountPath);
+  const config = fs.readJsonSync(`${workDir}/config.json`);
+
+  expect(exitCode).toBe(0);
+  expect(stdOut).toContain('Success!');
+  expect(stdOut).toContain('Next steps:');
+  // TODO: Add more StdOut checks after the fix of:
+  // - https://github.com/o1-labs/zkapp-cli/issues/456
+  expect(
+    listCachedFeePayerAliases().includes(sanitizedFeePayerAlias)
+  ).toBeTruthy();
+  expect(cachedFeePayerAccount.publicKey).toEqual(feePayerAccount.pk);
+  expect(cachedFeePayerAccount.privateKey).toEqual(feePayerAccount.sk);
+  expect(
+    JSON.stringify(config.deployAliases[`${sanitizedDeploymentAlias}`])
+  ).toEqual(
+    JSON.stringify({
+      url: minaGraphQlEndpoint,
+      keyPath: `keys/${sanitizedDeploymentAlias}.json`,
+      feepayerKeyPath: cachedFeePayerAccountPath,
+      feepayerAlias: sanitizedFeePayerAlias,
+      fee: transactionFee,
+    })
+  );
 }

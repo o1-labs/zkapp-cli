@@ -74,7 +74,7 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.36.0",
+    "@playwright/test": "^1.36.1",
     "@shimkiv/cli-testing-library": "^0.1.7",
     "@types/fs-extra": "^11.0.1",
     "@types/jest": "^27.5.1",

@@ -243,7 +243,12 @@ export function cleanupFeePayerCache() {
 }
 
 export function cleanupFeePayerCacheByAlias(alias) {
-  fs.rmSync(`${Constants.feePayerCacheDir}/${alias}`, { force: true });
+  fs.rmSync(
+    `${Constants.feePayerCacheDir}/${alias
+      .trim()
+      .replace(/\s{1,}/g, '-')}.json`,
+    { force: true }
+  );
 }
 
 export function restoreFeePayerCache() {
