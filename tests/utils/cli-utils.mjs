@@ -1,9 +1,16 @@
+import crypto from 'node:crypto';
 import {
   Constants,
+  cleanupFeePayerCacheByAlias,
   feePayerCacheExists,
   getBooleanFromString,
   listCachedFeePayerAliases,
 } from './common-utils.mjs';
+import {
+  acquireAvailableAccount,
+  getMinaGraphQlEndpoint,
+  releaseAcquiredAccount,
+} from './network-utils.mjs';
 
 function generateInputsForOptionSelection(lookupOption, targetOptions) {
   const inputs = [];
@@ -297,4 +304,74 @@ export async function maybeCreateDeploymentAlias(processHandler, options) {
   console.info(`[Config CLI StdErr] zk ${command}: ${stdErr}`);
 
   return { exitCode, stdOut, stdErr };
+}
+
+export async function deployZkApp(
+  projectType,
+  interactiveMode,
+  processHandler,
+  cancelDeployment = false
+) {
+  const projectName = crypto.randomUUID();
+  const deploymentAlias = crypto.randomUUID();
+  const feePayerAlias = crypto.randomUUID();
+  const feePayerAccount = await acquireAvailableAccount();
+  const feePayerMgmtType = 'recover';
+  const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
+  const transactionFee = '0.01';
+  const cliArgs = interactiveMode ? `` : ' --yes ';
+  const command = `deploy ${cliArgs} ${deploymentAlias}`.replace(
+    /\s{2,}/g,
+    ' '
+  );
+  let interactiveDialog = {};
+  let workDir;
+
+  if (interactiveMode) {
+    interactiveDialog = {
+      ...interactiveDialog,
+      'Are you sure you want to send (yes/no)?': [
+        cancelDeployment ? 'no' : 'yes',
+        'enter',
+      ],
+    };
+  }
+
+  try {
+    if (Constants.exampleTypes.includes(projectType)) {
+      workDir = `./${projectType}`;
+      await generateExampleProject(projectType, true, processHandler);
+    } else {
+      workDir = `./${projectName}`;
+      await generateProject(projectName, projectType, true, processHandler);
+    }
+    await createDeploymentAlias(processHandler, {
+      deploymentAlias,
+      feePayerAlias,
+      feePayerPrivateKey: feePayerAccount.sk,
+      feePayerMgmtType,
+      minaGraphQlEndpoint,
+      transactionFee,
+      interruptProcess: false,
+      runFrom: workDir,
+      waitForCompletion: true,
+    });
+
+    const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
+      processHandler,
+      runner: 'zk',
+      command,
+      runFrom: workDir,
+      waitForCompletion: true,
+      interactiveDialog,
+    });
+
+    console.info(`[Deploy CLI StdOut] zk ${command}: ${stdOut}`);
+    console.info(`[Deploy CLI StdErr] zk ${command}: ${stdErr}`);
+
+    return { exitCode, stdOut, stdErr };
+  } finally {
+    cleanupFeePayerCacheByAlias(feePayerAlias);
+    await releaseAcquiredAccount(feePayerAccount);
+  }
 }

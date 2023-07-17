@@ -53,5 +53,5 @@ test.describe('Users', () => {
   // TODO:
   // - Deployed zkapp interaction (node build/src/interact.js local)
 
-  // TODO: Add more tests for generated project's UI interaction (npm run dev)
+  // TODO: Add more tests: Web-UI (in browser) of generated zkApp projects (npm run dev)
 });

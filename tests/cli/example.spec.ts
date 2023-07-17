@@ -9,6 +9,7 @@ test.describe('zkApp-CLI', () => {
     const cliArg = 'example --name test';
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
+
     try {
       const { code, stderr } = await execute('zk', cliArg);
       console.info(`[CLI StdErr] zk ${cliArg}: ${JSON.stringify(stderr)}`);

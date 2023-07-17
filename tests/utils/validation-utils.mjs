@@ -175,3 +175,16 @@ export function checkDeploymentAliasCreationResults(options) {
     })
   );
 }
+
+export async function checkZkAppDeploymentResults(exitCode, stdOut) {
+  const blockchainExplorerLink = stdOut.at(-1).trim();
+  const transactionHash = blockchainExplorerLink.substr(
+    blockchainExplorerLink.length - 52
+  );
+
+  expect(exitCode).toBe(0);
+  expect(stdOut).toContain('Success! Deploy transaction sent.');
+  expect(stdOut).toContain('Next step:');
+
+  // TODO: validate zkApp deployment on-chain
+}

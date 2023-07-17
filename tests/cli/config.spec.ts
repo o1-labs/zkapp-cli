@@ -26,6 +26,7 @@ test.describe('zkApp-CLI', () => {
     const cliArg = 'config';
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
+
     try {
       const { code, stdout } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);

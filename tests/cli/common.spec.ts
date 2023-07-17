@@ -7,6 +7,7 @@ test.describe('zkApp-CLI', () => {
     const versionRegex = /^\d+\.\d+\.\d+$/i;
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
+
     try {
       for (const cliArg of ['-v', '--version']) {
         await test.step(`Checking the "${cliArg}" case`, async () => {
