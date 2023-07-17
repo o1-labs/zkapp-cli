@@ -35,7 +35,7 @@ test.describe('zkApp-CLI', () => {
       );
 
       for (const skipInteractiveSelection of Constants.skipInteractiveSelectionOptions) {
-        await test.step(`Project generation and results validation ("skipInteractiveSelection=${skipInteractiveSelection}")`, async () => {
+        await test.step(`Project generation and results validation skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
           const projectName = crypto.randomUUID();
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();

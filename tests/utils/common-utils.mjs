@@ -23,7 +23,7 @@ export class Constants {
   static get exampleTypes() {
     return ['sudoku', 'tictactoe'];
   }
-  static get feePayerTypes() {
+  static get feePayerMgmtTypes() {
     return ['recover', 'new', 'cached'];
   }
   static get feePayerCacheDir() {

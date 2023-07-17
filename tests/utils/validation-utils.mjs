@@ -115,6 +115,7 @@ export function checkDeploymentAliasCreationResults(options) {
     deploymentAlias,
     feePayerAlias,
     feePayerAccount,
+    feePayerMgmtType,
     minaGraphQlEndpoint,
     transactionFee,
     stdOut,
@@ -123,24 +124,48 @@ export function checkDeploymentAliasCreationResults(options) {
   const sanitizedDeploymentAlias = deploymentAlias
     .trim()
     .replace(/\s{1,}/g, '-');
-  const sanitizedFeePayerAlias = feePayerAlias.trim().replace(/\s{1,}/g, '-');
-  const cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
-  const cachedFeePayerAccount = fs.readJsonSync(cachedFeePayerAccountPath);
-  const config = fs.readJsonSync(`${workDir}/config.json`);
+  const config = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
+    `${sanitizedDeploymentAlias}`
+  ];
+  let sanitizedFeePayerAlias;
+  let cachedFeePayerAccountPath;
 
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success!');
   expect(stdOut).toContain('Next steps:');
-  // TODO: Add more StdOut checks after the fix of:
+  // TODO: Add more StdOut checks after the fix of (don't forget about table view of the aliases):
   // - https://github.com/o1-labs/zkapp-cli/issues/456
-  expect(
-    listCachedFeePayerAliases().includes(sanitizedFeePayerAlias)
-  ).toBeTruthy();
-  expect(cachedFeePayerAccount.publicKey).toEqual(feePayerAccount.pk);
-  expect(cachedFeePayerAccount.privateKey).toEqual(feePayerAccount.sk);
-  expect(
-    JSON.stringify(config.deployAliases[`${sanitizedDeploymentAlias}`])
-  ).toEqual(
+
+  switch (feePayerMgmtType) {
+    case 'recover':
+    case 'new': {
+      sanitizedFeePayerAlias = feePayerAlias.trim().replace(/\s{1,}/g, '-');
+      cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
+
+      expect(
+        listCachedFeePayerAliases().includes(sanitizedFeePayerAlias)
+      ).toBeTruthy();
+      if (feePayerMgmtType === 'recover') {
+        const cachedFeePayerAccount = fs.readJsonSync(
+          cachedFeePayerAccountPath
+        );
+        expect(cachedFeePayerAccount.publicKey).toEqual(feePayerAccount.pk);
+        expect(cachedFeePayerAccount.privateKey).toEqual(feePayerAccount.sk);
+      }
+      break;
+    }
+    case 'cached': {
+      sanitizedFeePayerAlias = listCachedFeePayerAliases()[0];
+      break;
+    }
+    default: {
+      sanitizedFeePayerAlias = feePayerMgmtType.trim().replace(/\s{1,}/g, '-');
+      break;
+    }
+  }
+
+  cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
+  expect(JSON.stringify(config)).toEqual(
     JSON.stringify({
       url: minaGraphQlEndpoint,
       keyPath: `keys/${sanitizedDeploymentAlias}.json`,

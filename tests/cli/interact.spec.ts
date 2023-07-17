@@ -3,10 +3,6 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { generateExampleProject } from '../utils/cli-utils.mjs';
 import { Constants } from '../utils/common-utils.mjs';
 
-// TODO:
-// - Deployed zkapp interaction (node build/src/interact.js local)
-// - Generated project UI interaction (npm run dev)
-
 test.describe('Users', () => {
   // Tests for interaction with example projects of each type
   for (const exampleType of Constants.exampleTypes) {
@@ -53,4 +49,9 @@ test.describe('Users', () => {
       }
     });
   }
+
+  // TODO:
+  // - Deployed zkapp interaction (node build/src/interact.js local)
+
+  // TODO: Add more tests for generated project's UI interaction (npm run dev)
 });

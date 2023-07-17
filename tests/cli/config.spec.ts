@@ -9,8 +9,9 @@ import {
 } from '../utils/cli-utils.mjs';
 import {
   Constants,
+  cleanupFeePayerCache,
   cleanupFeePayerCacheByAlias,
-  feePayerCacheExists,
+  restoreFeePayerCache,
 } from '../utils/common-utils.mjs';
 import {
   acquireAvailableAccount,
@@ -56,7 +57,7 @@ test.describe('zkApp-CLI', () => {
           deploymentAlias,
           feePayerAlias,
           feePayerPrivateKey: feePayerAccount.sk,
-          feePayerType: 'recover',
+          feePayerMgmtType: 'recover',
           minaGraphQlEndpoint,
           transactionFee: '0.01',
           interruptProcess: true,
@@ -82,10 +83,12 @@ test.describe('zkApp-CLI', () => {
   test(`should properly validate input field values, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
     const deploymentAlias = crypto.randomUUID();
-    const newDeploymentAlias = '  this is  the   deployment    alias  ';
     const feePayerAlias = crypto.randomUUID();
+    // Serial because of  the following new aliases
+    const newDeploymentAlias = '  this is  the   deployment    alias  ';
     const newFeePayerAlias = '  this is  the   fee-payer    alias  ';
     const feePayerAccount = await acquireAvailableAccount();
+    const feePayerMgmtType = 'recover';
     const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
     const transactionFee = '0.01';
     const { spawn, cleanup, path } = await prepareEnvironment();
@@ -98,7 +101,7 @@ test.describe('zkApp-CLI', () => {
           deploymentAlias,
           feePayerAlias,
           feePayerPrivateKey: feePayerAccount.sk,
-          feePayerType: 'recover',
+          feePayerMgmtType,
           minaGraphQlEndpoint,
           transactionFee,
           interruptProcess: false,
@@ -107,13 +110,9 @@ test.describe('zkApp-CLI', () => {
         });
       });
       await test.step('Input field values validation', async () => {
-        let bypassCachedDataInteractiveDialog = {};
-        if (feePayerCacheExists()) {
-          bypassCachedDataInteractiveDialog = {
-            ...bypassCachedDataInteractiveDialog,
-            'Use stored account': ['arrowDown', 'enter'],
-          };
-        }
+        let bypassCachedAccountSelectionInteractiveDialog = {
+          'Use stored account': ['arrowDown', 'enter'],
+        };
 
         const { exitCode, stdOut } = await maybeCreateDeploymentAlias(spawn, {
           runFrom: `./${projectName}`,
@@ -161,7 +160,7 @@ test.describe('zkApp-CLI', () => {
               `  ${transactionFee}  `,
               'enter',
             ],
-            ...bypassCachedDataInteractiveDialog,
+            ...bypassCachedAccountSelectionInteractiveDialog,
             'Recover fee payer account from an existing base58 private key': [
               'enter',
             ],
@@ -206,6 +205,7 @@ test.describe('zkApp-CLI', () => {
           deploymentAlias: newDeploymentAlias,
           feePayerAlias: newFeePayerAlias,
           feePayerAccount,
+          feePayerMgmtType,
           minaGraphQlEndpoint,
           transactionFee,
           stdOut,
@@ -220,10 +220,133 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
-  // TODO: Deployment alias creation and validation
-  // - with and without already existing fee payer cache (parallel and serial tests)
-  // - more than 1 or 2 deployment alias for project
-  // - fee payer cases
+  test(`should create deployment alias in case of no cached fee payer account available, @serial @smoke @config`, async () => {
+    const projectName = crypto.randomUUID();
+    const deploymentAlias = crypto.randomUUID();
+    const feePayerAlias = crypto.randomUUID();
+    const feePayerAccount = await acquireAvailableAccount();
+    const feePayerMgmtType = 'recover';
+    const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
+    const transactionFee = '0.01';
+    const { spawn, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await generateProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Cleanup Fee Payer cache', async () => {
+        cleanupFeePayerCache();
+      });
+      await test.step('Deployment alias creation and results validation', async () => {
+        const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+          deploymentAlias,
+          feePayerAlias,
+          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerMgmtType,
+          minaGraphQlEndpoint,
+          transactionFee,
+          interruptProcess: false,
+          runFrom: `./${projectName}`,
+          waitForCompletion: true,
+        });
+        checkDeploymentAliasCreationResults({
+          workDir: `${path}/${projectName}`,
+          deploymentAlias,
+          feePayerAlias,
+          feePayerAccount,
+          feePayerMgmtType,
+          minaGraphQlEndpoint,
+          transactionFee,
+          stdOut,
+          exitCode,
+        });
+      });
+    } finally {
+      restoreFeePayerCache();
+      await releaseAcquiredAccount(feePayerAccount);
+      await cleanup();
+    }
+  });
+
+  test(`should create deployment aliases using available fee payer account management approaches, @serial @smoke @config`, async () => {
+    const projectName = crypto.randomUUID();
+    let deploymentAlias = crypto.randomUUID();
+    let feePayerAlias = crypto.randomUUID();
+    const feePayerAccount = await acquireAvailableAccount();
+    const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
+    const transactionFee = '0.01';
+    const { spawn, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await generateProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Cleanup Fee Payer cache', async () => {
+        cleanupFeePayerCache();
+      });
+      for (const feePayerMgmtType of Constants.feePayerMgmtTypes) {
+        deploymentAlias = crypto.randomUUID();
+        if (feePayerMgmtType !== 'cached') {
+          feePayerAlias = crypto.randomUUID();
+        }
+        await test.step(`Deployment alias creation (feePayerMgmtType=${feePayerMgmtType}) and results validation`, async () => {
+          const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+            deploymentAlias,
+            feePayerAlias,
+            feePayerPrivateKey: feePayerAccount.sk,
+            feePayerMgmtType,
+            minaGraphQlEndpoint,
+            transactionFee,
+            interruptProcess: false,
+            runFrom: `./${projectName}`,
+            waitForCompletion: true,
+          });
+          checkDeploymentAliasCreationResults({
+            workDir: `${path}/${projectName}`,
+            deploymentAlias,
+            feePayerAlias,
+            feePayerAccount,
+            feePayerMgmtType,
+            minaGraphQlEndpoint,
+            transactionFee,
+            stdOut,
+            exitCode,
+          });
+        });
+      }
+      deploymentAlias = crypto.randomUUID();
+      await test.step(`Deployment alias creation (feePayerMgmtType=another) and results validation`, async () => {
+        const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+          deploymentAlias,
+          feePayerAlias,
+          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerMgmtType: feePayerAlias,
+          minaGraphQlEndpoint,
+          transactionFee,
+          interruptProcess: false,
+          runFrom: `./${projectName}`,
+          waitForCompletion: true,
+        });
+        checkDeploymentAliasCreationResults({
+          workDir: `${path}/${projectName}`,
+          deploymentAlias,
+          feePayerAlias,
+          feePayerAccount,
+          feePayerMgmtType: feePayerAlias,
+          minaGraphQlEndpoint,
+          transactionFee,
+          stdOut,
+          exitCode,
+        });
+      });
+    } finally {
+      restoreFeePayerCache();
+      await releaseAcquiredAccount(feePayerAccount);
+      await cleanup();
+    }
+  });
 
   // TODO: Add more tests after the fix of:
   // - https://github.com/o1-labs/zkapp-cli/issues/461

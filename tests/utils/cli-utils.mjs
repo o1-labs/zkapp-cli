@@ -184,7 +184,7 @@ export async function createDeploymentAlias(processHandler, options) {
     deploymentAlias,
     feePayerAlias,
     feePayerPrivateKey,
-    feePayerType,
+    feePayerMgmtType,
     minaGraphQlEndpoint,
     transactionFee,
     interruptProcess,
@@ -193,14 +193,14 @@ export async function createDeploymentAlias(processHandler, options) {
   } = options;
   let feePayerInteractiveDialog = {};
 
-  if (feePayerCacheExists() && feePayerType !== 'cached') {
+  if (feePayerCacheExists() && feePayerMgmtType !== 'cached') {
     feePayerInteractiveDialog = {
       ...feePayerInteractiveDialog,
       'Use stored account': ['arrowDown', 'enter'],
     };
   }
 
-  switch (feePayerType) {
+  switch (feePayerMgmtType) {
     case 'recover': {
       feePayerInteractiveDialog = {
         ...feePayerInteractiveDialog,
@@ -247,7 +247,7 @@ export async function createDeploymentAlias(processHandler, options) {
           'enter',
         ],
         'Choose another saved fee payer': generateInputsForOptionSelection(
-          feePayerType,
+          feePayerMgmtType,
           listCachedFeePayerAliases()
         ),
       };

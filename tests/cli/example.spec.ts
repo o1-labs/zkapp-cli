@@ -28,7 +28,7 @@ test.describe('zkApp-CLI', () => {
   for (const exampleType of Constants.exampleTypes) {
     test(`should generate an example zkApp project of ${exampleType.toUpperCase()} type, @parallel @smoke @example @${exampleType}`, async () => {
       for (const skipInteractiveSelection of Constants.skipInteractiveSelectionOptions) {
-        await test.step(`Example project generation and results validation ("skipInteractiveSelection=${skipInteractiveSelection}")`, async () => {
+        await test.step(`Example project generation and results validation (skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();
           console.info(`[Test Execution] Path: ${path}`);
