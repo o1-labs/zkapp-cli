@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import http from 'node:http';
 import { Constants } from './common-utils.mjs';
 
@@ -70,7 +71,7 @@ function httpRequest(method, endpoint, data = null) {
     });
     request.on('error', reject);
     if (data) {
-      request.write(JSON.stringify(data));
+      request.write(data);
     }
     request.end();
   });
@@ -95,6 +96,10 @@ export async function getMinaGraphQlEndpoint() {
   return (await isEndpointAvailable(minaGraphQlEndpoint))
     ? minaGraphQlEndpoint
     : getMinaMockedGraphQlEndpoint();
+}
+
+export async function isMockedMinaGraphQlEndpointInUse() {
+  return (await getMinaGraphQlEndpoint()) === getMinaMockedGraphQlEndpoint();
 }
 
 export async function getMinaAccountsManagerEndpoint(
@@ -139,10 +144,96 @@ export async function releaseAcquiredAccount(account) {
     console.info(
       `Releasing account with public key '${account.pk}' using Mina Accounts-Manager: ${endpoint}`
     );
-    const response = await httpRequest('PUT', endpoint, account);
+    const response = await httpRequest(
+      'PUT',
+      endpoint,
+      JSON.stringify(account)
+    );
     console.info(`Mina Accounts-Manager response: ${JSON.stringify(response)}`);
   } catch (error) {
     console.error(`Failed to release acquired account: ${error}`);
     throw error;
   }
+}
+
+export async function getMempoolTxns() {
+  try {
+    const response = await httpRequest(
+      'POST',
+      await getMinaGraphQlEndpoint(),
+      JSON.stringify({
+        query: Constants.getMempoolTxnsQuery,
+        variables: {},
+        operationName: null,
+      })
+    );
+    return response.data.pooledUserCommands.concat(
+      response.data.pooledZkappCommands
+    );
+  } catch (error) {
+    console.error(`Failed to get mempool transactions: ${error.message}`);
+    return [];
+  }
+}
+
+export async function getAccountDetails(publicKey) {
+  try {
+    const response = await httpRequest(
+      'POST',
+      await getMinaGraphQlEndpoint(),
+      JSON.stringify({
+        query: Constants.getAccountDetailsQuery(publicKey),
+        variables: {},
+        operationName: null,
+      })
+    );
+    return response.data.account;
+  } catch (error) {
+    console.error(`Failed to get account details: ${error.message}`);
+    return undefined;
+  }
+}
+
+export async function getRecentBlocks() {
+  try {
+    const response = await httpRequest(
+      'POST',
+      await getMinaGraphQlEndpoint(),
+      JSON.stringify({
+        query: Constants.getRecentBlocksQuery(),
+        variables: {},
+        operationName: null,
+      })
+    );
+    return response.data.bestChain;
+  } catch (error) {
+    console.error(`Failed to get recent blocks: ${error.message}`);
+    return [];
+  }
+}
+
+export async function findTxnByHash(txnHash) {
+  const blocks = await getRecentBlocks();
+  const txns = (await getMempoolTxns())
+    .concat(blocks.map((block) => block.transactions.zkappCommands).flat())
+    .concat(blocks.map((block) => block.transactions.userCommands).flat());
+
+  return txns.find((txn) => txn.hash === txnHash);
+}
+
+export async function waitForTxnToBeMined(txnHash) {
+  await expect
+    .poll(
+      async () => {
+        console.info(
+          `Waiting for transaction with hash ${txnHash} to be mined...`
+        );
+        return (await getMempoolTxns()).map((transaction) => transaction.hash);
+      },
+      {
+        intervals: [3_000, 5_000, 10_000],
+        timeout: 10 * 60 * 1000,
+      }
+    )
+    .not.toContain(txnHash);
 }

@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import crypto from 'node:crypto';
 import {
   Constants,
@@ -307,6 +308,7 @@ export async function maybeCreateDeploymentAlias(processHandler, options) {
 }
 
 export async function deployZkApp(
+  path,
   projectType,
   interactiveMode,
   processHandler,
@@ -342,7 +344,11 @@ export async function deployZkApp(
       workDir = `./${projectType}`;
       await generateExampleProject(projectType, true, processHandler);
     } else {
-      workDir = `./${projectName}`;
+      if (projectType !== 'none') {
+        workDir = `./${projectName}/contracts`;
+      } else {
+        workDir = `./${projectName}`;
+      }
       await generateProject(projectName, projectType, true, processHandler);
     }
     await createDeploymentAlias(processHandler, {
@@ -356,6 +362,14 @@ export async function deployZkApp(
       runFrom: workDir,
       waitForCompletion: true,
     });
+    const sanitizedDeploymentAlias = deploymentAlias
+      .trim()
+      .replace(/\s{1,}/g, '-');
+    const zkAppKeyPath = fs.readJsonSync(`${path}/${workDir}/config.json`)
+      .deployAliases[sanitizedDeploymentAlias].keyPath;
+    const zkAppPublicKey = fs.readJsonSync(
+      `${path}/${workDir}/${zkAppKeyPath}`
+    ).publicKey;
 
     const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
       processHandler,
@@ -369,7 +383,7 @@ export async function deployZkApp(
     console.info(`[Deploy CLI StdOut] zk ${command}: ${stdOut}`);
     console.info(`[Deploy CLI StdErr] zk ${command}: ${stdErr}`);
 
-    return { exitCode, stdOut, stdErr };
+    return { zkAppPublicKey, exitCode, stdOut, stdErr };
   } finally {
     cleanupFeePayerCacheByAlias(feePayerAlias);
     await releaseAcquiredAccount(feePayerAccount);

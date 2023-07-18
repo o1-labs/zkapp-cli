@@ -2,6 +2,12 @@ import { expect } from '@playwright/test';
 import fs from 'fs-extra';
 import { Constants } from '../utils/common-utils.mjs';
 import { listCachedFeePayerAliases } from './common-utils.mjs';
+import {
+  findTxnByHash,
+  getAccountDetails,
+  isMockedMinaGraphQlEndpointInUse,
+  waitForTxnToBeMined,
+} from './network-utils.mjs';
 
 async function checkSmartContractsFilesystem(
   path,
@@ -125,7 +131,7 @@ export function checkDeploymentAliasCreationResults(options) {
     .trim()
     .replace(/\s{1,}/g, '-');
   const config = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
-    `${sanitizedDeploymentAlias}`
+    sanitizedDeploymentAlias
   ];
   let sanitizedFeePayerAlias;
   let cachedFeePayerAccountPath;
@@ -176,15 +182,26 @@ export function checkDeploymentAliasCreationResults(options) {
   );
 }
 
-export async function checkZkAppDeploymentResults(exitCode, stdOut) {
+export async function checkZkAppDeploymentResults(
+  zkAppPublicKey,
+  exitCode,
+  stdOut
+) {
   const blockchainExplorerLink = stdOut.at(-1).trim();
   const transactionHash = blockchainExplorerLink.substr(
     blockchainExplorerLink.length - 52
   );
+  await waitForTxnToBeMined(transactionHash);
+  const account = await getAccountDetails(zkAppPublicKey);
 
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success! Deploy transaction sent.');
   expect(stdOut).toContain('Next step:');
-
-  // TODO: validate zkApp deployment on-chain
+  if (!isMockedMinaGraphQlEndpointInUse()) {
+    const txnDetails = await findTxnByHash(transactionHash);
+    expect(txnDetails.failureReason).toBeNull();
+  }
+  expect(account.verificationKey).not.toBeNull();
+  expect(account.verificationKey.verificationKey).not.toBeNull();
+  expect(account.verificationKey.verificationKey.length).toBeGreaterThan(0);
 }

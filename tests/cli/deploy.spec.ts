@@ -3,6 +3,7 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import { deployZkApp, generateProject } from '../utils/cli-utils.mjs';
 import { Constants } from '../utils/common-utils.mjs';
+import { getMempoolTxns } from '../utils/network-utils.mjs';
 import { checkZkAppDeploymentResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
@@ -63,13 +64,15 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
-  test(`should not deploy zkApp if aborted, @parallel @smoke @deployment`, async () => {
+  test(`should not deploy zkApp if aborted, @serial @smoke @deployment`, async () => {
     const { spawn, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
       await test.step('ZkApp project generation, configuration and deployment cancellation', async () => {
+        const mempoolTxns = await getMempoolTxns();
         const { exitCode, stdOut } = await deployZkApp(
+          path,
           'none',
           true,
           spawn,
@@ -78,7 +81,7 @@ test.describe('zkApp-CLI', () => {
 
         expect(exitCode).toBeGreaterThan(0);
         expect(stdOut).toContain('Aborted. Transaction not sent.');
-        // TODO: validate that deployment txn is not sent (mempool is empty)
+        expect(await getMempoolTxns()).toEqual(mempoolTxns);
       });
     } finally {
       await cleanup();
@@ -91,22 +94,24 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('ZkApp project generation, configuration, deployment (interactive mode) and results validation', async () => {
-        const { exitCode, stdOut } = await deployZkApp(
+        const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+          path,
           'none',
           true,
           spawn,
           false
         );
-        await checkZkAppDeploymentResults(exitCode, stdOut);
+        await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
       });
       await test.step('ZkApp project generation, configuration, deployment (non-interactive mode) and results validation', async () => {
-        const { exitCode, stdOut } = await deployZkApp(
-          'none',
+        const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+          path,
+          'svelte',
           false,
           spawn,
           false
         );
-        await checkZkAppDeploymentResults(exitCode, stdOut);
+        await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
       });
     } finally {
       await cleanup();
@@ -120,13 +125,14 @@ test.describe('zkApp-CLI', () => {
     try {
       for (const exampleType of Constants.exampleTypes) {
         await test.step(`Example zkApp project generation (${exampleType.toUpperCase()}), configuration, deployment and results validation`, async () => {
-          const { exitCode, stdOut } = await deployZkApp(
+          const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+            path,
             exampleType,
             false,
             spawn,
             false
           );
-          await checkZkAppDeploymentResults(exitCode, stdOut);
+          await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
         });
       }
     } finally {

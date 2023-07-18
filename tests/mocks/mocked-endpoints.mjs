@@ -53,6 +53,12 @@ function zkAppTransactionGraphQlResponseHandler(response) {
   response.end(JSON.stringify(Constants.zkAppTransactionGraphQlResponse));
 }
 
+function mempoolGraphQlResponseHandler(response) {
+  console.log('-> Mocking mempool fetching GraphQL response');
+  response.writeHead(200);
+  response.end(JSON.stringify(Constants.mempoolGraphQlResponse));
+}
+
 function graphQlRouteHandler(request, response) {
   if (request.method !== 'POST') {
     rootRouteHandler(response);
@@ -81,6 +87,11 @@ function graphQlRouteHandler(request, response) {
           accountDetailsFetchingGraphQlResponseHandler(query, response);
         } else if (query.includes(' zkappCommand: ')) {
           zkAppTransactionGraphQlResponseHandler(response);
+        } else if (
+          query.includes(' pooledUserCommands ') ||
+          query.includes(' pooledZkappCommands ')
+        ) {
+          mempoolGraphQlResponseHandler(response);
         } else {
           rootRouteHandler(response);
         }

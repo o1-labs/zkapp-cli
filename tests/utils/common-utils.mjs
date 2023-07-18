@@ -32,6 +32,9 @@ export class Constants {
   static get feePayerTmpCacheDir() {
     return `${os.homedir()}/.cache/zkapp-cli/_keys`;
   }
+  static get recentBlocks() {
+    return 25;
+  }
   static get specialCliKeys() {
     return [
       'arrowDown',
@@ -142,6 +145,9 @@ export class Constants {
       },
     };
   }
+  static get mempoolGraphQlResponse() {
+    return { data: { pooledUserCommands: [], pooledZkappCommands: [] } };
+  }
   static get accounts() {
     return [
       {
@@ -185,6 +191,71 @@ export class Constants {
         sk: 'EKEJru1CaxwBKMZZzoKEpD1HPCF77htS2VgqoVz6dBaCRoTtmFCy',
       },
     ];
+  }
+  static get getMempoolTxnsQuery() {
+    return `{
+      pooledUserCommands {
+        hash
+        failureReason
+      }
+      pooledZkappCommands {
+        hash
+        failureReason {
+          failures
+          index
+        }
+      }
+    }`;
+  }
+  static getAccountDetailsQuery(publicKey) {
+    return `{
+      account(publicKey: "${publicKey}") {
+        balance {
+          blockHeight
+          total
+          locked
+          liquid
+          unknown
+        }
+        zkappState
+        verificationKey {
+          verificationKey
+        }
+      }
+    }`;
+  }
+  static getRecentBlocksQuery(maxLength = Constants.recentBlocks) {
+    return `{
+      bestChain(maxLength: ${maxLength}) {
+        protocolState {
+          consensusState {
+            blockHeight
+            epoch
+            slot
+            slotSinceGenesis
+          }
+          previousStateHash
+          blockchainState {
+            date
+          }
+        }
+        commandTransactionCount
+        stateHash
+        transactions {
+          userCommands {
+            hash
+            failureReason
+          }
+          zkappCommands {
+            hash
+            failureReason {
+              failures
+              index
+            }
+          }
+        }
+      }
+    }`;
   }
 }
 
