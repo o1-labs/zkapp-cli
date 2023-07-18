@@ -7,7 +7,7 @@ name: E2E Tests
 on: [push, pull_request]
 jobs:
   against-real-network-on-linux:
-    timeout-minutes: 95
+    timeout-minutes: 125
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true

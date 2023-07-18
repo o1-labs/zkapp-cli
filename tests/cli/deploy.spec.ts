@@ -106,7 +106,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('ZkApp project generation, configuration, deployment (non-interactive mode) and results validation', async () => {
         const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
           path,
-          'svelte',
+          'next', // Can't do Svelte on Windows, see Project generation tests for more info.
           false,
           spawn,
           false
