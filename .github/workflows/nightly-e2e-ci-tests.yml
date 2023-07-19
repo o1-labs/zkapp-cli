@@ -3,8 +3,10 @@
 # So we extracted the tests into 3 separate jobs, one for each platform.
 #
 
-name: E2E Tests
-on: [push, pull_request]
+name: Nightly E2E Tests (default branch)
+on:
+  schedule:
+    - cron: '0 0 * * *'
 jobs:
   against-real-network-on-linux:
     timeout-minutes: 125

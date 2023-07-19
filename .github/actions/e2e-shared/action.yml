@@ -32,15 +32,15 @@ runs:
         git config --global user.email "e2e@o1labs.org"
         git config --global user.name "E2E Tests"
       shell: ${{ inputs.shell }}
-    - name: Execute parallel E2E Tests on ${{ inputs.os-type }}
+    - name: Execute Nightly E2E Tests on ${{ inputs.os-type }}
       run: npm run e2e:test
       shell: ${{ inputs.shell }}
       env:
         CI: "true"
-    - name: Upload E2E Test Artifacts
+    - name: Upload Nightly E2E Test Artifacts
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: e2e-tests-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        name: nightly-e2e-tests-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: reports/html-report/
         retention-days: 30

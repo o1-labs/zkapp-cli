@@ -43,6 +43,7 @@
     "e2e:test:parallel": "npm run clean && npx playwright test --grep @parallel",
     "e2e:test:serial": "npm run clean && npx playwright test --grep @serial --workers=1",
     "e2e:test": "npm run clean && npx playwright test --workers=1",
+    "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'",
     "e2e:list:parallel": "npm run e2e:test:parallel -- --list",
     "e2e:list:serial": "npm run e2e:test:serial -- --list",
     "e2e:show-report": "npx playwright show-report reports/html-report"
