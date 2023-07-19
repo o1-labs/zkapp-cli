@@ -1,10 +1,10 @@
-import fs from 'fs-extra';
 import crypto from 'node:crypto';
 import {
   Constants,
   cleanupFeePayerCacheByAlias,
   feePayerCacheExists,
   getBooleanFromString,
+  getZkAppAccountFromAlias,
   listCachedFeePayerAliases,
 } from './common-utils.mjs';
 import {
@@ -362,13 +362,9 @@ export async function deployZkApp(
       runFrom: workDir,
       waitForCompletion: true,
     });
-    const sanitizedDeploymentAlias = deploymentAlias
-      .trim()
-      .replace(/\s{1,}/g, '-');
-    const zkAppKeyPath = fs.readJsonSync(`${path}/${workDir}/config.json`)
-      .deployAliases[sanitizedDeploymentAlias].keyPath;
-    const zkAppPublicKey = fs.readJsonSync(
-      `${path}/${workDir}/${zkAppKeyPath}`
+    const zkAppPublicKey = getZkAppAccountFromAlias(
+      `${path}/${workDir}`,
+      deploymentAlias
     ).publicKey;
 
     const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({

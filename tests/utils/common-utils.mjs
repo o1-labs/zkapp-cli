@@ -308,16 +308,18 @@ export function listCachedFeePayerAliases() {
 
 export function cleanupFeePayerCache() {
   if (feePayerCacheExists()) {
+    console.info(
+      `Cleaning up the fee payer cache directory: ${Constants.feePayerCacheDir}`
+    );
     fs.rmSync(Constants.feePayerTmpCacheDir, { force: true, recursive: true });
     fs.renameSync(Constants.feePayerCacheDir, Constants.feePayerTmpCacheDir);
   }
 }
 
 export function cleanupFeePayerCacheByAlias(alias) {
+  console.info(`Cleaning up the fee payer cache for alias: ${alias}`);
   fs.rmSync(
-    `${Constants.feePayerCacheDir}/${alias
-      .trim()
-      .replace(/\s{1,}/g, '-')}.json`,
+    `${Constants.feePayerCacheDir}/${alias.trim().replace(/\s+/g, '-')}.json`,
     { force: true }
   );
 }
@@ -330,4 +332,23 @@ export function restoreFeePayerCache() {
     fs.rmSync(Constants.feePayerCacheDir, { force: true, recursive: true });
     fs.renameSync(Constants.feePayerTmpCacheDir, Constants.feePayerCacheDir);
   }
+}
+
+export function getZkAppAccountFromAlias(workDir, deploymentAlias) {
+  const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
+  const zkAppKeyPath = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
+    sanitizedDeploymentAlias
+  ].keyPath;
+  const zkAppAccount = fs.readJsonSync(`${workDir}/${zkAppKeyPath}`);
+
+  return zkAppAccount;
+}
+
+export function getZkAppSmartContractNameFromAlias(workDir, deploymentAlias) {
+  const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
+  const smartContract = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
+    sanitizedDeploymentAlias
+  ].smartContract;
+
+  return smartContract;
 }

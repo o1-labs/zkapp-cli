@@ -127,9 +127,7 @@ export function checkDeploymentAliasCreationResults(options) {
     stdOut,
     exitCode,
   } = options;
-  const sanitizedDeploymentAlias = deploymentAlias
-    .trim()
-    .replace(/\s{1,}/g, '-');
+  const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
   const config = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
     sanitizedDeploymentAlias
   ];
@@ -145,7 +143,7 @@ export function checkDeploymentAliasCreationResults(options) {
   switch (feePayerMgmtType) {
     case 'recover':
     case 'new': {
-      sanitizedFeePayerAlias = feePayerAlias.trim().replace(/\s{1,}/g, '-');
+      sanitizedFeePayerAlias = feePayerAlias.trim().replace(/\s+/g, '-');
       cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
 
       expect(
@@ -165,7 +163,7 @@ export function checkDeploymentAliasCreationResults(options) {
       break;
     }
     default: {
-      sanitizedFeePayerAlias = feePayerMgmtType.trim().replace(/\s{1,}/g, '-');
+      sanitizedFeePayerAlias = feePayerMgmtType.trim().replace(/\s+/g, '-');
       break;
     }
   }
@@ -187,7 +185,10 @@ export async function checkZkAppDeploymentResults(
   exitCode,
   stdOut
 ) {
-  const blockchainExplorerLink = stdOut.at(-1).trim();
+  const blockchainExplorerLink =
+    stdOut.at(-1).trim().length === 0
+      ? stdOut.at(-2).trim()
+      : stdOut.at(-1).trim();
   const transactionHash = blockchainExplorerLink.substr(
     blockchainExplorerLink.length - 52
   );
@@ -197,11 +198,41 @@ export async function checkZkAppDeploymentResults(
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success! Deploy transaction sent.');
   expect(stdOut).toContain('Next step:');
-  if (!isMockedMinaGraphQlEndpointInUse()) {
+  if (!(await isMockedMinaGraphQlEndpointInUse())) {
     const txnDetails = await findTxnByHash(transactionHash);
     expect(txnDetails.failureReason).toBeNull();
   }
   expect(account.verificationKey).not.toBeNull();
   expect(account.verificationKey.verificationKey).not.toBeNull();
   expect(account.verificationKey.verificationKey.length).toBeGreaterThan(0);
+}
+
+export async function checkZkAppInteractionResults(
+  smartContractName,
+  zkAppPublicKey,
+  exitCode,
+  stdOut
+) {
+  const blockchainExplorerLink =
+    stdOut.at(-1).trim().length === 0
+      ? stdOut.at(-2).trim()
+      : stdOut.at(-1).trim();
+  const transactionHash = blockchainExplorerLink.substr(
+    blockchainExplorerLink.length - 52
+  );
+  await waitForTxnToBeMined(transactionHash);
+  const account = await getAccountDetails(zkAppPublicKey);
+
+  expect(exitCode).toBe(0);
+  switch (smartContractName) {
+    case 'Add': {
+      expect(stdOut).toContain('Success! Update transaction sent.');
+      if (!(await isMockedMinaGraphQlEndpointInUse())) {
+        const txnDetails = await findTxnByHash(transactionHash);
+        expect(txnDetails.failureReason).toBeNull();
+      }
+      expect(Number(account.zkappState[0])).toBeGreaterThan(1);
+      break;
+    }
+  }
 }
