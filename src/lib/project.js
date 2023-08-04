@@ -677,6 +677,9 @@ function loadCOIServiceWorker() {
 loadCOIServiceWorker();
 `
     );
+    
+   let ghpPostInstallScript = fs.readFileSync(path.join(__dirname, 'ui', 'next', 'ghp-postbuild.js')); 
+  
   }
 }
 
