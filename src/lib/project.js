@@ -605,7 +605,7 @@ async function scaffoldNext(projectName) {
       isWindows
         ? `type nul > ${path.join('out', '.nojekyll')}`
         : `touch ${path.join('out', '.nojekyll')}`
-    }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
+    } && node ./ghp-postbuild && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
     x.scripts['deploy'] = deployScript;
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
