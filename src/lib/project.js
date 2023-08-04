@@ -678,8 +678,13 @@ loadCOIServiceWorker();
 `
     );
 
-   let ghpPostInstallScript = fs.readFileSync(path.join(__dirname, 'ui', 'next', 'ghp-postbuild.js')); 
-   ghpPostInstallScript = ghpPostInstallScript.replace(`let repoURL = '';`, `let repoURL = ${projectName};`)
+   let ghpPostInstallScript = fs.readFileSync(path.join(__dirname, 'ui', 'next', 'ghp-postbuild.js'),'utf8'); 
+   ghpPostInstallScript = ghpPostInstallScript.replace(`let repoURL = '';`, `let repoURL = ${projectName};`);
+
+   fs.writeFileSync(
+    path.join('ui', 'next', 'ghp-postbuild.js'),
+    ghpPostInstallScript
+   );
 
   }
 }
