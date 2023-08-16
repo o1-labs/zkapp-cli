@@ -13,8 +13,12 @@ files.forEach((file) => {
     const filePath = path.join(cssDir, file);
 
     const data = fs.readFileSync(filePath, 'utf8');
-    const regex = new RegExp(`url\\(\\s*'\\/(?!${repoURL})`, 'g');
-    const result = data.replace(regex, `url('/${repoURL}/`);
+
+    const singleQuoteRegex = new RegExp(`url\\(\\s*'\\/(?!${repoURL})`, 'g');
+    const doubleQuoteRegex = new RegExp(`url\\(\\s*"\\/(?!${repoURL})`, 'g');
+
+    let result = data.replace(singleQuoteRegex, `url('/${repoURL}/`);
+    result = result.replace(doubleQuoteRegex, `url("/${repoURL}/`);
 
     fs.writeFileSync(filePath, result, 'utf8');
   }
