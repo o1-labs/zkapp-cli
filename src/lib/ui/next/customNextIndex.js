@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { useEffect } from 'react';
 import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
-import HeroMinaLogo from '../../public/assets/hero-mina-logo.svg';
-import ArrowRightSmall from '../../public/assets/arrow-right-small.svg';
+import heroMinaLogo from '../../public/assets/hero-mina-logo.svg';
+import arrowRightSmall from '../../public/assets/arrow-right-small.svg';
 
 export default function Home() {
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function Home() {
             >
               <Image
                 className={styles.logo}
-                src={HeroMinaLogo}
+                src={heroMinaLogo}
                 alt="Mina Logo"
                 width="191"
                 height="174"
@@ -71,7 +71,7 @@ export default function Home() {
                 <span>DOCS</span>
                 <div>
                   <Image
-                    src="/assets/arrow-right-small.svg"
+                    src={arrowRightSmall}
                     alt="Mina Logo"
                     width={16}
                     height={16}
@@ -91,7 +91,7 @@ export default function Home() {
                 <span>TUTORIALS</span>
                 <div>
                   <Image
-                    src={ArrowRightSmall}
+                    src={arrowRightSmall}
                     alt="Mina Logo"
                     width={16}
                     height={16}
@@ -111,7 +111,7 @@ export default function Home() {
                 <span>QUESTIONS</span>
                 <div>
                   <Image
-                    src={ArrowRightSmall}
+                    src={arrowRightSmall}
                     alt="Mina Logo"
                     width={16}
                     height={16}
@@ -131,7 +131,7 @@ export default function Home() {
                 <span>DEPLOY</span>
                 <div>
                   <Image
-                    src={ArrowRightSmall}
+                    src={arrowRightSmall}
                     alt="Mina Logo"
                     width={16}
                     height={16}
