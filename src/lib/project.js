@@ -583,6 +583,7 @@ async function scaffoldNext(projectName) {
   assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
 };`
     );
+
     newNextConfig = newNextConfig.replace(
       'return config;',
       `config.optimization.minimizer = [];
@@ -590,7 +591,7 @@ async function scaffoldNext(projectName) {
     );
 
     // update papage extensions
-    newNextConfig = nextConfig.replace(
+    newNextConfig = newNextConfig.replace(
       'reactStrictMode: false,',
       `reactStrictMode: false,
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
@@ -678,17 +679,17 @@ loadCOIServiceWorker();
 `
     );
 
-    let ghpPostInstallScript = fs.readFileSync(
+    let ghpPostBuildScript = fs.readFileSync(
       path.join(__dirname, 'ui', 'next', 'ghp-postbuild.js'),
       'utf8'
     );
 
-    ghpPostInstallScript = ghpPostInstallScript.replace(
+    ghpPostBuildScript = ghpPostBuildScript.replace(
       `let repoURL = '';`,
-      `let repoURL = ${projectName};`
+      `let repoURL = "${projectName}";`
     );
 
-    fs.writeFileSync(path.join('ui', 'ghp-postbuild.js'), ghpPostInstallScript);
+    fs.writeFileSync(path.join('ui', 'ghp-postbuild.js'), ghpPostBuildScript);
   }
 }
 
