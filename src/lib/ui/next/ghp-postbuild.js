@@ -13,7 +13,8 @@ files.forEach((file) => {
     const filePath = path.join(cssDir, file);
 
     const data = fs.readFileSync(filePath, 'utf8');
-    const result = data.replace(/url\(\s*'\//g, `url('/${repoURL}/`);
+    const regex = new RegExp(`url\\(\\s*'\\/(?!${repoURL})`, 'g');
+    const result = data.replace(regex, `url('/${repoURL}/`);
 
     fs.writeFileSync(filePath, result, 'utf8');
   }
