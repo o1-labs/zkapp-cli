@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2023-08-16
+
+### Added
+
+- A post build script was added to prepend a project repo name to built css asset urls so a NextJS UI project can be correctly deployed to GitHub Pages [#468](https://github.com/o1-labs/zkapp-cli/pull/468)  
+
+### Fixed
+
+- A fix to deploy a NextJS UI project to GitHub Pages without manual configuration by running `npm run deploy` [#468](https://github.com/o1-labs/zkapp-cli/pull/468)
+
+
 ## [0.11.0] - 2023-07-14
 
 ### Changed

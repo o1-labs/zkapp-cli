@@ -1,6 +1,6 @@
 module.exports = `
 <script>
-  import heroMinaLogo from '$lib/assets/HeroMinaLogo.svg'
+  import heroMinaLogo from '$lib/assets/hero-mina-logo.svg'
   import arrowRightSmall from '$lib/assets/arrow-right-small.svg'
   import GradientBG from './GradientBG.svelte'
   import { onMount } from 'svelte'
