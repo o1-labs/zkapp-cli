@@ -13,7 +13,7 @@ module.exports = `
         >
           <img
             class="logo"
-            src="~/assets/HeroMinaLogo.svg"
+            src="~/assets/hero-mina-logo.svg"
             alt="Mina Logo"
             width="191"
             height="174"
