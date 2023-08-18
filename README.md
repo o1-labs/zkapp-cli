@@ -1,18 +1,18 @@
 # Mina zkApp CLI
 
-The Mina zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices. 
+The Mina zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
 
 Apps are written using [SnarkyJS](https://docs.minaprotocol.com/en/zkapps/snarkyjs-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. SnarkyJS is automatically included when you create a project using the Mina zkApp CLI.
 
 ## Getting Started
 
-Read through this README file and the Mina Protocol [zkApp Developer](https://docs.minaprotocol.com/zkapps) docs. 
+Read through this README file and the Mina Protocol [zkApp Developer](https://docs.minaprotocol.com/zkapps) docs.
 
 Build foundational knowledge by completing the guided steps in the [zkApp Developer Tutorials](https://docs.minaprotocol.com/zkapps/tutorials).
 
 ## Get Involved
 
-To learn about ways to participate and interact with community members, see the Mina [Online Communities](https://docs.minaprotocol.com/participate/online-communities) docs. 
+To learn about ways to participate and interact with community members, see the Mina [Online Communities](https://docs.minaprotocol.com/participate/online-communities) docs.
 
 Contributions are always appreciated. See the zkApp CLI [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/README.md) guidelines.
 
@@ -32,9 +32,9 @@ $ zk --version
 
 ### Update the Mina zkApp CLI
 
-You are prompted to install the new version if you are running an earlier zkApp CLI minor version. For example, if you are running version 0.9.8, but the current version is 0.10.2, you are prompted to update. 
+You are prompted to install the new version if you are running an earlier zkApp CLI minor version. For example, if you are running version 0.9.8, but the current version is 0.10.2, you are prompted to update.
 
-You are not prompted to update if you are using an earlier patch version. For example, you are not notified to upgrade when you are running 0.10.1, and the current version is 0.10.2. 
+You are not prompted to update if you are using an earlier patch version. For example, you are not notified to upgrade when you are running 0.10.1, and the current version is 0.10.2.
 
 To update to the latest version of the Mina zkApp CLI:
 
@@ -46,8 +46,8 @@ $ npm update -g zkapp-cli
 
 To use the zkApp CLI and SnarkyJS, your environment requires:
 
-- NodeJS v16 and later (or NodeJS v14 using `--experimental-wasm-threads`)
-- NPM v6 and later
+- NodeJS v16 and later
+- NPM v8 and later
 - Git v2 and later
 
 Use a package manager to install the required versions and upgrade older versions if needed. Package managers for the supported environments are:
@@ -94,7 +94,7 @@ This command creates a directory containing a new project template, fully set up
 - See the included [README](templates/project-ts/README.md) for usage instructions.
   All of the usual commands are available: `npm run build`, `npm run test`, `npm run coverage`, and so on.
 - A GitHub repo is automatically initialized in the project directory. For consistency and by convention, we use `main` as the default development branch.
-- A [GitHub Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is 
+- A [GitHub Actions CI workflow](templates/project-ts/.github/workflows/ci.yml) is
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
 - Code style consistency (using Prettier) and linting (using ES Lint) is automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
@@ -122,7 +122,7 @@ zk file <name>  # or path/to/name
 
 This command creates `name.js` and `name.test.js`.
 
-For convenience, when you run this command in your project's _root_ directory creates the files inside your project's `src` dir automatically, even if you don't specify `src/` as part of your file path. 
+For convenience, when you run this command in your project's _root_ directory creates the files inside your project's `src` dir automatically, even if you don't specify `src/` as part of your file path.
 
 When you run this command when you are _not_ in your project's
 root dir, files are created at the path you specify relative to your terminal's current working directory.
@@ -145,7 +145,7 @@ The auto-generated `config.json` file contains your deployment-related configura
 
 Run the `zk config` command to add a new deployment configuration to this file.
 
-Respond to the interactive command prompts to build or update a deploy alias. 
+Respond to the interactive command prompts to build or update a deploy alias.
 
 A deploy alias consists of:
 
@@ -158,7 +158,7 @@ A deploy alias consists of:
 
   - A key pair to use as a fee payer account for updates and deployments. Public and private keys are stored on your local computer and can be used across multiple projects.
 
-- Fee payer account alias 
+- Fee payer account alias
 
   A fee payer account is required. If you don't have a fee payer account, you are prompted to select one of these options:
 
@@ -173,10 +173,10 @@ zk deploy <alias>
 zk deploy // shows a list of aliases in your project to choose from
 ```
 
-_**Deployment is supported only to Berkeley Testnet. 
+_**Deployment is supported only to Berkeley Testnet.
 zkApp programmability is not yet available on the Mina Mainnet.**_
 
-After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias. 
+After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias.
 
 Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` this _same_ smart contract automatically deploys to this alias. See [Tutorial 3: Deploy to a Live Network](https://docs.minaprotocol.com/zkapps/tutorials/deploying-to-a-network).
 
