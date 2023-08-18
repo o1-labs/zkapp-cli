@@ -35,18 +35,9 @@
     "eslint": "eslint . --ext .js,.ts --quiet --fix",
     "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
     "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
-    "upgrade-deps": "ncu -u",
-    "e2e:prepare:cli": "npm r zkapp-cli -g && npm install && npm run build --if-present && npm link",
-    "e2e:prepare:lib": "node ./tests/helpers/build-helper.mjs",
-    "e2e:start:mocked-endpoints": "node ./tests/mocks/mocked-endpoints.mjs",
     "e2e:install": "npx playwright-core install --with-deps",
-    "e2e:test:parallel": "npm run clean && npx playwright test --grep @parallel",
-    "e2e:test:serial": "npm run clean && npx playwright test --grep @serial --workers=1",
     "e2e:test": "npm run clean && npx playwright test --workers=1",
-    "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'",
-    "e2e:list:parallel": "npm run e2e:test:parallel -- --list",
-    "e2e:list:serial": "npm run e2e:test:serial -- --list",
-    "e2e:show-report": "npx playwright show-report reports/html-report"
+    "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'"
   },
   "lint-staged": {
     "**/*": [
@@ -75,7 +66,7 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.36.1",
+    "@playwright/test": "^1.37.0",
     "@shimkiv/cli-testing-library": "^0.1.7",
     "@types/fs-extra": "^11.0.1",
     "@types/jest": "^27.5.1",

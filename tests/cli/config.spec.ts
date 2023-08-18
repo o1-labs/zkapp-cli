@@ -21,17 +21,17 @@ import {
 import { checkDeploymentAliasCreationResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
-  // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
   test(`should not create deployment alias if not within the project dir, @parallel @smoke @config @fail-cases`, async () => {
     const cliArg = 'config';
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { code, stdout } = await execute('zk', cliArg);
+      const { stdout } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-      expect(code).toBe(0);
+      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
+      // expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
@@ -348,7 +348,4 @@ test.describe('zkApp-CLI', () => {
       await cleanup();
     }
   });
-
-  // TODO: Add more tests after the fix of:
-  // - https://github.com/o1-labs/zkapp-cli/issues/461
 });

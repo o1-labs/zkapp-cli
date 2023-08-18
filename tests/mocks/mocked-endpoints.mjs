@@ -12,7 +12,7 @@ function rootRouteHandler(response) {
   response.end(JSON.stringify({ application: applicationName }));
 }
 
-function notFundRouteHandler(response) {
+function notFoundRouteHandler(response) {
   response.writeHead(404);
   response.end(JSON.stringify({ error: '404 Not Found' }));
 }
@@ -163,7 +163,7 @@ const requestListener = function (request, response) {
       break;
     }
     default: {
-      notFundRouteHandler(response);
+      notFoundRouteHandler(response);
       break;
     }
   }

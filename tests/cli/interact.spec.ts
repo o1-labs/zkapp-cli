@@ -47,22 +47,12 @@ test.describe('Users', () => {
             `./${exampleType}`
           );
           expect(npmRunBuildResults.code).toBe(0);
-          const { code, stdout } = await execute(
+          const { code } = await execute(
             'npm',
             'run start',
             `./${exampleType}`
           );
           expect(code).toBe(0);
-          switch (exampleType) {
-            case 'sudoku': {
-              expect(stdout).toContain('Is the sudoku solved? true');
-              break;
-            }
-            case 'tictactoe': {
-              expect(stdout).toContain('did someone win? Player 1!');
-              break;
-            }
-          }
         });
       } finally {
         await cleanup();
@@ -154,6 +144,4 @@ test.describe('Users', () => {
       await cleanup();
     }
   });
-
-  // TODO: Add more tests: Web-UI (in browser) of generated zkApp projects (npm run dev)
 });

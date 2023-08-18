@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import http from 'node:http';
 import { Constants } from './common-utils.mjs';
 
-function getValidUrlOrNUll(url) {
+function getValidUrlOrNull(url) {
   try {
     return new URL(url.trim());
   } catch (_) {
@@ -11,7 +11,7 @@ function getValidUrlOrNUll(url) {
 }
 
 function isEndpointAvailable(url, isMinaGraphQlEndpoint = true) {
-  const validUrl = getValidUrlOrNUll(url);
+  const validUrl = getValidUrlOrNull(url);
   if (!validUrl) return Promise.resolve(false);
 
   const { hostname, port, pathname } = validUrl;
@@ -42,7 +42,7 @@ function isEndpointAvailable(url, isMinaGraphQlEndpoint = true) {
 
 function httpRequest(method, endpoint, data = null) {
   const { hostname, port, pathname, searchParams } =
-    getValidUrlOrNUll(endpoint);
+    getValidUrlOrNull(endpoint);
   const options = {
     method,
     hostname,
@@ -226,7 +226,7 @@ export async function waitForTxnToBeMined(txnHash) {
     .poll(
       async () => {
         console.info(
-          `Waiting for transaction with hash ${txnHash} to be mined...`
+          `Waiting for transaction with hash ${txnHash} to be included into the block...`
         );
         return (await getMempoolTxns()).map((transaction) => transaction.hash);
       },

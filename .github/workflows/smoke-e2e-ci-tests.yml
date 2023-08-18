@@ -1,5 +1,8 @@
 name: Smoke E2E Tests
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch: {}
 jobs:
   against-real-network-on-linux:
     timeout-minutes: 30
@@ -17,6 +20,7 @@ jobs:
           PROOF_LEVEL: 'none'
         ports:
           - 3085:3085
+          - 5432:5432
           - 8080:8080
           - 8181:8181
         # TODO: Disable logging for the container as the workaround for a long post-job-cleanup phase
@@ -25,10 +29,12 @@ jobs:
         options: --log-driver=none
     steps:
       - uses: actions/checkout@v3
-      - name: Make helper script executable
-        run: chmod +x tests/scripts/wait-for-sync.sh
-      - name: Wait for Docker container services to be ready
-        run: ./tests/scripts/wait-for-sync.sh 8080
+      - name: Wait for Mina Network readiness
+        uses: o1-labs/wait-for-mina-network-action@v1
+        with:
+          mina-graphql-port: 8080
+          max-attempts: 60
+          polling-interval-ms: 10000
       - name: Setup NodeJS ${{ matrix.node }}
         uses: actions/setup-node@v3
         with:

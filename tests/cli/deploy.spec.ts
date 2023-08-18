@@ -7,17 +7,17 @@ import { getMempoolTxns } from '../utils/network-utils.mjs';
 import { checkZkAppDeploymentResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
-  // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
   test(`should not deploy zkApp if not within the project dir, @parallel @smoke @deployment @fail-cases`, async () => {
     const cliArg = 'deploy local';
     const { execute, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { code, stdout } = await execute('zk', cliArg);
+      const { stdout } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-      expect(code).toBe(0);
+      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
+      // expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
@@ -139,8 +139,4 @@ test.describe('zkApp-CLI', () => {
       await cleanup();
     }
   });
-
-  // TODO: Add more tests for specific edge cases:
-  // - networking or file system related issues during deployments, etc.
-  // - compatibility (an attempt to deploy zkApp using golden-master configuration).
 });

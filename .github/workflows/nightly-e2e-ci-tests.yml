@@ -7,6 +7,7 @@ name: Nightly E2E Tests (default branch)
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch: {}
 jobs:
   against-real-network-on-linux:
     timeout-minutes: 125
@@ -24,16 +25,17 @@ jobs:
           PROOF_LEVEL: 'none'
         ports:
           - 3085:3085
+          - 5432:5432
           - 8080:8080
           - 8181:8181
     steps:
       - uses: actions/checkout@v3
-      - name: Make helper script executable
-        run: chmod +x tests/scripts/wait-for-sync.sh
-        shell: bash
-      - name: Wait for Docker container services to be ready
-        run: ./tests/scripts/wait-for-sync.sh 8080
-        shell: bash
+      - name: Wait for Mina Network readiness
+        uses: o1-labs/wait-for-mina-network-action@v1
+        with:
+          mina-graphql-port: 8080
+          max-attempts: 60
+          polling-interval-ms: 10000
       - name: Use shared E2E testing steps
         uses: ./.github/actions/e2e-shared
         with:

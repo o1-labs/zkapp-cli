@@ -68,7 +68,7 @@ const config: PlaywrightTestConfig = {
     // },
   ],
   webServer: {
-    command: 'npm run e2e:start:mocked-endpoints',
+    command: 'node ./tests/mocks/mocked-endpoints.mjs',
     url: getMockedEndpointsServiceEndpoint(),
     timeout: 30 * 1000,
   },

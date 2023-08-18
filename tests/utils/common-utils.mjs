@@ -264,7 +264,7 @@ export function generateRandomInt(min, max) {
 }
 
 export function getBooleanFromString(string) {
-  return string != null && string != undefined && string.trim() === 'true';
+  return string?.trim() === 'true';
 }
 
 export function getArrayValuesAsString(array) {
