@@ -29,13 +29,13 @@ jobs:
           - 8080:8080
           - 8181:8181
     steps:
-      - uses: actions/checkout@v3
       - name: Wait for Mina Network readiness
         uses: o1-labs/wait-for-mina-network-action@v1
         with:
           mina-graphql-port: 8080
           max-attempts: 60
           polling-interval-ms: 10000
+      - uses: actions/checkout@v3
       - name: Use shared E2E testing steps
         uses: ./.github/actions/e2e-shared
         with:

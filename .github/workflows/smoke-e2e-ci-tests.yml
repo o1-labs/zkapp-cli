@@ -28,13 +28,13 @@ jobs:
         # - https://hub.docker.com/r/o1labs/mina-local-network
         options: --log-driver=none
     steps:
-      - uses: actions/checkout@v3
       - name: Wait for Mina Network readiness
         uses: o1-labs/wait-for-mina-network-action@v1
         with:
           mina-graphql-port: 8080
           max-attempts: 60
           polling-interval-ms: 10000
+      - uses: actions/checkout@v3
       - name: Setup NodeJS ${{ matrix.node }}
         uses: actions/setup-node@v3
         with:
