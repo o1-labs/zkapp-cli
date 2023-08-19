@@ -52,12 +52,12 @@ jobs:
         run: npm run e2e:test:smoke
         env:
           CI: 'true'
-      - name: Upload Mina Daemon(s) logs
+      - name: Upload Mina logs
         uses: actions/upload-artifact@v3
         with:
           if-no-files-found: ignore
-          name: mina-daemon-logs
-          path: /tmp/single-node-network.log
+          name: mina-logs-smoke-e2e-tests-node${{ matrix.node }}-${{ matrix.os }}
+          path: /tmp/*.log
           retention-days: 5
       - name: Upload Smoke E2E Test Artifacts
         uses: actions/upload-artifact@v3
