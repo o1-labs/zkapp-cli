@@ -23,10 +23,8 @@ jobs:
           - 5432:5432
           - 8080:8080
           - 8181:8181
-        # TODO: Disable logging for the container as the workaround for a long post-job-cleanup phase
-        # - Will be fixed by improving logging as part of the work on:
-        # - https://hub.docker.com/r/o1labs/mina-local-network
-        options: --log-driver=none
+        volumes:
+          - /tmp:/root/logs
     steps:
       - name: Wait for Mina Network readiness
         uses: o1-labs/wait-for-mina-network-action@v1
@@ -54,6 +52,13 @@ jobs:
         run: npm run e2e:test:smoke
         env:
           CI: 'true'
+      - name: Upload Mina Daemon(s) logs
+        uses: actions/upload-artifact@v3
+        with:
+          if-no-files-found: ignore
+          name: mina-daemon-logs
+          path: /tmp/single-node-network.log
+          retention-days: 5
       - name: Upload Smoke E2E Test Artifacts
         uses: actions/upload-artifact@v3
         if: always()
