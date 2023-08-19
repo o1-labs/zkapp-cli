@@ -41,6 +41,7 @@ export async function executeInteractiveCommand(options) {
     getStderr,
     getExitCode,
     pressKey,
+    wait,
     waitForText,
     waitForFinish,
     writeText,
@@ -58,6 +59,9 @@ export async function executeInteractiveCommand(options) {
     const inputs = interactiveDialog[prompt];
     for (const input of inputs) {
       if (Constants.specialCliKeys.includes(input)) {
+        // We have to wait for a bit before pressing the special keys
+        // because otherwise it might be ignored by the CLI
+        await wait(100);
         await pressKey(input);
       } else {
         await writeText(input);
