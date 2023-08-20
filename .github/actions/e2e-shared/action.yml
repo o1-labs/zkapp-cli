@@ -1,4 +1,4 @@
-name: "Shared E2E Testing Steps"
+name: "Shared E2E testing steps"
 description: "Shared steps for the E2E testing jobs"
 inputs:
   node-version:
@@ -11,6 +11,14 @@ inputs:
     description: "Shell to use"
     required: true
     default: "bash"
+  test-script:
+    description: "Test script to run"
+    required: false
+    default: "npm run e2e:test"
+  artifacts-prefix:
+    description: "Job artifacts prefix"
+    required: false
+    default: "nightly-e2e-tests"
 runs:
   using: "composite"
   steps:
@@ -18,13 +26,13 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.node-version }}
-    - name: Install Node Dependencies, build and link the CLI app
+    - name: Install Node dependencies, build and link the CLI app
       run: |
         npm ci
         npm run build --if-present
         npm link
       shell: ${{ inputs.shell }}
-    - name: Install Playwright Dependencies
+    - name: Install Playwright dependencies
       run: npm run e2e:install
       shell: ${{ inputs.shell }}
     - name: Configure Git
@@ -32,8 +40,8 @@ runs:
         git config --global user.email "e2e@o1labs.org"
         git config --global user.name "E2E Tests"
       shell: ${{ inputs.shell }}
-    - name: Execute Nightly E2E Tests on ${{ inputs.os-type }}
-      run: npm run e2e:test
+    - name: Execute E2E tests on ${{ inputs.os-type }}
+      run: ${{ inputs.test-script }}
       shell: ${{ inputs.shell }}
       env:
         CI: "true"
@@ -41,13 +49,13 @@ runs:
       uses: actions/upload-artifact@v3
       with:
         if-no-files-found: ignore
-        name: mina-logs-nightly-e2e-tests-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        name: mina-logs-${{ inputs.artifacts-prefix }}-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: /tmp/*.log
         retention-days: 5
-    - name: Upload Nightly E2E Test Artifacts
+    - name: Upload E2E test artifacts
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: nightly-e2e-tests-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        name: ${{ inputs.artifacts-prefix }}-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: reports/html-report/
         retention-days: 30

@@ -3,7 +3,7 @@
 # So we extracted the tests into 3 separate jobs, one for each platform.
 #
 
-name: Nightly E2E Tests (default branch)
+name: Nightly E2E tests (default branch)
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -31,7 +31,7 @@ jobs:
         volumes:
           - /tmp:/root/logs
     steps:
-      - name: Wait for Mina Network readiness
+      - name: Wait for Mina network readiness
         uses: o1-labs/wait-for-mina-network-action@v1
         with:
           mina-graphql-port: 8080
