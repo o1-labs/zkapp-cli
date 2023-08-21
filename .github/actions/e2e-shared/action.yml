@@ -47,6 +47,7 @@ runs:
         CI: "true"
     - name: Upload Mina logs
       uses: actions/upload-artifact@v3
+      continue-on-error: true
       if: always()
       with:
         if-no-files-found: ignore
@@ -55,6 +56,7 @@ runs:
         retention-days: 5
     - name: Upload E2E test artifacts
       uses: actions/upload-artifact@v3
+      continue-on-error: true
       if: always()
       with:
         if-no-files-found: ignore
