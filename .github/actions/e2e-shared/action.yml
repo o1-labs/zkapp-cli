@@ -47,6 +47,7 @@ runs:
         CI: "true"
     - name: Upload Mina logs
       uses: actions/upload-artifact@v3
+      if: always()
       with:
         if-no-files-found: ignore
         name: mina-logs-${{ inputs.artifacts-prefix }}-node${{ inputs.node-version }}-${{ inputs.os-type }}
@@ -56,6 +57,7 @@ runs:
       uses: actions/upload-artifact@v3
       if: always()
       with:
+        if-no-files-found: ignore
         name: ${{ inputs.artifacts-prefix }}-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: reports/html-report/
         retention-days: 30
