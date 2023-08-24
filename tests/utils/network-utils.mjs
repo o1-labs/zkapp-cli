@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import http from 'node:http';
-import { Constants } from './common-utils.mjs';
+import { TestConstants } from './common-utils.mjs';
 
 function getValidUrlOrNull(url) {
   try {
@@ -80,7 +80,7 @@ function httpRequest(method, endpoint, data = null) {
 export function getMockedEndpointsServiceEndpoint() {
   return `http://localhost:${
     process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
-    Constants.mockedEndpointsServicePort
+    TestConstants.mockedEndpointsServicePort
   }`;
 }
 
@@ -90,7 +90,7 @@ export function getMinaMockedGraphQlEndpoint() {
 
 export async function getMinaGraphQlEndpoint() {
   const minaGraphQlEndpoint = `http://localhost:${
-    process.env.MINA_GRAPHQL_PORT ?? Constants.minaGraphQlPort
+    process.env.MINA_GRAPHQL_PORT ?? TestConstants.minaGraphQlPort
   }/graphql`;
 
   return (await isEndpointAvailable(minaGraphQlEndpoint))
@@ -106,10 +106,11 @@ export async function getMinaAccountsManagerEndpoint(
   isForAccountAcquisition = true
 ) {
   const accountsManagerPort =
-    process.env.MINA_ACCOUNTS_MANAGER_PORT ?? Constants.minaAccountsManagerPort;
+    process.env.MINA_ACCOUNTS_MANAGER_PORT ??
+    TestConstants.minaAccountsManagerPort;
   const mockedAccountsManagerPort =
     process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
-    Constants.mockedEndpointsServicePort;
+    TestConstants.mockedEndpointsServicePort;
   const endpointAction = isForAccountAcquisition
     ? 'acquire-account'
     : 'release-account';
@@ -162,7 +163,7 @@ export async function getMempoolTxns() {
       'POST',
       await getMinaGraphQlEndpoint(),
       JSON.stringify({
-        query: Constants.getMempoolTxnsQuery,
+        query: TestConstants.getMempoolTxnsQuery,
         variables: {},
         operationName: null,
       })
@@ -182,7 +183,7 @@ export async function getAccountDetails(publicKey) {
       'POST',
       await getMinaGraphQlEndpoint(),
       JSON.stringify({
-        query: Constants.getAccountDetailsQuery(publicKey),
+        query: TestConstants.getAccountDetailsQuery(publicKey),
         variables: {},
         operationName: null,
       })
@@ -200,7 +201,7 @@ export async function getRecentBlocks() {
       'POST',
       await getMinaGraphQlEndpoint(),
       JSON.stringify({
-        query: Constants.getRecentBlocksQuery(),
+        query: TestConstants.getRecentBlocksQuery(),
         variables: {},
         operationName: null,
       })

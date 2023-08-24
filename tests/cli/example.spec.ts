@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
+import { Constants } from '../../src/lib/constants.js';
 import { generateExampleProject } from '../utils/cli-utils.mjs';
-import { Constants, getArrayValuesAsString } from '../utils/common-utils.mjs';
+import {
+  TestConstants,
+  getArrayValuesAsString,
+} from '../utils/common-utils.mjs';
 import { checkExampleProjectGenerationResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
@@ -28,7 +32,7 @@ test.describe('zkApp-CLI', () => {
   // Tests for example projects generation of each type
   for (const exampleType of Constants.exampleTypes) {
     test(`should generate an example zkApp project of ${exampleType.toUpperCase()} type, @parallel @smoke @example @${exampleType}`, async () => {
-      for (const skipInteractiveSelection of Constants.skipInteractiveSelectionOptions) {
+      for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
         await test.step(`Example project generation and results validation (skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();

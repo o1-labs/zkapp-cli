@@ -1,14 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import fs from 'fs-extra';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import { Constants } from '../../src/lib/constants.js';
 import {
   createDeploymentAlias,
   generateProject,
   maybeCreateDeploymentAlias,
 } from '../utils/cli-utils.mjs';
 import {
-  Constants,
+  TestConstants,
   cleanupFeePayerCache,
   cleanupFeePayerCacheByAlias,
   restoreFeePayerCache,
@@ -70,8 +71,8 @@ test.describe('zkApp-CLI', () => {
           fs.existsSync(`${Constants.feePayerCacheDir}/${feePayerAlias}`)
         ).toBeFalsy();
         expect(
-          JSON.stringify(fs.readJsonSync(`${path}/${projectName}/config.json`))
-        ).toEqual(JSON.stringify(Constants.defaultProjectConfig));
+          fs.readFileSync(`${path}/${projectName}/config.json`, 'utf8')
+        ).toEqual(JSON.stringify(TestConstants.defaultProjectConfig));
       });
     } finally {
       // Just in case, should not be created as validated above
@@ -287,7 +288,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('Cleanup Fee Payer cache', async () => {
         cleanupFeePayerCache();
       });
-      for (const feePayerMgmtType of Constants.feePayerMgmtTypes) {
+      for (const feePayerMgmtType of TestConstants.feePayerMgmtTypes) {
         deploymentAlias = crypto.randomUUID();
         if (feePayerMgmtType !== 'cached') {
           feePayerAlias = crypto.randomUUID();

@@ -13,6 +13,7 @@ const nuxtGradientBackground = require('../lib/ui/nuxt/nuxtGradientBackground');
 const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
 const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
 const gradientBackground = require('./ui/svelte/gradientBackground');
+const { Constants } = require('./constants');
 
 const shExec = util.promisify(sh.exec);
 
@@ -46,7 +47,7 @@ async function project({ name, ui }) {
       res = await prompt({
         type: 'select',
         name: 'ui',
-        choices: ['next', 'svelte', 'nuxt', 'empty', 'none'],
+        choices: Constants.uiTypes,
         message: (state) =>
           message(state, 'Create an accompanying UI project too?'),
         prefix: (state) => prefix(state),

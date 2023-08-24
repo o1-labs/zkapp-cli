@@ -68,7 +68,8 @@ const config: PlaywrightTestConfig = {
     // },
   ],
   webServer: {
-    command: 'node ./tests/mocks/mocked-endpoints.mjs',
+    // TODO: We can't use "ts-node" with Npx and Node20 because of the https://github.com/TypeStrong/ts-node/issues/1997
+    command: 'node --loader ts-node/esm ./tests/mocks/mocked-endpoints.mts',
     url: getMockedEndpointsServiceEndpoint(),
     timeout: 30 * 1000,
   },

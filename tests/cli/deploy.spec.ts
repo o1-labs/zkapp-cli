@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
+import { Constants } from '../../src/lib/constants.js';
 import { deployZkApp, generateProject } from '../utils/cli-utils.mjs';
-import { Constants } from '../utils/common-utils.mjs';
 import { getMempoolTxns } from '../utils/network-utils.mjs';
 import { checkZkAppDeploymentResults } from '../utils/validation-utils.mjs';
 

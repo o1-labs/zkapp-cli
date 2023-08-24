@@ -7,6 +7,7 @@ const util = require('util');
 const gittar = require('gittar');
 const { prompt } = require('enquirer');
 const { red, reset } = require('chalk');
+const { Constants } = require('./constants');
 
 const _green = chalk.green;
 const _red = chalk.red;
@@ -24,7 +25,7 @@ async function example(example) {
     const res = await prompt({
       type: 'select',
       name: 'example',
-      choices: ['sudoku', 'tictactoe'],
+      choices: Constants.exampleTypes,
       message: (state) => {
         const style =
           state.submitted && !state.cancelled ? state.styles.success : reset;

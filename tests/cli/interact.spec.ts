@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
+import { Constants } from '../../src/lib/constants.js';
 import {
   createDeploymentAlias,
   executeInteractiveCommand,
@@ -8,7 +9,6 @@ import {
   generateProject,
 } from '../utils/cli-utils.mjs';
 import {
-  Constants,
   cleanupFeePayerCacheByAlias,
   getZkAppAccountFromAlias,
   getZkAppSmartContractNameFromAlias,

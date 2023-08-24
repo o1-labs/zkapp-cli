@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import fs from 'fs-extra';
-import { Constants } from '../utils/common-utils.mjs';
+import fs from 'node:fs';
+import { Constants } from '../../src/lib/constants.js';
 import { listCachedFeePayerAliases } from './common-utils.mjs';
 import {
   findTxnByHash,
@@ -128,9 +128,8 @@ export function checkDeploymentAliasCreationResults(options) {
     exitCode,
   } = options;
   const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
-  const config = fs.readJsonSync(`${workDir}/config.json`).deployAliases[
-    sanitizedDeploymentAlias
-  ];
+  const config = JSON.parse(fs.readFileSync(`${workDir}/config.json`, 'utf8'))
+    .deployAliases[sanitizedDeploymentAlias];
   let sanitizedFeePayerAlias;
   let cachedFeePayerAccountPath;
 
@@ -150,8 +149,8 @@ export function checkDeploymentAliasCreationResults(options) {
         listCachedFeePayerAliases().includes(sanitizedFeePayerAlias)
       ).toBeTruthy();
       if (feePayerMgmtType === 'recover') {
-        const cachedFeePayerAccount = fs.readJsonSync(
-          cachedFeePayerAccountPath
+        const cachedFeePayerAccount = JSON.parse(
+          fs.readFileSync(cachedFeePayerAccountPath, 'utf8')
         );
         expect(cachedFeePayerAccount.publicKey).toEqual(feePayerAccount.pk);
         expect(cachedFeePayerAccount.privateKey).toEqual(feePayerAccount.sk);

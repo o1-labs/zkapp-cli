@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
+import { Constants } from '../../src/lib/constants.js';
 import {
-  Constants,
+  TestConstants,
   cleanupFeePayerCacheByAlias,
   feePayerCacheExists,
   getBooleanFromString,
@@ -58,10 +59,10 @@ export async function executeInteractiveCommand(options) {
     await waitForText(prompt.replace(/^#+/g, ''));
     const inputs = interactiveDialog[prompt];
     for (const input of inputs) {
-      if (Constants.specialCliKeys.includes(input)) {
+      if (TestConstants.specialCliKeys.includes(input)) {
         // We have to wait for a bit before pressing the special keys
         // because otherwise it might be ignored by the CLI
-        await wait(100);
+        await wait(TestConstants.cliPromptMsDelay);
         await pressKey(input);
       } else {
         await writeText(input);

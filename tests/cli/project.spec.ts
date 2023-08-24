@@ -2,8 +2,12 @@ import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import os from 'node:os';
+import { Constants } from '../../src/lib/constants.js';
 import { generateProject } from '../utils/cli-utils.mjs';
-import { Constants, getArrayValuesAsString } from '../utils/common-utils.mjs';
+import {
+  TestConstants,
+  getArrayValuesAsString,
+} from '../utils/common-utils.mjs';
 import { checkProjectGenerationResults } from '../utils/validation-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
@@ -35,7 +39,7 @@ test.describe('zkApp-CLI', () => {
         'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
       );
 
-      for (const skipInteractiveSelection of Constants.skipInteractiveSelectionOptions) {
+      for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
         await test.step(`Project generation and results validation skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
           const projectName = crypto.randomUUID();
           const { spawn, cleanup, path, ls, exists } =

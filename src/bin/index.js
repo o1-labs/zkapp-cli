@@ -9,6 +9,7 @@ const { deploy } = require('../lib/deploy');
 const { example } = require('../lib/example');
 const { system } = require('../lib/system');
 const chalk = require('chalk');
+const { Constants } = require('../lib/constants');
 
 const _g = chalk.green;
 const _r = chalk.reset;
@@ -48,7 +49,7 @@ yargs(hideBin(process.argv))
         demand: false,
         string: true,
         hidden: false,
-        choices: ['next', 'svelte', 'nuxt', 'empty', 'none'],
+        choices: Constants.uiTypes,
         description: 'Creates an accompanying UI',
       },
     },
@@ -85,7 +86,7 @@ yargs(hideBin(process.argv))
         demand: false,
         string: true,
         hidden: false,
-        choices: ['sudoku', 'tictactoe'],
+        choices: Constants.exampleTypes,
       },
     },
     async (argv) => await example(argv.name)
