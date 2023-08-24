@@ -24,6 +24,7 @@ export type Constants = {
       };
     };
   };
+  // eslint-disable-next-line no-unused-vars
   getAccountDetailsFetchingGraphQlResponse: (publicKey: string) => {
     data: {
       account: {
@@ -65,6 +66,6 @@ export type Constants = {
     sk: string;
   }[];
   getMempoolTxnsQuery: string;
-  getAccountDetailsQuery: (publicKey: string) => string;
-  getRecentBlocksQuery: (maxLength?: number) => string;
+  getAccountDetailsQuery: (publicKey: string) => string; // eslint-disable-line no-unused-vars
+  getRecentBlocksQuery: (maxLength?: number) => string; // eslint-disable-line no-unused-vars
 };

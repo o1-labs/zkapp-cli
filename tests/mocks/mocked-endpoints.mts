@@ -151,7 +151,14 @@ function accountReleaseRouteHandler(
   request.on('end', () => {
     try {
       publicKey = JSON.parse(requestData).pk;
-    } catch (_) {}
+    } catch (_) {
+      response.writeHead(500);
+      response.end(
+        JSON.stringify({
+          message: `Account release route handler error.`,
+        })
+      );
+    }
     response.writeHead(200);
     response.end(
       JSON.stringify({

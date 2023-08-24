@@ -199,7 +199,7 @@ export function getBooleanFromString(target: string) {
 export function getArrayValuesAsString(array: string[]) {
   return JSON.stringify(array)
     .replaceAll(',', ', ')
-    .replace(/[\[|\]]/g, '');
+    .replace(/[[|\]]/g, '');
 }
 
 export function isEmptyDir(path: string) {
