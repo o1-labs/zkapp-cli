@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Constants } from '../../src/lib/constants.js';
-import { type Constants as ConstantsType } from '../models/types.mjs';
+import { Constants as ConstantsType, KeyPair } from '../models/types.mjs';
 
 export const TestConstants: ConstantsType = Object.freeze({
   cliPromptMsDelay: 200,
@@ -61,7 +61,6 @@ export const TestConstants: ConstantsType = Object.freeze({
           zkappState: ['2', '0', '0', '0', '0', '0', '0', '0'],
           verificationKey: {
             verificationKey: 'mockedVerificationKey',
-            hash: 'mockedVerificationKeyHash',
           },
         },
       },
@@ -73,7 +72,7 @@ export const TestConstants: ConstantsType = Object.freeze({
         zkapp: {
           id: '1234567890',
           hash: '5Ju6e5WfkVhdp1PAVhAJoLxqgWZT17FVkFaTnU6XvPkGwUHdDvqC',
-          failureReason: null,
+          failureReason: undefined,
         },
       },
     },
@@ -139,12 +138,13 @@ export const TestConstants: ConstantsType = Object.freeze({
   getAccountDetailsQuery: (publicKey: string) => {
     return `{
       account(publicKey: "${publicKey}") {
+        publicKey
+        nonce
         balance {
-          blockHeight
           total
-          locked
-          liquid
-          unknown
+        }
+        delegateAccount {
+          publicKey
         }
         zkappState
         verificationKey {
@@ -156,20 +156,8 @@ export const TestConstants: ConstantsType = Object.freeze({
   getRecentBlocksQuery: (maxLength = TestConstants.recentBlocks) => {
     return `{
       bestChain(maxLength: ${maxLength}) {
-        protocolState {
-          consensusState {
-            blockHeight
-            epoch
-            slot
-            slotSinceGenesis
-          }
-          previousStateHash
-          blockchainState {
-            date
-          }
-        }
-        commandTransactionCount
         stateHash
+        commandTransactionCount
         transactions {
           userCommands {
             hash
@@ -188,21 +176,21 @@ export const TestConstants: ConstantsType = Object.freeze({
   },
 });
 
-export function generateRandomInt(min: number, max: number) {
+export function generateRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export function getBooleanFromString(target: string) {
+export function getBooleanFromString(target: string): boolean {
   return target?.trim() === 'true';
 }
 
-export function getArrayValuesAsString(array: string[]) {
+export function getArrayValuesAsString(array: string[]): string {
   return JSON.stringify(array)
     .replaceAll(',', ', ')
     .replace(/[[|\]]/g, '');
 }
 
-export function isEmptyDir(path: string) {
+export function isEmptyDir(path: string): boolean {
   try {
     const directory = fs.opendirSync(path);
     const entry = directory.readSync();
@@ -214,14 +202,14 @@ export function isEmptyDir(path: string) {
   }
 }
 
-export function feePayerCacheExists() {
+export function feePayerCacheExists(): boolean {
   return (
     fs.existsSync(Constants.feePayerCacheDir) &&
     !isEmptyDir(Constants.feePayerCacheDir)
   );
 }
 
-export function listCachedFeePayerAliases() {
+export function listCachedFeePayerAliases(): string[] {
   if (feePayerCacheExists()) {
     let aliases = fs.readdirSync(Constants.feePayerCacheDir);
 
@@ -235,7 +223,7 @@ export function listCachedFeePayerAliases() {
   }
 }
 
-export function cleanupFeePayerCache() {
+export function cleanupFeePayerCache(): void {
   if (feePayerCacheExists()) {
     console.info(
       `Cleaning up the fee payer cache directory: ${Constants.feePayerCacheDir}`
@@ -251,7 +239,7 @@ export function cleanupFeePayerCache() {
   }
 }
 
-export function cleanupFeePayerCacheByAlias(alias: string) {
+export function cleanupFeePayerCacheByAlias(alias: string): void {
   console.info(`Cleaning up the fee payer cache for alias: ${alias}`);
   fs.rmSync(
     `${Constants.feePayerCacheDir}/${alias.trim().replace(/\s+/g, '-')}.json`,
@@ -259,7 +247,7 @@ export function cleanupFeePayerCacheByAlias(alias: string) {
   );
 }
 
-export function restoreFeePayerCache() {
+export function restoreFeePayerCache(): void {
   if (
     fs.existsSync(TestConstants.feePayerTmpCacheDir) &&
     !isEmptyDir(TestConstants.feePayerTmpCacheDir)
@@ -275,7 +263,7 @@ export function restoreFeePayerCache() {
 export function getZkAppAccountFromAlias(
   workDir: string,
   deploymentAlias: string
-) {
+): KeyPair {
   const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
   const zkAppKeyPath = JSON.parse(
     fs.readFileSync(`${workDir}/config.json`, 'utf8')
@@ -290,11 +278,11 @@ export function getZkAppAccountFromAlias(
 export function getZkAppSmartContractNameFromAlias(
   workDir: string,
   deploymentAlias: string
-) {
+): string {
   const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
   const smartContract = JSON.parse(
     fs.readFileSync(`${workDir}/config.json`, 'utf8')
   ).deployAliases[sanitizedDeploymentAlias].smartContract;
 
-  return smartContract;
+  return smartContract as string;
 }
