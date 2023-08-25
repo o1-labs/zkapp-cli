@@ -1,3 +1,6 @@
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
+import { Constants as MainConstants } from '../../src/lib/constants';
+
 export type FailureReason = {
   index: number;
   failures: string[];
@@ -99,3 +102,28 @@ export type Constants = {
   getAccountDetailsQuery: (publicKey: string) => string; // eslint-disable-line no-unused-vars
   getRecentBlocksQuery: (maxLength?: number) => string; // eslint-disable-line no-unused-vars
 };
+
+export type CommandOptions = {
+  processHandler: CLITestEnvironment['spawn'];
+  runner: string;
+  command: string;
+  runFrom: string | undefined;
+  waitForCompletion: boolean;
+  interactiveDialog: any;
+};
+
+export type ConfigOptions = {
+  processHandler: CLITestEnvironment['spawn'];
+  deploymentAlias: string;
+  feePayerAlias: string;
+  feePayerAccount: Account;
+  feePayerMgmtType: string;
+  minaGraphQlEndpoint: string;
+  transactionFee: string;
+  interruptProcess: boolean;
+  runFrom: string | undefined;
+  waitForCompletion: boolean;
+};
+
+export type UiType = (typeof MainConstants.uiTypes)[number];
+export type ExampleType = (typeof MainConstants.exampleTypes)[number];

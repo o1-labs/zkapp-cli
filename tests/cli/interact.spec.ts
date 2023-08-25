@@ -79,10 +79,11 @@ test.describe('Users', () => {
         await generateProject(projectName, 'none', true, spawn);
       });
       await test.step('Deployment alias configuration', async () => {
-        await createDeploymentAlias(spawn, {
+        await createDeploymentAlias({
+          processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
-          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerAccount,
           feePayerMgmtType,
           minaGraphQlEndpoint,
           transactionFee,

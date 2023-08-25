@@ -180,11 +180,13 @@ export function generateRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export function getBooleanFromString(target: string): boolean {
+export function getBooleanFromString(target?: string): boolean {
   return target?.trim() === 'true';
 }
 
-export function getArrayValuesAsString(array: string[]): string {
+export function getArrayValuesAsString(
+  array: string[] | readonly string[]
+): string {
   return JSON.stringify(array)
     .replaceAll(',', ', ')
     .replace(/[[|\]]/g, '');

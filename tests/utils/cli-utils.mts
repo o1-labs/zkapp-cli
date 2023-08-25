@@ -1,5 +1,12 @@
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
 import crypto from 'node:crypto';
 import { Constants } from '../../src/lib/constants.js';
+import {
+  CommandOptions,
+  ConfigOptions,
+  ExampleType,
+  UiType,
+} from '../models/types.mjs';
 import {
   TestConstants,
   cleanupFeePayerCacheByAlias,
@@ -14,78 +21,11 @@ import {
   releaseAcquiredAccount,
 } from './network-utils.mjs';
 
-function generateInputsForOptionSelection(lookupOption, targetOptions) {
-  const inputs = [];
-
-  for (let i = 1; i <= targetOptions.indexOf(lookupOption); i++) {
-    inputs.push('arrowDown');
-  }
-
-  inputs.push('enter');
-  return inputs;
-}
-
-export async function executeInteractiveCommand(options) {
-  console.info(`[Command options]: ${JSON.stringify(options)}`);
-
-  const {
-    processHandler,
-    runner,
-    command,
-    runFrom,
-    waitForCompletion,
-    interactiveDialog,
-  } = options;
-  const {
-    debug,
-    getStdout,
-    getStderr,
-    getExitCode,
-    pressKey,
-    wait,
-    waitForText,
-    waitForFinish,
-    writeText,
-  } = await processHandler(runner, command, runFrom);
-  const testDebugEnabled = getBooleanFromString(
-    process.env.TEST_DEBUG ?? 'true'
-  );
-
-  if (testDebugEnabled) {
-    debug();
-  }
-
-  for (const prompt in interactiveDialog) {
-    await waitForText(prompt.replace(/^#+/g, ''));
-    const inputs = interactiveDialog[prompt];
-    for (const input of inputs) {
-      if (TestConstants.specialCliKeys.includes(input)) {
-        // We have to wait for a bit before pressing the special keys
-        // because otherwise it might be ignored by the CLI
-        await wait(TestConstants.cliPromptMsDelay);
-        await pressKey(input);
-      } else {
-        await writeText(input);
-      }
-    }
-  }
-
-  if (waitForCompletion) {
-    await waitForFinish();
-  }
-
-  const stdOut = getStdout();
-  const stdErr = getStderr();
-  const exitCode = getExitCode();
-
-  return { exitCode, stdOut, stdErr };
-}
-
 export async function generateProject(
-  projectName,
-  uiType,
-  skipInteractiveSelection,
-  processHandler
+  projectName: string,
+  uiType: UiType,
+  skipInteractiveSelection: boolean,
+  processHandler: CLITestEnvironment['spawn']
 ) {
   const cliArgs = skipInteractiveSelection ? `--ui ${uiType}` : '';
   const command = `project ${cliArgs} ${projectName}`.replace(/\s{2,}/g, ' ');
@@ -103,7 +43,7 @@ export async function generateProject(
     case 'next': {
       if (!getBooleanFromString(process.env.CI)) {
         // TODO: https://github.com/o1-labs/zkapp-cli/issues/453
-        process.env.CI = true;
+        process.env.CI = 'true';
       }
       interactiveDialog = {
         ...interactiveDialog,
@@ -149,9 +89,9 @@ export async function generateProject(
 }
 
 export async function generateExampleProject(
-  exampleType,
-  skipInteractiveSelection,
-  processHandler
+  exampleType: ExampleType,
+  skipInteractiveSelection: boolean,
+  processHandler: CLITestEnvironment['spawn']
 ) {
   const cliArgs = skipInteractiveSelection ? `--name ${exampleType}` : '';
   const command = `example ${cliArgs}`.replace(/\s{2,}/g, ' ');
@@ -188,12 +128,13 @@ export async function generateExampleProject(
   return { exitCode, stdOut, stdErr };
 }
 
-export async function createDeploymentAlias(processHandler, options) {
+export async function createDeploymentAlias(options: ConfigOptions) {
   const command = 'config';
   const {
+    processHandler,
     deploymentAlias,
     feePayerAlias,
-    feePayerPrivateKey,
+    feePayerAccount,
     feePayerMgmtType,
     minaGraphQlEndpoint,
     transactionFee,
@@ -219,7 +160,7 @@ export async function createDeploymentAlias(processHandler, options) {
         ],
         'Create an alias for this account': [feePayerAlias, 'enter'],
         'Account private key (base58)': [
-          feePayerPrivateKey,
+          feePayerAccount.sk,
           interruptProcess ? 'ctrlc' : 'enter',
         ],
       };
@@ -290,18 +231,9 @@ export async function createDeploymentAlias(processHandler, options) {
   return { exitCode, stdOut, stdErr };
 }
 
-export async function maybeCreateDeploymentAlias(processHandler, options) {
-  const command = 'config';
-  const { runFrom, waitForCompletion, interactiveDialog } = options;
-
-  const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({
-    processHandler,
-    runner: 'zk',
-    command,
-    runFrom,
-    waitForCompletion,
-    interactiveDialog,
-  });
+export async function maybeCreateDeploymentAlias(options: CommandOptions) {
+  const { command } = options;
+  const { exitCode, stdOut, stdErr } = await executeInteractiveCommand(options);
 
   console.info(`[Config CLI StdOut] zk ${command}: ${stdOut}`);
   console.info(`[Config CLI StdErr] zk ${command}: ${stdErr}`);
@@ -310,10 +242,10 @@ export async function maybeCreateDeploymentAlias(processHandler, options) {
 }
 
 export async function deployZkApp(
-  path,
-  projectType,
-  interactiveMode,
-  processHandler,
+  path: string,
+  projectType: UiType | ExampleType,
+  interactiveMode: boolean,
+  processHandler: CLITestEnvironment['spawn'],
   cancelDeployment = false
 ) {
   const projectName = crypto.randomUUID();
@@ -342,21 +274,31 @@ export async function deployZkApp(
   }
 
   try {
-    if (Constants.exampleTypes.includes(projectType)) {
+    if ((Constants.exampleTypes as string[]).includes(projectType)) {
       workDir = `./${projectType}`;
-      await generateExampleProject(projectType, true, processHandler);
+      await generateExampleProject(
+        projectType as ExampleType,
+        true,
+        processHandler
+      );
     } else {
       if (projectType !== 'none') {
         workDir = `./${projectName}/contracts`;
       } else {
         workDir = `./${projectName}`;
       }
-      await generateProject(projectName, projectType, true, processHandler);
+      await generateProject(
+        projectName,
+        projectType as UiType,
+        true,
+        processHandler
+      );
     }
-    await createDeploymentAlias(processHandler, {
+    await createDeploymentAlias({
+      processHandler,
       deploymentAlias,
       feePayerAlias,
-      feePayerPrivateKey: feePayerAccount.sk,
+      feePayerAccount,
       feePayerMgmtType,
       minaGraphQlEndpoint,
       transactionFee,
@@ -386,4 +328,74 @@ export async function deployZkApp(
     cleanupFeePayerCacheByAlias(feePayerAlias);
     await releaseAcquiredAccount(feePayerAccount);
   }
+}
+
+export async function executeInteractiveCommand(options: CommandOptions) {
+  console.info(`[Command options]: ${JSON.stringify(options)}`);
+
+  const {
+    processHandler,
+    runner,
+    command,
+    runFrom,
+    waitForCompletion,
+    interactiveDialog,
+  } = options;
+  const {
+    debug,
+    getStdout,
+    getStderr,
+    getExitCode,
+    pressKey,
+    wait,
+    waitForText,
+    waitForFinish,
+    writeText,
+  } = await processHandler(runner, command, runFrom);
+  const testDebugEnabled = getBooleanFromString(
+    process.env.TEST_DEBUG ?? 'true'
+  );
+
+  if (testDebugEnabled) {
+    debug();
+  }
+
+  for (const prompt in interactiveDialog) {
+    await waitForText(prompt.replace(/^#+/g, ''));
+    const inputs = interactiveDialog[prompt];
+    for (const input of inputs) {
+      if (TestConstants.specialCliKeys.includes(input)) {
+        // We have to wait for a bit before pressing the special keys
+        // because otherwise it might be ignored by the CLI
+        await wait(TestConstants.cliPromptMsDelay);
+        await pressKey(input);
+      } else {
+        await writeText(input);
+      }
+    }
+  }
+
+  if (waitForCompletion) {
+    await waitForFinish();
+  }
+
+  const stdOut = getStdout();
+  const stdErr = getStderr();
+  const exitCode = getExitCode();
+
+  return { exitCode, stdOut, stdErr };
+}
+
+function generateInputsForOptionSelection(
+  lookupOption: string,
+  targetOptions: string[] | readonly string[]
+) {
+  const inputs = [];
+
+  for (let i = 1; i <= targetOptions.indexOf(lookupOption); i++) {
+    inputs.push('arrowDown');
+  }
+
+  inputs.push('enter');
+  return inputs;
 }

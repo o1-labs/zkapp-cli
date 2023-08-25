@@ -55,10 +55,11 @@ test.describe('zkApp-CLI', () => {
         await generateProject(projectName, 'none', true, spawn);
       });
       await test.step('Deployment alias creation cancellation', async () => {
-        const { exitCode } = await createDeploymentAlias(spawn, {
+        const { exitCode } = await createDeploymentAlias({
+          processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
-          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerAccount,
           feePayerMgmtType: 'recover',
           minaGraphQlEndpoint,
           transactionFee: '0.01',
@@ -99,10 +100,11 @@ test.describe('zkApp-CLI', () => {
     try {
       await test.step('Project generation and deployment alias creation', async () => {
         await generateProject(projectName, 'none', true, spawn);
-        await createDeploymentAlias(spawn, {
+        await createDeploymentAlias({
+          processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
-          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerAccount,
           feePayerMgmtType,
           minaGraphQlEndpoint,
           transactionFee,
@@ -116,7 +118,10 @@ test.describe('zkApp-CLI', () => {
           'Use stored account': ['arrowDown', 'enter'],
         };
 
-        const { exitCode, stdOut } = await maybeCreateDeploymentAlias(spawn, {
+        const { exitCode, stdOut } = await maybeCreateDeploymentAlias({
+          processHandler: spawn,
+          runner: 'zk',
+          command: 'config',
           runFrom: `./${projectName}`,
           waitForCompletion: true,
           interactiveDialog: {
@@ -241,10 +246,11 @@ test.describe('zkApp-CLI', () => {
         cleanupFeePayerCache();
       });
       await test.step('Deployment alias creation and results validation', async () => {
-        const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+        const { exitCode, stdOut } = await createDeploymentAlias({
+          processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
-          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerAccount,
           feePayerMgmtType,
           minaGraphQlEndpoint,
           transactionFee,
@@ -294,10 +300,11 @@ test.describe('zkApp-CLI', () => {
           feePayerAlias = crypto.randomUUID();
         }
         await test.step(`Deployment alias creation (feePayerMgmtType=${feePayerMgmtType}) and results validation`, async () => {
-          const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+          const { exitCode, stdOut } = await createDeploymentAlias({
+            processHandler: spawn,
             deploymentAlias,
             feePayerAlias,
-            feePayerPrivateKey: feePayerAccount.sk,
+            feePayerAccount,
             feePayerMgmtType,
             minaGraphQlEndpoint,
             transactionFee,
@@ -320,10 +327,11 @@ test.describe('zkApp-CLI', () => {
       }
       deploymentAlias = crypto.randomUUID();
       await test.step(`Deployment alias creation (feePayerMgmtType=another) and results validation`, async () => {
-        const { exitCode, stdOut } = await createDeploymentAlias(spawn, {
+        const { exitCode, stdOut } = await createDeploymentAlias({
+          processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
-          feePayerPrivateKey: feePayerAccount.sk,
+          feePayerAccount,
           feePayerMgmtType: feePayerAlias,
           minaGraphQlEndpoint,
           transactionFee,
