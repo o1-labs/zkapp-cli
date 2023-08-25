@@ -26,7 +26,7 @@ const config: PlaywrightTestConfig = {
   use: {
     browserName: 'chromium',
     actionTimeout: 0,
-    headless: process.env.CI ? true : false,
+    headless: !!process.env.CI,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
     screenshot: {
@@ -40,7 +40,7 @@ const config: PlaywrightTestConfig = {
   projects: [
     {
       name: 'cli',
-      testMatch: '**/cli/**/*.spec.ts',
+      testMatch: '**/cli/**/*.spec.mts',
     },
     // {
     //   name: 'chromium-desktop',
@@ -48,7 +48,7 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'chromium',
     //     ...devices['Desktop Chrome'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
+    //   testIgnore: ['**/cli/**/*.spec.mts'],
     // },
     // {
     //   name: 'firefox-desktop',
@@ -56,7 +56,7 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'firefox',
     //     ...devices['Desktop Firefox'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
+    //   testIgnore: ['**/cli/**/*.spec.mts'],
     // },
     // {
     //   name: 'webkit-desktop',
@@ -64,7 +64,7 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'webkit',
     //     ...devices['Desktop Safari'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
+    //   testIgnore: ['**/cli/**/*.spec.mts'],
     // },
   ],
   webServer: {

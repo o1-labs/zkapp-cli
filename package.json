@@ -33,8 +33,8 @@
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
     "lint": "npm run prettier && npm run prettier-check && npm run eslint && npm run clean",
     "eslint": "eslint . --ext .js,.ts,.mts --quiet --fix",
-    "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
-    "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
+    "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts,mts}\"",
+    "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts,mts}\"",
     "e2e:install": "npx playwright-core install --with-deps",
     "e2e:test": "npm run clean && npx playwright test --workers=1",
     "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'"
