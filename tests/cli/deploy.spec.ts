@@ -2,9 +2,9 @@ import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import { Constants } from '../../src/lib/constants.js';
-import { deployZkApp, generateProject } from '../utils/cli-utils.mjs';
+import { checkZkDeploy, zkDeploy } from '../utils/deploy-utils.mjs';
 import { getMempoolTxns } from '../utils/network-utils.mjs';
-import { checkZkAppDeploymentResults } from '../utils/validation-utils.mjs';
+import { zkProject } from '../utils/project-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
   test(`should not deploy zkApp if not within the project dir, @parallel @smoke @deployment @fail-cases`, async () => {
@@ -33,7 +33,7 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('Project generation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
+        await zkProject(projectName, 'none', true, spawn);
       });
       await test.step('ZkApp deployment failure attempt (no aliases provided)', async () => {
         const cliArg = 'deploy';
@@ -71,7 +71,7 @@ test.describe('zkApp-CLI', () => {
     try {
       await test.step('ZkApp project generation, configuration and deployment cancellation', async () => {
         const mempoolTxns = await getMempoolTxns();
-        const { exitCode, stdOut } = await deployZkApp(
+        const { exitCode, stdOut } = await zkDeploy(
           path,
           'none',
           true,
@@ -94,24 +94,24 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('ZkApp project generation, configuration, deployment (interactive mode) and results validation', async () => {
-        const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+        const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
           path,
           'none',
           true,
           spawn,
           false
         );
-        await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
+        await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
       });
       await test.step('ZkApp project generation, configuration, deployment (non-interactive mode) and results validation', async () => {
-        const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+        const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
           path,
           'next', // Can't do Svelte on Windows, see Project generation tests for more info.
           false,
           spawn,
           false
         );
-        await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
+        await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
       });
     } finally {
       await cleanup();
@@ -125,14 +125,14 @@ test.describe('zkApp-CLI', () => {
     try {
       for (const exampleType of Constants.exampleTypes) {
         await test.step(`Example zkApp project generation (${exampleType.toUpperCase()}), configuration, deployment and results validation`, async () => {
-          const { zkAppPublicKey, exitCode, stdOut } = await deployZkApp(
+          const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
             path,
             exampleType,
             false,
             spawn,
             false
           );
-          await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
+          await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
         });
       }
     } finally {

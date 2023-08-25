@@ -3,12 +3,11 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import { Constants } from '../../src/lib/constants.js';
-import { generateProject } from '../utils/cli-utils.mjs';
 import {
   TestConstants,
   getArrayValuesAsString,
 } from '../utils/common-utils.mjs';
-import { checkProjectGenerationResults } from '../utils/validation-utils.mjs';
+import { checkZkProject, zkProject } from '../utils/project-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
   test(`should not generate zkApp project for unknown UI type, @parallel @smoke @project @fail-cases`, async () => {
@@ -47,13 +46,13 @@ test.describe('zkApp-CLI', () => {
           console.info(`[Test Execution] Path: ${path}`);
 
           try {
-            const { exitCode, stdOut } = await generateProject(
+            const { exitCode, stdOut } = await zkProject(
               projectName,
               uiType,
               skipInteractiveSelection,
               spawn
             );
-            await checkProjectGenerationResults(
+            await checkZkProject(
               projectName,
               uiType,
               stdOut,

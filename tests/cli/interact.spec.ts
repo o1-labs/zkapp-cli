@@ -1,27 +1,26 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
 import crypto from 'node:crypto';
 import { Constants } from '../../src/lib/constants.js';
-import {
-  createDeploymentAlias,
-  executeInteractiveCommand,
-  generateExampleProject,
-  generateProject,
-} from '../utils/cli-utils.mjs';
+import { executeInteractiveCommand } from '../utils/cli-utils.mjs';
 import {
   cleanupFeePayerCacheByAlias,
   getZkAppAccountFromAlias,
-  getZkAppSmartContractNameFromAlias,
 } from '../utils/common-utils.mjs';
+import { zkConfig } from '../utils/config-utils.mjs';
+import { checkZkDeploy } from '../utils/deploy-utils.mjs';
+import { zkExample } from '../utils/example-utils.mjs';
 import {
   acquireAvailableAccount,
+  findTxnByHash,
+  getAccountDetails,
   getMinaGraphQlEndpoint,
+  isMockedMinaGraphQlEndpointInUse,
   releaseAcquiredAccount,
+  waitForTxnToBeAddedIntoBlock,
 } from '../utils/network-utils.mjs';
-import {
-  checkZkAppDeploymentResults,
-  checkZkAppInteractionResults,
-} from '../utils/validation-utils.mjs';
+import { zkProject } from '../utils/project-utils.mjs';
 
 test.describe('Users', () => {
   // Tests for interaction with example projects of each type
@@ -32,7 +31,7 @@ test.describe('Users', () => {
 
       try {
         await test.step('Example project generation', async () => {
-          await generateExampleProject(exampleType, true, spawn);
+          await zkExample(exampleType, true, spawn);
         });
         await test.step('Interaction with an example zkApp', async () => {
           const npmRunTestResults = await execute(
@@ -69,17 +68,16 @@ test.describe('Users', () => {
     const minaGraphQlEndpoint = await getMinaGraphQlEndpoint();
     const transactionFee = '0.01';
     let zkAppPublicKey: any;
-    let smartContractName: any;
     const { execute, spawn, cleanup, path } = await prepareEnvironment();
     const workDir = `${path}/${projectName}`;
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
       await test.step('Project generation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
+        await zkProject(projectName, 'none', true, spawn);
       });
       await test.step('Deployment alias configuration', async () => {
-        await createDeploymentAlias({
+        await zkConfig({
           processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
@@ -105,11 +103,7 @@ test.describe('Users', () => {
           waitForCompletion: true,
           interactiveDialog: {},
         });
-        await checkZkAppDeploymentResults(zkAppPublicKey, exitCode, stdOut);
-        smartContractName = getZkAppSmartContractNameFromAlias(
-          workDir,
-          deploymentAlias
-        );
+        await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
       });
       await test.step('Deployed zkApp interaction and results validation', async () => {
         const interactionCommand = `build/src/interact.js ${deploymentAlias}`;
@@ -132,12 +126,7 @@ test.describe('Users', () => {
           `[Interaction CLI StdErr] node ${interactionCommand}: ${stderr}`
         );
 
-        await checkZkAppInteractionResults(
-          smartContractName,
-          zkAppPublicKey,
-          code,
-          stdout
-        );
+        await checkZkAppInteraction(zkAppPublicKey, code, stdout);
       });
     } finally {
       cleanupFeePayerCacheByAlias(feePayerAlias);
@@ -146,3 +135,27 @@ test.describe('Users', () => {
     }
   });
 });
+
+async function checkZkAppInteraction(
+  zkAppPublicKey: string | undefined,
+  exitCode: ExitCode | null,
+  stdOut: string[]
+): Promise<void> {
+  const blockchainExplorerLink =
+    stdOut.at(-1)!.trim().length === 0
+      ? stdOut.at(-2)!.trim()
+      : stdOut.at(-1)!.trim();
+  const transactionHash = blockchainExplorerLink.substring(
+    blockchainExplorerLink.length - 52
+  );
+  await waitForTxnToBeAddedIntoBlock(transactionHash);
+  const account = await getAccountDetails(zkAppPublicKey!);
+
+  expect(exitCode).toBe(0);
+  expect(stdOut).toContain('Success! Update transaction sent.');
+  if (!(await isMockedMinaGraphQlEndpointInUse())) {
+    const txnDetails = await findTxnByHash(transactionHash);
+    expect(txnDetails?.failureReason).toBeUndefined();
+  }
+  expect(Number(account?.zkappState?.[0])).toBeGreaterThan(1);
+}

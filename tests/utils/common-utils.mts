@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { Constants } from '../../src/lib/constants.js';
@@ -287,4 +289,19 @@ export function getZkAppSmartContractNameFromAlias(
   ).deployAliases[sanitizedDeploymentAlias].smartContract as string;
 
   return smartContract;
+}
+
+export async function checkSmartContractsFilesystem(
+  path: string,
+  checkKeysExistence: boolean,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
+  expect(await existsOnFilesystemFn(path)).toBe(true);
+  expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
+  if (checkKeysExistence) {
+    expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
+  }
+  expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
+  expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
 }

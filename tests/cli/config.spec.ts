@@ -4,22 +4,22 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { Constants } from '../../src/lib/constants.js';
 import {
-  createDeploymentAlias,
-  generateProject,
-  maybeCreateDeploymentAlias,
-} from '../utils/cli-utils.mjs';
-import {
   TestConstants,
   cleanupFeePayerCache,
   cleanupFeePayerCacheByAlias,
   restoreFeePayerCache,
 } from '../utils/common-utils.mjs';
 import {
+  checkZkConfig,
+  maybeZkConfig,
+  zkConfig,
+} from '../utils/config-utils.mjs';
+import {
   acquireAvailableAccount,
   getMinaGraphQlEndpoint,
   releaseAcquiredAccount,
 } from '../utils/network-utils.mjs';
-import { checkDeploymentAliasCreationResults } from '../utils/validation-utils.mjs';
+import { zkProject } from '../utils/project-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
   test(`should not create deployment alias if not within the project dir, @parallel @smoke @config @fail-cases`, async () => {
@@ -52,10 +52,10 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('Project generation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
+        await zkProject(projectName, 'none', true, spawn);
       });
       await test.step('Deployment alias creation cancellation', async () => {
-        const { exitCode } = await createDeploymentAlias({
+        const { exitCode } = await zkConfig({
           processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
@@ -99,8 +99,8 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('Project generation and deployment alias creation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
-        await createDeploymentAlias({
+        await zkProject(projectName, 'none', true, spawn);
+        await zkConfig({
           processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
@@ -118,7 +118,7 @@ test.describe('zkApp-CLI', () => {
           'Use stored account': ['arrowDown', 'enter'],
         };
 
-        const { exitCode, stdOut } = await maybeCreateDeploymentAlias({
+        const { exitCode, stdOut } = await maybeZkConfig({
           processHandler: spawn,
           runner: 'zk',
           command: 'config',
@@ -207,7 +207,7 @@ test.describe('zkApp-CLI', () => {
           },
         });
 
-        checkDeploymentAliasCreationResults({
+        checkZkConfig({
           workDir: `${path}/${projectName}`,
           deploymentAlias: newDeploymentAlias,
           feePayerAlias: newFeePayerAlias,
@@ -240,13 +240,13 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('Project generation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
+        await zkProject(projectName, 'none', true, spawn);
       });
       await test.step('Cleanup Fee Payer cache', async () => {
         cleanupFeePayerCache();
       });
       await test.step('Deployment alias creation and results validation', async () => {
-        const { exitCode, stdOut } = await createDeploymentAlias({
+        const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
@@ -258,7 +258,7 @@ test.describe('zkApp-CLI', () => {
           runFrom: `./${projectName}`,
           waitForCompletion: true,
         });
-        checkDeploymentAliasCreationResults({
+        checkZkConfig({
           workDir: `${path}/${projectName}`,
           deploymentAlias,
           feePayerAlias,
@@ -289,7 +289,7 @@ test.describe('zkApp-CLI', () => {
 
     try {
       await test.step('Project generation', async () => {
-        await generateProject(projectName, 'none', true, spawn);
+        await zkProject(projectName, 'none', true, spawn);
       });
       await test.step('Cleanup Fee Payer cache', async () => {
         cleanupFeePayerCache();
@@ -300,7 +300,7 @@ test.describe('zkApp-CLI', () => {
           feePayerAlias = crypto.randomUUID();
         }
         await test.step(`Deployment alias creation (feePayerMgmtType=${feePayerMgmtType}) and results validation`, async () => {
-          const { exitCode, stdOut } = await createDeploymentAlias({
+          const { exitCode, stdOut } = await zkConfig({
             processHandler: spawn,
             deploymentAlias,
             feePayerAlias,
@@ -312,7 +312,7 @@ test.describe('zkApp-CLI', () => {
             runFrom: `./${projectName}`,
             waitForCompletion: true,
           });
-          checkDeploymentAliasCreationResults({
+          checkZkConfig({
             workDir: `${path}/${projectName}`,
             deploymentAlias,
             feePayerAlias,
@@ -327,7 +327,7 @@ test.describe('zkApp-CLI', () => {
       }
       deploymentAlias = crypto.randomUUID();
       await test.step(`Deployment alias creation (feePayerMgmtType=another) and results validation`, async () => {
-        const { exitCode, stdOut } = await createDeploymentAlias({
+        const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
           deploymentAlias,
           feePayerAlias,
@@ -339,7 +339,7 @@ test.describe('zkApp-CLI', () => {
           runFrom: `./${projectName}`,
           waitForCompletion: true,
         });
-        checkDeploymentAliasCreationResults({
+        checkZkConfig({
           workDir: `${path}/${projectName}`,
           deploymentAlias,
           feePayerAlias,

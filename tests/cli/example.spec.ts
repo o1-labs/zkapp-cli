@@ -1,12 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { Constants } from '../../src/lib/constants.js';
-import { generateExampleProject } from '../utils/cli-utils.mjs';
 import {
   TestConstants,
   getArrayValuesAsString,
 } from '../utils/common-utils.mjs';
-import { checkExampleProjectGenerationResults } from '../utils/validation-utils.mjs';
+import { checkZkExample, zkExample } from '../utils/example-utils.mjs';
 
 test.describe('zkApp-CLI', () => {
   test(`should not generate zkApp project for unknown example type, @parallel @smoke @example @fail-cases`, async () => {
@@ -39,18 +38,12 @@ test.describe('zkApp-CLI', () => {
           console.info(`[Test Execution] Path: ${path}`);
 
           try {
-            const { exitCode, stdOut } = await generateExampleProject(
+            const { exitCode, stdOut } = await zkExample(
               exampleType,
               skipInteractiveSelection,
               spawn
             );
-            await checkExampleProjectGenerationResults(
-              exampleType,
-              stdOut,
-              exitCode,
-              ls,
-              exists
-            );
+            await checkZkExample(exampleType, stdOut, exitCode, ls, exists);
           } finally {
             await cleanup();
           }
