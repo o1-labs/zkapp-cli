@@ -1,5 +1,6 @@
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
-import { Constants as MainConstants } from '../../src/lib/constants';
+import { Constants as CommonConstants } from '../../src/lib/constants';
 
 export type FailureReason = {
   index: number;
@@ -125,5 +126,24 @@ export type ConfigOptions = {
   waitForCompletion: boolean;
 };
 
-export type UiType = (typeof MainConstants.uiTypes)[number];
-export type ExampleType = (typeof MainConstants.exampleTypes)[number];
+export type CommandResults = {
+  exitCode: ExitCode | null;
+  stdOut: string[];
+  stdErr: string[];
+  zkAppPublicKey?: string;
+};
+
+export type ZkConfigCommandResults = {
+  workDir: string;
+  deploymentAlias: string;
+  feePayerAlias: string;
+  feePayerAccount: Account;
+  feePayerMgmtType: string;
+  minaGraphQlEndpoint: string;
+  transactionFee: string;
+  stdOut: string[];
+  exitCode: ExitCode | null;
+};
+
+export type UiType = (typeof CommonConstants.uiTypes)[number];
+export type ExampleType = (typeof CommonConstants.exampleTypes)[number];

@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { Constants } from '../../src/lib/constants.js';
 import {
   CommandOptions,
+  CommandResults,
   ConfigOptions,
   ExampleType,
   UiType,
@@ -26,7 +27,7 @@ export async function generateProject(
   uiType: UiType,
   skipInteractiveSelection: boolean,
   processHandler: CLITestEnvironment['spawn']
-) {
+): Promise<CommandResults> {
   const cliArgs = skipInteractiveSelection ? `--ui ${uiType}` : '';
   const command = `project ${cliArgs} ${projectName}`.replace(/\s{2,}/g, ' ');
   let interactiveDialog = {};
@@ -92,7 +93,7 @@ export async function generateExampleProject(
   exampleType: ExampleType,
   skipInteractiveSelection: boolean,
   processHandler: CLITestEnvironment['spawn']
-) {
+): Promise<CommandResults> {
   const cliArgs = skipInteractiveSelection ? `--name ${exampleType}` : '';
   const command = `example ${cliArgs}`.replace(/\s{2,}/g, ' ');
   let interactiveDialog = {};
@@ -128,7 +129,9 @@ export async function generateExampleProject(
   return { exitCode, stdOut, stdErr };
 }
 
-export async function createDeploymentAlias(options: ConfigOptions) {
+export async function createDeploymentAlias(
+  options: ConfigOptions
+): Promise<CommandResults> {
   const command = 'config';
   const {
     processHandler,
@@ -231,7 +234,9 @@ export async function createDeploymentAlias(options: ConfigOptions) {
   return { exitCode, stdOut, stdErr };
 }
 
-export async function maybeCreateDeploymentAlias(options: CommandOptions) {
+export async function maybeCreateDeploymentAlias(
+  options: CommandOptions
+): Promise<CommandResults> {
   const { command } = options;
   const { exitCode, stdOut, stdErr } = await executeInteractiveCommand(options);
 
@@ -247,7 +252,7 @@ export async function deployZkApp(
   interactiveMode: boolean,
   processHandler: CLITestEnvironment['spawn'],
   cancelDeployment = false
-) {
+): Promise<CommandResults> {
   const projectName = crypto.randomUUID();
   const deploymentAlias = crypto.randomUUID();
   const feePayerAlias = crypto.randomUUID();
@@ -330,7 +335,9 @@ export async function deployZkApp(
   }
 }
 
-export async function executeInteractiveCommand(options: CommandOptions) {
+export async function executeInteractiveCommand(
+  options: CommandOptions
+): Promise<CommandResults> {
   console.info(`[Command options]: ${JSON.stringify(options)}`);
 
   const {
@@ -389,7 +396,7 @@ export async function executeInteractiveCommand(options: CommandOptions) {
 function generateInputsForOptionSelection(
   lookupOption: string,
   targetOptions: string[] | readonly string[]
-) {
+): string[] {
   const inputs = [];
 
   for (let i = 1; i <= targetOptions.indexOf(lookupOption); i++) {

@@ -269,10 +269,10 @@ export function getZkAppAccountFromAlias(
   const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
   const zkAppKeyPath = JSON.parse(
     fs.readFileSync(`${workDir}/config.json`, 'utf8')
-  ).deployAliases[sanitizedDeploymentAlias].keyPath;
+  ).deployAliases[sanitizedDeploymentAlias].keyPath as string;
   const zkAppAccount = JSON.parse(
     fs.readFileSync(`${workDir}/${zkAppKeyPath}`, 'utf8')
-  );
+  ) as KeyPair;
 
   return zkAppAccount;
 }
@@ -284,7 +284,7 @@ export function getZkAppSmartContractNameFromAlias(
   const sanitizedDeploymentAlias = deploymentAlias.trim().replace(/\s+/g, '-');
   const smartContract = JSON.parse(
     fs.readFileSync(`${workDir}/config.json`, 'utf8')
-  ).deployAliases[sanitizedDeploymentAlias].smartContract;
+  ).deployAliases[sanitizedDeploymentAlias].smartContract as string;
 
-  return smartContract as string;
+  return smartContract;
 }

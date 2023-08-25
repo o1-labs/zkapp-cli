@@ -1,47 +1,30 @@
 import { expect } from '@playwright/test';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
 import fs from 'node:fs';
 import { Constants } from '../../src/lib/constants.js';
+import {
+  ExampleType,
+  KeyPair,
+  UiType,
+  ZkConfigCommandResults,
+} from '../models/types.mjs';
 import { listCachedFeePayerAliases } from './common-utils.mjs';
 import {
   findTxnByHash,
   getAccountDetails,
   isMockedMinaGraphQlEndpointInUse,
-  waitForTxnToBeMined,
+  waitForTxnToBeAddedIntoBlock,
 } from './network-utils.mjs';
 
-async function checkSmartContractsFilesystem(
-  path,
-  checkKeysExistence,
-  listFilesystemFn,
-  existsOnFilesystemFn
-) {
-  expect(await existsOnFilesystemFn(path)).toBe(true);
-  expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
-  if (checkKeysExistence) {
-    expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
-  }
-  expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
-  expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
-}
-
-async function checkUiFilesystem(path, listFilesystemFn, existsOnFilesystemFn) {
-  expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
-  expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
-}
-
-export function checkCommandExecutionResults(exitCode, stdErr) {
-  expect(exitCode).toBe(0);
-  expect(stdErr).toHaveLength(0);
-}
-
 export async function checkProjectGenerationResults(
-  projectName,
-  uiType,
-  stdOut,
-  exitCode,
-  listFilesystemFn,
-  existsOnFilesystemFn
-) {
+  projectName: string,
+  uiType: UiType,
+  stdOut: string[],
+  exitCode: ExitCode | null,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
   const contractsPath = `./${projectName}/contracts`;
   const uiPath = `./${projectName}/ui`;
 
@@ -95,12 +78,12 @@ export async function checkProjectGenerationResults(
 }
 
 export async function checkExampleProjectGenerationResults(
-  exampleType,
-  stdOut,
-  exitCode,
-  listFilesystemFn,
-  existsOnFilesystemFn
-) {
+  exampleType: ExampleType,
+  stdOut: string[],
+  exitCode: ExitCode | null,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
   const path = `./${exampleType}`;
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success!');
@@ -115,7 +98,9 @@ export async function checkExampleProjectGenerationResults(
   expect((await listFilesystemFn(`${path}/.git`)).length).toBeGreaterThan(0);
 }
 
-export function checkDeploymentAliasCreationResults(options) {
+export function checkDeploymentAliasCreationResults(
+  options: ZkConfigCommandResults
+): void {
   const {
     workDir,
     deploymentAlias,
@@ -151,7 +136,7 @@ export function checkDeploymentAliasCreationResults(options) {
       if (feePayerMgmtType === 'recover') {
         const cachedFeePayerAccount = JSON.parse(
           fs.readFileSync(cachedFeePayerAccountPath, 'utf8')
-        );
+        ) as KeyPair;
         expect(cachedFeePayerAccount.publicKey).toEqual(feePayerAccount.pk);
         expect(cachedFeePayerAccount.privateKey).toEqual(feePayerAccount.sk);
       }
@@ -180,47 +165,47 @@ export function checkDeploymentAliasCreationResults(options) {
 }
 
 export async function checkZkAppDeploymentResults(
-  zkAppPublicKey,
-  exitCode,
-  stdOut
-) {
+  zkAppPublicKey: string | undefined,
+  exitCode: ExitCode | null,
+  stdOut: string[]
+): Promise<void> {
   const blockchainExplorerLink =
-    stdOut.at(-1).trim().length === 0
-      ? stdOut.at(-2).trim()
-      : stdOut.at(-1).trim();
-  const transactionHash = blockchainExplorerLink.substr(
+    stdOut.at(-1)!.trim().length === 0
+      ? stdOut.at(-2)!.trim()
+      : stdOut.at(-1)!.trim();
+  const transactionHash = blockchainExplorerLink.substring(
     blockchainExplorerLink.length - 52
   );
-  await waitForTxnToBeMined(transactionHash);
-  const account = await getAccountDetails(zkAppPublicKey);
+  await waitForTxnToBeAddedIntoBlock(transactionHash);
+  const account = await getAccountDetails(zkAppPublicKey!);
 
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success! Deploy transaction sent.');
   expect(stdOut).toContain('Next step:');
   if (!(await isMockedMinaGraphQlEndpointInUse())) {
     const txnDetails = await findTxnByHash(transactionHash);
-    expect(txnDetails.failureReason).toBeNull();
+    expect(txnDetails?.failureReason).toBeUndefined();
   }
-  expect(account.verificationKey).not.toBeNull();
-  expect(account.verificationKey.verificationKey).not.toBeNull();
-  expect(account.verificationKey.verificationKey.length).toBeGreaterThan(0);
+  expect(account?.verificationKey).not.toBeUndefined();
+  expect(account?.verificationKey?.verificationKey).not.toBeUndefined();
+  expect(account?.verificationKey?.verificationKey.length).toBeGreaterThan(0);
 }
 
 export async function checkZkAppInteractionResults(
-  smartContractName,
-  zkAppPublicKey,
-  exitCode,
-  stdOut
-) {
+  smartContractName: string,
+  zkAppPublicKey: string | undefined,
+  exitCode: ExitCode | null,
+  stdOut: string[]
+): Promise<void> {
   const blockchainExplorerLink =
-    stdOut.at(-1).trim().length === 0
-      ? stdOut.at(-2).trim()
-      : stdOut.at(-1).trim();
-  const transactionHash = blockchainExplorerLink.substr(
+    stdOut.at(-1)!.trim().length === 0
+      ? stdOut.at(-2)!.trim()
+      : stdOut.at(-1)!.trim();
+  const transactionHash = blockchainExplorerLink.substring(
     blockchainExplorerLink.length - 52
   );
-  await waitForTxnToBeMined(transactionHash);
-  const account = await getAccountDetails(zkAppPublicKey);
+  await waitForTxnToBeAddedIntoBlock(transactionHash);
+  const account = await getAccountDetails(zkAppPublicKey!);
 
   expect(exitCode).toBe(0);
   switch (smartContractName) {
@@ -228,10 +213,34 @@ export async function checkZkAppInteractionResults(
       expect(stdOut).toContain('Success! Update transaction sent.');
       if (!(await isMockedMinaGraphQlEndpointInUse())) {
         const txnDetails = await findTxnByHash(transactionHash);
-        expect(txnDetails.failureReason).toBeNull();
+        expect(txnDetails?.failureReason).toBeUndefined();
       }
-      expect(Number(account.zkappState[0])).toBeGreaterThan(1);
+      expect(Number(account?.zkappState?.[0])).toBeGreaterThan(1);
       break;
     }
   }
+}
+
+async function checkSmartContractsFilesystem(
+  path: string,
+  checkKeysExistence: boolean,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
+  expect(await existsOnFilesystemFn(path)).toBe(true);
+  expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
+  if (checkKeysExistence) {
+    expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
+  }
+  expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
+  expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
+}
+
+async function checkUiFilesystem(
+  path: string,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
+  expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
+  expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
 }

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import { checkCommandExecutionResults } from '../utils/validation-utils.mjs';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 
 test.describe('zkApp-CLI', () => {
   test('should return version information, @parallel @smoke @version', async () => {
@@ -25,3 +25,11 @@ test.describe('zkApp-CLI', () => {
     }
   });
 });
+
+function checkCommandExecutionResults(
+  exitCode: ExitCode | null,
+  stdErr: string[]
+): void {
+  expect(exitCode).toBe(0);
+  expect(stdErr).toHaveLength(0);
+}

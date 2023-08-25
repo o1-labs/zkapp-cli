@@ -133,7 +133,9 @@ export async function findTxnByHash(
   return transactions.find((transaction) => transaction.hash === txnHash);
 }
 
-export async function waitForTxnToBeMined(txnHash: string): Promise<void> {
+export async function waitForTxnToBeAddedIntoBlock(
+  txnHash: string
+): Promise<void> {
   await expect
     .poll(
       async () => {
