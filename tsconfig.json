@@ -19,10 +19,5 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "./templates",
-    "./examples",
-    "./tests/**/*.ts",
-    "./tests/**/*.mts"
-  ]
+  "include": ["./templates", "./examples", "./tests/**/*.ts"]
 }

@@ -1,21 +1,21 @@
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
-import { Constants } from '../../src/lib/constants.js';
+import Constants from '../../src/lib/constants.js';
 import {
   CommandOptions,
   CommandResults,
   ConfigOptions,
   KeyPair,
   ZkConfigCommandResults,
-} from '../models/types.mjs';
+} from '../models/types.js';
 import {
   executeInteractiveCommand,
   generateInputsForOptionSelection,
-} from './cli-utils.mjs';
+} from './cli-utils.js';
 import {
   feePayerCacheExists,
   listCachedFeePayerAliases,
-} from './common-utils.mjs';
+} from './common-utils.js';
 
 export async function zkConfig(
   options: ConfigOptions

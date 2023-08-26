@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
-import { Constants } from '../../src/lib/constants.js';
-import { checkZkDeploy, zkDeploy } from '../utils/deploy-utils.mjs';
-import { getMempoolTxns } from '../utils/network-utils.mjs';
-import { zkProject } from '../utils/project-utils.mjs';
+import Constants from '../../src/lib/constants.js';
+import { checkZkDeploy, zkDeploy } from '../utils/deploy-utils.js';
+import { getMempoolTxns } from '../utils/network-utils.js';
+import { zkProject } from '../utils/project-utils.js';
 
 test.describe('zkApp-CLI', () => {
   test(`should not deploy zkApp if not within the project dir, @parallel @smoke @deployment @fail-cases`, async () => {

@@ -6,8 +6,8 @@ import {
   Block,
   Mempool,
   Transaction,
-} from '../models/types.mjs';
-import { TestConstants } from './common-utils.mjs';
+} from '../models/types.js';
+import { TestConstants } from './common-utils.js';
 
 export function getMockedEndpointsServiceEndpoint(): string {
   return `http://localhost:${
@@ -221,10 +221,11 @@ function httpRequest(
       response.on('data', (chunk: Buffer) => chunks.push(chunk));
       response.on('end', () => {
         let responseData = '';
-        switch (response.headers['content-type']) {
-          case 'application/json':
-            responseData = Buffer.concat(chunks).toString();
-            break;
+        if (response.headers['content-type']?.includes('application/json')) {
+          responseData = Buffer.concat(chunks)
+            .toString()
+            .replace(/(?:\r\n|\r|\n)/g, '')
+            .replace(/\s{2,}/g, ' ');
         }
         resolve(JSON.parse(responseData));
       });

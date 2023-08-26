@@ -1,10 +1,6 @@
-const fs = require('fs-extra');
-const chalk = require('chalk');
-const path = require('path');
-
-const _red = chalk.red;
-const _green = chalk.green;
-const _i = chalk.italic;
+import chalk from 'chalk';
+import fs from 'fs-extra';
+import path from 'path';
 
 /**
  * Create `foo.js` and `foo.test.js` in current directory. Warn if destination
@@ -12,7 +8,7 @@ const _i = chalk.italic;
  * @param {string} _path Desired file name or `path/to/name`
  * @return {Promise<void>}
  */
-async function file(_path) {
+export async function file(_path) {
   let { userPath, projName } = parsePath(process.cwd(), _path);
 
   // If we're in root dir, and the user didn't specify `src` as part of their
@@ -54,8 +50,8 @@ describe('${projName}.js', () => {
   fs.outputFileSync(fileName, fileContent);
   fs.outputFileSync(testName, testContent);
 
-  console.log(`${_green('Created ' + fileName)}`);
-  console.log(`${_green('Created ' + testName)}`);
+  console.log(`${chalk.green('Created ' + fileName)}`);
+  console.log(`${chalk.green('Created ' + testName)}`);
 }
 
 /**
@@ -65,7 +61,7 @@ describe('${projName}.js', () => {
  *                       E.g. `path/to/name` or `name` (with no path).
  * @returns {{fullPath: string, projName: string, userPath: string}}
  */
-function parsePath(cwd, _path) {
+export function parsePath(cwd, _path) {
   const fullPath = path.join(cwd, _path);
 
   const parts = _path.split(path.sep);
@@ -85,13 +81,11 @@ function parsePath(cwd, _path) {
  * @param {string} path  File name or `path/to/name`.
  * @return {boolean}
  */
-function pathExists(path) {
+export function pathExists(path) {
   let exists;
   if (fs.existsSync(path)) {
     exists = true;
-    console.error(_red(`"${_i(path)}" already exists`));
+    console.error(chalk.red(`"${chalk.italic(path)}" already exists`));
   }
   return exists;
 }
-
-module.exports = { file, parsePath, pathExists };

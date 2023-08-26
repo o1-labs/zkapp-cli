@@ -1,5 +1,5 @@
-import { CommandOptions, CommandResults } from '../models/types.mjs';
-import { TestConstants, getBooleanFromString } from './common-utils.mjs';
+import { CommandOptions, CommandResults } from '../models/types.js';
+import { TestConstants, getBooleanFromString } from './common-utils.js';
 
 export async function executeInteractiveCommand(
   options: CommandOptions

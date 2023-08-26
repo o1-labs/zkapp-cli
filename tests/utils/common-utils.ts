@@ -2,8 +2,8 @@ import { expect } from '@playwright/test';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Constants } from '../../src/lib/constants.js';
-import { Constants as ConstantsType, KeyPair } from '../models/types.mjs';
+import Constants from '../../src/lib/constants.js';
+import { Constants as ConstantsType, KeyPair } from '../models/types.js';
 
 export const TestConstants: ConstantsType = Object.freeze({
   cliPromptMsDelay: 200,

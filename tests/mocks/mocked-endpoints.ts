@@ -4,7 +4,7 @@ import http, {
   Server,
   ServerResponse,
 } from 'node:http';
-import { TestConstants, generateRandomInt } from '../utils/common-utils.mjs';
+import { TestConstants, generateRandomInt } from '../utils/common-utils.js';
 
 const applicationName = '⚡️[Mocked Endpoints Service]';
 const host = 'localhost';
@@ -69,10 +69,8 @@ function graphQlRouteHandler(
   request.on('end', () => {
     try {
       let requestData = '';
-      switch (request.headers['content-type']) {
-        case 'application/json':
-          requestData = Buffer.concat(chunks).toString();
-          break;
+      if (request.headers['content-type']?.includes('application/json')) {
+        requestData = Buffer.concat(chunks).toString();
       }
       const query: string = JSON.parse(requestData)
         .query.replace(/(?:\r\n|\r|\n)/g, '')

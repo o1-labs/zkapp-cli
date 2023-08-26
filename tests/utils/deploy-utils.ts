@@ -2,15 +2,15 @@ import { expect } from '@playwright/test';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
 import crypto from 'node:crypto';
-import { Constants } from '../../src/lib/constants.js';
-import { CommandResults, ExampleType, UiType } from '../models/types.mjs';
-import { executeInteractiveCommand } from './cli-utils.mjs';
+import Constants from '../../src/lib/constants.js';
+import { CommandResults, ExampleType, UiType } from '../models/types.js';
+import { executeInteractiveCommand } from './cli-utils.js';
 import {
   cleanupFeePayerCacheByAlias,
   getZkAppAccountFromAlias,
-} from './common-utils.mjs';
-import { zkConfig } from './config-utils.mjs';
-import { zkExample } from './example-utils.mjs';
+} from './common-utils.js';
+import { zkConfig } from './config-utils.js';
+import { zkExample } from './example-utils.js';
 import {
   acquireAvailableAccount,
   findTxnByHash,
@@ -19,8 +19,8 @@ import {
   isMockedMinaGraphQlEndpointInUse,
   releaseAcquiredAccount,
   waitForTxnToBeAddedIntoBlock,
-} from './network-utils.mjs';
-import { zkProject } from './project-utils.mjs';
+} from './network-utils.js';
+import { zkProject } from './project-utils.js';
 
 export async function zkDeploy(
   path: string,

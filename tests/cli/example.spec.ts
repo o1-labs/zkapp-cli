@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import { Constants } from '../../src/lib/constants.js';
+import Constants from '../../src/lib/constants.js';
 import {
   TestConstants,
   getArrayValuesAsString,
-} from '../utils/common-utils.mjs';
-import { checkZkExample, zkExample } from '../utils/example-utils.mjs';
+} from '../utils/common-utils.js';
+import { checkZkExample, zkExample } from '../utils/example-utils.js';
 
 test.describe('zkApp-CLI', () => {
   test(`should not generate zkApp project for unknown example type, @parallel @smoke @example @fail-cases`, async () => {

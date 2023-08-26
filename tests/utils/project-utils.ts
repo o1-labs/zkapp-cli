@@ -1,16 +1,16 @@
 import { expect } from '@playwright/test';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
-import { Constants } from '../../src/lib/constants.js';
-import { CommandResults, UiType } from '../models/types.mjs';
+import Constants from '../../src/lib/constants.js';
+import { CommandResults, UiType } from '../models/types.js';
 import {
   executeInteractiveCommand,
   generateInputsForOptionSelection,
-} from './cli-utils.mjs';
+} from './cli-utils.js';
 import {
   checkSmartContractsFilesystem,
   getBooleanFromString,
-} from './common-utils.mjs';
+} from './common-utils.js';
 
 export async function zkProject(
   projectName: string,

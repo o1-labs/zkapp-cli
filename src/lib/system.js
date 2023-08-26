@@ -1,5 +1,5 @@
-const envinfo = require('envinfo');
-const sh = require('child_process').execSync;
+import { execSync as sh } from 'child_process';
+import envinfo from 'envinfo';
 
 function system() {
   const installedSnarkyJSversion = getInstalledSnarkyJSversion();
@@ -21,9 +21,7 @@ function system() {
       return env.replace(
         str,
         `snarkyjs: ${
-          installedSnarkyJSversion
-            ? installedSnarkyJSversion
-            : 'Not Found (not in a project)'
+          installedSnarkyJSversion || 'Not Found (not in a project)'
         }`
       );
     })
@@ -38,4 +36,4 @@ function getInstalledSnarkyJSversion() {
   return JSON.parse(installedPkgs)['dependencies']?.['snarkyjs']?.['version'];
 }
 
-module.exports = { system };
+export default system;

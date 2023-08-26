@@ -1,22 +1,18 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
-const { project } = require('../lib/project');
-const { file } = require('../lib/file');
-const { config } = require('../lib/config');
-const { deploy } = require('../lib/deploy');
-const { example } = require('../lib/example');
-const { system } = require('../lib/system');
-const chalk = require('chalk');
-const { Constants } = require('../lib/constants');
-
-const _g = chalk.green;
-const _r = chalk.reset;
-const _red = chalk.red;
+import chalk from 'chalk';
+import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs/yargs';
+import config from '../lib/config.js';
+import Constants from '../lib/constants.js';
+import { deploy } from '../lib/deploy.js';
+import { example } from '../lib/example.js';
+import { file } from '../lib/file.js';
+import { project } from '../lib/project.js';
+import system from '../lib/system.js';
 
 yargs(hideBin(process.argv))
-  .scriptName(_g('zk'))
+  .scriptName(chalk.green('zk'))
   .usage('Usage: $0 <command> [options]')
   .strictCommands()
   .strictOptions()
@@ -25,20 +21,20 @@ yargs(hideBin(process.argv))
   // https://github.com/yargs/yargs/blob/master/locales/en.json
   .updateStrings({
     'Missing required argument: %s': {
-      one: _red('Missing required argument: %s'),
+      one: chalk.red('Missing required argument: %s'),
     },
     'Unknown argument: %s': {
-      one: _red('Unknown argument: %s'),
+      one: chalk.red('Unknown argument: %s'),
     },
     'Unknown command: %s': {
-      one: _red('Unknown command: %s'),
+      one: chalk.red('Unknown command: %s'),
     },
-    'Invalid values:': _red('Invalid values:'),
-    'Argument: %s, Given: %s, Choices: %s': _red(
+    'Invalid values:': chalk.red('Invalid values:'),
+    'Argument: %s, Given: %s, Choices: %s': chalk.red(
       `%s was %s. Must be one of: %s.`
     ),
   })
-  .demandCommand(1, _red('Please provide a command.'))
+  .demandCommand(1, chalk.red('Please provide a command.'))
 
   .command(
     ['project [name]', 'proj [name]', 'p [name]'],
@@ -59,9 +55,9 @@ yargs(hideBin(process.argv))
     ['file [name]', 'f [name]'],
     'Create a file and generate the corresponding test file',
     { name: { demand: true, string: true, hidden: true } },
-    (argv) => file(argv.name)
+    async (argv) => await file(argv.name)
   )
-  .command(['config'], 'Add a new deploy alias', {}, config)
+  .command(['config'], 'Add a new deploy alias', {}, async () => await config())
   .command(
     ['deploy [alias]'],
     'Deploy or redeploy a zkApp',
@@ -96,8 +92,8 @@ yargs(hideBin(process.argv))
   .alias('v', 'version')
 
   .epilog(
-    // _r is a hack to force the terminal to retain a line break below
-    _r(
+    // chalk.reset is a hack to force the terminal to retain a line break below
+    chalk.reset(
       `
 
     █▄ ▄█ █ █▄ █ ▄▀▄

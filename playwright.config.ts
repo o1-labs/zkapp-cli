@@ -1,5 +1,5 @@
 import { type PlaywrightTestConfig } from '@playwright/test';
-import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.mjs';
+import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.js';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -40,7 +40,7 @@ const config: PlaywrightTestConfig = {
   projects: [
     {
       name: 'cli',
-      testMatch: '**/cli/**/*.spec.mts',
+      testMatch: '**/cli/**/*.spec.ts',
     },
     // {
     //   name: 'chromium-desktop',
@@ -48,7 +48,7 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'chromium',
     //     ...devices['Desktop Chrome'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.mts'],
+    //   testIgnore: ['**/cli/**/*.spec.ts'],
     // },
     // {
     //   name: 'firefox-desktop',
@@ -56,7 +56,7 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'firefox',
     //     ...devices['Desktop Firefox'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.mts'],
+    //   testIgnore: ['**/cli/**/*.spec.ts'],
     // },
     // {
     //   name: 'webkit-desktop',
@@ -64,12 +64,12 @@ const config: PlaywrightTestConfig = {
     //     browserName: 'webkit',
     //     ...devices['Desktop Safari'],
     //   },
-    //   testIgnore: ['**/cli/**/*.spec.mts'],
+    //   testIgnore: ['**/cli/**/*.spec.ts'],
     // },
   ],
   webServer: {
     // TODO: We can't use "ts-node" with Npx and Node20 because of the https://github.com/TypeStrong/ts-node/issues/1997
-    command: 'node --loader ts-node/esm ./tests/mocks/mocked-endpoints.mts',
+    command: 'node --loader ts-node/esm ./tests/mocks/mocked-endpoints.ts',
     url: getMockedEndpointsServiceEndpoint(),
     timeout: 30 * 1000,
   },

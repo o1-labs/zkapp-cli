@@ -1,13 +1,14 @@
-const fs = require('fs-extra');
-const findPrefix = require('find-npm-prefix');
-const { prompt } = require('enquirer');
-const { table, getBorderCharacters } = require('table');
-const { step } = require('./helpers');
-const { green, red, bold, gray } = require('chalk');
-const Client = require('mina-signer');
-const { prompts } = require('./prompts');
-const { PrivateKey, PublicKey } = require('snarkyjs');
-const { Constants } = require('./constants');
+import chalk from 'chalk';
+import enquirer from 'enquirer';
+import findPrefix from 'find-npm-prefix';
+import fs from 'fs-extra';
+import Client from 'mina-signer';
+import { PrivateKey, PublicKey } from 'snarkyjs';
+import { getBorderCharacters, table } from 'table';
+import Constants from './constants.js';
+import step from './helpers.js';
+import prompts from './prompts.js';
+
 const log = console.log;
 
 /**
@@ -30,7 +31,7 @@ async function config() {
       str = 'Unable to read config.json.';
       console.error(err);
     }
-    log(red(str));
+    log(chalk.red(str));
     return;
   }
 
@@ -58,13 +59,15 @@ async function config() {
   }
 
   // Build table of existing deploy aliases found in their config.json
-  let tableData = [[bold('Name'), bold('URL'), bold('Smart Contract')]];
+  let tableData = [
+    [chalk.bold('Name'), chalk.bold('URL'), chalk.bold('Smart Contract')],
+  ];
   for (const deployAliasName in config.deployAliases) {
     const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
       deployAliasName,
       url ?? '',
-      smartContract ?? gray('(never deployed)'),
+      smartContract ?? chalk.gray('(never deployed)'),
     ]);
   }
 
@@ -75,7 +78,7 @@ async function config() {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('Deploy aliases in config.json'),
+      content: chalk.bold('Deploy aliases in config.json'),
     },
   };
 
@@ -85,7 +88,7 @@ async function config() {
     tableData[0][0] = tableData[0][0] + ' '.repeat(2);
     tableData[0][1] = tableData[0][1] + ' '.repeat(3);
 
-    tableData.push([[gray('None found')], [], []]);
+    tableData.push([[chalk.gray('None found')], [], []]);
     tableConfig.spanningCells = [{ col: 0, row: 1, colSpan: 3 }];
   }
 
@@ -103,7 +106,7 @@ async function config() {
     feepayerAliasPrompt,
   } = prompts;
 
-  const initialPromptResponse = await prompt([
+  const initialPromptResponse = await enquirer.prompt([
     ...deployAliasPrompts(config),
     ...initialFeepayerPrompts(
       defaultFeepayerAlias,
@@ -117,30 +120,30 @@ async function config() {
   let otherFeepayerResponse;
 
   if (initialPromptResponse.feepayer === 'recover') {
-    recoverFeepayerResponse = await prompt(
+    recoverFeepayerResponse = await enquirer.prompt(
       recoverFeepayerPrompts(cachedFeepayerAliases)
     );
   }
 
   if (initialPromptResponse?.feepayer === 'create') {
-    feepayerAliasResponse = await prompt(
+    feepayerAliasResponse = await enquirer.prompt(
       feepayerAliasPrompt(cachedFeepayerAliases)
     );
   }
 
   if (initialPromptResponse.feepayer === 'other') {
-    otherFeepayerResponse = await prompt(
+    otherFeepayerResponse = await enquirer.prompt(
       otherFeepayerPrompts(cachedFeepayerAliases)
     );
 
     if (otherFeepayerResponse.feepayer === 'recover') {
-      recoverFeepayerResponse = await prompt(
+      recoverFeepayerResponse = await enquirer.prompt(
         recoverFeepayerPrompts(cachedFeepayerAliases)
       );
     }
 
     if (otherFeepayerResponse.feepayer === 'create') {
-      feepayerAliasResponse = await prompt(
+      feepayerAliasResponse = await enquirer.prompt(
         feepayerAliasPrompt(cachedFeepayerAliases)
       );
     }
@@ -203,7 +206,7 @@ async function config() {
   await step(`Add deploy alias to config.json`, async () => {
     if (!feepayerAlias) {
       // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
-      log(red(`Invalid fee payer alias ${feepayerAlias}" .`));
+      log(chalk.red(`Invalid fee payer alias ${feepayerAlias}" .`));
       process.exit(1);
     }
     config.deployAliases[deployAliasName] = {
@@ -228,14 +231,14 @@ async function config() {
     )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
-  log(green(str));
+  log(chalk.green(str));
 }
 
 // Creates a new feepayer key pair
 async function createKeyPairStep(feepayerAlias) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias ${feepayerAlias}.`));
+    log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
     return;
   }
   return await step(
@@ -282,7 +285,7 @@ async function recoverKeyPairStep(feepayerKey, feepayerAlias) {
 async function savedKeyPairStep(feepayerAlias, address) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias: ${feepayerAlias}.`));
+    log(chalk.red(`Invalid fee payer alias: ${feepayerAlias}.`));
     process.exit(1);
   }
   const keyPair = fs.readJSONSync(
@@ -330,6 +333,4 @@ function getExplorerName(graphQLUrl) {
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
 
-module.exports = {
-  config,
-};
+export default config;

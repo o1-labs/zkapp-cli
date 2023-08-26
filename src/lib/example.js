@@ -1,17 +1,14 @@
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const path = require('path');
-const ora = require('ora');
-const sh = require('shelljs');
-const util = require('util');
-const gittar = require('gittar');
-const { prompt } = require('enquirer');
-const { red, reset } = require('chalk');
-const { Constants } = require('./constants');
+import chalk from 'chalk';
+import enquirer from 'enquirer';
+import fs from 'fs-extra';
+import gittar from 'gittar';
+import ora from 'ora';
+import path from 'path';
+import shell from 'shelljs';
+import util from 'util';
+import Constants from './constants.js';
 
-const _green = chalk.green;
-const _red = chalk.red;
-const shExec = util.promisify(sh.exec);
+const shellExec = util.promisify(shell.exec);
 
 /**
  * Create a new zkApp project with recommended dir structure, Prettier config,
@@ -20,15 +17,17 @@ const shExec = util.promisify(sh.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {Promise<void>}
  */
-async function example(example) {
+export async function example(example) {
   if (!example) {
-    const res = await prompt({
+    const res = await enquirer.prompt({
       type: 'select',
       name: 'example',
       choices: Constants.exampleTypes,
       message: (state) => {
         const style =
-          state.submitted && !state.cancelled ? state.styles.success : reset;
+          state.submitted && !state.cancelled
+            ? state.styles.success
+            : chalk.reset;
         return style('Choose an example');
       },
       prefix: (state) => {
@@ -38,7 +37,7 @@ async function example(example) {
         if (!state.submitted) return state.symbols.question;
         return !state.cancelled
           ? state.symbols.check
-          : red(state.symbols.cross);
+          : chalk.red(state.symbols.cross);
       },
     });
     example = res.example;
@@ -53,12 +52,12 @@ async function example(example) {
   if (!(await extractExample(example, dir, lang))) return;
 
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
-  sh.cd(dir);
+  shell.cd(dir);
 
   // Git must be initialized before running `npm install` b/c Husky runs an
   // NPM `prepare` script to set up its pre-commit hook within `.git`.
-  if (!sh.which('git')) {
-    console.error(_red('Please ensure Git is installed, then try again.'));
+  if (!shell.which('git')) {
+    console.error(chalk.red('Please ensure Git is installed, then try again.'));
     return;
   }
 
@@ -92,7 +91,7 @@ async function example(example) {
     `\n  npm run build` +
     `\n  npm run start`;
 
-  console.log(_green(str));
+  console.log(chalk.green(str));
   process.exit(0);
 }
 
@@ -112,8 +111,8 @@ async function fetchProjectTemplate(name, lang) {
     const templatePath = `templates/${projectName}`;
 
     if (process.env.CI) {
-      sh.mkdir('-p', path.join(TEMP, templatePath));
-      sh.cp('-r', `${templatePath}/.`, path.join(TEMP, templatePath));
+      shell.mkdir('-p', path.join(TEMP, templatePath));
+      shell.cp('-r', `${templatePath}/.`, path.join(TEMP, templatePath));
     } else {
       const src = 'github:o1-labs/zkapp-cli#main';
       await gittar.fetch(src, { force: true });
@@ -127,9 +126,9 @@ async function fetchProjectTemplate(name, lang) {
       });
     }
 
-    sh.mv(path.join(TEMP, templatePath), name);
-    sh.rm('-r', TEMP);
-    spin.succeed(_green(step));
+    shell.mv(path.join(TEMP, templatePath), name);
+    shell.rm('-r', TEMP);
+    spin.succeed(chalk.green(step));
     return true;
   } catch (err) {
     spin.fail(step);
@@ -144,11 +143,11 @@ async function fetchProjectTemplate(name, lang) {
  * @param {string} cmd  Shell command to execute.
  * @returns {Promise<void>}
  */
-async function step(step, cmd) {
+export async function step(step, cmd) {
   const spin = ora(`${step}...`).start();
   try {
-    await shExec(cmd);
-    spin.succeed(_green(step));
+    await shellExec(cmd);
+    spin.succeed(chalk.green(step));
   } catch (err) {
     spin.fail(step);
   }
@@ -160,7 +159,7 @@ async function step(step, cmd) {
  * @param {string} projDir Full path to terminal dir + path/to/name
  * @returns {Promise<void>}
  */
-async function setProjectName(projDir) {
+export async function setProjectName(projDir) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
@@ -179,7 +178,7 @@ async function setProjectName(projDir) {
 
   addStartScript(path.join(projDir, 'package.json'));
 
-  spin.succeed(_green(step));
+  spin.succeed(chalk.green(step));
 }
 
 /**
@@ -198,20 +197,20 @@ function addStartScript(file) {
  * @param {string} a    Old text.
  * @param {string} b    New text.
  */
-function replaceInFile(file, a, b) {
+export function replaceInFile(file, a, b) {
   let content = fs.readFileSync(file, 'utf8');
   content = content.replace(a, b);
   fs.writeFileSync(file, content);
 }
 
-function titleCase(str) {
+export function titleCase(str) {
   return str
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
     .join(' ');
 }
 
-function kebabCase(str) {
+export function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
 }
 
@@ -222,7 +221,7 @@ function kebabCase(str) {
  * @param {string} lang        ts or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-async function extractExample(example, name, lang) {
+export async function extractExample(example, name, lang) {
   const step = 'Extract example';
   const spin = ora(`${step}...`).start();
 
@@ -231,8 +230,8 @@ async function extractExample(example, name, lang) {
     const examplePath = `examples/${example}/${lang}/src`;
 
     if (process.env.CI) {
-      sh.mkdir('-p', path.join(TEMP, examplePath));
-      sh.cp('-r', `${examplePath}/.`, path.join(TEMP, examplePath));
+      shell.mkdir('-p', path.join(TEMP, examplePath));
+      shell.cp('-r', `${examplePath}/.`, path.join(TEMP, examplePath));
     } else {
       const src = 'github:o1-labs/zkapp-cli#main';
 
@@ -247,16 +246,16 @@ async function extractExample(example, name, lang) {
     // Example not found. Delete the project template & temp dir to clean up.
     if (isEmpty(TEMP)) {
       spin.fail(step);
-      console.error(_red('Example not found'));
-      sh.rm('-r', `${process.cwd()}/${name}`, TEMP);
+      console.error(chalk.red('Example not found'));
+      shell.rm('-r', `${process.cwd()}/${name}`, TEMP);
       return false;
     }
 
     // Delete the project template's `src` & use the example's `src` instead.
-    sh.rm('-r', `${name}/src`);
-    sh.mv(`${TEMP}/${examplePath}`, `${name}/src`);
-    sh.rm('-r', TEMP);
-    spin.succeed(_green(step));
+    shell.rm('-r', `${name}/src`);
+    shell.mv(`${TEMP}/${examplePath}`, `${name}/src`);
+    shell.rm('-r', TEMP);
+    spin.succeed(chalk.green(step));
     return true;
   } catch (err) {
     spin.fail(step);
@@ -265,7 +264,7 @@ async function extractExample(example, name, lang) {
   }
 }
 
-function isEmpty(path) {
+export function isEmpty(path) {
   return fs.readdirSync(path).length === 0;
 }
 
@@ -276,22 +275,10 @@ function isEmpty(path) {
  * @param {number} i   Counter for the recursive function.
  * @return {string}    An unused directory name.
  */
-function findUniqueDir(str, i = 0) {
+export function findUniqueDir(str, i = 0) {
   const dir = str + (i ? i : '');
   if (fs.existsSync(dir)) {
     return findUniqueDir(str, ++i);
   }
   return dir;
 }
-
-module.exports = {
-  example,
-  step,
-  setProjectName,
-  replaceInFile,
-  titleCase,
-  kebabCase,
-  extractExample,
-  isEmpty,
-  findUniqueDir,
-};

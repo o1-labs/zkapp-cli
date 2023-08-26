@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect } from 'react';

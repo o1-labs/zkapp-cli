@@ -1,16 +1,16 @@
-const sh = require('child_process').execSync;
-const fs = require('fs-extra');
-const path = require('path');
-const findPrefix = require('find-npm-prefix');
-const { prompt } = require('enquirer');
-const { table, getBorderCharacters } = require('table');
-const glob = require('fast-glob');
-const { step } = require('./helpers');
-const fetch = require('node-fetch');
-const util = require('util');
-const { red, green, bold, reset } = require('chalk');
-const log = console.log;
+import chalk from 'chalk';
+import { execSync as sh } from 'child_process';
+import enquirer from 'enquirer';
+import glob from 'fast-glob';
+import findPrefix from 'find-npm-prefix';
+import fs from 'fs-extra';
+import fetch from 'node-fetch';
+import path from 'path';
+import { getBorderCharacters, table } from 'table';
+import util from 'util';
+import step from './helpers.js';
 
+const log = console.log;
 const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
@@ -20,7 +20,7 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
  * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
  */
-async function deploy({ alias, yes }) {
+export async function deploy({ alias, yes }) {
   // Get project root, so the CLI command can be run anywhere inside their proj.
   const DIR = await findPrefix(process.cwd());
 
@@ -35,7 +35,7 @@ async function deploy({ alias, yes }) {
       str = 'Unable to read config.json.';
       console.error(err);
     }
-    log(red(str));
+    log(chalk.red(str));
     return;
   }
 
@@ -48,29 +48,35 @@ async function deploy({ alias, yes }) {
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(
-      red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`)
+      chalk.red(
+        `You are using an earlier zkapp-cli version ${installedCliVersion}.`
+      )
     );
-    log(red(`The current version is ${latestCliVersion}.`));
-    log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
+    log(chalk.red(`The current version is ${latestCliVersion}.`));
+    log(
+      chalk.red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.')
+    );
     return;
   }
 
   if (!alias) {
     const aliases = Object.keys(config?.deployAliases);
     if (!aliases.length) {
-      log(red('No deploy aliases found in config.json.'));
-      log(red('Run `zk config` to add a deploy alias, then try again.'));
+      log(chalk.red('No deploy aliases found in config.json.'));
+      log(chalk.red('Run `zk config` to add a deploy alias, then try again.'));
       return;
     }
 
-    const res = await prompt({
+    const res = await enquirer.prompt({
       type: 'select',
       name: 'network',
       choices: aliases,
       message: (state) => {
         // Makes the step text green upon success, else uses reset.
         const style =
-          state.submitted && !state.cancelled ? state.styles.success : reset;
+          state.submitted && !state.cancelled
+            ? state.styles.success
+            : chalk.reset;
         return style('Which deploy alias do you want to deploy to?');
       },
       prefix: (state) => {
@@ -80,7 +86,7 @@ async function deploy({ alias, yes }) {
         if (!state.submitted) return state.symbols.question;
         return !state.cancelled
           ? state.symbols.check
-          : red(state.symbols.cross);
+          : chalk.red(state.symbols.cross);
       },
     });
     alias = res.network;
@@ -89,18 +95,18 @@ async function deploy({ alias, yes }) {
   alias = alias.toLowerCase();
 
   if (!config.deployAliases[alias]) {
-    log(red('Deploy alias name not found in config.json.'));
-    log(red('You can add a deploy alias by running `zk config`.'));
+    log(chalk.red('Deploy alias name not found in config.json.'));
+    log(chalk.red('You can add a deploy alias by running `zk config`.'));
     return;
   }
 
   if (!config.deployAliases[alias].url) {
     log(
-      red(
+      chalk.red(
         `No 'url' property is specified for this deploy alias in config.json.`
       )
     );
-    log(red(`Please correct your config.json and try again.`));
+    log(chalk.red(`Please correct your config.json and try again.`));
 
     process.exit(1);
     return;
@@ -110,7 +116,7 @@ async function deploy({ alias, yes }) {
     // store cache to add after build directory is emptied
     let cache;
     try {
-      cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      cache = fs.readJSONSync(`${DIR}/build/cache.json`);
     } catch (err) {
       if (err.code === 'ENOENT') {
         cache = {};
@@ -144,14 +150,16 @@ async function deploy({ alias, yes }) {
   // If no smart contract is specified for this deploy alias in config.json &
   // 2+ smart contracts exist in build.json, ask which they want to use.
   if (!contractName) {
-    const res = await prompt({
+    const res = await enquirer.prompt({
       type: 'select',
       name: 'contractName',
       choices: build.smartContracts,
       message: (state) => {
         // Makes the step text green upon success, else uses reset.
         const style =
-          state.submitted && !state.cancelled ? state.styles.success : reset;
+          state.submitted && !state.cancelled
+            ? state.styles.success
+            : chalk.reset;
         return style('Choose smart contract to deploy');
       },
       prefix: (state) => {
@@ -161,7 +169,7 @@ async function deploy({ alias, yes }) {
         if (!state.submitted) return state.symbols.question;
         return !state.cancelled
           ? state.symbols.check
-          : red(state.symbols.cross);
+          : chalk.red(state.symbols.cross);
       },
     });
     contractName = res.contractName;
@@ -212,7 +220,7 @@ async function deploy({ alias, yes }) {
 
   if (!nodeStatus || nodeStatus.syncStatus === 'OFFLINE') {
     log(
-      red(
+      chalk.red(
         `  Transaction relayer node is offline. Please try again or use a different "url" for this deploy alias in your config.json`
       )
     );
@@ -220,7 +228,7 @@ async function deploy({ alias, yes }) {
     return;
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
     log(
-      red(
+      chalk.red(
         `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this deploy alias in your config.json`
       )
     );
@@ -243,7 +251,7 @@ async function deploy({ alias, yes }) {
     smartContractImports = await import(smartContractImportPath);
   } catch (_) {
     log(
-      red(
+      chalk.red(
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you want to deploy to this deploy alias.`
       )
     );
@@ -255,7 +263,7 @@ async function deploy({ alias, yes }) {
   // If we cannot find the named export log an error message and return early.
   if (!(contractName in smartContractImports)) {
     log(
-      red(
+      chalk.red(
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
       )
     );
@@ -271,7 +279,7 @@ async function deploy({ alias, yes }) {
     feepayerPrivateKeyBase58 = fs.readJSONSync(feepayerKeyPath).privateKey;
   } catch (error) {
     log(
-      red(
+      chalk.red(
         `  Failed to find the feepayer private key.\n  Please make sure your config.json has the correct 'feepayerKeyPath' property.`
       )
     );
@@ -285,7 +293,7 @@ async function deploy({ alias, yes }) {
     ).privateKey;
   } catch (_) {
     log(
-      red(
+      chalk.red(
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
     );
@@ -305,7 +313,7 @@ async function deploy({ alias, yes }) {
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      let cache = fs.readJSONSync(`${DIR}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
 
@@ -325,7 +333,7 @@ async function deploy({ alias, yes }) {
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
 
-        fs.writeJsonSync(`${DIR}/build/cache.json`, cache, {
+        fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
           spaces: 2,
         });
 
@@ -343,7 +351,7 @@ async function deploy({ alias, yes }) {
   let { fee } = config.deployAliases[alias];
   if (!fee) {
     log(
-      red(
+      chalk.red(
         `  The "fee" property is not specified for this deploy alias in config.json. Please update your config.json and try again.`
       )
     );
@@ -359,7 +367,7 @@ async function deploy({ alias, yes }) {
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
     log(
-      red(
+      chalk.red(
         `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
     );
@@ -399,10 +407,10 @@ async function deploy({ alias, yes }) {
   let transactionJson = transaction.json;
   let { feepayerAlias, url } = config.deployAliases[alias];
   const settings = [
-    [bold('Deploy Alias'), reset(alias)],
-    [bold('Fee Payer Alias'), reset(feepayerAlias)],
-    [bold('URL'), reset(url)],
-    [bold('Smart Contract'), reset(contractName)],
+    [chalk.bold('Deploy Alias'), chalk.reset(alias)],
+    [chalk.bold('Fee Payer Alias'), chalk.reset(feepayerAlias)],
+    [chalk.bold('URL'), chalk.reset(url)],
+    [chalk.bold('Smart Contract'), chalk.reset(contractName)],
   ];
 
   let confirm;
@@ -411,7 +419,7 @@ async function deploy({ alias, yes }) {
     confirm = 'yes';
   } else {
     // This is verbose, but creates ideal UX steps--expected colors & symbols.
-    let res = await prompt({
+    let res = await enquirer.prompt({
       type: 'input',
       name: 'confirm',
       message: (state) => {
@@ -420,7 +428,7 @@ async function deploy({ alias, yes }) {
         const style =
           state.submitted && (x === 'yes' || x === 'y')
             ? state.styles.success
-            : reset;
+            : chalk.reset;
 
         return (
           style('Confirm to send transaction\n\n  ') +
@@ -438,7 +446,7 @@ async function deploy({ alias, yes }) {
         let x = state.input.toLowerCase();
         return x === 'yes' || x === 'y'
           ? state.symbols.check
-          : red(state.symbols.cross);
+          : chalk.red(state.symbols.cross);
       },
       result: (val) => {
         // Using a text input b/c we want to require pressing "enter". But
@@ -470,7 +478,7 @@ async function deploy({ alias, yes }) {
 
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
-    log(red(getErrorMessage(txn)));
+    log(chalk.red(getErrorMessage(txn)));
     process.exit(1);
     return;
   }
@@ -483,7 +491,7 @@ async function deploy({ alias, yes }) {
     `\n  as soon as the transaction is included in a block:` +
     `\n  ${getTxnUrl(graphQLUrl, txn)}`;
 
-  log(green(str));
+  log(chalk.green(str));
   process.exit(0);
 }
 
@@ -555,7 +563,7 @@ function hasBreakingChanges(version1, version2) {
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
  * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
  */
-async function findSmartContracts(path) {
+export async function findSmartContracts(path) {
   if (process.platform === 'win32') {
     path = path.replaceAll('\\', '/');
   }
@@ -580,7 +588,7 @@ async function findSmartContracts(path) {
  * @param {string} deployAliasName The deploy alias name.
  * @returns {string}       The smart contract name.
  */
-function chooseSmartContract(config, deploy, deployAliasName) {
+export function chooseSmartContract(config, deploy, deployAliasName) {
   // If the deploy alias in config.json has a smartContract specified, use it.
   if (config.deployAliases[deployAliasName]?.smartContract) {
     return config.deployAliases[deployAliasName]?.smartContract;
@@ -700,9 +708,3 @@ function removeJsonQuotes(json) {
     match.replace(/"/g, '')
   );
 }
-
-module.exports = {
-  deploy,
-  findSmartContracts,
-  chooseSmartContract,
-};

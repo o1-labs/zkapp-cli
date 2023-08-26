@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 <script>
   import '../styles/globals.css'
 </script>

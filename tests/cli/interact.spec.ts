@@ -2,15 +2,15 @@ import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
 import crypto from 'node:crypto';
-import { Constants } from '../../src/lib/constants.js';
-import { executeInteractiveCommand } from '../utils/cli-utils.mjs';
+import Constants from '../../src/lib/constants.js';
+import { executeInteractiveCommand } from '../utils/cli-utils.js';
 import {
   cleanupFeePayerCacheByAlias,
   getZkAppAccountFromAlias,
-} from '../utils/common-utils.mjs';
-import { zkConfig } from '../utils/config-utils.mjs';
-import { checkZkDeploy } from '../utils/deploy-utils.mjs';
-import { zkExample } from '../utils/example-utils.mjs';
+} from '../utils/common-utils.js';
+import { zkConfig } from '../utils/config-utils.js';
+import { checkZkDeploy } from '../utils/deploy-utils.js';
+import { zkExample } from '../utils/example-utils.js';
 import {
   acquireAvailableAccount,
   findTxnByHash,
@@ -19,8 +19,8 @@ import {
   isMockedMinaGraphQlEndpointInUse,
   releaseAcquiredAccount,
   waitForTxnToBeAddedIntoBlock,
-} from '../utils/network-utils.mjs';
-import { zkProject } from '../utils/project-utils.mjs';
+} from '../utils/network-utils.js';
+import { zkProject } from '../utils/project-utils.js';
 
 test.describe('Users', () => {
   // Tests for interaction with example projects of each type

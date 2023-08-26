@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 <template>
   <Head>
     <Title>Mina zkApp UI</Title>
