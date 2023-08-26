@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 if [ -z "$husky_skip_init" ]; then
-  debug() {
+  debug () {
     if [ "$HUSKY_DEBUG" = "1" ]; then
       echo "husky (debug) - $1"
     fi
