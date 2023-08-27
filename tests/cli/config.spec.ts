@@ -7,6 +7,7 @@ import {
   TestConstants,
   cleanupFeePayerCache,
   cleanupFeePayerCacheByAlias,
+  removeEnvCustomLoaders,
   restoreFeePayerCache,
 } from '../utils/common-utils.js';
 import {
@@ -22,6 +23,8 @@ import {
 import { zkProject } from '../utils/project-utils.js';
 
 test.describe('zkApp-CLI', () => {
+  test.beforeAll(removeEnvCustomLoaders);
+
   test(`should not create deployment alias if not within the project dir, @parallel @smoke @config @fail-cases`, async () => {
     const cliArg = 'config';
     const { execute, cleanup, path } = await prepareEnvironment();
@@ -71,9 +74,13 @@ test.describe('zkApp-CLI', () => {
         expect(
           fs.existsSync(`${Constants.feePayerCacheDir}/${feePayerAlias}`)
         ).toBeFalsy();
-        expect(
-          fs.readFileSync(`${path}/${projectName}/config.json`, 'utf8')
-        ).toEqual(JSON.stringify(TestConstants.defaultProjectConfig));
+        expect(TestConstants.defaultProjectConfig).toEqual(
+          expect.objectContaining(
+            JSON.parse(
+              fs.readFileSync(`${path}/${projectName}/config.json`, 'utf8')
+            )
+          )
+        );
       });
     } finally {
       // Just in case, should not be created as validated above

@@ -1,4 +1,4 @@
-import { execSync as sh } from 'child_process';
+import { execSync } from 'child_process';
 import envinfo from 'envinfo';
 
 function system() {
@@ -29,7 +29,7 @@ function system() {
 }
 
 function getInstalledSnarkyJSversion() {
-  const installedPkgs = sh('npm list --all --depth 0 --json', {
+  const installedPkgs = execSync('npm list --all --depth 0 --json', {
     encoding: 'utf-8',
   });
 

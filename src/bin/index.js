@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
 import chalk from 'chalk';
+import fs from 'fs-extra';
+import path from 'path';
+import url from 'url';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import config from '../lib/config.js';
@@ -10,6 +13,9 @@ import { example } from '../lib/example.js';
 import { file } from '../lib/file.js';
 import { project } from '../lib/project.js';
 import system from '../lib/system.js';
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 yargs(hideBin(process.argv))
   .scriptName(chalk.green('zk'))
@@ -88,6 +94,9 @@ yargs(hideBin(process.argv))
     async (argv) => await example(argv.name)
   )
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
+  .version(
+    fs.readJSONSync(path.join(__dirname, '..', '..', 'package.json')).version
+  )
   .alias('h', 'help')
   .alias('v', 'version')
 

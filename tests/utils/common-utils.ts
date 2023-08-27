@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
 import fs from 'node:fs';
 import path from 'node:path';
 import Constants from '../../src/lib/constants.js';
@@ -55,15 +55,52 @@ export const TestConstants: ConstantsType = Object.freeze({
       data: {
         account: {
           publicKey,
+          token: 'wSHV2S4qX9jFsLjQo8r1BsMLH2ZRKsZx6EJd1sbozGPieEC4Jf',
           nonce: '999',
-          balance: { total: '999' },
+          balance: { total: '0' },
+          tokenSymbol: '',
+          receiptChainHash:
+            '2mza1ghsouqXbp8Rt9EEQwcUZkpFmhoQbMmGzqdRRjzSm1afZuYV',
+          timing: {
+            initialMinimumBalance: null,
+            cliffTime: null,
+            cliffAmount: null,
+            vestingPeriod: null,
+            vestingIncrement: null,
+          },
+          permissions: {
+            editState: 'Proof',
+            access: 'None',
+            send: 'Proof',
+            receive: 'None',
+            setDelegate: 'Signature',
+            setPermissions: 'Signature',
+            setVerificationKey: 'Signature',
+            setZkappUri: 'Signature',
+            editActionState: 'Proof',
+            setTokenSymbol: 'Signature',
+            incrementNonce: 'Signature',
+            setVotingFor: 'Signature',
+            setTiming: 'Signature',
+          },
           delegateAccount: {
             publicKey,
           },
+          votingFor: '2mzWc7ZF8hRKvLyoLpKLZ3TSm8XSjfxZq67dphJpnjhYmU5Vja5Q',
           zkappState: ['2', '0', '0', '0', '0', '0', '0', '0'],
           verificationKey: {
             verificationKey: 'mockedVerificationKey',
+            hash: '23113964601705267640721828504735879594037921437708937961472943945603864832180',
           },
+          actionState: [
+            '25079927036070901246064867767436987657692091363973573142121686150614948079097',
+            '25079927036070901246064867767436987657692091363973573142121686150614948079097',
+            '25079927036070901246064867767436987657692091363973573142121686150614948079097',
+            '25079927036070901246064867767436987657692091363973573142121686150614948079097',
+            '25079927036070901246064867767436987657692091363973573142121686150614948079097',
+          ],
+          provedState: false,
+          zkappUri: '',
         },
       },
     };
@@ -74,7 +111,7 @@ export const TestConstants: ConstantsType = Object.freeze({
         zkapp: {
           id: '1234567890',
           hash: '5Ju6e5WfkVhdp1PAVhAJoLxqgWZT17FVkFaTnU6XvPkGwUHdDvqC',
-          failureReason: undefined,
+          failureReason: null,
         },
       },
     },
@@ -144,9 +181,6 @@ export const TestConstants: ConstantsType = Object.freeze({
         nonce
         balance {
           total
-        }
-        delegateAccount {
-          publicKey
         }
         zkappState
         verificationKey {
@@ -304,4 +338,16 @@ export async function checkSmartContractsFilesystem(
   }
   expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
   expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
+}
+
+// We need to filter out the node ESM loader from NODE_OPTIONS for CLI tests.
+// Otherwise, `zkapp-cli` will also consume the loader and fail.
+//   https://github.com/microsoft/playwright/issues/24516
+export async function removeEnvCustomLoaders(): Promise<void> {
+  if (process.env.NODE_OPTIONS) {
+    process.env.NODE_OPTIONS = process.env.NODE_OPTIONS.replace(
+      /--experimental-loader=[^\s]+/g,
+      ''
+    );
+  }
 }

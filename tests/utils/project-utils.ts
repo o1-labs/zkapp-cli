@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
-import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
 import Constants from '../../src/lib/constants.js';
 import { CommandResults, UiType } from '../models/types.js';
 import {

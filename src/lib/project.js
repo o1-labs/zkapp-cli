@@ -6,6 +6,7 @@ import gittar from 'gittar';
 import ora from 'ora';
 import path from 'path';
 import shell from 'shelljs';
+import url from 'url';
 import util from 'util';
 import customNextIndex from '../lib/ui/next/customNextIndex.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
@@ -15,6 +16,8 @@ import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
 import Constants from './constants.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
 
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const shellExec = util.promisify(shell.exec);
 const isWindows = process.platform === 'win32';
 

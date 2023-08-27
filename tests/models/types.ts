@@ -1,6 +1,6 @@
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
-import { Constants as CommonConstants } from '../../src/lib/constants';
+import CommonConstants from '../../src/lib/constants.js';
 
 export type FailureReason = {
   index: number;
@@ -10,7 +10,7 @@ export type FailureReason = {
 export type Transaction = {
   id?: string;
   hash: string;
-  failureReason?: string | FailureReason[];
+  failureReason: string | FailureReason[] | null;
 };
 
 export type Mempool = {
@@ -31,17 +31,40 @@ export type Account = {
 
 export type AccountDetails = {
   publicKey: string;
+  token: string;
   nonce: string;
-  balance: {
-    total: string;
+  balance: { total: string };
+  tokenSymbol: string | null;
+  receiptChainHash: string | null;
+  timing: {
+    initialMinimumBalance: string | null;
+    cliffTime: string | null;
+    cliffAmount: string | null;
+    vestingPeriod: string | null;
+    vestingIncrement: string | null;
   };
-  delegateAccount?: {
-    publicKey: string;
-  };
-  zkappState?: string[];
-  verificationKey?: {
-    verificationKey: string;
-  };
+  permissions: {
+    editState: string;
+    access: string;
+    send: string;
+    receive: string;
+    setDelegate: string;
+    setPermissions: string;
+    setVerificationKey: string;
+    setZkappUri: string;
+    editActionState: string;
+    setTokenSymbol: string;
+    incrementNonce: string;
+    setVotingFor: string;
+    setTiming: string;
+  } | null;
+  delegateAccount: { publicKey: string } | null;
+  votingFor: string | null;
+  zkappState: string[] | null;
+  verificationKey: { verificationKey: string; hash: string } | null;
+  actionState: string[] | null;
+  provedState: boolean | null;
+  zkappUri: string | null;
 };
 
 export type Block = {

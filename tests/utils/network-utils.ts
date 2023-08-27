@@ -220,13 +220,10 @@ function httpRequest(
       const chunks: Buffer[] = [];
       response.on('data', (chunk: Buffer) => chunks.push(chunk));
       response.on('end', () => {
-        let responseData = '';
-        if (response.headers['content-type']?.includes('application/json')) {
-          responseData = Buffer.concat(chunks)
-            .toString()
-            .replace(/(?:\r\n|\r|\n)/g, '')
-            .replace(/\s{2,}/g, ' ');
-        }
+        const responseData = Buffer.concat(chunks)
+          .toString()
+          .replace(/(?:\r\n|\r|\n)/g, '')
+          .replace(/\s{2,}/g, ' ');
         resolve(JSON.parse(responseData));
       });
     });

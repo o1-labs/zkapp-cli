@@ -4,10 +4,13 @@ import Constants from '../../src/lib/constants.js';
 import {
   TestConstants,
   getArrayValuesAsString,
+  removeEnvCustomLoaders,
 } from '../utils/common-utils.js';
 import { checkZkExample, zkExample } from '../utils/example-utils.js';
 
 test.describe('zkApp-CLI', () => {
+  test.beforeAll(removeEnvCustomLoaders);
+
   test(`should not generate zkApp project for unknown example type, @parallel @smoke @example @fail-cases`, async () => {
     const cliArg = 'example --name test';
     const { execute, cleanup, path } = await prepareEnvironment();

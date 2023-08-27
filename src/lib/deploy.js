@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { execSync as sh } from 'child_process';
+import { execSync } from 'child_process';
 import enquirer from 'enquirer';
 import glob from 'fast-glob';
 import findPrefix from 'find-npm-prefix';
@@ -128,7 +128,7 @@ export async function deploy({ alias, yes }) {
     fs.emptyDirSync(`${DIR}/build`); // ensure old artifacts don't remain
     fs.outputJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
 
-    await sh('npm run build --silent');
+    execSync('npm run build --silent');
   });
 
   const build = await step('Generate build.json', async () => {
@@ -531,9 +531,12 @@ async function getLatestCliVersion() {
 }
 
 async function getInstalledCliVersion() {
-  const globalInstalledPkgs = sh('npm list -g --depth 0 --json --silent', {
-    encoding: 'utf-8',
-  });
+  const globalInstalledPkgs = execSync(
+    'npm list -g --depth 0 --json --silent',
+    {
+      encoding: 'utf-8',
+    }
+  );
 
   return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
     'version'
@@ -552,9 +555,9 @@ function hasBreakingChanges(version1, version2) {
   const version2Arr = version2?.split('.');
 
   if (version1Arr[0] === '0') {
-    return version1Arr[1] !== version2Arr[1];
+    return Number(version1Arr[1]) < Number(version2Arr[1]);
   }
-  return version1Arr[0] !== version2Arr[0];
+  return Number(version1Arr[0]) < Number(version2Arr[0]);
 }
 
 /**

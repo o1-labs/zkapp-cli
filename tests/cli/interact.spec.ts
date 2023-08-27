@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { executeInteractiveCommand } from '../utils/cli-utils.js';
 import {
   cleanupFeePayerCacheByAlias,
   getZkAppAccountFromAlias,
+  removeEnvCustomLoaders,
 } from '../utils/common-utils.js';
 import { zkConfig } from '../utils/config-utils.js';
 import { checkZkDeploy } from '../utils/deploy-utils.js';
@@ -23,6 +24,8 @@ import {
 import { zkProject } from '../utils/project-utils.js';
 
 test.describe('Users', () => {
+  test.beforeAll(removeEnvCustomLoaders);
+
   // Tests for interaction with example projects of each type
   for (const exampleType of Constants.exampleTypes) {
     test(`should be able to interact off-chain with an example zkApp of ${exampleType.toUpperCase()} type, @parallel @smoke @off-chain @interaction @${exampleType}`, async () => {
@@ -155,7 +158,7 @@ async function checkZkAppInteraction(
   expect(stdOut).toContain('Success! Update transaction sent.');
   if (!(await isMockedMinaGraphQlEndpointInUse())) {
     const txnDetails = await findTxnByHash(transactionHash);
-    expect(txnDetails?.failureReason).toBeUndefined();
+    expect(txnDetails?.failureReason).toBeNull();
   }
   expect(Number(account?.zkappState?.[0])).toBeGreaterThan(1);
 }

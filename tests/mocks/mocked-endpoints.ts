@@ -68,10 +68,7 @@ function graphQlRouteHandler(
   });
   request.on('end', () => {
     try {
-      let requestData = '';
-      if (request.headers['content-type']?.includes('application/json')) {
-        requestData = Buffer.concat(chunks).toString();
-      }
+      const requestData = Buffer.concat(chunks).toString();
       const query: string = JSON.parse(requestData)
         .query.replace(/(?:\r\n|\r|\n)/g, '')
         .replace(/\s{2,}/g, ' ');

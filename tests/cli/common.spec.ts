@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
+import { removeEnvCustomLoaders } from '../utils/common-utils.js';
 
 test.describe('zkApp-CLI', () => {
+  test.beforeAll(removeEnvCustomLoaders);
+
   test('should return version information, @parallel @smoke @version', async () => {
     const versionRegex = /^\d+\.\d+\.\d+$/i;
     const { execute, cleanup, path } = await prepareEnvironment();

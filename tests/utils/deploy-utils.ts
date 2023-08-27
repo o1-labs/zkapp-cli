@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute.js';
-import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types.js';
+import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
+import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
 import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { CommandResults, ExampleType, UiType } from '../models/types.js';
@@ -122,9 +122,9 @@ export async function checkZkDeploy(
   expect(stdOut).toContain('Next step:');
   if (!(await isMockedMinaGraphQlEndpointInUse())) {
     const txnDetails = await findTxnByHash(transactionHash);
-    expect(txnDetails?.failureReason).toBeUndefined();
+    expect(txnDetails?.failureReason).toBeNull();
   }
-  expect(account?.verificationKey).not.toBeUndefined();
-  expect(account?.verificationKey?.verificationKey).not.toBeUndefined();
+  expect(account?.verificationKey).not.toBeNull();
+  expect(account?.verificationKey?.verificationKey).not.toBeNull();
   expect(account?.verificationKey?.verificationKey.length).toBeGreaterThan(0);
 }
