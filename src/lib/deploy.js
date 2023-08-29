@@ -193,13 +193,13 @@ async function deploy({ alias, yes }) {
     );
   }
 
-  // import snarkyjs from the user directory
-  let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
+  // import o1js from the user directory
+  let o1jsImportPath = `${DIR}/node_modules/o1js/dist/node/index.js`;
 
   if (process.platform === 'win32') {
-    snarkyjsImportPath = 'file://' + snarkyjsImportPath;
+    o1jsImportPath = 'file://' + o1jsImportPath;
   }
-  let { PrivateKey, Mina, AccountUpdate } = await import(snarkyjsImportPath);
+  let { PrivateKey, Mina, AccountUpdate } = await import(o1jsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
