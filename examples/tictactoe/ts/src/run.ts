@@ -17,7 +17,7 @@ import {
   Mina,
   AccountUpdate,
   Signature,
-} from 'snarkyjs';
+} from 'o1js';
 import { TicTacToe, Board } from './tictactoe.js';
 
 let Local = Mina.LocalBlockchain({ proofsEnabled: false });
