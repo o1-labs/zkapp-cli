@@ -16,11 +16,11 @@
   "scripts": {
     "build": "tsc",
     "buildw": "tsc --watch",
-    "coverage": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --coverage",
+    "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
-    "test": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js",
-    "testw": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --watch",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "testw": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "lint": "npx eslint src/* --fix"
   },
   "lint-staged": {
@@ -48,5 +48,3 @@
     "snarkyjs": "0.12.*"
   }
 }
-
-

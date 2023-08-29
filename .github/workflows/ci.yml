@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        node: [16]
+        node: [18]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v2
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16]
+        node: [18]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v2
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16]
+        node: [18]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v2
@@ -83,7 +83,7 @@ jobs:
     needs: [ci, sudoku-example, tictactoe-example]
     strategy:
       matrix:
-        node: [16]
+        node: [18]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v2

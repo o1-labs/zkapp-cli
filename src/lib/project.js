@@ -579,10 +579,19 @@ async function scaffoldNext(projectName) {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+
+  /* Used to serve the Next.js app from a subdirectory (the GitHub repo name) and 
+   * assetPrefix is used to serve assets (JS, CSS, images, etc.) from that subdirectory 
+   * when deployed to GitHub Pages. The assetPrefix needs to be added manually to any assets
+   * if they're not loaded by Next.js' automatic handling (for example, in CSS files or in a <img> element). 
+   * The 'ghp-postbuild.js' script in this project prepends the repo name to asset urls in the built css files 
+   * after runing 'npm run deploy'.
+   */
+  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : '', // update if your repo name changes for 'npm run deploy' to work successfully
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : '', // update if your repo name changes for 'npm run deploy' to work successfully
 };`
     );
+
     newNextConfig = newNextConfig.replace(
       'return config;',
       `config.optimization.minimizer = [];
@@ -590,7 +599,7 @@ async function scaffoldNext(projectName) {
     );
 
     // update papage extensions
-    newNextConfig = nextConfig.replace(
+    newNextConfig = newNextConfig.replace(
       'reactStrictMode: false,',
       `reactStrictMode: false,
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
@@ -605,7 +614,7 @@ async function scaffoldNext(projectName) {
       isWindows
         ? `type nul > ${path.join('out', '.nojekyll')}`
         : `touch ${path.join('out', '.nojekyll')}`
-    }  && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
+    } && node ./ghp-postbuild && git add -f out && git commit -m "Deploy gh-pages" && cd .. && git subtree push --prefix ui/out origin gh-pages`;
     x.scripts['deploy'] = deployScript;
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
@@ -677,6 +686,18 @@ function loadCOIServiceWorker() {
 loadCOIServiceWorker();
 `
     );
+
+    let ghpPostBuildScript = fs.readFileSync(
+      path.join(__dirname, 'ui', 'next', 'ghp-postbuild.js'),
+      'utf8'
+    );
+
+    ghpPostBuildScript = ghpPostBuildScript.replace(
+      `let repoURL = '';`,
+      `let repoURL = "${projectName}";`
+    );
+
+    fs.writeFileSync(path.join('ui', 'ghp-postbuild.js'), ghpPostBuildScript);
   }
 }
 
