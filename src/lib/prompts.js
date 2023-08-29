@@ -1,6 +1,6 @@
 const chalk = require('chalk');
 const { green, red, reset } = chalk;
-const { PrivateKey } = require('snarkyjs');
+const { PrivateKey } = require('o1js');
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.
