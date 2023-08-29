@@ -13,7 +13,7 @@ import {
   Provable,
   Signature,
   Struct,
-} from 'snarkyjs';
+} from 'o1js';
 
 export { Board, TicTacToe };
 
