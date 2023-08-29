@@ -47,7 +47,7 @@ $ npm update -g zkapp-cli
 To use the zkApp CLI and o1js, your environment requires:
 
 - NodeJS v16 and later (or NodeJS v14 using `--experimental-wasm-threads`)
-- NPM v6 and later
+- NPM v8 and later
 - Git v2 and later
 
 Use a package manager to install the required versions and upgrade older versions if needed. Package managers for the supported environments are:
