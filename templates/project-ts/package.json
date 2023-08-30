@@ -16,11 +16,11 @@
   "scripts": {
     "build": "tsc",
     "buildw": "tsc --watch",
-    "coverage": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --coverage",
+    "coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*",
     "prepare": "husky install",
-    "test": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js",
-    "testw": "node --experimental-vm-modules --experimental-wasm-threads node_modules/jest/bin/jest.js --watch",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "testw": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "lint": "npx eslint src/* --fix"
   },
   "lint-staged": {
@@ -36,7 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
     "eslint": "^8.7.0",
-    "eslint-plugin-snarkyjs": "^0.1.0",
+    "eslint-plugin-o1js": "^0.1.0",
     "husky": "^7.0.1",
     "jest": "^27.3.1",
     "lint-staged": "^11.0.1",
@@ -45,8 +45,6 @@
     "typescript": "^4.7.2"
   },
   "peerDependencies": {
-    "snarkyjs": "0.12.*"
+    "o1js": "0.12.*"
   }
 }
-
-

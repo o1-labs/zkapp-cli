@@ -2,7 +2,7 @@ const envinfo = require('envinfo');
 const sh = require('child_process').execSync;
 
 function system() {
-  const installedSnarkyJSversion = getInstalledSnarkyJSversion();
+  const installedO1jsVersion = getInstalledO1jsVersion();
   console.log(
     'Be sure to include the following system information when submitting a GitHub issue:'
   );
@@ -11,18 +11,18 @@ function system() {
       {
         System: ['OS', 'CPU'],
         Binaries: ['Node', 'npm', 'Yarn'],
-        npmPackages: ['snarkyjs'],
+        npmPackages: ['o1js'],
         npmGlobalPackages: ['zkapp-cli'],
       },
       { showNotFound: true }
     )
     .then((env) => {
-      const str = 'snarkyjs: Not Found';
+      const str = 'o1js: Not Found';
       return env.replace(
         str,
-        `snarkyjs: ${
-          installedSnarkyJSversion
-            ? installedSnarkyJSversion
+        `o1js: ${
+          installedO1jsVersion
+            ? installedO1jsVersion
             : 'Not Found (not in a project)'
         }`
       );
@@ -30,12 +30,12 @@ function system() {
     .then((env) => console.log(env));
 }
 
-function getInstalledSnarkyJSversion() {
+function getInstalledO1jsVersion() {
   const installedPkgs = sh('npm list --all --depth 0 --json', {
     encoding: 'utf-8',
   });
 
-  return JSON.parse(installedPkgs)['dependencies']?.['snarkyjs']?.['version'];
+  return JSON.parse(installedPkgs)['dependencies']?.['o1js']?.['version'];
 }
 
 module.exports = { system };

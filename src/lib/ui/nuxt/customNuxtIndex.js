@@ -13,7 +13,7 @@ module.exports = `
         >
           <img
             class="logo"
-            src="~/assets/HeroMinaLogo.svg"
+            src="~/assets/hero-mina-logo.svg"
             alt="Mina Logo"
             width="191"
             height="174"
@@ -22,7 +22,7 @@ module.exports = `
         </a>
         <p class="tagline">
           built with
-          <code class="code">SnarkyJS</code>
+          <code class="code">o1js</code>
         </p>
       </div>
       <p class="start">
@@ -68,7 +68,7 @@ module.exports = `
               />
             </div>
           </h2>
-          <p>Learn with step-by-step SnarkyJS tutorials</p>
+          <p>Learn with step-by-step o1js tutorials</p>
         </a>
         <a
           href="https://discord.gg/minaprotocol"
@@ -121,7 +121,7 @@ import GradientBG from '~/components/GradientBG.vue'
 export default {
   setup() {
     onMounted(async () => {
-      const { Mina, PublicKey } = await import('snarkyjs')
+      const { Mina, PublicKey } = await import('o1js')
       const { Add } = await import('../../contracts/build/src/')
 
       // Update this to use the address (public key) for your zkApp account.

@@ -1,10 +1,10 @@
 module.exports = `
 <script>
-  import heroMinaLogo from '$lib/assets/HeroMinaLogo.svg'
+  import heroMinaLogo from '$lib/assets/hero-mina-logo.svg'
   import arrowRightSmall from '$lib/assets/arrow-right-small.svg'
   import GradientBG from './GradientBG.svelte'
   import { onMount } from 'svelte'
-  import { isReady, Mina, PublicKey } from 'snarkyjs'
+  import { isReady, Mina, PublicKey } from 'o1js'
 
   onMount(async () => {
     const { Add } = await import('../../../contracts/build/src/')
@@ -48,7 +48,7 @@ module.exports = `
       </a>
       <p class="tagline">
         built with
-        <code class="code">SnarkyJS</code>
+        <code class="code">o1js</code>
       </p>
     </div>
     <p class="start">
@@ -90,7 +90,7 @@ module.exports = `
               priority />
           </div>
         </h2>
-        <p>Learn with step-by-step SnarkyJS tutorials</p>
+        <p>Learn with step-by-step o1js tutorials</p>
       </a>
       <a
         href="https://discord.gg/minaprotocol"

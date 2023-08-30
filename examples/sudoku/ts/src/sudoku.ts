@@ -8,7 +8,7 @@ import {
   Poseidon,
   Struct,
   Provable,
-} from 'snarkyjs';
+} from 'o1js';
 
 export { Sudoku, SudokuZkApp };
 

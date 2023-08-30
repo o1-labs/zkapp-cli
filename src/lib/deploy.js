@@ -51,7 +51,7 @@ async function deploy({ alias, yes }) {
       red(`You are using an earlier zkapp-cli version ${installedCliVersion}.`)
     );
     log(red(`The current version is ${latestCliVersion}.`));
-    log(red('Run `npm update -g zkapp-cli && npm install snarkyjs@latest`.'));
+    log(red('Run `npm update -g zkapp-cli && npm install o1js@latest`.'));
     return;
   }
 
@@ -193,13 +193,13 @@ async function deploy({ alias, yes }) {
     );
   }
 
-  // import snarkyjs from the user directory
-  let snarkyjsImportPath = `${DIR}/node_modules/snarkyjs/dist/node/index.js`;
+  // import o1js from the user directory
+  let o1jsImportPath = `${DIR}/node_modules/o1js/dist/node/index.js`;
 
   if (process.platform === 'win32') {
-    snarkyjsImportPath = 'file://' + snarkyjsImportPath;
+    o1jsImportPath = 'file://' + o1jsImportPath;
   }
-  let { PrivateKey, Mina, AccountUpdate } = await import(snarkyjsImportPath);
+  let { PrivateKey, Mina, AccountUpdate } = await import(o1jsImportPath);
 
   const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
@@ -533,9 +533,9 @@ async function getInstalledCliVersion() {
 }
 
 /*
-While SnarkyJS and the zkApp CLI have a major version of 0,
+While o1js and the zkApp CLI have a major version of 0,
 a change of the minor version represents a breaking change.
-When SnarkyJS and the zkApp CLI have a major version of 1 or higher,
+When o1js and the zkApp CLI have a major version of 1 or higher,
 changes to the major version of the zkApp CLI will represent
 breaking changes, following semver.
 */
