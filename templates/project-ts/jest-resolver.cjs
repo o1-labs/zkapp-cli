@@ -2,8 +2,8 @@ module.exports = (request, options) => {
   return options.defaultResolver(request, {
     ...options,
     packageFilter: (pkg) => {
-      // When importing snarkyjs, we specify the Node ESM import as Jest by default imports the web version
-      if (pkg.name === 'snarkyjs') {
+      // When importing o1js, we specify the Node ESM import as Jest by default imports the web version
+      if (pkg.name === 'o1js') {
         return {
           ...pkg,
           main: pkg.exports.node.import,
