@@ -10,7 +10,7 @@ import arrowRightSmall from '../../public/assets/arrow-right-small.svg';
 export default function Home() {
   useEffect(() => {
     (async () => {
-      const { Mina, PublicKey } = await import('snarkyjs');
+      const { Mina, PublicKey } = await import('o1js');
       const { Add } = await import('../../../contracts/build/src/');
 
       // Update this to use the address (public key) for your zkApp account.
@@ -31,7 +31,7 @@ export default function Home() {
     <>
       <Head>
         <title>Mina zkApp UI</title>
-        <meta name="description" content="built with SnarkyJS" />
+        <meta name="description" content="built with o1js" />
         <link rel="icon" href="/assets/favicon.ico" />
       </Head>
       <GradientBG>
@@ -53,7 +53,7 @@ export default function Home() {
             </a>
             <p className={styles.tagline}>
               built with
-              <code className={styles.code}> SnarkyJS</code>
+              <code className={styles.code}> o1js</code>
             </p>
           </div>
           <p className={styles.start}>
@@ -99,7 +99,7 @@ export default function Home() {
                   />
                 </div>
               </h2>
-              <p>Learn with step-by-step SnarkyJS tutorials</p>
+              <p>Learn with step-by-step o1js tutorials</p>
             </a>
             <a
               href="https://discord.gg/minaprotocol"
