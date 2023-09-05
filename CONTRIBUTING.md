@@ -2,7 +2,7 @@
 
 Welcome to the Mina zkApp CLI open source repository. Thank you for being a part of the Mina ecosystem and for your interest in contributing to the Mina zkApp CLI project.
 
-SnarkyJS helps developers build apps powered by zero-knowledge (zk) cryptography. The best way to get started with SnarkyJS is to use the Mina zkApp CLI to [write a zkApp](https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp).
+o1js helps developers build apps powered by zero-knowledge (zk) cryptography. The best way to get started with o1js is to use the Mina zkApp CLI to [write a zkApp](https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp).
 
 The best way to contribute to the Mina zkApp CLI is to help us test it broadly to ensure it works as expected on all platforms.
 

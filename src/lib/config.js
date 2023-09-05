@@ -7,7 +7,7 @@ const { step } = require('./helpers');
 const { green, red, bold, gray } = require('chalk');
 const Client = require('mina-signer');
 const { prompts } = require('./prompts');
-const { PrivateKey, PublicKey } = require('snarkyjs');
+const { PrivateKey, PublicKey } = require('o1js');
 const HOME_DIR = os.homedir();
 const log = console.log;
 
