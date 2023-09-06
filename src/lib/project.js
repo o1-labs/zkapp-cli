@@ -98,12 +98,12 @@ export async function project({ name, ui }) {
     ora(chalk.green(`UI: Set up project`)).succeed();
 
     if (ui && ui !== 'empty') {
-      // Add SnarkyJS as a dependency in the UI project.
+      // Add o1js as a dependency in the UI project.
       let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
       // Add dependencies object if none is found in the package.json because generated
       // SvelteKit projects do not have dependencies included.
       if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
-      pkgJson.dependencies.snarkyjs = '0.*';
+      pkgJson.dependencies.o1js = '0.*';
       fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
@@ -458,12 +458,12 @@ async function scaffoldNext(projectName) {
   webpack(config) {
     config.resolve.alias = {
       ...config.resolve.alias,
-      snarkyjs: require('path').resolve('node_modules/snarkyjs')
+      o1js: require('path').resolve('node_modules/o1js')
     };
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
-  // To enable SnarkyJS for the web, we must set the COOP and COEP headers.
+  // To enable o1js for the web, we must set the COOP and COEP headers.
   // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
   async headers() {
     return [

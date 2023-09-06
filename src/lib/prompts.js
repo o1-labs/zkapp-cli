@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { PrivateKey } from 'snarkyjs';
+import { PrivateKey } from 'o1js';
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.

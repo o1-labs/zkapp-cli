@@ -7,7 +7,7 @@ import {
   Mina,
   AccountUpdate,
   Signature,
-} from 'snarkyjs';
+} from 'o1js';
 
 describe('tictactoe', () => {
   let player1: PublicKey,

@@ -12,7 +12,7 @@
  * Build the project: `$ npm run build`
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
-import { Mina, PrivateKey } from 'snarkyjs';
+import { Mina, PrivateKey } from 'o1js';
 import fs from 'fs/promises';
 import { Add } from './Add.js';
 

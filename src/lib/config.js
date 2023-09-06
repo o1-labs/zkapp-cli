@@ -3,7 +3,7 @@ import enquirer from 'enquirer';
 import findPrefix from 'find-npm-prefix';
 import fs from 'fs-extra';
 import Client from 'mina-signer';
-import { PrivateKey, PublicKey } from 'snarkyjs';
+import { PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
 import step from './helpers.js';

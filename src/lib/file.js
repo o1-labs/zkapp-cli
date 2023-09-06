@@ -35,7 +35,7 @@ export async function file(_path) {
     return;
   }
 
-  // TODO: Add SnarkyJS import to fileContent, when it's ready.
+  // TODO: Add o1js import to fileContent, when it's ready.
   const fileContent = ``;
   const testContent = `// import { ${projName} } from './${projName}';
 
