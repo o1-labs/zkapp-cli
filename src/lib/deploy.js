@@ -544,9 +544,9 @@ function hasBreakingChanges(version1, version2) {
   const version2Arr = version2?.split('.');
 
   if (version1Arr[0] === '0') {
-    return version1Arr[1] !== version2Arr[1];
+    return Number(version1Arr[1]) < Number(version2Arr[1]);
   }
-  return version1Arr[0] !== version2Arr[0];
+  return Number(version1Arr[0]) < Number(version2Arr[0]);
 }
 
 /**
