@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- E2E tests for critical user flows against mocked and real networks ([#447](https://github.com/o1-labs/zkapp-cli/pull/447)).
+- E2E tests for critical user flows against mocked and real networks [#447](https://github.com/o1-labs/zkapp-cli/pull/447).
 
 ## [0.11.2] - 2023-09-05
 
