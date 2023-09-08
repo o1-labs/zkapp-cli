@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Project migrated to ESM.
+- Project migrated to ESM [#447](https://github.com/o1-labs/zkapp-cli/pull/447).
 
 ### Added
 
