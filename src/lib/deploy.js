@@ -40,7 +40,7 @@ async function deploy({ alias, yes }) {
   }
 
   const latestCliVersion = await getLatestCliVersion();
-  const installedCliVersion = await getInstalledCliVersion();
+  const installedCliVersion = getInstalledCliVersion();
 
   // Checks if developer has the legacy networks or deploy aliases in config.json
   if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
@@ -522,7 +522,7 @@ async function getLatestCliVersion() {
     .then((response) => response['latest']);
 }
 
-async function getInstalledCliVersion() {
+function getInstalledCliVersion() {
   const localInstalledPkgs = sh('npm list --depth 0 --json --silent', {
     encoding: 'utf-8',
   });
