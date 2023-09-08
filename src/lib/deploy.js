@@ -527,6 +527,15 @@ async function getInstalledCliVersion() {
     encoding: 'utf-8',
   });
 
+  const localInstalledPkgs = sh('npm list --depth 0 --json --silent', {
+    encoding: 'utf-8',
+  });
+
+  const localCli =
+    JSON.parse(localInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
+      'version'
+    ];
+
   return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
     'version'
   ];
