@@ -539,14 +539,14 @@ When o1js and the zkApp CLI have a major version of 1 or higher,
 changes to the major version of the zkApp CLI will represent
 breaking changes, following semver.
 */
-function hasBreakingChanges(version1, version2) {
-  const version1Arr = version1?.split('.');
-  const version2Arr = version2?.split('.');
+function hasBreakingChanges(installedVersion, latestVersion) {
+  const installedVersionArr = installedVersion?.split('.');
+  const latestVersionArr = latestVersion?.split('.');
 
-  if (version1Arr[0] === '0') {
-    return Number(version1Arr[1]) < Number(version2Arr[1]);
+  if (installedVersionArr[0] === '0') {
+    return Number(installedVersionArr[1]) < Number(latestVersionArr[1]);
   }
-  return Number(version1Arr[0]) < Number(version2Arr[0]);
+  return Number(installedVersionArr[0]) < Number(latestVersionArr[0]);
 }
 
 /**
