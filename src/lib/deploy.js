@@ -554,13 +554,20 @@ changes to the major version of the zkApp CLI will represent
 breaking changes, following semver.
 */
 function hasBreakingChanges(installedVersion, latestVersion) {
-  const installedVersionArr = installedVersion?.split('.');
-  const latestVersionArr = latestVersion?.split('.');
+  console.log('inside breaking');
+  const installedVersionArr = installedVersion
+    ?.split('.')
+    .map((version) => Number(version));
 
-  if (installedVersionArr[0] === '0') {
-    return Number(installedVersionArr[1]) < Number(latestVersionArr[1]);
+  const latestVersionArr = latestVersion
+    ?.split('.')
+    .map((version) => Number(version));
+
+  if (installedVersionArr[0] === 0) {
+    return installedVersionArr[1] < latestVersionArr[1];
   }
-  return Number(installedVersionArr[0]) < Number(latestVersionArr[0]);
+
+  return installedVersionArr[0] < latestVersionArr[0];
 }
 
 /**
