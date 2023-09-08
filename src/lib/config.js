@@ -22,7 +22,7 @@ async function config() {
 
   let config;
   try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
+    config = fs.readJsonSync(`${DIR}/config.json`);
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
@@ -288,7 +288,7 @@ async function savedKeyPairStep(feepayerAlias, address) {
     log(chalk.red(`Invalid fee payer alias: ${feepayerAlias}.`));
     process.exit(1);
   }
-  const keyPair = fs.readJSONSync(
+  const keyPair = fs.readJsonSync(
     `${Constants.feePayerCacheDir}/${feepayerAlias}.json`
   );
 
@@ -315,7 +315,7 @@ function getCachedFeepayerAliases() {
 }
 
 function getCachedFeepayerAddress(feePayorAlias) {
-  const address = fs.readJSONSync(
+  const address = fs.readJsonSync(
     `${Constants.feePayerCacheDir}/${feePayorAlias}.json`
   ).publicKey;
 

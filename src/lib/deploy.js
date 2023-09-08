@@ -26,7 +26,7 @@ export async function deploy({ alias, yes }) {
 
   let config;
   try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
+    config = fs.readJsonSync(`${DIR}/config.json`);
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
@@ -114,7 +114,7 @@ export async function deploy({ alias, yes }) {
     // store cache to add after build directory is emptied
     let cache;
     try {
-      cache = fs.readJSONSync(`${DIR}/build/cache.json`);
+      cache = fs.readJsonSync(`${DIR}/build/cache.json`);
     } catch (err) {
       if (err.code === 'ENOENT') {
         cache = {};
@@ -274,7 +274,7 @@ export async function deploy({ alias, yes }) {
   let zkAppPrivateKeyBase58;
   const { feepayerKeyPath } = config.deployAliases[alias];
   try {
-    feepayerPrivateKeyBase58 = fs.readJSONSync(feepayerKeyPath).privateKey;
+    feepayerPrivateKeyBase58 = fs.readJsonSync(feepayerKeyPath).privateKey;
   } catch (error) {
     log(
       chalk.red(
@@ -286,7 +286,7 @@ export async function deploy({ alias, yes }) {
   }
 
   try {
-    zkAppPrivateKeyBase58 = fs.readJSONSync(
+    zkAppPrivateKeyBase58 = fs.readJsonSync(
       `${DIR}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {
@@ -311,7 +311,7 @@ export async function deploy({ alias, yes }) {
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let cache = fs.readJSONSync(`${DIR}/build/cache.json`);
+      let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
 

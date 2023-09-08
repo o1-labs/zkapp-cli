@@ -99,7 +99,7 @@ export async function project({ name, ui }) {
 
     if (ui && ui !== 'empty') {
       // Add o1js as a dependency in the UI project.
-      let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+      let pkgJson = fs.readJsonSync(path.join('ui', 'package.json'));
       // Add dependencies object if none is found in the package.json because generated
       // SvelteKit projects do not have dependencies included.
       if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
@@ -133,7 +133,7 @@ export async function project({ name, ui }) {
   // Source: https://github.com/typicode/husky/issues/348#issuecomment-899344732
   if (ui) {
     // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/package.json#L20
-    let x = fs.readJSONSync(`package.json`);
+    let x = fs.readJsonSync(`package.json`);
     x.scripts.prepare = `cd .. && husky install ${path.join(
       'contracts',
       '.husky'
@@ -559,7 +559,7 @@ async function scaffoldNext(projectName) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
 
     // Add a script to the package.json
-    let x = fs.readJSONSync(path.join('ui', 'package.json'));
+    let x = fs.readJsonSync(path.join('ui', 'package.json'));
     x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
   }
@@ -611,7 +611,7 @@ async function scaffoldNext(projectName) {
     fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
     // Add some scripts to the package.json
-    let x = fs.readJSONSync(`ui/package.json`);
+    let x = fs.readJsonSync(`ui/package.json`);
     x.scripts['export'] = 'next export';
     const deployScript = `next build && next export && ${
       isWindows

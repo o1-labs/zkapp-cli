@@ -95,7 +95,7 @@ yargs(hideBin(process.argv))
   )
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
   .version(
-    fs.readJSONSync(path.join(__dirname, '..', '..', 'package.json')).version
+    fs.readJsonSync(path.join(__dirname, '..', '..', 'package.json')).version
   )
   .alias('h', 'help')
   .alias('v', 'version')
