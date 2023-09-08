@@ -523,10 +523,6 @@ async function getLatestCliVersion() {
 }
 
 async function getInstalledCliVersion() {
-  const globalInstalledPkgs = sh('npm list -g --depth 0 --json --silent', {
-    encoding: 'utf-8',
-  });
-
   const localInstalledPkgs = sh('npm list --depth 0 --json --silent', {
     encoding: 'utf-8',
   });
@@ -536,9 +532,18 @@ async function getInstalledCliVersion() {
       'version'
     ];
 
-  return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
-    'version'
-  ];
+  // Fetch the globally installed version of the zkApp cli if no local version is found
+  if (!localCli) {
+    const globalInstalledPkgs = sh('npm list -g --depth 0 --json --silent', {
+      encoding: 'utf-8',
+    });
+
+    return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
+      'version'
+    ];
+  }
+
+  return localCli;
 }
 
 /*
