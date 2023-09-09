@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.1] - 2023-09-09
+
+### Changed
+
+- Both local and global installed versions are checked to determine if an update of the zkApp-cli is necessary[#448](https://github.com/o1-labs/zkapp-cli/pull/448).
+
+### Fixed 
+
+- Fix to allow the zkApp-cli to be used from a projects local node_modules[#448](https://github.com/o1-labs/zkapp-cli/pull/448).
+
 ## [0.12.0] - 2023-09-09
 
 ### Changed
