@@ -556,14 +556,14 @@ function getInstalledCliVersion() {
 }
 
 /*
-While o1js and the zkApp CLI have a major version of 0,
-a change of the minor version represents a breaking change.
-When o1js and the zkApp CLI have a major version of 1 or higher,
-changes to the major version of the zkApp CLI will represent
-breaking changes, following semver.
-*/
+ * While o1js and the zkApp CLI have a major version of 0,
+ * a change of the minor version represents a breaking change.
+ * When o1js and the zkApp CLI have a major version of 1 or higher,
+ * changes to the major version of the zkApp CLI will represent
+ * breaking changes, following semver.
+ * 
+**/
 function hasBreakingChanges(installedVersion, latestVersion) {
-  console.log('inside breaking');
   const installedVersionArr = installedVersion
     ?.split('.')
     .map((version) => Number(version));
