@@ -40,7 +40,7 @@ export async function deploy({ alias, yes }) {
   }
 
   const latestCliVersion = await getLatestCliVersion();
-  const installedCliVersion = await getInstalledCliVersion();
+  const installedCliVersion = getInstalledCliVersion();
 
   // Checks if developer has the legacy networks or deploy aliases in config.json
   if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
@@ -528,34 +528,55 @@ async function getLatestCliVersion() {
     .then((response) => response['latest']);
 }
 
-async function getInstalledCliVersion() {
-  const globalInstalledPkgs = execSync(
-    'npm list -g --depth 0 --json --silent',
-    {
-      encoding: 'utf-8',
-    }
-  );
+function getInstalledCliVersion() {
+  const localInstalledPkgs = execSync('npm list --depth 0 --json --silent', {
+    encoding: 'utf-8',
+  });
 
-  return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
-    'version'
-  ];
+  const localCli =
+    JSON.parse(localInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
+      'version'
+    ];
+
+  // Fetch the globally installed version of the zkApp cli if no local version is found
+  if (!localCli) {
+    const globalInstalledPkgs = execSync(
+      'npm list -g --depth 0 --json --silent',
+      {
+        encoding: 'utf-8',
+      }
+    );
+
+    return JSON.parse(globalInstalledPkgs)?.['dependencies']?.['zkapp-cli']?.[
+      'version'
+    ];
+  }
+
+  return localCli;
 }
 
 /*
-While o1js and the zkApp CLI have a major version of 0,
-a change of the minor version represents a breaking change.
-When o1js and the zkApp CLI have a major version of 1 or higher,
-changes to the major version of the zkApp CLI will represent
-breaking changes, following semver.
-*/
-function hasBreakingChanges(version1, version2) {
-  const version1Arr = version1?.split('.');
-  const version2Arr = version2?.split('.');
+ * While o1js and the zkApp CLI have a major version of 0,
+ * a change of the minor version represents a breaking change.
+ * When o1js and the zkApp CLI have a major version of 1 or higher,
+ * changes to the major version of the zkApp CLI will represent
+ * breaking changes, following semver.
+ * 
+**/
+function hasBreakingChanges(installedVersion, latestVersion) {
+  const installedVersionArr = installedVersion
+    ?.split('.')
+    .map((version) => Number(version));
 
-  if (version1Arr[0] === '0') {
-    return Number(version1Arr[1]) < Number(version2Arr[1]);
+  const latestVersionArr = latestVersion
+    ?.split('.')
+    .map((version) => Number(version));
+
+  if (installedVersionArr[0] === 0) {
+    return installedVersionArr[1] < latestVersionArr[1];
   }
-  return Number(version1Arr[0]) < Number(version2Arr[0]);
+
+  return installedVersionArr[0] < latestVersionArr[0];
 }
 
 /**
