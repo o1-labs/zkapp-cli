@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 <script>
   import { onMount } from 'svelte'
   let ctx

@@ -1,5 +1,5 @@
-const envinfo = require('envinfo');
-const sh = require('child_process').execSync;
+import { execSync } from 'child_process';
+import envinfo from 'envinfo';
 
 function system() {
   const installedO1jsVersion = getInstalledO1jsVersion();
@@ -20,22 +20,18 @@ function system() {
       const str = 'o1js: Not Found';
       return env.replace(
         str,
-        `o1js: ${
-          installedO1jsVersion
-            ? installedO1jsVersion
-            : 'Not Found (not in a project)'
-        }`
+        `o1js: ${installedO1jsVersion || 'Not Found (not in a project)'}`
       );
     })
     .then((env) => console.log(env));
 }
 
 function getInstalledO1jsVersion() {
-  const installedPkgs = sh('npm list --all --depth 0 --json', {
+  const installedPkgs = execSync('npm list --all --depth 0 --json', {
     encoding: 'utf-8',
   });
 
   return JSON.parse(installedPkgs)['dependencies']?.['o1js']?.['version'];
 }
 
-module.exports = { system };
+export default system;

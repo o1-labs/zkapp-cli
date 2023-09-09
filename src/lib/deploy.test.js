@@ -1,4 +1,4 @@
-const { chooseSmartContract } = require('./deploy');
+import { chooseSmartContract } from './deploy.js';
 
 describe('deploy.js', () => {
   describe('findSmartContracts()', () => {

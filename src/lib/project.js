@@ -1,21 +1,24 @@
-const fs = require('fs-extra');
-const path = require('path');
-const ora = require('ora');
-const sh = require('shelljs');
-const util = require('util');
-const gittar = require('gittar');
-const { prompt, Select } = require('enquirer');
-const { spawnSync } = require('child_process');
-const { red, green, reset } = require('chalk');
-const customNextIndex = require('../lib/ui/next/customNextIndex');
-const customNuxtIndex = require('../lib/ui/nuxt/customNuxtIndex');
-const nuxtGradientBackground = require('../lib/ui/nuxt/nuxtGradientBackground');
-const customPageSvelte = require('../lib/ui/svelte/customPageSvelte');
-const customLayoutSvelte = require('../lib/ui/svelte/customLayoutSvelte');
-const gradientBackground = require('./ui/svelte/gradientBackground');
+import chalk from 'chalk';
+import { spawnSync } from 'child_process';
+import enquirer from 'enquirer';
+import fs from 'fs-extra';
+import gittar from 'gittar';
+import ora from 'ora';
+import path from 'path';
+import shell from 'shelljs';
+import url from 'url';
+import util from 'util';
+import customNextIndex from '../lib/ui/next/customNextIndex.js';
+import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
+import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
+import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
+import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
+import Constants from './constants.js';
+import gradientBackground from './ui/svelte/gradientBackground.js';
 
-const shExec = util.promisify(sh.exec);
-
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const shellExec = util.promisify(shell.exec);
 const isWindows = process.platform === 'win32';
 
 /**
@@ -26,27 +29,27 @@ const isWindows = process.platform === 'win32';
  * @param {string} argv.ui - The name of the UI framework to use.
  * @return {Promise<void>}
  */
-async function project({ name, ui }) {
+export async function project({ name, ui }) {
   if (fs.existsSync(name)) {
-    console.error(red(`Directory already exists. Not proceeding`));
+    console.error(chalk.red(`Directory already exists. Not proceeding`));
     return;
   }
 
   // Git must be initialized before running `npm install` b/c Husky runs an
   // NPM `prepare` script to set up its pre-commit hook within `.git`.
   // Check before fetching project template, to not leave crud on user's system.
-  if (!sh.which('git')) {
-    console.error(red('Please ensure Git is installed, then try again.'));
+  if (!shell.which('git')) {
+    console.error(chalk.red('Please ensure Git is installed, then try again.'));
     return;
   }
 
   let res;
   if (!ui) {
     try {
-      res = await prompt({
+      res = await enquirer.prompt({
         type: 'select',
         name: 'ui',
-        choices: ['next', 'svelte', 'nuxt', 'empty', 'none'],
+        choices: Constants.uiTypes,
         message: (state) =>
           message(state, 'Create an accompanying UI project too?'),
         prefix: (state) => prefix(state),
@@ -59,8 +62,8 @@ async function project({ name, ui }) {
     ui = res.ui;
   }
 
-  sh.mkdir('-p', name); // Create path/to/dir with their specified name
-  sh.cd(name); // Set dir for shell commands. Doesn't change user's dir in their CLI.
+  shell.mkdir('-p', name); // Create path/to/dir with their specified name
+  shell.cd(name); // Set dir for shell commands. Doesn't change user's dir in their CLI.
 
   // If user wants a UI framework installed alongside their smart contract,
   // we'll create this dir structure:
@@ -82,7 +85,7 @@ async function project({ name, ui }) {
         scaffoldNuxt();
         break;
       case 'empty':
-        sh.mkdir('ui');
+        shell.mkdir('ui');
         break;
       case 'none':
         // `zk project <name>` now shows a dropdown to allow users to select
@@ -92,11 +95,11 @@ async function project({ name, ui }) {
         break;
     }
 
-    ora(green(`UI: Set up project`)).succeed();
+    ora(chalk.green(`UI: Set up project`)).succeed();
 
     if (ui && ui !== 'empty') {
       // Add o1js as a dependency in the UI project.
-      let pkgJson = fs.readJSONSync(path.join('ui', 'package.json'));
+      let pkgJson = fs.readJsonSync(path.join('ui', 'package.json'));
       // Add dependencies object if none is found in the package.json because generated
       // SvelteKit projects do not have dependencies included.
       if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
@@ -104,12 +107,12 @@ async function project({ name, ui }) {
       fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
-      sh.cd('ui');
+      shell.cd('ui');
       await step(
         'UI: NPM install',
         `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
       );
-      sh.cd('..');
+      shell.cd('..');
     }
   }
 
@@ -118,8 +121,8 @@ async function project({ name, ui }) {
 
   // Scaffold smart contract project
   if (ui) {
-    sh.mkdir('contracts');
-    sh.cd('contracts');
+    shell.mkdir('contracts');
+    shell.cd('contracts');
   }
   if (!(await fetchProjectTemplate())) return;
 
@@ -130,7 +133,7 @@ async function project({ name, ui }) {
   // Source: https://github.com/typicode/husky/issues/348#issuecomment-899344732
   if (ui) {
     // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/package.json#L20
-    let x = fs.readJSONSync(`package.json`);
+    let x = fs.readJsonSync(`package.json`);
     x.scripts.prepare = `cd .. && husky install ${path.join(
       'contracts',
       '.husky'
@@ -157,7 +160,7 @@ async function project({ name, ui }) {
 
   await setProjectName('.', name.split(path.sep).pop());
 
-  if (ui) sh.cd('..'); // back to project root
+  if (ui) shell.cd('..'); // back to project root
 
   // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
@@ -172,7 +175,7 @@ async function project({ name, ui }) {
     `\n  git remote add origin <your-repo-url>` +
     `\n  git push -u origin main`;
 
-  console.log(green(str));
+  console.log(chalk.green(str));
   process.exit(0);
 }
 
@@ -200,18 +203,18 @@ async function fetchProjectTemplate() {
     });
 
     // Copy files into current working dir
-    sh.cp(
+    shell.cp(
       '-r',
       `${path.join(TEMP, 'templates', projectName)}${path.sep}.`,
       '.'
     );
-    sh.rm('-r', TEMP);
+    shell.rm('-r', TEMP);
 
     // Create a keys dir because it's not part of the project scaffolding given
     // we have `keys` in our .gitignore.
-    sh.mkdir('keys');
+    shell.mkdir('keys');
 
-    spin.succeed(green(step));
+    spin.succeed(chalk.green(step));
     return true;
   } catch (err) {
     spin.fail(step);
@@ -226,11 +229,11 @@ async function fetchProjectTemplate() {
  * @param {string} cmd - Shell command to execute.
  * @returns {Promise<void>}
  */
-async function step(step, cmd) {
+export async function step(step, cmd) {
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
   try {
-    await shExec(cmd);
-    spin.succeed(green(step));
+    await shellExec(cmd);
+    spin.succeed(chalk.green(step));
   } catch (err) {
     spin.fail(step);
     process.exit(1);
@@ -244,7 +247,7 @@ async function step(step, cmd) {
  * @param {string} name - User-provided project name.
  * @returns {Promise<void>}
  */
-async function setProjectName(dir, name) {
+export async function setProjectName(dir, name) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
@@ -255,7 +258,7 @@ async function setProjectName(dir, name) {
     kebabCase(name)
   );
 
-  spin.succeed(green(step));
+  spin.succeed(chalk.green(step));
 }
 
 /**
@@ -264,20 +267,20 @@ async function setProjectName(dir, name) {
  * @param {string} a - Old text.
  * @param {string} b - New text.
  */
-function replaceInFile(file, a, b) {
+export function replaceInFile(file, a, b) {
   let content = fs.readFileSync(file, 'utf8');
   content = content.replace(a, b);
   fs.writeFileSync(file, content);
 }
 
-function titleCase(str) {
+export function titleCase(str) {
   return str
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
     .join(' ');
 }
 
-function kebabCase(str) {
+export function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
 }
 
@@ -288,7 +291,7 @@ function scaffoldSvelte() {
     shell: true,
   });
 
-  sh.cp(
+  shell.cp(
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
     path.join('ui', 'src')
   );
@@ -389,7 +392,7 @@ function scaffoldSvelte() {
   );
 
   // Removes Sveltekit static assets
-  fs.emptydirSync(path.join('ui', 'static'));
+  fs.emptyDirSync(path.join('ui', 'static'));
 
   fs.copySync(
     path.join(__dirname, 'ui', 'svelte', 'favicon.png'),
@@ -398,7 +401,7 @@ function scaffoldSvelte() {
 }
 
 async function scaffoldNext(projectName) {
-  const ghPagesPrompt = new Select({
+  const ghPagesPrompt = new enquirer.Select({
     message: (state) =>
       message(
         state,
@@ -432,7 +435,7 @@ async function scaffoldNext(projectName) {
     shell: true,
   });
 
-  sh.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
+  shell.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
   // Read in the NextJS config file and add the middleware.
 
   let useTypescript = true;
@@ -511,7 +514,7 @@ async function scaffoldNext(projectName) {
   );
 
   // Removes create-next-app assets
-  fs.emptydirSync(path.join('ui', 'public'));
+  fs.emptyDirSync(path.join('ui', 'public'));
 
   // Adds landing page assets directory and files to NextJS project.
   fs.copySync(
@@ -556,7 +559,7 @@ async function scaffoldNext(projectName) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
 
     // Add a script to the package.json
-    let x = fs.readJSONSync(path.join('ui', 'package.json'));
+    let x = fs.readJsonSync(path.join('ui', 'package.json'));
     x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
   }
@@ -608,7 +611,7 @@ async function scaffoldNext(projectName) {
     fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
 
     // Add some scripts to the package.json
-    let x = fs.readJSONSync(`ui/package.json`);
+    let x = fs.readJsonSync(`ui/package.json`);
     x.scripts['export'] = 'next export';
     const deployScript = `next build && next export && ${
       isWindows
@@ -618,7 +621,7 @@ async function scaffoldNext(projectName) {
     x.scripts['deploy'] = deployScript;
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
-    sh.cd('ui');
+    shell.cd('ui');
     await step(
       'COI-ServiceWorker: NPM install',
       `npm install coi-serviceworker --save > ${
@@ -626,7 +629,7 @@ async function scaffoldNext(projectName) {
       }`
     );
 
-    sh.cp(
+    shell.cp(
       path.join(
         'node_modules',
         'coi-serviceworker',
@@ -634,7 +637,7 @@ async function scaffoldNext(projectName) {
       ),
       './public/'
     );
-    sh.cd('..');
+    shell.cd('..');
 
     const appFileName = useTypescript ? '_app.tsx' : '_app.js';
     const appPagesFileName = useTypescript ? '_app.page.tsx' : '_app.page.js';
@@ -645,11 +648,11 @@ async function scaffoldNext(projectName) {
     const reactCOIServiceWorkerFileName = useTypescript
       ? 'reactCOIServiceWorker.tsx'
       : 'reactCOIServiceWorker.js';
-    sh.mv(
+    shell.mv(
       path.join('ui', 'src/pages', appFileName),
       path.join('ui', 'src/pages', appPagesFileName)
     );
-    sh.mv(
+    shell.mv(
       path.join('ui', 'src/pages', indexFileName),
       path.join('ui', 'src/pages', indexPagesFileName)
     );
@@ -708,7 +711,7 @@ function scaffoldNuxt() {
   });
 
   if (fs.existsSync(path.join('ui', '.git'))) {
-    sh.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
+    shell.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
   }
 
   // Add server middleware file to setCOOP and COEP
@@ -758,7 +761,7 @@ function scaffoldNuxt() {
     path.join('ui', 'assets')
   );
   // Removes nuxt static assets
-  fs.emptydirSync(path.join('ui', 'public'));
+  fs.emptyDirSync(path.join('ui', 'public'));
 
   fs.copySync(
     path.join(__dirname, 'ui', 'nuxt', 'favicon.ico'),
@@ -775,7 +778,7 @@ function scaffoldNuxt() {
  */
 function message(state, str) {
   const style =
-    state.submitted && !state.cancelled ? state.styles.success : reset;
+    state.submitted && !state.cancelled ? state.styles.success : chalk.reset;
   return style(str);
 }
 
@@ -789,14 +792,7 @@ function message(state, str) {
  */
 function prefix(state) {
   if (!state.submitted) return state.symbols.question;
-  return !state.cancelled ? state.symbols.check : red(state.symbols.cross);
+  return !state.cancelled
+    ? state.symbols.check
+    : chalk.red(state.symbols.cross);
 }
-
-module.exports = {
-  project,
-  step,
-  setProjectName,
-  replaceInFile,
-  titleCase,
-  kebabCase,
-};

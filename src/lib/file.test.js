@@ -1,5 +1,5 @@
-const path = require('path');
-const { parsePath } = require('./file');
+import path from 'path';
+import { parsePath } from './file.js';
 
 describe('file.js', () => {
   describe('file()', () => {

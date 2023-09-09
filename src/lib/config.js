@@ -1,14 +1,14 @@
-const fs = require('fs-extra');
-const findPrefix = require('find-npm-prefix');
-const os = require('os');
-const { prompt } = require('enquirer');
-const { table, getBorderCharacters } = require('table');
-const { step } = require('./helpers');
-const { green, red, bold, gray } = require('chalk');
-const Client = require('mina-signer');
-const { prompts } = require('./prompts');
-const { PrivateKey, PublicKey } = require('o1js');
-const HOME_DIR = os.homedir();
+import chalk from 'chalk';
+import enquirer from 'enquirer';
+import findPrefix from 'find-npm-prefix';
+import fs from 'fs-extra';
+import Client from 'mina-signer';
+import { PrivateKey, PublicKey } from 'o1js';
+import { getBorderCharacters, table } from 'table';
+import Constants from './constants.js';
+import step from './helpers.js';
+import prompts from './prompts.js';
+
 const log = console.log;
 
 /**
@@ -22,7 +22,7 @@ async function config() {
 
   let config;
   try {
-    config = fs.readJSONSync(`${DIR}/config.json`);
+    config = fs.readJsonSync(`${DIR}/config.json`);
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
@@ -31,7 +31,7 @@ async function config() {
       str = 'Unable to read config.json.';
       console.error(err);
     }
-    log(red(str));
+    log(chalk.red(str));
     return;
   }
 
@@ -41,12 +41,9 @@ async function config() {
   let defaultFeepayerAddress;
 
   try {
-    cachedFeepayerAliases = getCachedFeepayerAliases(HOME_DIR);
+    cachedFeepayerAliases = getCachedFeepayerAliases();
     defaultFeepayerAlias = cachedFeepayerAliases[0];
-    defaultFeepayerAddress = getCachedFeepayerAddress(
-      HOME_DIR,
-      defaultFeepayerAlias
-    );
+    defaultFeepayerAddress = getCachedFeepayerAddress(defaultFeepayerAlias);
 
     isFeepayerCached = true;
   } catch (err) {
@@ -62,13 +59,15 @@ async function config() {
   }
 
   // Build table of existing deploy aliases found in their config.json
-  let tableData = [[bold('Name'), bold('URL'), bold('Smart Contract')]];
+  let tableData = [
+    [chalk.bold('Name'), chalk.bold('URL'), chalk.bold('Smart Contract')],
+  ];
   for (const deployAliasName in config.deployAliases) {
     const { url, smartContract } = config.deployAliases[deployAliasName];
     tableData.push([
       deployAliasName,
       url ?? '',
-      smartContract ?? gray('(never deployed)'),
+      smartContract ?? chalk.gray('(never deployed)'),
     ]);
   }
 
@@ -79,7 +78,7 @@ async function config() {
     border: getBorderCharacters('norc'),
     header: {
       alignment: 'center',
-      content: bold('Deploy aliases in config.json'),
+      content: chalk.bold('Deploy aliases in config.json'),
     },
   };
 
@@ -89,7 +88,7 @@ async function config() {
     tableData[0][0] = tableData[0][0] + ' '.repeat(2);
     tableData[0][1] = tableData[0][1] + ' '.repeat(3);
 
-    tableData.push([[gray('None found')], [], []]);
+    tableData.push([[chalk.gray('None found')], [], []]);
     tableConfig.spanningCells = [{ col: 0, row: 1, colSpan: 3 }];
   }
 
@@ -107,7 +106,7 @@ async function config() {
     feepayerAliasPrompt,
   } = prompts;
 
-  const initialPromptResponse = await prompt([
+  const initialPromptResponse = await enquirer.prompt([
     ...deployAliasPrompts(config),
     ...initialFeepayerPrompts(
       defaultFeepayerAlias,
@@ -121,30 +120,30 @@ async function config() {
   let otherFeepayerResponse;
 
   if (initialPromptResponse.feepayer === 'recover') {
-    recoverFeepayerResponse = await prompt(
+    recoverFeepayerResponse = await enquirer.prompt(
       recoverFeepayerPrompts(cachedFeepayerAliases)
     );
   }
 
   if (initialPromptResponse?.feepayer === 'create') {
-    feepayerAliasResponse = await prompt(
+    feepayerAliasResponse = await enquirer.prompt(
       feepayerAliasPrompt(cachedFeepayerAliases)
     );
   }
 
   if (initialPromptResponse.feepayer === 'other') {
-    otherFeepayerResponse = await prompt(
+    otherFeepayerResponse = await enquirer.prompt(
       otherFeepayerPrompts(cachedFeepayerAliases)
     );
 
     if (otherFeepayerResponse.feepayer === 'recover') {
-      recoverFeepayerResponse = await prompt(
+      recoverFeepayerResponse = await enquirer.prompt(
         recoverFeepayerPrompts(cachedFeepayerAliases)
       );
     }
 
     if (otherFeepayerResponse.feepayer === 'create') {
-      feepayerAliasResponse = await prompt(
+      feepayerAliasResponse = await enquirer.prompt(
         feepayerAliasPrompt(cachedFeepayerAliases)
       );
     }
@@ -173,29 +172,21 @@ async function config() {
   let feepayerKeyPair;
   switch (feepayer) {
     case 'create':
-      feepayerKeyPair = await createKeyPairStep(HOME_DIR, feepayerAlias);
+      feepayerKeyPair = await createKeyPairStep(feepayerAlias);
       break;
     case 'recover':
-      feepayerKeyPair = await recoverKeyPairStep(
-        HOME_DIR,
-        feepayerKey,
-        feepayerAlias
-      );
+      feepayerKeyPair = await recoverKeyPairStep(feepayerKey, feepayerAlias);
       break;
     case 'defaultCache':
       feepayerAlias = defaultFeepayerAlias;
       feepayerKeyPair = await savedKeyPairStep(
-        HOME_DIR,
         defaultFeepayerAlias,
         defaultFeepayerAddress
       );
       break;
     case 'alternateCachedFeepayer':
       feepayerAlias = alternateCachedFeepayerAlias;
-      feepayerKeyPair = await savedKeyPairStep(
-        HOME_DIR,
-        alternateCachedFeepayerAlias
-      );
+      feepayerKeyPair = await savedKeyPairStep(alternateCachedFeepayerAlias);
       break;
     default:
       break;
@@ -215,13 +206,13 @@ async function config() {
   await step(`Add deploy alias to config.json`, async () => {
     if (!feepayerAlias) {
       // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
-      log(red(`Invalid fee payer alias ${feepayerAlias}" .`));
+      log(chalk.red(`Invalid fee payer alias ${feepayerAlias}" .`));
       process.exit(1);
     }
     config.deployAliases[deployAliasName] = {
       url,
       keyPath: `keys/${deployAliasName}.json`,
-      feepayerKeyPath: `${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+      feepayerKeyPath: `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
       feepayerAlias,
       fee,
     };
@@ -240,23 +231,23 @@ async function config() {
     )}&?explorer=${explorerName}` +
     `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
 
-  log(green(str));
+  log(chalk.green(str));
 }
 
 // Creates a new feepayer key pair
-async function createKeyPairStep(directory, feepayerAlias) {
+async function createKeyPairStep(feepayerAlias) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias ${feepayerAlias}.`));
+    log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
     return;
   }
   return await step(
-    `Create fee payer key pair at ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+    `Create fee payer key pair at ${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
     async () => {
       const keyPair = createKeyPair('testnet');
 
       fs.outputJsonSync(
-        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+        `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
         keyPair,
         {
           spaces: 2,
@@ -267,9 +258,9 @@ async function createKeyPairStep(directory, feepayerAlias) {
   );
 }
 
-async function recoverKeyPairStep(directory, feepayerKey, feepayerAlias) {
+async function recoverKeyPairStep(feepayerKey, feepayerAlias) {
   return await step(
-    `Recover fee payer keypair from ${feepayerKey} and add to ${HOME_DIR}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+    `Recover fee payer keypair from ${feepayerKey} and add to ${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
     async () => {
       const feepayorPrivateKey = PrivateKey.fromBase58(feepayerKey);
       const feepayerAddress = feepayorPrivateKey.toPublicKey();
@@ -280,7 +271,7 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAlias) {
       };
 
       fs.outputJsonSync(
-        `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`,
+        `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
         keyPair,
         {
           spaces: 2,
@@ -291,14 +282,14 @@ async function recoverKeyPairStep(directory, feepayerKey, feepayerAlias) {
   );
 }
 // Returns a cached keypair from a given feepayer alias
-async function savedKeyPairStep(directory, feepayerAlias, address) {
+async function savedKeyPairStep(feepayerAlias, address) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(red(`Invalid fee payer alias: ${feepayerAlias}.`));
+    log(chalk.red(`Invalid fee payer alias: ${feepayerAlias}.`));
     process.exit(1);
   }
-  const keyPair = fs.readJSONSync(
-    `${directory}/.cache/zkapp-cli/keys/${feepayerAlias}.json`
+  const keyPair = fs.readJsonSync(
+    `${Constants.feePayerCacheDir}/${feepayerAlias}.json`
   );
 
   if (!address) address = keyPair.publicKey;
@@ -313,8 +304,8 @@ async function savedKeyPairStep(directory, feepayerAlias, address) {
 }
 
 // Check if feepayer alias/aliases are stored on users machine and returns an array of them.
-function getCachedFeepayerAliases(directory) {
-  let aliases = fs.readdirSync(`${directory}/.cache/zkapp-cli/keys/`);
+function getCachedFeepayerAliases() {
+  let aliases = fs.readdirSync(Constants.feePayerCacheDir);
 
   aliases = aliases
     .filter((fileName) => fileName.includes('json'))
@@ -323,9 +314,9 @@ function getCachedFeepayerAliases(directory) {
   return aliases;
 }
 
-function getCachedFeepayerAddress(directory, feePayorAlias) {
-  const address = fs.readJSONSync(
-    `${directory}/.cache/zkapp-cli/keys/${feePayorAlias}.json`
+function getCachedFeepayerAddress(feePayorAlias) {
+  const address = fs.readJsonSync(
+    `${Constants.feePayerCacheDir}/${feePayorAlias}.json`
   ).publicKey;
 
   return address;
@@ -342,6 +333,4 @@ function getExplorerName(graphQLUrl) {
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
 }
 
-module.exports = {
-  config,
-};
+export default config;

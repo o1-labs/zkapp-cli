@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-let {
-  setProjectName,
-  replaceInFile,
-  titleCase,
+import fs from 'fs';
+import path from 'path';
+import {
   kebabCase,
-} = require('./project');
+  replaceInFile,
+  setProjectName,
+  titleCase,
+} from './project.js';
 
 describe('project.js', () => {
   describe('project()', () => {

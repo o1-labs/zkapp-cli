@@ -1,4 +1,4 @@
-module.exports = `
+export default `
 <script>
   import heroMinaLogo from '$lib/assets/hero-mina-logo.svg'
   import arrowRightSmall from '$lib/assets/arrow-right-small.svg'
