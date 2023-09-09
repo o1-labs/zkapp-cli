@@ -1,10 +1,9 @@
-const chalk = require('chalk');
-const { green, red, reset } = chalk;
-const { PrivateKey } = require('o1js');
+import chalk from 'chalk';
+import { PrivateKey } from 'o1js';
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.
-  // Shows a green check mark when submitted.
+  // Shows a chalk.green check mark when submitted.
   // Shows a red "x" if ctrl+C is pressed.
 
   // Can't override the validating prefix or styling unfortunately
@@ -12,7 +11,7 @@ function formatPrefixSymbol(state) {
   // if (state.validating) return ''; // use no symbol, instead of pointer
 
   if (!state.submitted) return state.symbols.question;
-  return state.cancelled ? red(state.symbols.cross) : state.symbols.check;
+  return state.cancelled ? chalk.red(state.symbols.cross) : state.symbols.check;
 }
 
 const prompts = {
@@ -21,7 +20,8 @@ const prompts = {
       type: 'input',
       name: 'deployAliasName',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Create a name (can be anything):');
       },
       prefix: formatPrefixSymbol,
@@ -30,9 +30,9 @@ const prompts = {
           .toLowerCase()
           .trim()
           .replace(/\s{1,}/g, '-');
-        if (!val) return red('Name is required.');
+        if (!val) return chalk.red('Name is required.');
         if (Object.keys(config.deployAliases).includes(val)) {
-          return red('Name already exists.');
+          return chalk.red('Name already exists.');
         }
         return true;
       },
@@ -46,12 +46,13 @@ const prompts = {
       type: 'input',
       name: 'url',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Set the Mina GraphQL API URL to deploy to:');
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return red('Url is required.');
+        if (!val) return chalk.red('Url is required.');
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
@@ -60,14 +61,15 @@ const prompts = {
       type: 'input',
       name: 'fee',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Set transaction fee to use when deploying (in MINA):');
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return red('Fee is required.');
-        if (isNaN(val)) return red('Fee must be a number.');
-        if (val < 0) return red("Fee can't be negative.");
+        if (!val) return chalk.red('Fee is required.');
+        if (isNaN(val)) return chalk.red('Fee must be a number.');
+        if (val < 0) return chalk.red("Fee can't be negative.");
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
@@ -94,7 +96,8 @@ const prompts = {
         },
       ],
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Choose an account to pay transaction fees:');
       },
 
@@ -116,7 +119,9 @@ const prompts = {
       name: 'feepayer',
       choices: [
         {
-          name: chalk`Use stored account {bold ${defaultFeepayerAlias}} (public key: {bold ${defaultFeepayerAddress}}) `,
+          name: `Use stored account ${chalk.bold(
+            defaultFeepayerAlias
+          )} (public key: ${chalk.bold(defaultFeepayerAddress)}) `,
           value: 'defaultCache',
         },
         {
@@ -125,7 +130,8 @@ const prompts = {
         },
       ],
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Choose an account to pay transaction fees:');
       },
       skip() {
@@ -148,7 +154,8 @@ const prompts = {
       type: 'input',
       name: 'feepayerAlias',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Create an alias for this account');
       },
       validate: async (val) => {
@@ -158,8 +165,8 @@ const prompts = {
           .replace(/\s{1,}/g, '-');
 
         if (cachedFeepayerAliases?.includes(val))
-          return red(`Fee payer alias ${val} already exists`);
-        if (!val) return red('Fee payer alias is required.');
+          return chalk.red(`Fee payer alias ${val} already exists`);
+        if (!val) return chalk.red('Fee payer alias is required.');
         return true;
       },
       result: (val) =>
@@ -172,7 +179,8 @@ const prompts = {
       type: 'input',
       name: 'feepayerKey',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style(`Account private key (base58):
   NOTE: The private key is created on this computer and is stored in plain text.
   Do NOT use an account which holds a substantial amount of MINA.`);
@@ -182,7 +190,7 @@ const prompts = {
         try {
           PrivateKey.fromBase58(val);
         } catch (err) {
-          return red('Enter a valid private key.');
+          return chalk.red('Enter a valid private key.');
         }
         return true;
       },
@@ -194,7 +202,8 @@ const prompts = {
       type: 'input',
       name: 'feepayerAlias',
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Create an alias for this account');
       },
       validate: async (val) => {
@@ -204,8 +213,8 @@ const prompts = {
           .replace(/\s{1,}/g, '-');
 
         if (cachedFeepayerAliases?.includes(val))
-          return red(`Fee payer alias ${val} already exists`);
-        if (!val) return red('Fee payer alias is required.');
+          return chalk.red(`Fee payer alias ${val} already exists`);
+        if (!val) return chalk.red('Fee payer alias is required.');
         return true;
       },
       result: (val) =>
@@ -230,7 +239,8 @@ const prompts = {
       name: 'alternateCachedFeepayerAlias',
       choices: cachedFeepayerAliases,
       message: (state) => {
-        const style = state.submitted && !state.cancelled ? green : reset;
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Choose another saved fee payer:');
       },
       skip() {
@@ -262,6 +272,4 @@ function getFeepayorChoices(cachedFeepayerAliases) {
 
   return choices;
 }
-module.exports = {
-  prompts,
-};
+export default prompts;
