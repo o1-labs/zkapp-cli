@@ -15,7 +15,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        # https://github.com/shelljs/shelljs/issues/1133
+        node: [18, 20.6.1]
         os: [ubuntu-latest]
     services:
       mina-local-network:
@@ -50,7 +51,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        # https://github.com/shelljs/shelljs/issues/1133
+        node: [18, 20.6.1]
         os: [macos-latest]
     steps:
       - uses: actions/checkout@v3
@@ -66,7 +68,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        # https://github.com/shelljs/shelljs/issues/1133
+        node: [18, 20.6.1]
         os: [windows-latest]
     steps:
       - uses: actions/checkout@v3
