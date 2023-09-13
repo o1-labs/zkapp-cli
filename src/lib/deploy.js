@@ -561,8 +561,8 @@ function getInstalledCliVersion() {
  * When o1js and the zkApp CLI have a major version of 1 or higher,
  * changes to the major version of the zkApp CLI will represent
  * breaking changes, following semver.
- * 
-**/
+ *
+ **/
 function hasBreakingChanges(installedVersion, latestVersion) {
   const installedVersionArr = installedVersion
     ?.split('.')
