@@ -11,7 +11,7 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/shelljs/shelljs/issues/1133
-        node: [18, 20.6.1]
+        node: [18, 20]
         os: [ubuntu-latest]
     services:
       mina-local-network:
