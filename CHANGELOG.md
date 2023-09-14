@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2023-09-14
+
+### Changed
+
+- Release `0.13.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1123) `0.13.0`. The o1js release includes changes to verification keys caused by updates to the proof system, which breaks all deployed contracts. [#492](https://github.com/o1-labs/zkapp-cli/pull/492)
+  - o1js minor version dependency updated in cli package.json to 0.13.\*.
+  - o1js minor version peer dependency updated in template/example contract package.json to 0.13.\*.
+
 ## [0.12.1] - 2023-09-09
 
 ### Changed
