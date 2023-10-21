@@ -35,9 +35,6 @@ export async function project({ name, ui }) {
     return;
   }
 
-  // Git must be initialized before running `npm install` b/c Husky runs an
-  // NPM `prepare` script to set up its pre-commit hook within `.git`.
-  // Check before fetching project template, to not leave crud on user's system.
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
     return;
@@ -138,7 +135,6 @@ export async function project({ name, ui }) {
 
   if (ui) shell.cd('..'); // back to project root
 
-  // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
     'Git init commit',
     'git add . && git commit -m "Init commit" -q -n && git branch -m main'
