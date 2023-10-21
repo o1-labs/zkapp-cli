@@ -126,30 +126,6 @@ export async function project({ name, ui }) {
   }
   if (!(await fetchProjectTemplate())) return;
 
-  // Make Husky work if using a monorepo. It needs some changes to work when
-  // .git lives one dir level above package.json. Note that Husky's pre-commit
-  // checks only apply to the contracts project, not to the UI, unless the dev
-  // set that up themselves. It's more valuable for the smart contract.
-  // Source: https://github.com/typicode/husky/issues/348#issuecomment-899344732
-  if (ui) {
-    // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/package.json#L20
-    let x = fs.readJsonSync(`package.json`);
-    x.scripts.prepare = `cd .. && husky install ${path.join(
-      'contracts',
-      '.husky'
-    )}`;
-    fs.writeJSONSync(`package.json`, x, { spaces: 2 });
-
-    // https://github.com/o1-labs/zkapp-cli/blob/main/templates/project-ts/.husky/pre-commit#L3
-    let y = fs.readFileSync(`${path.join('.husky', 'pre-commit')}`, 'utf-8');
-    const targetStr = 'husky.sh"\n';
-    y = y.replace(targetStr, targetStr + '\ncd contracts');
-    fs.writeFileSync(`${path.join('.husky', 'pre-commit')}`, y, 'utf-8');
-  }
-
-  // `/dev/null` on Mac or Linux and 'NUL' on Windows is the only way to silence
-  // Husky's install log msg.
-
   await step(
     'NPM install',
     `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
