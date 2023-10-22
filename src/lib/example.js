@@ -54,8 +54,6 @@ export async function example(example) {
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   shell.cd(dir);
 
-  // Git must be initialized before running `npm install` b/c Husky runs an
-  // NPM `prepare` script to set up its pre-commit hook within `.git`.
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
     return;
@@ -63,7 +61,6 @@ export async function example(example) {
 
   await step('Initialize Git repo', 'git init -q');
 
-  // `/dev/null` on linux or 'NUL' on windows is the only way to silence Husky's install log msg.
   await step(
     'NPM install',
     `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
@@ -72,7 +69,6 @@ export async function example(example) {
   // process.cwd() is full path to user's terminal + path/to/name.
   await setProjectName(process.cwd());
 
-  // `-n` (no verify) skips Husky's pre-commit hooks.
   await step(
     'Git init commit',
     'git add . && git commit -m "Init commit" -q -n && git branch -m main'
