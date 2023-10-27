@@ -193,7 +193,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: true,
               description:
-                'Whether to save the Docker container services logs to the host file system.',
+                'Whether to save the Docker container processes logs to the host file system.',
             },
             'clean-up': {
               alias: 'c',
