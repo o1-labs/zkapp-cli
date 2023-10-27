@@ -202,7 +202,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: true,
               description:
-                'Whether to remove the Docker container, dangling Docker images, consumed Docker container and the network configuration.',
+                'Whether to remove the Docker container, dangling Docker images, consumed Docker volume and the network configuration.',
             },
           },
           async (argv) => await stopLightnet(argv)
