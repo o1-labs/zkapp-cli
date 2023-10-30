@@ -211,8 +211,7 @@ yargs(hideBin(process.argv))
           ['status'],
           'Get the lightweight Mina blockchain network status.',
           {},
-          async () =>
-            await lightnetStatus({ checkDockerEngineAvailability: true })
+          async () => await lightnetStatus()
         )
         .demandCommand();
     }

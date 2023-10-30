@@ -113,7 +113,7 @@ export async function startLightnet({
     });
     const statusColored = chalk.green.bold('is ready');
     console.info(`\nBlockchain network ${statusColored} in ${runTime}.`);
-    await lightnetStatus();
+    await lightnetStatus({ preventDockerEngineAvailabilityCheck: true });
   } else {
     const statusColored = chalk.green.bold('is running');
     console.info(
@@ -182,13 +182,13 @@ export async function stopLightnet({ saveLogs, cleanUp }) {
 
 /**
  * Gets the lightweight Mina blockchain network status.
- * @param {boolean} object.checkDockerEngineAvailability - Whether to check the Docker Engine availability.
+ * @param {boolean} object.preventDockerEngineAvailabilityCheck - Whether to prevent the Docker Engine availability check.
  * @returns {Promise<void>}
  */
 export async function lightnetStatus({
-  checkDockerEngineAvailability = false,
+  preventDockerEngineAvailabilityCheck = false,
 } = {}) {
-  if (checkDockerEngineAvailability) {
+  if (!preventDockerEngineAvailabilityCheck) {
     await checkDockerEngineAvailability();
   }
   const containerStatus = getDockerContainerStatus(lightnetDockerContainerName);
