@@ -436,11 +436,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
         await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
       } else {
         const responseJson = await response.json();
-        if (!responseJson || !responseJson.data) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, pollingIntervalMs)
-          );
-        } else if (responseJson.data.syncStatus === 'SYNCED') {
+        if (responseJson?.data?.syncStatus === 'SYNCED') {
           blockchainIsReady = true;
         } else {
           await new Promise((resolve) =>
@@ -517,7 +513,7 @@ function printDockerContainerProcessesLogPaths() {
   const mode = lightnetConfig.mode;
   const border = getBorderCharacters('norc');
   const boldTitle = chalk.reset.bold(
-    '\nLogs produced by different processes are redirected into the files' +
+    'Logs produced by different processes are redirected into the files' +
       '\nlocated by the following path patterns inside the container:'
   );
   const logs = [[chalk.reset('/root/logs/*.log')]];
@@ -531,6 +527,16 @@ function printDockerContainerProcessesLogPaths() {
     table(logs, {
       border,
     })
+  );
+  console.info(
+    chalk.yellow.bold('Note:') +
+      ' By default, important logs of the current session will be saved' +
+      '\nto the host file system during the ' +
+      chalk.green.bold('zk lightnet stop') +
+      ' command execution.' +
+      '\nTo disable this behavior, please use the ' +
+      chalk.reset.bold('--no-save-logs') +
+      ' option.'
   );
 }
 
@@ -571,7 +577,7 @@ async function printBlockchainNetworkProperties() {
       data = noData;
     } else {
       const responseJson = await response.json();
-      if (!responseJson || !responseJson.data) {
+      if (!responseJson?.data) {
         data = noData;
       } else {
         data = [
@@ -635,7 +641,7 @@ async function printBlockchainNetworkProperties() {
 }
 
 function printZkAppSnippet() {
-  const boldTitle = chalk.reset.bold('\nzkApp snippet using o1js API');
+  const boldTitle = chalk.reset.bold('zkApp snippet using o1js API');
   console.info(boldTitle);
   console.info(
     chalk.dim(
@@ -674,8 +680,17 @@ function secondsToHms(seconds) {
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor((seconds % 3600) % 60);
 
-  const hDisplay = h > 0 ? h + (h == 1 ? ' hour, ' : ' hours, ') : '';
-  const mDisplay = m > 0 ? m + (m == 1 ? ' minute, ' : ' minutes, ') : '';
-  const sDisplay = s > 0 ? s + (s == 1 ? ' second' : ' seconds') : '';
+  let hDisplay = '';
+  if (h > 0) {
+    hDisplay = h + (h == 1 ? ' hour, ' : ' hours, ');
+  }
+  let mDisplay = '';
+  if (m > 0) {
+    mDisplay = m + (m == 1 ? ' minute, ' : ' minutes, ');
+  }
+  let sDisplay = '';
+  if (s > 0) {
+    sDisplay = s + (s == 1 ? ' second' : ' seconds');
+  }
   return hDisplay + mDisplay + sDisplay;
 }
