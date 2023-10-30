@@ -159,7 +159,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: true,
               description:
-                'Whether to start the Mina Archive process and Archive-Node-API application within the Docker container.',
+                'Whether to start the Mina Archive process and Archive Node API application within the Docker container.',
             },
             sync: {
               alias: 's',
