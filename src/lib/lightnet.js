@@ -38,7 +38,7 @@ export async function startLightnet({
 }) {
   let containerId = 'N/A';
   let containerVolume = 'N/A';
-  await checkDockerCommandAvailability();
+  await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
     await handleStartCommandChecks(lightnetDockerContainerName);
   });
@@ -134,7 +134,7 @@ export async function startLightnet({
  */
 export async function stopLightnet({ saveLogs, cleanUp }) {
   let logsDir = null;
-  await checkDockerCommandAvailability();
+  await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
     await handleStopCommandChecks(lightnetDockerContainerName);
   });
@@ -182,14 +182,14 @@ export async function stopLightnet({ saveLogs, cleanUp }) {
 
 /**
  * Gets the lightweight Mina blockchain network status.
- * @param {boolean} object.checkCommandsAvailability - Whether to check different commands availability.
+ * @param {boolean} object.checkDockerEngineAvailability - Whether to check the Docker Engine availability.
  * @returns {Promise<void>}
  */
 export async function lightnetStatus({
-  checkCommandsAvailability = false,
+  checkDockerEngineAvailability = false,
 } = {}) {
-  if (checkCommandsAvailability) {
-    await checkDockerCommandAvailability();
+  if (checkDockerEngineAvailability) {
+    await checkDockerEngineAvailability();
   }
   const containerStatus = getDockerContainerStatus(lightnetDockerContainerName);
   if (containerStatus === 'not found') {
@@ -219,12 +219,19 @@ export async function lightnetStatus({
   }
 }
 
-async function checkDockerCommandAvailability() {
+async function checkDockerEngineAvailability() {
   await step('Checking Docker Engine availability', async () => {
     if (!shell.which('docker')) {
       console.info(
         '\n\nPlease ensure that Docker Engine is installed, then try again.' +
           '\nSee https://docs.docker.com/engine/install/ for more information.'
+      );
+      shell.exit(1);
+    }
+    const { code } = shell.exec('docker ps -a', { silent: true });
+    if (code !== 0) {
+      console.info(
+        '\n\nPlease ensure that Docker Engine is running, then try again.'
       );
       shell.exit(1);
     }
