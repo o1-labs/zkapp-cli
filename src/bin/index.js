@@ -131,7 +131,7 @@ yargs(hideBin(process.argv))
               choices: Constants.lightnetTypes,
               default: 'fast',
               description:
-                'Whether to configure the network to be fast or to have closer to real world properties but slower.',
+                'Whether to configure the network to be fast or slower with closer-to-real-world properties.',
             },
             'proof-level': {
               alias: 'p',
