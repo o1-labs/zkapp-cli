@@ -184,7 +184,7 @@ yargs(hideBin(process.argv))
         )
         .command(
           ['stop [save-logs] [clean-up]'],
-          'Stop the lightweight Mina blockchain network Docker container and perform the clean up.',
+          'Stop the lightweight Mina blockchain network Docker container and perform the cleanup.',
           {
             'save-logs': {
               alias: 'l',
