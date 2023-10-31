@@ -54,23 +54,23 @@ export async function startLightnet({
     await handleStartCommandChecks(lightnetDockerContainerName);
   });
   await step(
-    pull
-      ? 'Pulling the corresponding Docker image, stopping and removing the existing Docker container'
-      : 'Stopping and removing the existing Docker container',
+    'Stopping and removing the existing Docker container',
     async () => {
       await stopDockerContainer(lightnetDockerContainerName);
       await removeDockerContainer(lightnetDockerContainerName);
-      if (pull) {
-        await shellExec(
-          `docker pull o1labs/mina-local-network:${minaBranch}-latest-${
-            type === 'fast' ? 'lightnet' : 'devnet'
-          }`,
-          { silent: !isDebug }
-        );
-        await removeDanglingDockerImages();
-      }
     }
   );
+  if (pull) {
+    await step('Pulling the corresponding Docker image', async () => {
+      await shellExec(
+        `docker pull o1labs/mina-local-network:${minaBranch}-latest-${
+          type === 'fast' ? 'lightnet' : 'devnet'
+        }`,
+        { silent: !isDebug }
+      );
+      await removeDanglingDockerImages();
+    });
+  }
   await step(
     'Starting the lightweight Mina blockchain network Docker container',
     async () => {
@@ -164,7 +164,11 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
   }
   if (cleanUp) {
     await step(
-      'Cleaning up (Docker container, dangling images, volume and blockchain network configuration)',
+      'Cleaning up' +
+        '\n  - Docker container' +
+        '\n  - Dangling Docker images' +
+        '\n  - Docker volume' +
+        '\n  - Blockchain network configuration',
       async () => {
         await removeDockerContainer(lightnetDockerContainerName);
         await removeDanglingDockerImages();
@@ -449,7 +453,7 @@ async function saveDockerContainerProcessesLogs() {
 async function waitForBlockchainNetworkReadiness(mode) {
   let blockchainSyncAttempt = 1;
   let blockchainIsReady = false;
-  const maxAttempts = mode === 'single-node' ? 60 : 210;
+  const maxAttempts = mode === 'single-node' ? 1 : 210;
   const pollingIntervalMs = 10_000;
   const syncStatusGraphQlQuery = {
     query: '{ syncStatus }',
@@ -483,7 +487,8 @@ async function waitForBlockchainNetworkReadiness(mode) {
   if (!blockchainIsReady) {
     const statusColored = chalk.red.bold('is not ready');
     console.log(
-      `\n\nMaximum attempts reached. The blockchain network ${statusColored}.` +
+      '\n\nMaximum blockchain network readiness check attempts reached.' +
+        `\nThe blockchain network ${statusColored}.` +
         '\nPlease consider to cleaning up the environment by executing:\n\n' +
         chalk.green.bold('zk lightnet stop') +
         '\n'
