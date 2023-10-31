@@ -668,7 +668,7 @@ Mina.setActiveInstance(network);
 
 // Fee payer setup
 const feePayerPrivateKey = (await Lightnet.acquireKeyPair()).privateKey
-const feePayerAccount = senderKey.toPublicKey();
+const feePayerAccount = feePayerPrivateKey.toPublicKey();
 
 ...
 
