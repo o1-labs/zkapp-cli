@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import path from 'path';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';
@@ -8,12 +9,18 @@ import Constants from './constants.js';
 import step from './helpers.js';
 
 const shellExec = util.promisify(shell.exec);
-const lightnetConfigFile = `${Constants.lightnetWorkDir}/config.json`;
-const lightnetLogsDir = `${Constants.lightnetWorkDir}/logs`;
+const lightnetConfigFile = path.resolve(
+  `${Constants.lightnetWorkDir}/config.json`
+);
+const lightnetLogsDir = path.resolve(`${Constants.lightnetWorkDir}/logs`);
 const lightnetDockerContainerName = 'mina-local-lightnet';
 const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
 const lightnetAccountsManagerEndpoint = 'http://localhost:8181';
 const lightnetArchiveNodeApiEndpoint = 'http://localhost:8282';
+const DockerContainerState = {
+  RUNNING: 'running',
+  NOT_FOUND: 'not-found',
+};
 
 /**
  * Starts the lightweight Mina blockchain network Docker container.
@@ -191,8 +198,8 @@ export async function lightnetStatus({
   if (!preventDockerEngineAvailabilityCheck) {
     await checkDockerEngineAvailability();
   }
-  const containerStatus = getDockerContainerStatus(lightnetDockerContainerName);
-  if (containerStatus === 'not found') {
+  const containerState = getDockerContainerState(lightnetDockerContainerName);
+  if (DockerContainerState.NOT_FOUND === containerState) {
     console.log(
       chalk.red(
         '\nThe lightweight Mina blockchain network Docker container does not exist!'
@@ -201,7 +208,10 @@ export async function lightnetStatus({
     shell.exit(1);
   }
   console.log('\n' + chalk.reset.bold('Lightweight Mina Blockchain Network'));
-  if (containerStatus === 'running' && fs.existsSync(lightnetConfigFile)) {
+  if (
+    DockerContainerState.RUNNING === containerState &&
+    fs.existsSync(lightnetConfigFile)
+  ) {
     printUsefulUrls();
     printDockerContainerProcessesLogPaths();
     await printBlockchainNetworkProperties();
@@ -239,8 +249,9 @@ async function checkDockerEngineAvailability() {
 }
 
 async function handleStartCommandChecks(containerName) {
+  const containerState = getDockerContainerState(containerName);
   if (
-    getDockerContainerStatus(containerName) === 'running' &&
+    DockerContainerState.RUNNING === containerState &&
     fs.existsSync(lightnetConfigFile)
   ) {
     console.log(
@@ -250,7 +261,7 @@ async function handleStartCommandChecks(containerName) {
     );
     shell.exit(1);
   } else if (
-    getDockerContainerStatus(containerName) !== 'not found' &&
+    DockerContainerState.NOT_FOUND !== containerState &&
     (!fs.existsSync(lightnetConfigFile) ||
       !dockerContainerIdMatchesConfig(containerName))
   ) {
@@ -260,7 +271,7 @@ async function handleStartCommandChecks(containerName) {
 
 async function handleStopCommandChecks(containerName) {
   if (
-    getDockerContainerStatus(containerName) !== 'not found' &&
+    DockerContainerState.NOT_FOUND !== getDockerContainerState(containerName) &&
     (!fs.existsSync(lightnetConfigFile) ||
       !dockerContainerIdMatchesConfig(containerName))
   ) {
@@ -294,12 +305,12 @@ async function handleDockerContainerPresence() {
   }
 }
 
-function getDockerContainerStatus(containerName) {
+function getDockerContainerState(containerName) {
   const { stdout } = shell.exec(
     `docker inspect -f '{{.State.Status}}' ${containerName}`,
     { silent: true }
   );
-  return stdout.trim() === '' ? 'not found' : stdout.trim();
+  return stdout.trim() === '' ? DockerContainerState.NOT_FOUND : stdout.trim();
 }
 
 function getDockerContainerId(containerName) {
@@ -357,9 +368,9 @@ async function removeDanglingDockerImages() {
 async function saveDockerContainerProcessesLogs() {
   const timeZoneOffset = new Date().getTimezoneOffset() * 60000;
   const localMoment = new Date(Date.now() - timeZoneOffset);
-  const logsDir = `${lightnetLogsDir}/${
-    localMoment.toISOString().split('.')[0]
-  }`;
+  const logsDir = path.resolve(
+    `${lightnetLogsDir}/${localMoment.toISOString().split('.')[0]}`
+  );
   try {
     const lightnetConfig = fs.readJSONSync(lightnetConfigFile);
     const mode = lightnetConfig.mode;

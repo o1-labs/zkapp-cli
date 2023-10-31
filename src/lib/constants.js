@@ -1,4 +1,5 @@
 import { homedir } from 'os';
+import path from 'path';
 
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
@@ -14,7 +15,7 @@ const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
   exampleTypes: ['sudoku', 'tictactoe'],
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
-  lightnetWorkDir: `${homedir()}/.cache/zkapp-cli/lightnet`,
+  lightnetWorkDir: path.resolve(`${homedir()}/.cache/zkapp-cli/lightnet`),
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],
   lightnetProofLevels: ['none', 'full'],
