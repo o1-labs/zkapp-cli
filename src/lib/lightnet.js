@@ -75,7 +75,7 @@ export async function startLightnet({
     'Starting the lightweight Mina blockchain network Docker container',
     async () => {
       await shellExec(
-        `docker run --name ${lightnetDockerContainerName} --pull=always -id ` +
+        `docker run --name ${lightnetDockerContainerName} --pull=missing -id ` +
           `--env NETWORK_TYPE="${mode}" ` +
           `--env PROOF_LEVEL="${proofLevel}" ` +
           `--env RUN_ARCHIVE_NODE="${archive}" ` +
