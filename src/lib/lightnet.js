@@ -453,7 +453,7 @@ async function saveDockerContainerProcessesLogs() {
 async function waitForBlockchainNetworkReadiness(mode) {
   let blockchainSyncAttempt = 1;
   let blockchainIsReady = false;
-  const maxAttempts = mode === 'single-node' ? 1 : 210;
+  const maxAttempts = mode === 'single-node' ? 60 : 210;
   const pollingIntervalMs = 10_000;
   const syncStatusGraphQlQuery = {
     query: '{ syncStatus }',
