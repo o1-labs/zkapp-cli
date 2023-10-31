@@ -1,6 +1,6 @@
-# Mina zkApp CLI
+# zkApp CLI
 
-The Mina zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
+The zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
 
 Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the Mina zkApp CLI.
 
@@ -16,9 +16,9 @@ To learn about ways to participate and interact with community members, see the 
 
 Contributions are always appreciated. See the zkApp CLI [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/README.md) guidelines.
 
-## Install the Mina zkApp CLI
+## Install the zkApp CLI
 
-To install the Mina zkApp CLI:
+To install the zkApp CLI:
 
 ```sh
 $ npm install -g zkapp-cli
@@ -30,7 +30,7 @@ To confirm successful installation:
 $ zk --version
 ```
 
-### Update the Mina zkApp CLI
+### Update the zkApp CLI
 
 You are prompted to install the new version if you are running an earlier zkApp CLI minor version. For example, if you are running version 0.9.8, but the current version is 0.10.2, you are prompted to update.
 
@@ -173,7 +173,7 @@ zk deploy <alias>
 zk deploy // shows a list of aliases in your project to choose from
 ```
 
-_**Deployment is supported only to Berkeley Testnet.
+_**Deployment is supported only to Berkeley Testnet and Testworld Mission 2.0, the Protocol Performance Testing program.
 zkApp programmability is not yet available on the Mina Mainnet.**_
 
 After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias.
