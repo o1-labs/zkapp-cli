@@ -22,6 +22,17 @@ const DockerContainerState = {
   NOT_FOUND: 'not-found',
 };
 let isDebug = false;
+let quotes = "'";
+let escapeQuotes = '';
+if (process.platform === 'win32') {
+  quotes = '"';
+  const { code } = shell.exec('Get-ChildItem', { silent: true });
+  if (code == 0) {
+    escapeQuotes = '\\`';
+  } else {
+    escapeQuotes = '\\"';
+  }
+}
 
 /**
  * Starts the lightweight Mina blockchain network Docker container.
@@ -324,7 +335,7 @@ async function handleDockerContainerPresence() {
 
 function getDockerContainerState(containerName) {
   const { stdout } = shell.exec(
-    `docker inspect -f '{{.State.Status}}' ${containerName}`,
+    `docker inspect -f ${quotes}{{.State.Status}}${quotes} ${containerName}`,
     { silent: !isDebug }
   );
   return stdout.trim() === '' ? DockerContainerState.NOT_FOUND : stdout.trim();
@@ -332,7 +343,7 @@ function getDockerContainerState(containerName) {
 
 function getDockerContainerId(containerName) {
   const { stdout } = shell.exec(
-    `docker inspect -f '{{.Id}}' ${containerName}`,
+    `docker inspect -f ${quotes}{{.Id}}${quotes} ${containerName}`,
     { silent: !isDebug }
   );
   return stdout.trim();
@@ -340,7 +351,7 @@ function getDockerContainerId(containerName) {
 
 function getDockerContainerVolume(containerName) {
   const { stdout } = shell.exec(
-    `docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}}{{end}}{{end}}' ${containerName}`,
+    `docker inspect -f ${quotes}{{range .Mounts}}{{if eq .Type ${escapeQuotes}"volume${escapeQuotes}"}}{{.Name}}{{end}}{{end}}${quotes} ${containerName}`,
     { silent: !isDebug }
   );
   return stdout.trim();
@@ -401,11 +412,11 @@ async function saveDockerContainerProcessesLogs() {
       ];
       for (const logFilePath of logFilePaths) {
         try {
+          const destinationFilePath = path.resolve(
+            `${logsDir}/${logFilePath.replace(/\//g, '_')}`
+          );
           await shellExec(
-            `docker cp ${lightnetDockerContainerName}:/root/${logFilePath} ${logsDir}/${logFilePath.replace(
-              /\//g,
-              '_'
-            )}`,
+            `docker cp ${lightnetDockerContainerName}:/root/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
         } catch (_) {
@@ -431,11 +442,11 @@ async function saveDockerContainerProcessesLogs() {
       }
       for (const logFilePath of logFilePaths) {
         try {
+          const destinationFilePath = path.resolve(
+            `${logsDir}/${logFilePath.replace(/\//g, '_')}`
+          );
           await shellExec(
-            `docker cp ${lightnetDockerContainerName}:/root/.mina-network/mina-local-network-2-1-1/nodes/${logFilePath} ${logsDir}/${logFilePath.replace(
-              /\//g,
-              '_'
-            )}`,
+            `docker cp ${lightnetDockerContainerName}:/root/.mina-network/mina-local-network-2-1-1/nodes/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
         } catch (_) {
@@ -500,11 +511,11 @@ async function waitForBlockchainNetworkReadiness(mode) {
 function printExtendedDockerContainerState(containerName) {
   const { stdout } = shell.exec(
     `docker inspect -f ` +
-      `'Status: {{.State.Status}}; ` +
+      `${quotes}Status: {{.State.Status}}; ` +
       `Is running: {{.State.Running}}; ` +
       `{{if .State.ExitCode}}Exit code: {{.State.ExitCode}}; {{end}}` +
       `Killed by OOM: {{.State.OOMKilled}}; ` +
-      `{{if .State.Error}}Error: {{.State.Error}}{{end}}' ${containerName}`,
+      `{{if .State.Error}}Error: {{.State.Error}}{{end}}${quotes} ${containerName}`,
     { silent: !isDebug }
   );
   const boldTitle = chalk.reset.bold('\nDocker container state\n');
