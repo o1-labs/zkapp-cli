@@ -22,6 +22,17 @@ import system from '../lib/system.js';
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const commonOptions = {
+  debug: {
+    alias: 'd',
+    demand: false,
+    boolean: true,
+    hidden: false,
+    default: false,
+    description: 'Whether to print the debug information.',
+  },
+};
+
 yargs(hideBin(process.argv))
   .scriptName(chalk.green('zk'))
   .usage('Usage: $0 <command> [options]')
@@ -109,7 +120,7 @@ yargs(hideBin(process.argv))
       yargs
         .command(
           [
-            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull]',
+            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [debug]',
           ],
           'Start the lightweight Mina blockchain network Docker container.',
           {
@@ -140,7 +151,8 @@ yargs(hideBin(process.argv))
               hidden: false,
               choices: Constants.lightnetProofLevels,
               default: 'none',
-              description: '"none" value will make the network faster.',
+              description:
+                '"none" value will make the network faster by disabling the blockchain SNARK proofs.',
             },
             'mina-branch': {
               alias: 'b',
@@ -179,11 +191,12 @@ yargs(hideBin(process.argv))
               description:
                 'Whether to pull the latest version of the Docker image from the Docker Hub.',
             },
+            ...commonOptions,
           },
           async (argv) => await startLightnet(argv)
         )
         .command(
-          ['stop [save-logs] [clean-up]'],
+          ['stop [save-logs] [clean-up] [debug]'],
           'Stop the lightweight Mina blockchain network Docker container and perform the cleanup.',
           {
             'save-logs': {
@@ -204,14 +217,21 @@ yargs(hideBin(process.argv))
               description:
                 'Whether to remove the Docker container, dangling Docker images, consumed Docker volume, and the blockchain network configuration.',
             },
+            ...commonOptions,
           },
           async (argv) => await stopLightnet(argv)
         )
         .command(
-          ['status'],
+          ['status [debug]'],
           'Get the lightweight Mina blockchain network status.',
-          {},
-          async () => await lightnetStatus()
+          {
+            ...commonOptions,
+          },
+          async (argv) =>
+            await lightnetStatus({
+              preventDockerEngineAvailabilityCheck: false,
+              debug: argv.debug,
+            })
         )
         .demandCommand();
     }

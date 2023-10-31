@@ -21,6 +21,7 @@ const DockerContainerState = {
   RUNNING: 'running',
   NOT_FOUND: 'not-found',
 };
+let isDebug = false;
 
 /**
  * Starts the lightweight Mina blockchain network Docker container.
@@ -32,6 +33,7 @@ const DockerContainerState = {
  * @param {boolean} argv.archive - Whether to start the Mina Archive process and the Archive-Node-API application.
  * @param {boolean} argv.sync - Whether to wait for the network to sync.
  * @param {boolean} argv.pull - Whether to pull the latest version of the Docker image from the Docker Hub.
+ * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
 export async function startLightnet({
@@ -42,7 +44,9 @@ export async function startLightnet({
   archive,
   sync,
   pull,
+  debug,
 }) {
+  isDebug = debug;
   let containerId = 'N/A';
   let containerVolume = 'N/A';
   await checkDockerEngineAvailability();
@@ -61,7 +65,7 @@ export async function startLightnet({
           `docker pull o1labs/mina-local-network:${minaBranch}-latest-${
             type === 'fast' ? 'lightnet' : 'devnet'
           }`,
-          { silent: true }
+          { silent: !isDebug }
         );
         await removeDanglingDockerImages();
       }
@@ -87,7 +91,7 @@ export async function startLightnet({
           `o1labs/mina-local-network:${minaBranch}-latest-${
             type === 'fast' ? 'lightnet' : 'devnet'
           }`,
-        { silent: true }
+        { silent: !isDebug }
       );
       containerId = getDockerContainerId(lightnetDockerContainerName);
       containerVolume = getDockerContainerVolume(lightnetDockerContainerName);
@@ -120,7 +124,7 @@ export async function startLightnet({
     });
     const statusColored = chalk.green.bold('is ready');
     console.info(`\nBlockchain network ${statusColored} in ${runTime}.`);
-    await lightnetStatus({ preventDockerEngineAvailabilityCheck: true });
+    await lightnetStatus({ preventDockerEngineAvailabilityCheck: true, debug });
   } else {
     const statusColored = chalk.green.bold('is running');
     console.info(
@@ -137,9 +141,11 @@ export async function startLightnet({
  * @param {object}  argv - The arguments object provided by yargs.
  * @param {string}  argv.saveLogs - Whether to save the Docker container processes logs to the host file system.
  * @param {string}  argv.cleanUp - Whether to perform the clean up.
+ * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function stopLightnet({ saveLogs, cleanUp }) {
+export async function stopLightnet({ saveLogs, cleanUp, debug }) {
+  isDebug = debug;
   let logsDir = null;
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
@@ -190,11 +196,14 @@ export async function stopLightnet({ saveLogs, cleanUp }) {
 /**
  * Gets the lightweight Mina blockchain network status.
  * @param {boolean} object.preventDockerEngineAvailabilityCheck - Whether to prevent the Docker Engine availability check.
+ * @param {boolean} object.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
 export async function lightnetStatus({
   preventDockerEngineAvailabilityCheck = false,
+  debug,
 } = {}) {
+  isDebug = debug;
   if (!preventDockerEngineAvailabilityCheck) {
     await checkDockerEngineAvailability();
   }
@@ -238,7 +247,7 @@ async function checkDockerEngineAvailability() {
       );
       shell.exit(1);
     }
-    const { code } = shell.exec('docker ps -a', { silent: true });
+    const { code } = shell.exec('docker ps -a', { silent: !isDebug });
     if (code !== 0) {
       console.info(
         '\n\nPlease ensure that Docker Engine is running, then try again.'
@@ -308,7 +317,7 @@ async function handleDockerContainerPresence() {
 function getDockerContainerState(containerName) {
   const { stdout } = shell.exec(
     `docker inspect -f '{{.State.Status}}' ${containerName}`,
-    { silent: true }
+    { silent: !isDebug }
   );
   return stdout.trim() === '' ? DockerContainerState.NOT_FOUND : stdout.trim();
 }
@@ -316,7 +325,7 @@ function getDockerContainerState(containerName) {
 function getDockerContainerId(containerName) {
   const { stdout } = shell.exec(
     `docker inspect -f '{{.Id}}' ${containerName}`,
-    { silent: true }
+    { silent: !isDebug }
   );
   return stdout.trim();
 }
@@ -324,7 +333,7 @@ function getDockerContainerId(containerName) {
 function getDockerContainerVolume(containerName) {
   const { stdout } = shell.exec(
     `docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}} {{end}}{{end}}' ${containerName}`,
-    { silent: true }
+    { silent: !isDebug }
   );
   return stdout.trim();
 }
@@ -337,7 +346,7 @@ function dockerContainerIdMatchesConfig(containerName) {
 
 async function stopDockerContainer(containerName) {
   try {
-    await shellExec(`docker stop ${containerName}`, { silent: true });
+    await shellExec(`docker stop ${containerName}`, { silent: !isDebug });
   } catch (_) {
     // Ignore the error if container doesn't exist
   }
@@ -345,7 +354,7 @@ async function stopDockerContainer(containerName) {
 
 async function removeDockerContainer(containerName) {
   try {
-    await shellExec(`docker rm ${containerName}`, { silent: true });
+    await shellExec(`docker rm ${containerName}`, { silent: !isDebug });
   } catch (_) {
     // Ignore the error if container doesn't exist
   }
@@ -353,7 +362,7 @@ async function removeDockerContainer(containerName) {
 
 async function removeDockerVolume(volume) {
   try {
-    await shellExec(`docker volume rm ${volume}`, { silent: true });
+    await shellExec(`docker volume rm ${volume}`, { silent: !isDebug });
   } catch (_) {
     // Ignore the error if volume doesn't exist
   }
@@ -361,7 +370,7 @@ async function removeDockerVolume(volume) {
 
 async function removeDanglingDockerImages() {
   await shellExec('docker image prune -f --filter "dangling=true"', {
-    silent: true,
+    silent: !isDebug,
   });
 }
 
@@ -389,7 +398,7 @@ async function saveDockerContainerProcessesLogs() {
               /\//g,
               '_'
             )}`,
-            { silent: true }
+            { silent: !isDebug }
           );
         } catch (_) {
           // Ignore the error if log file doesn't exist
@@ -409,7 +418,7 @@ async function saveDockerContainerProcessesLogs() {
       if (archive) {
         await shellExec(
           `docker cp ${lightnetDockerContainerName}:/root/logs/archive-node-api.log ${logsDir}`,
-          { silent: true }
+          { silent: !isDebug }
         );
       }
       for (const logFilePath of logFilePaths) {
@@ -419,7 +428,7 @@ async function saveDockerContainerProcessesLogs() {
               /\//g,
               '_'
             )}`,
-            { silent: true }
+            { silent: !isDebug }
           );
         } catch (_) {
           // Ignore the error if log file doesn't exist
@@ -487,7 +496,7 @@ function printExtendedDockerContainerState(containerName) {
       `{{if .State.ExitCode}}Exit code: {{.State.ExitCode}}; {{end}}` +
       `Killed by OOM: {{.State.OOMKilled}}; ` +
       `{{if .State.Error}}Error: {{.State.Error}}{{end}}' ${containerName}`,
-    { silent: true }
+    { silent: !isDebug }
   );
   const boldTitle = chalk.reset.bold('\nDocker container state\n');
   console.info(boldTitle + stdout.trim());
