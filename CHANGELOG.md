@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Release `0.14.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1209) `0.14.0`. The o1js release includes constraint optimizations in Field methods and core crypto changes that break all verification keys. [#514](https://github.com/o1-labs/zkapp-cli/pull/514)
+- Release `0.14.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1209) `0.14.0`. The o1js release includes constraint optimizations in Field methods and core crypto changes that break all verification keys. All contracts need to be redeployed. See the docs for more guidance on [deploying](https://docs.minaprotocol.com/zkapps/how-to-deploy-a-zkapp) contracts. [#514](https://github.com/o1-labs/zkapp-cli/pull/514)
   - o1js minor version dependency updated in cli package.json to 0.14.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.14.\*.
 
