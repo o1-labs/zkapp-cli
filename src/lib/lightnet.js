@@ -594,7 +594,7 @@ async function printBlockchainNetworkProperties() {
   const border = getBorderCharacters('norc');
   const boldTitle = chalk.reset.bold('\nBlockchain network properties');
   const noData = [
-    [chalk.yellow('No data available yet. Please retry a bit later.')],
+    [chalk.yellow('No data available yet. Please try again a bit later.')],
   ];
   let data = null;
   try {
