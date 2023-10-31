@@ -96,7 +96,7 @@ async function config() {
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
   log(msg);
 
-  console.log('Enter values to create a deploy alias:');
+  log('Enter values to create a deploy alias:');
 
   const {
     deployAliasPrompts,

@@ -47,16 +47,16 @@ export async function startLightnet({
   debug,
 }) {
   isDebug = debug;
-  let containerId = 'N/A';
-  let containerVolume = 'N/A';
+  let containerId = null;
+  let containerVolume = null;
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
     await handleStartCommandChecks(lightnetDockerContainerName);
   });
   await step(
     pull
-      ? 'Pulling the corresponding Docker image and cleaning up'
-      : 'Cleaning up',
+      ? 'Pulling the corresponding Docker image, stopping and removing the existing Docker container'
+      : 'Stopping and removing the existing Docker container',
     async () => {
       await stopDockerContainer(lightnetDockerContainerName);
       await removeDockerContainer(lightnetDockerContainerName);
@@ -98,7 +98,7 @@ export async function startLightnet({
     }
   );
   await step('Preserving the network configuration', async () => {
-    await fs.outputJson(
+    fs.outputJsonSync(
       lightnetConfigFile,
       {
         containerId,
@@ -123,11 +123,11 @@ export async function startLightnet({
       );
     });
     const statusColored = chalk.green.bold('is ready');
-    console.info(`\nBlockchain network ${statusColored} in ${runTime}.`);
+    console.log(`\nBlockchain network ${statusColored} in ${runTime}.`);
     await lightnetStatus({ preventDockerEngineAvailabilityCheck: true, debug });
   } else {
     const statusColored = chalk.green.bold('is running');
-    console.info(
+    console.log(
       `\nThe lightweight Mina blockchain network Docker container ${statusColored}.` +
         '\nPlease check the network readiness a bit later by executing:\n\n' +
         chalk.green.bold('zk lightnet status') +
@@ -163,25 +163,28 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
     });
   }
   if (cleanUp) {
-    await step('Cleaning up', async () => {
-      await removeDockerContainer(lightnetDockerContainerName);
-      await removeDanglingDockerImages();
-      if (fs.existsSync(lightnetConfigFile)) {
-        await removeDockerVolume(
-          fs.readJSONSync(lightnetConfigFile).containerVolume
-        );
+    await step(
+      'Cleaning up (Docker container, dangling images, volume and blockchain network configuration)',
+      async () => {
+        await removeDockerContainer(lightnetDockerContainerName);
+        await removeDanglingDockerImages();
+        if (fs.existsSync(lightnetConfigFile)) {
+          await removeDockerVolume(
+            fs.readJSONSync(lightnetConfigFile).containerVolume
+          );
+        }
+        await fs.remove(lightnetConfigFile);
       }
-      await fs.remove(lightnetConfigFile);
-    });
+    );
   }
   if (logsDir) {
     const boldLogs = chalk.reset.bold('logs');
-    console.info(
+    console.log(
       `\nThe Docker container processes ${boldLogs} can be found at:\n\n` +
         chalk.green.bold(logsDir) +
         '\n'
     );
-    console.info('Done\n');
+    console.log('Done\n');
   } else {
     if (
       fs.existsSync(lightnetLogsDir) &&
@@ -189,7 +192,7 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
     ) {
       fs.removeSync(lightnetLogsDir);
     }
-    console.info('\nDone\n');
+    console.log('\nDone\n');
   }
 }
 
@@ -227,7 +230,7 @@ export async function lightnetStatus({
     printZkAppSnippet();
     printExtendedDockerContainerState(lightnetDockerContainerName);
   } else {
-    console.info(
+    console.log(
       chalk.yellow.bold(
         '\nWarning:\nThe lightweight Mina blockchain network Docker container is either ' +
           '\nnot running or it was created outside of this application.' +
@@ -241,7 +244,7 @@ export async function lightnetStatus({
 async function checkDockerEngineAvailability() {
   await step('Checking Docker Engine availability', async () => {
     if (!shell.which('docker')) {
-      console.info(
+      console.log(
         '\n\nPlease ensure that Docker Engine is installed, then try again.' +
           '\nSee https://docs.docker.com/engine/install/ for more information.'
       );
@@ -249,7 +252,7 @@ async function checkDockerEngineAvailability() {
     }
     const { code } = shell.exec('docker ps -a', { silent: !isDebug });
     if (code !== 0) {
-      console.info(
+      console.log(
         '\n\nPlease ensure that Docker Engine is running, then try again.'
       );
       shell.exit(1);
@@ -308,8 +311,9 @@ async function handleDockerContainerPresence() {
         ? state.symbols.check
         : chalk.red(state.symbols.cross);
     },
+    result: (val) => val.trim().toLowerCase(),
   });
-  if (res.proceed.trim().toLowerCase() === 'no') {
+  if (res.proceed === 'no') {
     shell.exit(0);
   }
 }
@@ -332,7 +336,7 @@ function getDockerContainerId(containerName) {
 
 function getDockerContainerVolume(containerName) {
   const { stdout } = shell.exec(
-    `docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}} {{end}}{{end}}' ${containerName}`,
+    `docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}}{{end}}{{end}}' ${containerName}`,
     { silent: !isDebug }
   );
   return stdout.trim();
@@ -478,7 +482,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
   }
   if (!blockchainIsReady) {
     const statusColored = chalk.red.bold('is not ready');
-    console.info(
+    console.log(
       `\n\nMaximum attempts reached. The blockchain network ${statusColored}.` +
         '\nPlease consider to cleaning up the environment by executing:\n\n' +
         chalk.green.bold('zk lightnet stop') +
@@ -499,7 +503,7 @@ function printExtendedDockerContainerState(containerName) {
     { silent: !isDebug }
   );
   const boldTitle = chalk.reset.bold('\nDocker container state\n');
-  console.info(boldTitle + stdout.trim());
+  console.log(boldTitle + stdout.trim());
 }
 
 function printUsefulUrls() {
@@ -527,8 +531,8 @@ function printUsefulUrls() {
       chalk.reset('postgresql://postgres:postgres@localhost:5432/archive'),
     ]);
   }
-  console.info(boldTitle);
-  console.info(
+  console.log(boldTitle);
+  console.log(
     table(urls, {
       border,
     })
@@ -549,13 +553,13 @@ function printDockerContainerProcessesLogPaths() {
       chalk.reset('/root/mina-local-network-2-1-1/nodes/**/logs/*.log'),
     ]);
   }
-  console.info(boldTitle);
-  console.info(
+  console.log(boldTitle);
+  console.log(
     table(logs, {
       border,
     })
   );
-  console.info(
+  console.log(
     chalk.yellow.bold('Note:') +
       ' By default, important logs of the current session will be saved' +
       '\nto the host file system during the ' +
@@ -659,8 +663,8 @@ async function printBlockchainNetworkProperties() {
   } catch (_) {
     data = noData;
   }
-  console.info(boldTitle);
-  console.info(
+  console.log(boldTitle);
+  console.log(
     table(data, {
       border,
     })
@@ -669,8 +673,8 @@ async function printBlockchainNetworkProperties() {
 
 function printZkAppSnippet() {
   const boldTitle = chalk.reset.bold('zkApp snippet using o1js API');
-  console.info(boldTitle);
-  console.info(
+  console.log(boldTitle);
+  console.log(
     chalk.dim(
       `import {
   Lightnet,
@@ -696,7 +700,7 @@ const feePayerAccount = feePayerPrivateKey.toPublicKey();
 const keyPairReleaseMessage = await Lightnet.releaseKeyPair({
   publicKey: feePayerAccount.toBase58(),
 });
-if (keyPairReleaseMessage) console.info(keyPairReleaseMessage);`
+if (keyPairReleaseMessage) console.log(keyPairReleaseMessage);`
     )
   );
 }
