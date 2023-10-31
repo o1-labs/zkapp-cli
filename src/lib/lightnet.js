@@ -397,7 +397,10 @@ async function saveDockerContainerProcessesLogs() {
   const timeZoneOffset = new Date().getTimezoneOffset() * 60000;
   const localMoment = new Date(Date.now() - timeZoneOffset);
   const logsDir = path.resolve(
-    `${lightnetLogsDir}/${localMoment.toISOString().split('.')[0]}`
+    `${lightnetLogsDir}/${localMoment
+      .toISOString()
+      .split('.')[0]
+      .replace(/:/g, '-')}`
   );
   try {
     const lightnetConfig = fs.readJSONSync(lightnetConfigFile);
