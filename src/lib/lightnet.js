@@ -366,24 +366,24 @@ function dockerContainerIdMatchesConfig(containerName) {
 async function stopDockerContainer(containerName) {
   try {
     await shellExec(`docker stop ${containerName}`, { silent: !isDebug });
-  } catch (_) {
-    // Ignore the error if container doesn't exist
+  } catch (error) {
+    printErrorIfDebug(error);
   }
 }
 
 async function removeDockerContainer(containerName) {
   try {
     await shellExec(`docker rm ${containerName}`, { silent: !isDebug });
-  } catch (_) {
-    // Ignore the error if container doesn't exist
+  } catch (error) {
+    printErrorIfDebug(error);
   }
 }
 
 async function removeDockerVolume(volume) {
   try {
     await shellExec(`docker volume rm ${volume}`, { silent: !isDebug });
-  } catch (_) {
-    // Ignore the error if volume doesn't exist
+  } catch (error) {
+    printErrorIfDebug(error);
   }
 }
 
@@ -422,8 +422,8 @@ async function saveDockerContainerProcessesLogs() {
             `docker cp ${lightnetDockerContainerName}:/root/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
-        } catch (_) {
-          // Ignore the error if log file doesn't exist
+        } catch (error) {
+          printErrorIfDebug(error);
         }
       }
     } else {
@@ -452,13 +452,14 @@ async function saveDockerContainerProcessesLogs() {
             `docker cp ${lightnetDockerContainerName}:/root/.mina-network/mina-local-network-2-1-1/nodes/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
-        } catch (_) {
-          // Ignore the error if log file doesn't exist
+        } catch (error) {
+          printErrorIfDebug(error);
         }
       }
     }
     return logsDir;
-  } catch (_) {
+  } catch (error) {
+    printErrorIfDebug(error);
     fs.removeSync(logsDir);
     return null;
   }
@@ -493,7 +494,8 @@ async function waitForBlockchainNetworkReadiness(mode) {
           );
         }
       }
-    } catch (_) {
+    } catch (error) {
+      printErrorIfDebug(error);
       await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
     }
     blockchainSyncAttempt++;
@@ -679,7 +681,8 @@ async function printBlockchainNetworkProperties() {
         ];
       }
     }
-  } catch (_) {
+  } catch (error) {
+    printErrorIfDebug(error);
     data = noData;
   }
   console.log(boldTitle);
@@ -743,4 +746,16 @@ function secondsToHms(seconds) {
     sDisplay = s + (s == 1 ? ' second' : ' seconds');
   }
   return hDisplay + mDisplay + sDisplay;
+}
+
+function printErrorIfDebug(error) {
+  if (isDebug) {
+    console.error(
+      chalk.red(
+        '\n\nAn error occurred during the execution of the command:\n\n' +
+          chalk.reset(error.message) +
+          '\n'
+      )
+    );
+  }
 }
