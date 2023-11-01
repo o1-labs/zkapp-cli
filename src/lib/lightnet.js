@@ -750,10 +750,12 @@ function secondsToHms(seconds) {
 
 function printErrorIfDebug(error) {
   if (isDebug) {
-    console.error(
+    console.log(
       chalk.red(
         '\n\nAn error occurred during the execution of the command:\n\n' +
-          chalk.reset(error.message) +
+          chalk.reset(
+            error.message || error.toString() || JSON.stringify(error)
+          ) +
           '\n'
       )
     );
