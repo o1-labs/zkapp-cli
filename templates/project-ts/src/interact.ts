@@ -82,6 +82,19 @@ Success! Update transaction sent.
 
 Your smart contract state will be updated
 as soon as the transaction is included in a block:
-Transaction hash: ${sentTx.hash()}
+${getTxnUrl(config.url, sentTx.hash())}
 `);
+}
+
+function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
+  const explorerName = new URL(graphQlUrl).hostname
+    .split('.')
+    .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
+  const networkName = new URL(graphQlUrl).hostname
+    .split('.')
+    .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
+  if (explorerName && networkName) {
+    return `https://minascan.io/${networkName}/tx/${txnHash}?type=zk-tx`;
+  }
+  return `Transaction hash: ${txnHash}`;
 }
