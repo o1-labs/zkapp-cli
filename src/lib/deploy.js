@@ -207,10 +207,10 @@ export async function deploy({ alias, yes }) {
   }
   let { PrivateKey, Mina, AccountUpdate } = await import(o1jsImportPath);
 
-  const graphQLUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
+  const graphQlUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
   const { data: nodeStatus } = await sendGraphQL(
-    graphQLUrl,
+    graphQlUrl,
     `query {
       syncStatus
     }`
@@ -360,7 +360,7 @@ export async function deploy({ alias, yes }) {
 
   const feepayerAddressBase58 = feepayerAddress.toBase58();
   const accountQuery = getAccountQuery(feepayerAddressBase58);
-  const accountResponse = await sendGraphQL(graphQLUrl, accountQuery);
+  const accountResponse = await sendGraphQL(graphQlUrl, accountQuery);
 
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
@@ -375,7 +375,7 @@ export async function deploy({ alias, yes }) {
   }
 
   let transaction = await step('Build transaction', async () => {
-    let Network = Mina.Network(graphQLUrl);
+    let Network = Mina.Network(graphQlUrl);
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
       AccountUpdate.fundNewAccount(feepayerAddress);
@@ -468,7 +468,7 @@ export async function deploy({ alias, yes }) {
   const txn = await step('Send to network', async () => {
     const zkAppMutation = sendZkAppQuery(transactionJson);
     try {
-      return await sendGraphQL(graphQLUrl, zkAppMutation);
+      return await sendGraphQL(graphQlUrl, zkAppMutation);
     } catch (error) {
       return error;
     }
@@ -487,21 +487,21 @@ export async function deploy({ alias, yes }) {
     `\nNext step:` +
     `\n  Your smart contract will be live (or updated)` +
     `\n  as soon as the transaction is included in a block:` +
-    `\n  ${getTxnUrl(graphQLUrl, txn)}`;
+    `\n  ${getTxnUrl(graphQlUrl, txn)}`;
 
   log(chalk.green(str));
   process.exit(0);
 }
 
 // Get the specified blockchain explorer url with txn hash
-function getTxnUrl(graphQLUrl, txn) {
-  const explorerName = new URL(graphQLUrl).hostname
+function getTxnUrl(graphQlUrl, txn) {
+  const txnBroadcastServiceName = new URL(graphQlUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
-  const networkName = new URL(graphQLUrl).hostname
+  const networkName = new URL(graphQlUrl).hostname
     .split('.')
     .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
-  if (explorerName && networkName) {
+  if (txnBroadcastServiceName && networkName) {
     return `https://minascan.io/${networkName}/tx/${txn.data.sendZkapp.zkapp.hash}?type=zk-tx`;
   }
   return `Transaction hash: ${txn.data.sendZkapp.zkapp.hash}`;
