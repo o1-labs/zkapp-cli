@@ -495,30 +495,16 @@ export async function deploy({ alias, yes }) {
 
 // Get the specified blockchain explorer url with txn hash
 function getTxnUrl(graphQLUrl, txn) {
-  const MINASCAN_BASE_URL = `https://minascan.io/berkeley/zk-transaction/`;
-  const MINA_EXPLORER_BASE_URL = `https://berkeley.minaexplorer.com/transaction/`;
-  const explorers = [MINASCAN_BASE_URL, MINA_EXPLORER_BASE_URL];
-  const randomExplorersIndex = Math.floor(Math.random() * explorers.length);
-
   const explorerName = new URL(graphQLUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
-  let txnBaseUrl;
-
-  switch (explorerName) {
-    case 'minascan':
-      txnBaseUrl = MINASCAN_BASE_URL;
-      break;
-    case 'minaexplorer':
-      txnBaseUrl = MINA_EXPLORER_BASE_URL;
-      break;
-    default:
-      // An explorer will be randomly selected from the available explorers if the developer doesn't specify
-      txnBaseUrl = explorers[randomExplorersIndex];
-      break;
+  const networkName = new URL(graphQLUrl).hostname
+    .split('.')
+    .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
+  if (explorerName && networkName) {
+    return `https://minascan.io/${networkName}/tx/${txn.data.sendZkapp.zkapp.hash}?type=zk-tx`;
   }
-
-  return `${txnBaseUrl}${txn.data.sendZkapp.zkapp.hash}`;
+  return `Transaction hash: ${txn.data.sendZkapp.zkapp.hash}`;
 }
 
 // Query npm registry to get the latest CLI version.
