@@ -12,8 +12,8 @@
  * Build the project: `$ npm run build`
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
-import { Mina, PrivateKey } from 'o1js';
 import fs from 'fs/promises';
+import { Mina, PrivateKey } from 'o1js';
 import { Add } from './Add.js';
 
 // check command line arg
@@ -82,6 +82,19 @@ Success! Update transaction sent.
 
 Your smart contract state will be updated
 as soon as the transaction is included in a block:
-https://berkeley.minaexplorer.com/transaction/${sentTx.hash()}
+${getTxnUrl(config.url, sentTx.hash())}
 `);
+}
+
+function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
+  const txnBroadcastServiceName = new URL(graphQlUrl).hostname
+    .split('.')
+    .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
+  const networkName = new URL(graphQlUrl).hostname
+    .split('.')
+    .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
+  if (txnBroadcastServiceName && networkName) {
+    return `https://minascan.io/${networkName}/tx/${txnHash}?type=zk-tx`;
+  }
+  return `Transaction hash: ${txnHash}`;
 }
