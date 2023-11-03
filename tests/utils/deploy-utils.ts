@@ -107,10 +107,11 @@ export async function checkZkDeploy(
   exitCode: ExitCode | null,
   stdOut: string[]
 ): Promise<void> {
-  const blockchainExplorerLink =
+  let blockchainExplorerLink =
     stdOut.at(-1)!.trim().length === 0
       ? stdOut.at(-2)!.trim()
       : stdOut.at(-1)!.trim();
+  blockchainExplorerLink = blockchainExplorerLink.split('?')[0];
   const transactionHash = blockchainExplorerLink.substring(
     blockchainExplorerLink.length - 52
   );
