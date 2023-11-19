@@ -168,7 +168,12 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
       await stopDockerContainer(lightnetDockerContainerName);
     }
   );
-  if (saveLogs && fs.existsSync(lightnetConfigFile)) {
+  if (
+    saveLogs &&
+    fs.existsSync(lightnetConfigFile) &&
+    DockerContainerState.NOT_FOUND !==
+      getDockerContainerState(lightnetDockerContainerName)
+  ) {
     await step('Preserving Docker container processes logs', async () => {
       logsDir = await saveDockerContainerProcessesLogs();
     });
@@ -745,7 +750,8 @@ function secondsToHms(seconds) {
   if (s > 0) {
     sDisplay = s + (s == 1 ? ' second' : ' seconds');
   }
-  return hDisplay + mDisplay + sDisplay;
+  const result = hDisplay + mDisplay + sDisplay;
+  return result.endsWith(', ') ? result.slice(0, -2) : result;
 }
 
 function printErrorIfDebug(error) {
