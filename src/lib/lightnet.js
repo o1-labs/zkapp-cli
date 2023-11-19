@@ -17,9 +17,37 @@ const lightnetDockerContainerName = 'mina-local-lightnet';
 const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
 const lightnetAccountsManagerEndpoint = 'http://localhost:8181';
 const lightnetArchiveNodeApiEndpoint = 'http://localhost:8282';
+const lightnetDockerProcessToLogFileMapping = new Map([
+  [Constants.lightnetProcessName.archiveNodeApi, 'logs/archive-node-api.log'],
+  [
+    Constants.lightnetProcessName.minaArchive,
+    'logs/archive-node.log,archive/log.txt',
+  ],
+  [
+    Constants.lightnetProcessName.minaSingleNodeDaemon,
+    'logs/single-node-network.log',
+  ],
+  [Constants.lightnetProcessName.minaFish1, 'fish_0/log.txt'],
+  [Constants.lightnetProcessName.minaFollowing1, 'node_0/log.txt'],
+  [Constants.lightnetProcessName.minaSeed1, 'seed/log.txt'],
+  [
+    Constants.lightnetProcessName.minaSnarkCoordinator1,
+    'snark_coordinator/log.txt',
+  ],
+  [
+    Constants.lightnetProcessName.minaSnarkWorker1,
+    'snark_workers/worker_0/log.txt',
+  ],
+  [Constants.lightnetProcessName.minaWhale1, 'whale_0/log.txt'],
+  [Constants.lightnetProcessName.minaWhale2, 'whale_1/log.txt'],
+]);
 const DockerContainerState = {
   RUNNING: 'running',
   NOT_FOUND: 'not-found',
+};
+const ContainerLogFilesPrefix = {
+  SINGLE_NODE: '/root',
+  MULTI_NODE: '/root/.mina-network/mina-local-network-2-1-1/nodes',
 };
 let isDebug = false;
 let quotes = "'";
@@ -47,7 +75,7 @@ if (process.platform === 'win32') {
  * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function startLightnet({
+export async function lightnetStart({
   mode,
   type,
   proofLevel,
@@ -155,7 +183,7 @@ export async function startLightnet({
  * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function stopLightnet({ saveLogs, cleanUp, debug }) {
+export async function lightnetStop({ saveLogs, cleanUp, debug }) {
   isDebug = debug;
   let logsDir = null;
   await checkDockerEngineAvailability();
@@ -174,7 +202,7 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
     DockerContainerState.NOT_FOUND !==
       getDockerContainerState(lightnetDockerContainerName)
   ) {
-    await step('Preserving Docker container processes logs', async () => {
+    await step('Preserving the Docker container processes logs', async () => {
       logsDir = await saveDockerContainerProcessesLogs();
     });
   }
@@ -200,7 +228,7 @@ export async function stopLightnet({ saveLogs, cleanUp, debug }) {
   if (logsDir) {
     const boldLogs = chalk.reset.bold('logs');
     console.log(
-      `\nThe Docker container processes ${boldLogs} can be found at:\n\n` +
+      `\nThe Docker container processes ${boldLogs} can be found at the following path:\n\n` +
         chalk.green.bold(logsDir) +
         '\n'
     );
@@ -261,8 +289,146 @@ export async function lightnetStatus({
   }
 }
 
+/**
+ * Saves the lightweight Mina blockchain network Docker container processes logs to the host file system.
+ * @param {object}  argv - The arguments object provided by yargs.
+ * @param {boolean} argv.debug - Whether to print the debug information.
+ * @returns {Promise<void>}
+ */
+export async function lightnetSaveLogs({ debug }) {
+  isDebug = debug;
+  let logsDir = null;
+  await checkDockerEngineAvailability();
+  if (
+    fs.existsSync(lightnetConfigFile) &&
+    DockerContainerState.NOT_FOUND !==
+      getDockerContainerState(lightnetDockerContainerName)
+  ) {
+    await step('Preserving the Docker container processes logs', async () => {
+      logsDir = await saveDockerContainerProcessesLogs();
+    });
+    if (logsDir) {
+      const boldLogs = chalk.reset.bold('logs');
+      console.log(
+        `\nThe Docker container processes ${boldLogs} were preserved at the following path:\n\n` +
+          chalk.green.bold(logsDir) +
+          '\n'
+      );
+    } else {
+      console.log(
+        chalk.red(
+          '\nIssue happened during the Docker container processes logs preservation!'
+        )
+      );
+      shell.exit(1);
+    }
+  } else {
+    console.log(
+      chalk.red(
+        '\nIt is impossible to preserve the logs at the moment!' +
+          '\nPlease ensure that the lightweight Mina blockchain network Docker container exists, then try again.'
+      )
+    );
+    shell.exit(1);
+  }
+}
+
+/**
+ * Follows one of the lightweight Mina blockchain network Docker container processes logs.
+ * @param {object}  argv - The arguments object provided by yargs.
+ * @param {string}  argv.process - The name of the Docker container process to follow the logs of.
+ * @param {boolean} argv.debug - Whether to print the debug information.
+ * @returns {Promise<void>}
+ */
+export async function lightnetFollowLogs({ process, debug }) {
+  isDebug = debug;
+  await checkDockerEngineAvailability();
+  if (
+    fs.existsSync(lightnetConfigFile) &&
+    DockerContainerState.RUNNING ===
+      getDockerContainerState(lightnetDockerContainerName)
+  ) {
+    const lightnetConfig = fs.readJSONSync(lightnetConfigFile);
+    const mode = lightnetConfig.mode;
+    const archive = lightnetConfig.archive;
+    let logFilePath = null;
+    let processToLogFileMapping = new Map(
+      lightnetDockerProcessToLogFileMapping
+    );
+    if (mode === 'single-node') {
+      processToLogFileMapping = new Map(
+        Array.from(processToLogFileMapping).slice(0, 3)
+      );
+      processToLogFileMapping.forEach((value, key) => {
+        processToLogFileMapping.set(
+          key,
+          `${ContainerLogFilesPrefix.SINGLE_NODE}/${value.split(',')[0]}`
+        );
+      });
+    } else {
+      processToLogFileMapping.delete(
+        Constants.lightnetProcessName.minaSingleNodeDaemon
+      );
+      processToLogFileMapping.forEach((value, key) => {
+        const logFilePaths = value.split(',');
+        processToLogFileMapping.set(
+          key,
+          `${
+            Constants.lightnetProcessName.archiveNodeApi === key
+              ? ContainerLogFilesPrefix.SINGLE_NODE
+              : ContainerLogFilesPrefix.MULTI_NODE
+          }/${logFilePaths.length === 1 ? logFilePaths[0] : logFilePaths[1]}`
+        );
+      });
+    }
+    if (!archive) {
+      processToLogFileMapping.delete(
+        Constants.lightnetProcessName.archiveNodeApi
+      );
+      processToLogFileMapping.delete(Constants.lightnetProcessName.minaArchive);
+    }
+    if (!process || !processToLogFileMapping.has(process)) {
+      const res = await enquirer.prompt({
+        type: 'select',
+        name: 'selectedProcess',
+        choices: Array.from(processToLogFileMapping.keys()),
+        message: () => {
+          return chalk.reset(
+            'Please select the Docker container process to follow the logs of'
+          );
+        },
+        prefix: (state) => {
+          // Shows a cyan question mark when not submitted.
+          // Shows a green check mark if submitted.
+          // Shows a red "x" if ctrl+C is pressed (default is a magenta).
+          if (!state.submitted) return `\n${state.symbols.question}`;
+          return !state.cancelled
+            ? state.symbols.check
+            : chalk.red(state.symbols.cross);
+        },
+        result: (val) => val.trim(),
+      });
+      logFilePath = processToLogFileMapping.get(res.selectedProcess);
+    } else {
+      logFilePath = processToLogFileMapping.get(process);
+    }
+    await streamDockerContainerFileContent(
+      lightnetDockerContainerName,
+      logFilePath
+    );
+  } else {
+    console.log(
+      chalk.red(
+        '\nIt is impossible to follow the logs at the moment!' +
+          '\nPlease ensure that the lightweight Mina blockchain network Docker container is up and running, then try again.'
+      )
+    );
+    shell.exit(1);
+  }
+}
+
 async function checkDockerEngineAvailability() {
-  await step('Checking Docker Engine availability', async () => {
+  await step('Checking the Docker Engine availability', async () => {
     if (!shell.which('docker')) {
       console.log(
         '\n\nPlease ensure that Docker Engine is installed, then try again.' +
@@ -398,6 +564,31 @@ async function removeDanglingDockerImages() {
   });
 }
 
+async function streamDockerContainerFileContent(containerName, filePath) {
+  try {
+    const border = getBorderCharacters('norc');
+    console.log(
+      '\n' + chalk.reset.bold('Docker container file content streaming') + '\n'
+    );
+    console.log(
+      table([[chalk.reset('Use Ctrl+C to stop the file content streaming.')]], {
+        border,
+      })
+    );
+    await shellExec(`docker exec ${containerName} tail -n 50 -f ${filePath}`, {
+      silent: false,
+    });
+  } catch (error) {
+    printErrorIfDebug(error);
+    console.log(
+      chalk.red(
+        '\nIssue happened while streaming the Docker container file content!'
+      )
+    );
+    shell.exit(1);
+  }
+}
+
 async function saveDockerContainerProcessesLogs() {
   const timeZoneOffset = new Date().getTimezoneOffset() * 60000;
   const localMoment = new Date(Date.now() - timeZoneOffset);
@@ -413,18 +604,16 @@ async function saveDockerContainerProcessesLogs() {
     const archive = lightnetConfig.archive;
     await fs.ensureDir(logsDir);
     if (mode === 'single-node') {
-      const logFilePaths = [
-        'logs/archive-node-api.log',
-        'logs/archive-node.log',
-        'logs/single-node-network.log',
-      ];
+      const logFilePaths = Array.from(
+        lightnetDockerProcessToLogFileMapping.values()
+      ).map((value) => value.split(',')[0]);
       for (const logFilePath of logFilePaths) {
         try {
           const destinationFilePath = path.resolve(
             `${logsDir}/${logFilePath.replace(/\//g, '_')}`
           );
           await shellExec(
-            `docker cp ${lightnetDockerContainerName}:/root/${logFilePath} ${destinationFilePath}`,
+            `docker cp ${lightnetDockerContainerName}:${ContainerLogFilesPrefix.SINGLE_NODE}/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
         } catch (error) {
@@ -432,19 +621,15 @@ async function saveDockerContainerProcessesLogs() {
         }
       }
     } else {
-      const logFilePaths = [
-        'archive/log.txt',
-        'fish_0/log.txt',
-        'node_0/log.txt',
-        'seed/log.txt',
-        'snark_coordinator/log.txt',
-        'snark_workers/worker_0/log.txt',
-        'whale_0/log.txt',
-        'whale_1/log.txt',
-      ];
+      const logFilePaths = Array.from(
+        lightnetDockerProcessToLogFileMapping.values()
+      ).map((value) => {
+        const logFilePaths = value.split(',');
+        return logFilePaths.length === 1 ? logFilePaths[0] : logFilePaths[1];
+      });
       if (archive) {
         await shellExec(
-          `docker cp ${lightnetDockerContainerName}:/root/logs/archive-node-api.log ${logsDir}`,
+          `docker cp ${lightnetDockerContainerName}:${ContainerLogFilesPrefix.SINGLE_NODE}/logs/archive-node-api.log ${logsDir}`,
           { silent: !isDebug }
         );
       }
@@ -454,7 +639,7 @@ async function saveDockerContainerProcessesLogs() {
             `${logsDir}/${logFilePath.replace(/\//g, '_')}`
           );
           await shellExec(
-            `docker cp ${lightnetDockerContainerName}:/root/.mina-network/mina-local-network-2-1-1/nodes/${logFilePath} ${destinationFilePath}`,
+            `docker cp ${lightnetDockerContainerName}:${ContainerLogFilesPrefix.MULTI_NODE}/${logFilePath} ${destinationFilePath}`,
             { silent: !isDebug }
           );
         } catch (error) {
@@ -573,10 +758,12 @@ function printDockerContainerProcessesLogPaths() {
     'Logs produced by different processes are redirected into the files' +
       '\nlocated by the following path patterns inside the container:'
   );
-  const logs = [[chalk.reset('/root/logs/*.log')]];
+  const logs = [
+    [chalk.reset(`${ContainerLogFilesPrefix.SINGLE_NODE}/logs/*.log`)],
+  ];
   if (mode === 'multi-node') {
     logs.push([
-      chalk.reset('/root/mina-local-network-2-1-1/nodes/**/logs/*.log'),
+      chalk.reset(`${ContainerLogFilesPrefix.MULTI_NODE}/**/logs/*.log`),
     ]);
   }
   console.log(boldTitle);
