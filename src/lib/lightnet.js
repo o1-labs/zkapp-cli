@@ -350,10 +350,13 @@ export async function lightnetFollowLogs({ process, debug }) {
   const selectedProcess =
     process || (await promptForDockerContainerProcess(processToLogFileMapping));
   const logFilePath = processToLogFileMapping.get(selectedProcess);
-  await streamDockerContainerFileContent(
-    lightnetDockerContainerName,
-    logFilePath
-  );
+
+  await step('Docker container file content streaming', async () => {
+    await streamDockerContainerFileContent(
+      lightnetDockerContainerName,
+      logFilePath
+    );
+  });
 }
 
 function getProcessToLogFileMapping({ mode, archive }) {
@@ -552,12 +555,13 @@ async function streamDockerContainerFileContent(containerName, filePath) {
   try {
     const border = getBorderCharacters('norc');
     console.log(
-      '\n' + chalk.reset.bold('Docker container file content streaming') + '\n'
-    );
-    console.log(
-      table([[chalk.reset('Use Ctrl+C to stop the file content streaming.')]], {
-        border,
-      })
+      '\n' +
+        table(
+          [[chalk.reset('Use Ctrl+C to stop the file content streaming.')]],
+          {
+            border,
+          }
+        )
     );
     await shellExec(`docker exec ${containerName} tail -n 50 -f ${filePath}`, {
       silent: false,
