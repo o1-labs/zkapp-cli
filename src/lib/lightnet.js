@@ -1,6 +1,8 @@
 import chalk from 'chalk';
+import decompress from 'decompress';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import opener from 'opener';
 import path from 'path';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
@@ -13,6 +15,12 @@ const lightnetConfigFile = path.resolve(
   `${Constants.lightnetWorkDir}/config.json`
 );
 const lightnetLogsDir = path.resolve(`${Constants.lightnetWorkDir}/logs`);
+const lightnetExplorerDir = path.resolve(
+  `${Constants.lightnetWorkDir}/explorer`
+);
+const lightnetExplorerConfigFile = path.resolve(
+  `${lightnetExplorerDir}/current.json`
+);
 const lightnetDockerContainerName = 'mina-local-lightnet';
 const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
 const lightnetAccountsManagerEndpoint = 'http://localhost:8181';
@@ -167,8 +175,8 @@ export async function lightnetStart({
 /**
  * Stops the lightweight Mina blockchain network Docker container.
  * @param {object}  argv - The arguments object provided by yargs.
- * @param {string}  argv.saveLogs - Whether to save the Docker container processes logs to the host file system.
- * @param {string}  argv.cleanUp - Whether to perform the clean up.
+ * @param {boolean} argv.saveLogs - Whether to save the Docker container processes logs to the host file system.
+ * @param {boolean} argv.cleanUp - Whether to perform the clean up.
  * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
@@ -357,6 +365,244 @@ export async function lightnetFollowLogs({ process, debug }) {
       logFilePath
     );
   });
+}
+
+/**
+ * Launches the lightweight Mina Explorer.
+ * @param {object}  argv - The arguments object provided by yargs.
+ * @param {string}  argv.use - The version of the lightweight Mina Explorer to use.
+ * @param {boolean} argv.list - Whether to list the available versions of the lightweight Mina Explorer.
+ * @param {boolean} argv.debug - Whether to print the debug information.
+ * @returns {Promise<void>}
+ */
+export async function lightnetExplorer({ use, list, debug }) {
+  isDebug = debug;
+  if (list) {
+    await printExplorerVersions();
+  } else {
+    await launchExplorer(use);
+  }
+}
+
+async function printExplorerVersions() {
+  try {
+    const releasesPrintLimit = 5;
+    const border = getBorderCharacters('norc');
+    const boldTitle = chalk.reset.bold('Lightweight Mina Explorer versions');
+    const versions = [
+      [boldTitle, '', ''],
+      ['Version', 'Published on', 'Is in use?'],
+    ];
+    const releases = await fetchExplorerReleases();
+    const currentVersion = getCurrentExplorerVersion();
+    if (releases.length === 0) {
+      versions.push([
+        chalk.yellow('No data available yet.\nPlease try again later.'),
+        '',
+        '',
+      ]);
+      console.log(
+        '\n' +
+          table(versions, {
+            border,
+            spanningCells: [
+              { col: 0, row: 0, colSpan: 3, alignment: 'center' },
+              { col: 0, row: 2, colSpan: 3, alignment: 'center' },
+            ],
+          })
+      );
+      return;
+    }
+    for (const release of releases.slice(0, releasesPrintLimit)) {
+      versions.push([
+        chalk.reset.bold(release.name),
+        new Date(release.published_at).toLocaleString(),
+        currentVersion === release.name ? chalk.reset.green.bold('✓ Yes') : '',
+      ]);
+    }
+    console.log(
+      '\n' +
+        table(versions, {
+          border,
+          spanningCells: [{ col: 0, row: 0, colSpan: 3, alignment: 'center' }],
+        })
+    );
+    if (releases.length > releasesPrintLimit) {
+      console.log(
+        `Only ${chalk.green.bold(
+          releasesPrintLimit
+        )} most recent versions are shown.` +
+          '\nPlease refer to the GitHub repository for the full list of available versions:' +
+          chalk.green(
+            '\nhttps://github.com/o1-labs/mina-lightweight-explorer/releases'
+          )
+      );
+    }
+  } catch (error) {
+    printErrorIfDebug(error);
+    console.log(
+      chalk.red(
+        '\nIssue happened while fetching the lightweight Mina Explorer available versions!'
+      )
+    );
+    shell.exit(1);
+  }
+}
+
+async function launchExplorer(use) {
+  try {
+    const releases = await fetchExplorerReleases();
+    if (releases.length === 0) {
+      console.log(
+        chalk.red(
+          '\nNo lightweight Mina Explorer versions are available yet.\nPlease try again later.'
+        )
+      );
+      shell.exit(1);
+    }
+    const useVersion = use === 'latest' ? releases[0].name : use;
+    const release = releases.find((release) => release.name === useVersion);
+    const explorerReleasePath = path.resolve(
+      `${lightnetExplorerDir}/${useVersion}`
+    );
+    const explorerReleaseIndexFilePath = path.resolve(
+      `${explorerReleasePath}/index.html`
+    );
+    if (!release) {
+      console.log(
+        chalk.red(
+          `\nThe specified version ("${useVersion}") of the lightweight Mina Explorer does not exist!`
+        )
+      );
+      shell.exit(1);
+    }
+    await handleExplorerReleasePresence(explorerReleasePath, release);
+    await updateCurrentExplorerVersion(useVersion);
+    await step('Launching the lightweight Mina Explorer', async () => {
+      opener(explorerReleaseIndexFilePath);
+    });
+    console.log(
+      chalk.reset(
+        '\nThe lightweight Mina Explorer is available at the following path:' +
+          '\n\n' +
+          chalk.green.bold(explorerReleaseIndexFilePath) +
+          '\n'
+      )
+    );
+  } catch (error) {
+    printErrorIfDebug(error);
+    console.log(
+      chalk.red(
+        '\nIssue happened while launching the lightweight Mina Explorer!'
+      )
+    );
+    shell.exit(1);
+  }
+}
+
+function getCurrentExplorerVersion() {
+  if (fs.existsSync(lightnetExplorerConfigFile)) {
+    return fs.readJSONSync(lightnetExplorerConfigFile).version;
+  }
+  return null;
+}
+
+async function updateCurrentExplorerVersion(version) {
+  const currentVersion = getCurrentExplorerVersion();
+  if (currentVersion !== version) {
+    await step(
+      'Updating the current lightweight Mina Explorer version in use',
+      async () => {
+        let explorerConfig = { version };
+        if (fs.existsSync(lightnetExplorerConfigFile)) {
+          explorerConfig = fs.readJSONSync(lightnetExplorerConfigFile);
+          explorerConfig.version = version;
+        }
+        fs.ensureDirSync(lightnetExplorerDir);
+        fs.outputJsonSync(lightnetExplorerConfigFile, explorerConfig, {
+          spaces: 2,
+          flag: 'w',
+        });
+      }
+    );
+  }
+}
+
+async function fetchExplorerReleases() {
+  let releases = [];
+  await step(
+    'Fetching the lightweight Mina Explorer releases information',
+    async () => {
+      const response = await fetch(
+        'https://api.github.com/repos/o1-labs/mina-lightweight-explorer/releases',
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(
+          `Received ${response.status} status code from the GitHub API.`
+        );
+      }
+      releases = await response.json();
+    }
+  );
+  return releases;
+}
+
+async function downloadExplorerRelease(release) {
+  await step(
+    'Downloading the lightweight Mina Explorer release bundle',
+    async () => {
+      const response = await fetch(release.zipball_url);
+      if (!response.ok) {
+        throw new Error(
+          `Received ${response.status} status code from the GitHub API.`
+        );
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      fs.ensureDirSync(lightnetExplorerDir);
+      fs.writeFileSync(
+        path.resolve(`${lightnetExplorerDir}/${release.name}.zip`),
+        Buffer.from(arrayBuffer),
+        'binary'
+      );
+    }
+  );
+}
+
+async function handleExplorerReleasePresence(explorerReleasePath, release) {
+  if (
+    !fs.existsSync(explorerReleasePath) ||
+    fs.readdirSync(explorerReleasePath).length === 0
+  ) {
+    const tmpDir = path.resolve(`${explorerReleasePath}-tmp`);
+    await step('Preparing the file-system', async () => {
+      fs.removeSync(explorerReleasePath);
+      fs.ensureDirSync(explorerReleasePath);
+      fs.ensureDirSync(tmpDir);
+    });
+    await downloadExplorerRelease(release);
+    await step('Unpacking the release bundle', async () => {
+      await decompress(`${explorerReleasePath}.zip`, tmpDir);
+    });
+    await step('Restructuring the file-system', async () => {
+      const extractedDir = fs.readdirSync(tmpDir)[0];
+      fs.moveSync(
+        path.resolve(`${tmpDir}/${extractedDir}`),
+        path.resolve(explorerReleasePath),
+        { overwrite: true }
+      );
+    });
+    await step('Cleaning up', async () => {
+      fs.removeSync(`${explorerReleasePath}.zip`);
+      fs.removeSync(tmpDir);
+    });
+  }
 }
 
 function getProcessToLogFileMapping({ mode, archive }) {
