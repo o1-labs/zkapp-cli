@@ -479,7 +479,7 @@ async function launchExplorer(use) {
     await handleExplorerReleasePresence(explorerReleasePath, release);
     await updateCurrentExplorerVersion(useVersion);
     await step('Launching the lightweight Mina Explorer', async () => {
-      opener(explorerReleaseIndexFilePath);
+      opener(`file://${explorerReleaseIndexFilePath}`);
     });
     console.log(
       chalk.reset(
