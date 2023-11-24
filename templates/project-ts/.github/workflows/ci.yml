@@ -12,11 +12,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Set up NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '16'
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: NPM ci, build, & test
         run: |
           npm install

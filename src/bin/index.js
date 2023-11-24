@@ -160,9 +160,9 @@ yargs(hideBin(process.argv))
               string: true,
               hidden: false,
               choices: Constants.lightnetMinaBranches,
-              default: 'rampup',
+              default: 'o1js-main',
               description:
-                'One of the major Mina repository branches the artifacts were compiled against.',
+                'One of the major Mina repository branches the Docker image artifacts were compiled against.',
             },
             archive: {
               alias: 'a',
