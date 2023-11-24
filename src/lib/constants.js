@@ -7,7 +7,7 @@ import path from 'path';
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
- * @typedef {'rampup' | 'berkeley' | 'develop'} LightnetMinaBranch
+ * @typedef {'o1js-main' | 'berkeley' | 'develop'} LightnetMinaBranch
  * @typedef {{ archiveNodeApi: string, minaArchive: string, minaSingleNodeDaemon: string, minaFish1: string, minaFollowing1: string, minaSeed1: string, minaSnarkCoordinator1: string, minaSnarkWorker1: string, minaWhale1: string, minaWhale2: string }} LightnetProcessName
  *
  * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessName: LightnetProcessName }}
@@ -20,7 +20,7 @@ const Constants = Object.freeze({
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],
   lightnetProofLevels: ['none', 'full'],
-  lightnetMinaBranches: ['rampup', 'berkeley', 'develop'],
+  lightnetMinaBranches: ['o1js-main', 'berkeley', 'develop'],
   lightnetProcessName: Object.freeze({
     archiveNodeApi: 'Archive-Node-API application',
     minaArchive: 'Mina Archive process',
