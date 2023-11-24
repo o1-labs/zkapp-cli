@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest]
     services:
       mina-local-network:
-        image: o1labs/mina-local-network:rampup-latest-lightnet
+        image: o1labs/mina-local-network:o1js-main-latest-lightnet
         env:
           NETWORK_TYPE: 'single-node'
           PROOF_LEVEL: 'none'
@@ -33,7 +33,7 @@ jobs:
           mina-graphql-port: 8080
           max-attempts: 60
           polling-interval-ms: 10000
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use shared E2E testing steps
         uses: ./.github/actions/e2e-shared
         with:

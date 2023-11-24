@@ -7,7 +7,7 @@ import path from 'path';
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
- * @typedef {'rampup' | 'berkeley' | 'develop'} LightnetMinaBranch
+ * @typedef {'o1js-main' | 'berkeley' | 'develop'} LightnetMinaBranch
  *
  * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[] }}
  */
@@ -19,7 +19,7 @@ const Constants = Object.freeze({
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],
   lightnetProofLevels: ['none', 'full'],
-  lightnetMinaBranches: ['rampup', 'berkeley', 'develop'],
+  lightnetMinaBranches: ['o1js-main', 'berkeley', 'develop'],
 });
 
 export default Constants;
