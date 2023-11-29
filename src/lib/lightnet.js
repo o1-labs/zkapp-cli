@@ -394,7 +394,7 @@ async function promptForDockerContainerProcess(processToLogFileMapping) {
   const response = await enquirer.prompt({
     type: 'select',
     name: 'selectedProcess',
-    choices: Array.from(processToLogFileMapping.keys()),
+    [...processToLogFileMapping.keys()],
     message: () => {
       return chalk.reset(
         'Please select the Docker container process to follow the logs of'
