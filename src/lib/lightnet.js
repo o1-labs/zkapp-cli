@@ -611,7 +611,7 @@ function createLogsDirectory() {
 }
 
 function getLogFilePaths(mode) {
-  return Array.from(lightnetDockerProcessToLogFileMapping.values()).map(
+  return [...lightnetDockerProcessToLogFileMapping.values()].map(
     (value) => {
       const logFilePaths = value.split(',');
       return mode === 'single-node' || logFilePaths.length === 1
