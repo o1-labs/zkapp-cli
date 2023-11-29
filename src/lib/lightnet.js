@@ -394,7 +394,7 @@ async function promptForDockerContainerProcess(processToLogFileMapping) {
   const response = await enquirer.prompt({
     type: 'select',
     name: 'selectedProcess',
-    [...processToLogFileMapping.keys()],
+    choices: [...processToLogFileMapping.keys()],
     message: () => {
       return chalk.reset(
         'Please select the Docker container process to follow the logs of'
@@ -611,14 +611,12 @@ function createLogsDirectory() {
 }
 
 function getLogFilePaths(mode) {
-  return [...lightnetDockerProcessToLogFileMapping.values()].map(
-    (value) => {
-      const logFilePaths = value.split(',');
-      return mode === 'single-node' || logFilePaths.length === 1
-        ? logFilePaths[0]
-        : logFilePaths[1];
-    }
-  );
+  return [...lightnetDockerProcessToLogFileMapping.values()].map((value) => {
+    const logFilePaths = value.split(',');
+    return mode === 'single-node' || logFilePaths.length === 1
+      ? logFilePaths[0]
+      : logFilePaths[1];
+  });
 }
 
 async function processSingleNodeLogs(logFilePaths, logsDir) {
