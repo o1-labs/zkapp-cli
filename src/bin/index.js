@@ -258,7 +258,9 @@ yargs(hideBin(process.argv))
                     demand: false,
                     string: true,
                     hidden: false,
-                    choices: Object.values(Constants.lightnetProcessName),
+                    choices: [
+                      ...Constants.lightnetProcessToLogFileMapping.keys(),
+                    ],
                     description:
                       'The name of the Docker container process to follow the logs of.',
                   },

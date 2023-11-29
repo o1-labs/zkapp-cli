@@ -25,19 +25,9 @@ const lightnetDockerContainerName = 'mina-local-lightnet';
 const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
 const lightnetAccountsManagerEndpoint = 'http://localhost:8181';
 const lightnetArchiveNodeApiEndpoint = 'http://localhost:8282';
-const lightnetProcessName = Constants.lightnetProcessName;
-const lightnetDockerProcessToLogFileMapping = new Map([
-  [lightnetProcessName.archiveNodeApi, 'logs/archive-node-api.log'],
-  [lightnetProcessName.minaArchive, 'logs/archive-node.log,archive/log.txt'],
-  [lightnetProcessName.minaSingleNodeDaemon, 'logs/single-node-network.log'],
-  [lightnetProcessName.minaFish1, 'fish_0/log.txt'],
-  [lightnetProcessName.minaFollowing1, 'node_0/log.txt'],
-  [lightnetProcessName.minaSeed1, 'seed/log.txt'],
-  [lightnetProcessName.minaSnarkCoordinator1, 'snark_coordinator/log.txt'],
-  [lightnetProcessName.minaSnarkWorker1, 'snark_workers/worker_0/log.txt'],
-  [lightnetProcessName.minaWhale1, 'whale_0/log.txt'],
-  [lightnetProcessName.minaWhale2, 'whale_1/log.txt'],
-]);
+const archiveNodeApiProcessName = 'Archive-Node-API application';
+const minaArchiveProcessName = 'Mina Archive process';
+const multiPurposeMinaDaemonProcessName = 'Mina multi-purpose Daemon';
 const DockerContainerState = {
   RUNNING: 'running',
   NOT_FOUND: 'not-found',
@@ -606,9 +596,9 @@ async function handleExplorerReleasePresence(explorerReleasePath, release) {
 }
 
 function getProcessToLogFileMapping({ mode, archive }) {
-  let mapping = new Map(lightnetDockerProcessToLogFileMapping);
+  let mapping = new Map(Constants.lightnetProcessToLogFileMapping);
   if (mode === 'single-node') {
-    mapping = new Map(Array.from(mapping).slice(0, 3));
+    mapping = new Map([...mapping].slice(0, 3));
     mapping.forEach((value, key) => {
       mapping.set(
         key,
@@ -616,13 +606,13 @@ function getProcessToLogFileMapping({ mode, archive }) {
       );
     });
   } else {
-    mapping.delete(lightnetProcessName.minaSingleNodeDaemon);
+    mapping.delete(multiPurposeMinaDaemonProcessName);
     mapping.forEach((value, key) => {
       const logFilePaths = value.split(',');
       mapping.set(
         key,
         `${
-          lightnetProcessName.archiveNodeApi === key
+          archiveNodeApiProcessName === key
             ? ContainerLogFilesPrefix.SINGLE_NODE
             : ContainerLogFilesPrefix.MULTI_NODE
         }/${logFilePaths.length === 1 ? logFilePaths[0] : logFilePaths[1]}`
@@ -630,8 +620,8 @@ function getProcessToLogFileMapping({ mode, archive }) {
     });
   }
   if (!archive) {
-    mapping.delete(lightnetProcessName.archiveNodeApi);
-    mapping.delete(lightnetProcessName.minaArchive);
+    mapping.delete(archiveNodeApiProcessName);
+    mapping.delete(minaArchiveProcessName);
   }
   return mapping;
 }
@@ -640,7 +630,7 @@ async function promptForDockerContainerProcess(processToLogFileMapping) {
   const response = await enquirer.prompt({
     type: 'select',
     name: 'selectedProcess',
-    choices: Array.from(processToLogFileMapping.keys()),
+    choices: [...processToLogFileMapping.keys()],
     message: () => {
       return chalk.reset(
         'Please select the Docker container process to follow the logs of'
@@ -857,7 +847,7 @@ function createLogsDirectory() {
 }
 
 function getLogFilePaths(mode) {
-  return Array.from(lightnetDockerProcessToLogFileMapping.values()).map(
+  return [...Constants.lightnetProcessToLogFileMapping.values()].map(
     (value) => {
       const logFilePaths = value.split(',');
       return mode === 'single-node' || logFilePaths.length === 1
@@ -898,9 +888,7 @@ async function processMultiNodeLogs(logFilePaths, logsDir) {
 async function processArchiveNodeApiLogs(logsDir) {
   try {
     await copyContainerLogToHost(
-      lightnetDockerProcessToLogFileMapping.get(
-        lightnetProcessName.archiveNodeApi
-      ),
+      Constants.lightnetProcessToLogFileMapping.get(archiveNodeApiProcessName),
       logsDir,
       ContainerLogFilesPrefix.SINGLE_NODE
     );
