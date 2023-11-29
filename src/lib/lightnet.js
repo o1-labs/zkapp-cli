@@ -362,7 +362,7 @@ export async function lightnetFollowLogs({ process, debug }) {
 function getProcessToLogFileMapping({ mode, archive }) {
   let mapping = new Map(lightnetDockerProcessToLogFileMapping);
   if (mode === 'single-node') {
-    mapping = new Map(Array.from(mapping).slice(0, 3));
+    mapping = new Map([...mapping].slice(0, 3));
     mapping.forEach((value, key) => {
       mapping.set(
         key,
