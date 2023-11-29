@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.1] - 2023-11-29
+
+### Added
+
+- Lightnet sub-commands implementation (`logs`). [#520](https://github.com/o1-labs/zkapp-cli/pull/520)
+
 ## [0.15.0] - 2023-11-07
 
-### Changed
+### Added
 
-- Lightnet sub-commands implementation (start/stop/status). [#510](https://github.com/o1-labs/zkapp-cli/pull/510)
+- Lightnet sub-commands implementation (`start`/`stop`/`status`). [#510](https://github.com/o1-labs/zkapp-cli/pull/510)
 
 ## [0.14.1] - 2023-11-03
 

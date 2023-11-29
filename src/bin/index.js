@@ -12,9 +12,11 @@ import { deploy } from '../lib/deploy.js';
 import { example } from '../lib/example.js';
 import { file } from '../lib/file.js';
 import {
+  lightnetFollowLogs,
+  lightnetSaveLogs,
+  lightnetStart,
   lightnetStatus,
-  startLightnet,
-  stopLightnet,
+  lightnetStop,
 } from '../lib/lightnet.js';
 import { project } from '../lib/project.js';
 import system from '../lib/system.js';
@@ -193,7 +195,7 @@ yargs(hideBin(process.argv))
             },
             ...commonOptions,
           },
-          async (argv) => await startLightnet(argv)
+          async (argv) => await lightnetStart(argv)
         )
         .command(
           ['stop [save-logs] [clean-up] [debug]'],
@@ -219,7 +221,7 @@ yargs(hideBin(process.argv))
             },
             ...commonOptions,
           },
-          async (argv) => await stopLightnet(argv)
+          async (argv) => await lightnetStop(argv)
         )
         .command(
           ['status [debug]'],
@@ -232,6 +234,41 @@ yargs(hideBin(process.argv))
               preventDockerEngineAvailabilityCheck: false,
               debug: argv.debug,
             })
+        )
+        .command(
+          ['logs <sub-command> [options]'],
+          'Handle the lightweight Mina blockchain network Docker container processes logs.',
+          (yargs) => {
+            yargs
+              .command(
+                ['save [debug]'],
+                'Save the lightweight Mina blockchain network Docker container processes logs to the host file system.',
+                {
+                  ...commonOptions,
+                },
+                async (argv) => await lightnetSaveLogs(argv)
+              )
+              .command(
+                ['follow [process] [debug]'],
+                'Follow one of the lightweight Mina blockchain network Docker container processes logs.',
+                {
+                  process: {
+                    alias: 'p',
+                    demand: false,
+                    string: true,
+                    hidden: false,
+                    choices: [
+                      ...Constants.lightnetProcessToLogFileMapping.keys(),
+                    ],
+                    description:
+                      'The name of the Docker container process to follow the logs of.',
+                  },
+                  ...commonOptions,
+                },
+                async (argv) => await lightnetFollowLogs(argv)
+              )
+              .demandCommand();
+          }
         )
         .demandCommand();
     }
