@@ -1,8 +1,8 @@
 # Purpose:
-# Automatically bumps the project's patch version bi-weekly on Fridays.
+# Automatically bumps the project's patch version bi-weekly on Tuesdays.
 #
 # Details:
-# - Triggered at 00:00 UTC every Friday; runs on even weeks of the year.
+# - Triggered at 00:00 UTC every Tuesday; runs on even weeks of the year.
 # - Sets up the environment by checking out the repo and setting up Node.js.
 # - Bumps patch version using `npm version patch`, then creates a new branch 'release/x.x.x'.
 # - Pushes changes and creates a PR to `main` using GitHub CLI.
@@ -12,7 +12,7 @@ name: Version Bump
 on:
   workflow_dispatch: # Allow to manually trigger the workflow
   schedule:
-    - cron: '0 0 * * 5' # At 00:00 UTC every Friday
+    - cron: '0 0 * * 2' # At 00:00 UTC every Tuesday
 
 jobs:
   version-bump:
@@ -28,6 +28,7 @@ jobs:
           else
             echo "RUN_JOB=false" >> $GITHUB_ENV
           fi
+
       - name: Check out the repository
         uses: actions/checkout@v4
 
@@ -40,6 +41,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+
       - name: Bump patch version
         if: ${{ env.RUN_JOB }} == 'true'
         run: |
@@ -47,8 +49,15 @@ jobs:
           NEW_VERSION=$(npm version patch)
           echo "New version: $NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
       - name: Install npm dependencies
         run: npm install
+
+      - name: Update CHANGELOG.md
+        run: |
+          npm run update-changelog
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG for new version $NEW_VERSION"
 
       - name: Create new release branch
         run: |

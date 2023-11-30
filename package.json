@@ -39,7 +39,8 @@
     "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
     "e2e:install": "npx playwright-core install --with-deps",
     "e2e:test": "npm run clean && npx playwright test --workers=1",
-    "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'"
+    "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'",
+    "update-changelog": "./update-changelog.sh"
   },
   "lint-staged": {
     "**/*": [
