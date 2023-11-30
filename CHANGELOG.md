@@ -1,3 +1,13 @@
+<!--
+  Possible subsections:
+    Added for new features.
+    Changed for changes in existing functionality.
+    Deprecated for soon-to-be removed features.
+    Removed for now removed features.
+    Fixed for any bug fixes.
+    Security in case of vulnerabilities.
+ -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -354,13 +364,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bug with CI not cleaning up node_modules after testing. [#219](https://github.com/o1-labs/zkapp-cli/pull/219)
 
 ## [0.3.7] - 2021-06-03
-
-<!--
-  Possible subsections:
-    Added for new features.
-    Changed for changes in existing functionality.
-    Deprecated for soon-to-be removed features.
-    Removed for now removed features.
-    Fixed for any bug fixes.
-    Security in case of vulnerabilities.
- -->
