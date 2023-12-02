@@ -19,7 +19,7 @@ const lightnetExplorerDir = path.resolve(
   `${Constants.lightnetWorkDir}/explorer`
 );
 const lightnetExplorerConfigFile = path.resolve(
-  `${lightnetExplorerDir}/current.json`
+  `${lightnetExplorerDir}/config.json`
 );
 const lightnetDockerContainerName = 'mina-local-lightnet';
 const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
