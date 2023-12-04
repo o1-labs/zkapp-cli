@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.15.2] - 2023-12-04
+
+### Added
+
+- Lightnet sub-commands implementation (`explorer`). [#521](https://github.com/o1-labs/zkapp-cli/pull/521)
+
 ## [0.15.1] - 2023-11-29
 
 ### Added

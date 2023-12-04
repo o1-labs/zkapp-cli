@@ -12,6 +12,7 @@ import { deploy } from '../lib/deploy.js';
 import { example } from '../lib/example.js';
 import { file } from '../lib/file.js';
 import {
+  lightnetExplorer,
   lightnetFollowLogs,
   lightnetSaveLogs,
   lightnetStart,
@@ -269,6 +270,32 @@ yargs(hideBin(process.argv))
               )
               .demandCommand();
           }
+        )
+        .command(
+          ['explorer [use] [list] [debug]'],
+          'Launch the lightweight Mina Explorer.',
+          {
+            use: {
+              alias: 'u',
+              demand: false,
+              string: true,
+              hidden: false,
+              default: 'latest',
+              description:
+                'The version of the lightweight Mina Explorer to use.\nThe "latest" value will use the latest available version.',
+            },
+            list: {
+              alias: 'l',
+              demand: false,
+              boolean: true,
+              hidden: false,
+              default: false,
+              description:
+                'Whether to list the available versions of the lightweight Mina Explorer.',
+            },
+            ...commonOptions,
+          },
+          async (argv) => await lightnetExplorer(argv)
         )
         .demandCommand();
     }
