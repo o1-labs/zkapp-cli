@@ -123,7 +123,7 @@ yargs(hideBin(process.argv))
       yargs
         .command(
           [
-            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [debug]',
+            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [mina-log-level] [debug]',
           ],
           'Start the lightweight Mina blockchain network Docker container.',
           {
@@ -193,6 +193,15 @@ yargs(hideBin(process.argv))
               default: true,
               description:
                 'Whether to pull the latest version of the Docker image from the Docker Hub.',
+            },
+            'mina-log-level': {
+              alias: 'l',
+              demand: false,
+              string: true,
+              hidden: false,
+              choices: Constants.lightnetMinaProcessesLogLevels,
+              default: 'Trace',
+              description: 'Mina processes logging level to use.',
             },
             ...commonOptions,
           },
