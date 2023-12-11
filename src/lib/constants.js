@@ -8,8 +8,9 @@ import path from 'path';
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
  * @typedef {'o1js-main' | 'berkeley' | 'develop'} LightnetMinaBranch
+ * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string> }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[] }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
@@ -32,6 +33,15 @@ const Constants = Object.freeze({
     ['Whale BP #1', 'whale_0/log.txt'],
     ['Whale BP #2', 'whale_1/log.txt'],
   ]),
+  lightnetMinaProcessesLogLevels: [
+    'Spam',
+    'Trace',
+    'Debug',
+    'Info',
+    'Warn',
+    'Error',
+    'Fatal',
+  ],
 });
 
 export default Constants;
