@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.16.0] - 2023-12-11
+
 ### Added
 
 - Possibility to configure the `lightnet` Mina processes logging level. [#536](https://github.com/o1-labs/zkapp-cli/pull/536)

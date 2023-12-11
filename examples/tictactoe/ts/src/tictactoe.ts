@@ -159,7 +159,7 @@ class TicTacToe extends SmartContract {
 
   @method startGame(player1: PublicKey, player2: PublicKey) {
     // you can only start a new game if the current game is done
-    this.gameDone.assertEquals(Bool(true));
+    this.gameDone.requireEquals(Bool(true));
     this.gameDone.set(Bool(false));
     // set players
     this.player1.set(player1);
@@ -178,7 +178,7 @@ class TicTacToe extends SmartContract {
   // 2 | x  x  x
   @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
     // 1. if the game is already finished, abort.
-    this.gameDone.assertEquals(Bool(false)); // precondition on this.gameDone
+    this.gameDone.requireEquals(Bool(false)); // precondition on this.gameDone
 
     // 2. ensure that we know the private key associated to the public key
     //    and that our public key is known to the zkApp
@@ -187,8 +187,8 @@ class TicTacToe extends SmartContract {
     signature.verify(pubkey, [x, y]).assertTrue();
 
     // ensure player is valid
-    const player1 = this.player1.getAndAssertEquals();
-    const player2 = this.player2.getAndAssertEquals();
+    const player1 = this.player1.getAndRequireEquals();
+    const player2 = this.player2.getAndRequireEquals();
     Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertTrue();
 
     // 3. Make sure that its our turn,
@@ -198,14 +198,14 @@ class TicTacToe extends SmartContract {
     const player = pubkey.equals(player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
-    const nextPlayer = this.nextIsPlayer2.getAndAssertEquals();
+    const nextPlayer = this.nextIsPlayer2.getAndRequireEquals();
     nextPlayer.assertEquals(player);
 
     // set the next player
     this.nextIsPlayer2.set(player.not());
 
     // 4. get and deserialize the board
-    this.board.assertEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
+    this.board.requireEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move

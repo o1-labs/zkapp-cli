@@ -94,7 +94,7 @@ class SudokuZkApp extends SmartContract {
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
-    let sudokuHash = this.sudokuHash.getAndAssertEquals();
+    let sudokuHash = this.sudokuHash.getAndRequireEquals();
 
     sudokuInstance
       .hash()

@@ -18,7 +18,7 @@ export class Add extends SmartContract {
   }
 
   @method update() {
-    const currentState = this.num.getAndAssertEquals();
+    const currentState = this.num.getAndRequireEquals();
     const newState = currentState.add(2);
     this.num.set(newState);
   }
