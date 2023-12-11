@@ -59,6 +59,7 @@ if (process.platform === 'win32') {
  * @param {boolean} argv.archive - Whether to start the Mina Archive process and the Archive-Node-API application.
  * @param {boolean} argv.sync - Whether to wait for the network to sync.
  * @param {boolean} argv.pull - Whether to pull the latest version of the Docker image from the Docker Hub.
+ * @param {string}  argv.minaLogLevel - Mina processes logging level to use.
  * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
@@ -70,6 +71,7 @@ export async function lightnetStart({
   archive,
   sync,
   pull,
+  minaLogLevel,
   debug,
 }) {
   isDebug = debug;
@@ -104,6 +106,7 @@ export async function lightnetStart({
         `docker run --name ${lightnetDockerContainerName} --pull=missing -id ` +
           `--env NETWORK_TYPE="${mode}" ` +
           `--env PROOF_LEVEL="${proofLevel}" ` +
+          `--env LOG_LEVEL="${minaLogLevel}" ` +
           `--env RUN_ARCHIVE_NODE="${archive}" ` +
           '-p 3085:3085 ' +
           '-p 4001:4001 ' +
