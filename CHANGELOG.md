@@ -21,6 +21,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Possibility to configure the `lightnet` Mina processes logging level. [#536](https://github.com/o1-labs/zkapp-cli/pull/536)
 
+### Changed
+
+- Updates the Github Pages UI scaffold deploy flow configuration in the `next.config.js` to be compatible with the current version of NextJS. [#534](https://github.com/o1-labs/zkapp-cli/pull/534)
+
+### Fixed
+
+- Fix to allow a deployment to Github Pages using the npm run deploy command in a NextJS UI project[#534](https://github.com/o1-labs/zkapp-cli/pull/534).
+
 ## [0.15.2] - 2023-12-04
 
 ### Added
