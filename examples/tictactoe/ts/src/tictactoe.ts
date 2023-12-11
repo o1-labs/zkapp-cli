@@ -187,8 +187,8 @@ class TicTacToe extends SmartContract {
     signature.verify(pubkey, [x, y]).assertTrue();
 
     // ensure player is valid
-    const player1 = this.player1.getAndAssertEquals();
-    const player2 = this.player2.getAndAssertEquals();
+    const player1 = this.player1.getAndRequireEquals();
+    const player2 = this.player2.getAndRequireEquals();
     Bool.or(pubkey.equals(player1), pubkey.equals(player2)).assertTrue();
 
     // 3. Make sure that its our turn,
@@ -198,7 +198,7 @@ class TicTacToe extends SmartContract {
     const player = pubkey.equals(player2); // player 1 is false, player 2 is true
 
     // ensure its their turn
-    const nextPlayer = this.nextIsPlayer2.getAndAssertEquals();
+    const nextPlayer = this.nextIsPlayer2.getAndRequireEquals();
     nextPlayer.assertEquals(player);
 
     // set the next player
