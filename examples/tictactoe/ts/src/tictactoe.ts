@@ -159,7 +159,7 @@ class TicTacToe extends SmartContract {
 
   @method startGame(player1: PublicKey, player2: PublicKey) {
     // you can only start a new game if the current game is done
-    this.gameDone.assertEquals(Bool(true));
+    this.gameDone.requireEquals(Bool(true));
     this.gameDone.set(Bool(false));
     // set players
     this.player1.set(player1);
@@ -178,7 +178,7 @@ class TicTacToe extends SmartContract {
   // 2 | x  x  x
   @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
     // 1. if the game is already finished, abort.
-    this.gameDone.assertEquals(Bool(false)); // precondition on this.gameDone
+    this.gameDone.requireEquals(Bool(false)); // precondition on this.gameDone
 
     // 2. ensure that we know the private key associated to the public key
     //    and that our public key is known to the zkApp
@@ -205,7 +205,7 @@ class TicTacToe extends SmartContract {
     this.nextIsPlayer2.set(player.not());
 
     // 4. get and deserialize the board
-    this.board.assertEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
+    this.board.requireEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
     let board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
