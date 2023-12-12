@@ -31,31 +31,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix to allow a deployment to Github Pages using the npm run deploy command in a NextJS UI project[#534](https://github.com/o1-labs/zkapp-cli/pull/534).
 
-## [0.15.2](https://github.com/o1-labs/zkapp-cli/compare/v15.2...v15.1) - 2023-12-04
+## [0.15.2](https://github.com/o1-labs/zkapp-cli/compare/v15.1...v15.2) - 2023-12-04
 
 ### Added
 
 - Lightnet sub-commands implementation (`explorer`). [#521](https://github.com/o1-labs/zkapp-cli/pull/521)
 
-## [0.15.1] - 2023-11-29
+## [0.15.1](https://github.com/o1-labs/zkapp-cli/compare/v15.0...v15.1) - 2023-11-29
 
 ### Added
 
 - Lightnet sub-commands implementation (`logs`). [#520](https://github.com/o1-labs/zkapp-cli/pull/520)
 
-## [0.15.0] - 2023-11-07
+## [0.15.0](https://github.com/o1-labs/zkapp-cli/compare/v14.1...v15.0) - 2023-11-07
 
 ### Added
 
 - Lightnet sub-commands implementation (`start`/`stop`/`status`). [#510](https://github.com/o1-labs/zkapp-cli/pull/510)
 
-## [0.14.1] - 2023-11-03
+## [0.14.1](https://github.com/o1-labs/zkapp-cli/compare/v14.0...v14.1) - 2023-11-03
 
 ### Changed
 
 - Explorer links for deployment and interaction transactions. [#516](https://github.com/o1-labs/zkapp-cli/pull/516)
 
-## [0.14.0] - 2023-10-31
+## [0.14.0](https://github.com/o1-labs/zkapp-cli/compare/v13.2...v14.0) - 2023-10-31
 
 ### Changed
 
