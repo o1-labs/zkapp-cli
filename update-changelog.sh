@@ -20,6 +20,6 @@ echo "Current date: $current_date"
 
 # Step 5: Update the CHANGELOG
 # Insert a new version section with an additional newline for spacing
-sed -i "/## Unreleased/a \\\n## [$new_version] - $current_date" CHANGELOG.md
+sed -i "/## Unreleased/a \\\n## [$new_version]($comparison_url) - $current_date" CHANGELOG.md
 
 echo "CHANGELOG updated with version $new_version"
