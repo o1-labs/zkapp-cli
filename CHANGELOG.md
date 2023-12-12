@@ -31,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix to allow a deployment to Github Pages using the npm run deploy command in a NextJS UI project[#534](https://github.com/o1-labs/zkapp-cli/pull/534).
 
-## [0.15.2] - 2023-12-04
+## [0.15.2](https://github.com/o1-labs/zkapp-cli/compare/v15.2...v15.1) - 2023-12-04
 
 ### Added
 
