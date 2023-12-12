@@ -10,11 +10,15 @@ let version_parts[2]+=1
 new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
 echo "New version: $new_version"
 
-# Step 3: Capture the current date
+# Step 3: Construct the version comparison URL
+comparison_url="https://github.com/o1-labs/zkapp-cli/compare/${latest_version}...${new_version}"
+echo "Comparison URL: $comparison_url"
+
+# Step 4: Capture the current date
 current_date=$(date +%Y-%m-%d)
 echo "Current date: $current_date"
 
-# Step 4: Update the CHANGELOG
+# Step 5: Update the CHANGELOG
 # Insert a new version section with an additional newline for spacing
 sed -i "/## Unreleased/a \\\n## [$new_version] - $current_date" CHANGELOG.md
 
