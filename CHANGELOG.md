@@ -63,7 +63,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.14.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.14.\*.
 
-## [0.13.2] - 2023-10-22
+## [0.13.2](https://github.com/o1-labs/zkapp-cli/compare/v0.13.0...v13.2) - 2023-10-22
 
 ### Changed
 
@@ -75,7 +75,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - This PR removes Husky and the pre-commit hooks from the project templates to remove friction and create a better DX when building zkApps. [#505](https://github.com/o1-labs/zkapp-cli/pull/505).
 
-## [0.13.0] - 2023-09-14
+## [0.13.0](https://github.com/o1-labs/zkapp-cli/compare/v0.12.1...v0.13.0) - 2023-09-14
 
 ### Changed
 
@@ -83,7 +83,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.13.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.13.\*.
 
-## [0.12.1] - 2023-09-09
+## [0.12.1](https://github.com/o1-labs/zkapp-cli/compare/v0.12.0...v0.12.1) - 2023-09-09
 
 ### Changed
 
@@ -93,7 +93,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix to allow the zkApp-cli to be used from a projects local node_modules[#448](https://github.com/o1-labs/zkapp-cli/pull/448).
 
-## [0.12.0] - 2023-09-09
+## [0.12.0](https://github.com/o1-labs/zkapp-cli/compare/v0.11.2...v0.12.0) - 2023-09-09
 
 ### Changed
 
@@ -103,7 +103,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - E2E tests for critical user flows against mocked and real networks [#447](https://github.com/o1-labs/zkapp-cli/pull/447).
 
-## [0.11.2] - 2023-09-05
+## [0.11.2](https://github.com/o1-labs/zkapp-cli/compare/v0.11.0...v0.11.2) - 2023-09-05
 
 ### Changed
 
@@ -119,7 +119,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - A fix to deploy a NextJS UI project to GitHub Pages without manual configuration by running `npm run deploy` [#468](https://github.com/o1-labs/zkapp-cli/pull/468)
 
-## [0.11.0] - 2023-07-14
+## [0.11.0](https://github.com/o1-labs/zkapp-cli/compare/v0.10.2...v0.11.0) - 2023-07-14
 
 ### Changed
 
@@ -127,7 +127,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.12.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.12.\*.
 
-## [0.10.2] - 2023-07-09
+## [0.10.2](https://github.com/o1-labs/zkapp-cli/compare/v0.10.1...v0.10.2) - 2023-07-09
 
 ### Changed
 
@@ -137,13 +137,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix for zkApp project generation with `Nuxt` UI framework issue ([#449](https://github.com/o1-labs/zkapp-cli/issues/449))
 
-## [0.10.1] - 2023-06-22
+## [0.10.1](https://github.com/o1-labs/zkapp-cli/compare/v0.10.0...v0.10.1) - 2023-06-22
 
 ### Changed
 
 - Update cli prompt language and upgrade version instructions [#437](https://github.com/o1-labs/zkapp-cli/pull/437) & [#438](https://github.com/o1-labs/zkapp-cli/pull/438)
 
-## [0.10.0] - 2023-06-20
+## [0.10.0](https://github.com/o1-labs/zkapp-cli/compare/v0.9.1...v0.10.0) - 2023-06-20
 
 ## Added
 
@@ -154,7 +154,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - A fee payer tries to pay the fee using signature authorization (proofs are not supported). If the zkApp account is used as fee payer after deployment, the transaction was rejected because the permissions of the account would be violated, breaking all re-deployments and the interact.ts script in the template project. [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
 
-## [0.9.1] - 2023-06-17
+## [0.9.1](https://github.com/o1-labs/zkapp-cli/compare/v0.1.4...v0.9.1) - 2023-06-17
 
 ### Changed
 
