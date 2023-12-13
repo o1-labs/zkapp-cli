@@ -544,6 +544,8 @@ async function findZkPrograms(path) {
   return zkPrograms;
 }
 
+async function findZkProgramFile(buildPath, zkProgram) {}
+
 /*
  * While o1js and the zkApp CLI have a major version of 0,
  * a change of the minor version represents a breaking change.
