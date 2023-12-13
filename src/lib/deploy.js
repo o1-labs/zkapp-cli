@@ -540,6 +540,9 @@ function getInstalledCliVersion() {
 
   return localCli;
 }
+async function findZkPrograms(path) {
+  return zkPrograms;
+}
 
 /*
  * While o1js and the zkApp CLI have a major version of 0,
