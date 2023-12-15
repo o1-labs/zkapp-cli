@@ -651,6 +651,29 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
 /**
  * Find the file name of the smart contract to be deployed.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
+ * @param {string}    zkProgramName The user-specified contract name to deploy.
+ * @returns {Promise<string>}      The file name of the user-specified smart contract.
+ */
+async function findZkProgramFile(buildPath, zkProgramName) {
+  if (process.platform === 'win32') {
+    buildPath = buildPath.replaceAll('\\', '/');
+  }
+  const files = await glob(buildPath);
+  const re = new RegExp(
+    `export const ${zkProgramName} = ZkProgram\\(\\{`,
+    'gi'
+  );
+  for (const file of files) {
+    const zkProgram = fs.readFileSync(file, 'utf-8');
+    if (re.test(zkProgram)) {
+      return path.basename(file);
+    }
+  }
+}
+
+/**
+ * Find the file name of the smart contract to be deployed.
+ * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
  * @param {string}    contractName The user-specified contract name to deploy.
  * @returns {Promise<string>}      The file name of the user-specified smart contract.
  */
