@@ -132,6 +132,7 @@ export async function deploy({ alias, yes }) {
   const build = await step('Generate build.json', async () => {
     // Identify all instances of SmartContract in the build.
     const smartContracts = await findSmartContracts(`${DIR}/build/**/*.js`);
+    const zkPrograms = await findZkPrograms(`${DIR}/build/**/*.js`);
 
     fs.outputJsonSync(
       `${DIR}/build/build.json`,
@@ -540,9 +541,13 @@ function getInstalledCliVersion() {
 
   return localCli;
 }
-async function findZkPrograms(path) {
-  return zkPrograms;
-}
+
+/**
+ * Determine if a smart contract verifies a  zkprogram.
+ * @param {string}    contractName The user-specified contract name to deploy.
+ * @returns {boolean}      Returns true if the smart contract verifies a zkprogram.
+ */
+async function hasZkProgram() {}
 
 async function findZkProgramFile(buildPath, zkProgram) {}
 
@@ -571,18 +576,44 @@ function hasBreakingChanges(installedVersion, latestVersion) {
 }
 
 /**
+ * Find the user-specified name for every exported instance of `ZkProgram`
+ * in the build dir.
+ * @param {string} path The glob pattern--e.g. `build/**\/*.js`
+ * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
+ */
+async function findZkPrograms(path) {
+  if (process.platform === 'win32') {
+    path = path.replaceAll('\\', '/');
+  }
+  const files = await glob(path);
+  // create storage for zkprograms
+  let zkPrograms = [];
+
+  for (const file of files) {
+    const str = fs.readFileSync(file, 'utf-8');
+    let results = str.matchAll(/export const (\w*) = ZkProgram\(\{/g);
+    results = Array.from(results) ?? []; // prevent error if no results
+    results = results.map((zkprogram) => zkprogram[1]); // only keep capture groups
+    zkPrograms.push(...results);
+  }
+
+  return zkPrograms;
+}
+/**
  * Find the user-specified class names for every instance of `SmartContract`
  * in the build dir.
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
  * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
  */
+
 export async function findSmartContracts(path) {
   if (process.platform === 'win32') {
     path = path.replaceAll('\\', '/');
   }
   const files = await glob(path);
-
+  console.log('files', files);
   let smartContracts = [];
+
   for (const file of files) {
     const str = fs.readFileSync(file, 'utf-8');
     let results = str.matchAll(/class (\w*) extends SmartContract/gi);
