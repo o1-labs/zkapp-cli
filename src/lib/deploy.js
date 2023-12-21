@@ -334,7 +334,19 @@ export async function deploy({ alias, yes }) {
           isCached: true,
         };
       } else {
-        const { verificationKey } = await zkApp.compile(zkAppAddress);
+        try {
+          const { verificationKey } = await zkApp.compile(zkAppAddress);
+        } catch (e) {
+          console.log('e.message', e.message);
+          const re =
+            /depends on (\w+), but we cannot find compilation output for (\w+)/;
+          const match = e.message.match(re);
+          console.log('match', match);
+          if (match && match[1] === match[2]) {
+            const program = match[1];
+            console.log('Program found:', program);
+          }
+        }
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
@@ -616,7 +628,6 @@ export async function findSmartContracts(path) {
     path = path.replaceAll('\\', '/');
   }
   const files = await glob(path);
-  console.log('files', files);
   let smartContracts = [];
 
   for (const file of files) {
