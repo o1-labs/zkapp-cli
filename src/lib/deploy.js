@@ -547,9 +547,7 @@ function getInstalledCliVersion() {
  * @param {string}    contractName The user-specified contract name to deploy.
  * @returns {boolean}      Returns true if the smart contract verifies a zkprogram.
  */
-async function hasZkProgram() {}
-
-async function findZkProgramFile(buildPath, zkProgram) {}
+async function hasZkProgram(contractName) {}
 
 /*
  * While o1js and the zkApp CLI have a major version of 0,
@@ -621,7 +619,6 @@ export async function findSmartContracts(path) {
     results = results.map((result) => result[1]); // only keep capture groups
     smartContracts.push(...results);
   }
-
   return smartContracts;
 }
 
