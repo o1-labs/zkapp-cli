@@ -132,7 +132,6 @@ export async function deploy({ alias, yes }) {
   const build = await step('Generate build.json', async () => {
     // Identify all instances of SmartContract in the build.
     const smartContracts = await findSmartContracts(`${DIR}/build/**/*.js`);
-    const zkPrograms = await findZkPrograms(`${DIR}/build/**/*.js`);
 
     fs.outputJsonSync(
       `${DIR}/build/build.json`,
@@ -240,6 +239,14 @@ export async function deploy({ alias, yes }) {
     `${DIR}/build/**/*.js`,
     contractName
   );
+
+  if (hasZkProgram(smartContractFile)) {
+    // TODO: Check if zkprogram exists first
+    let zkProgramFile = await findZkProgramFile(
+      `${DIR}/build/**/*.js`,
+      zkProgramName
+    );
+  }
 
   let smartContractImports;
   try {
