@@ -679,10 +679,13 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
 }
 
 /**
- * Find the file name of the smart contract to be deployed.
+ * Find the file and variable name of the ZkProgram.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
- * @param {string}    zkProgramName The user-specified contract name to deploy.
- * @returns {Promise<string>}      The file name of the user-specified smart contract.
+ * @param {string}    zkProgramName The user-specified ZkProgram name argument.
+ * @returns {Promise<{zkProgramVarName: string, zkProgramFile: string}>}
+ *      An object containing the variable name (`zkProgramVarName`)
+ *      of the ZkProgram and the file name (`zkProgramFile`) in which the specified ZkProgram is found.
+ *      Returns null if the ZkProgram is not found.
  */
 async function findZkProgramFile(buildPath, zkProgramName) {
   if (process.platform === 'win32') {
@@ -693,14 +696,16 @@ async function findZkProgramFile(buildPath, zkProgramName) {
   for (const file of files) {
     const zkProgram = fs.readFileSync(file, 'utf-8');
 
-    // Regular expression to match the ZkProgram pattern
+    // Regex is used to find and extract the variable name of the ZkProgram
+    // that has a matching name argument that is verified in the smart contract
+    // to be deployed.
     const regex =
       /(\w+)\s*=\s*ZkProgram\(\{[\s\S]*?name:\s*'(\w+)'[\s\S]*?\}\);/g;
     let match;
 
     while ((match = regex.exec(zkProgram)) !== null) {
       const [_, zkProgramVarName, nameArg] = match;
-      // returns the variable name assigned to the zkProgram with the matching name argument
+
       if (nameArg === zkProgramName) {
         return { zkProgramVarName, zkProgramFile: path.basename(file) };
       }
