@@ -343,7 +343,7 @@ export async function deploy({ alias, yes }) {
         // import and compile ZKprogram if smart contract to deploy verifies it
         if (zkProgramName) {
           // TODO: Check if zkprogram exists first
-          let zkProgramFile = await findZkProgramFile(
+          let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
             `${DIR}/build/**/*.js`,
             zkProgramName
           );
@@ -705,7 +705,7 @@ async function findZkProgramFile(buildPath, zkProgramName) {
       // returns the variable name assigned to the zkProgram with the matching name argument
       if (nameArg === zkProgramName) {
         console.log('zkProgramVarName', zkProgramVarName);
-        return zkProgramVarName;
+        return { zkProgramVarName, zkProgramFile: path.basename(file) };
       }
     }
   }
