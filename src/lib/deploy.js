@@ -590,7 +590,32 @@ function getInstalledCliVersion() {
  * @param {string}    contractName The user-specified contract name to deploy.
  * @returns {boolean}      Returns true if the smart contract verifies a zkprogram.
  */
-async function hasZkProgram(contractName) {}
+async function hasZkProgram(smartContractFile, buildPath) {
+  console.log('file inside has', smartContractFile);
+  if (process.platform === 'win32') {
+    buildPath = buildPath.replaceAll('\\', '/');
+  }
+  const files = await glob(buildPath);
+  // create storage for zkprograms
+  let zkPrograms = [];
+
+  for (const file of files) {
+    // if same file as smartcontract
+    if (path.basename(smartContractFile) === path.basename(file)) {
+      console.log('file', file);
+      const str = fs.readFileSync(file, 'utf-8');
+      // console.log('contract', str);
+      const re = /\.verify\(\)/g;
+      // Check if verify a zk program
+      if (re.test(str)) {
+        console.log('hasZkProgram!');
+        return;
+      }
+    }
+  }
+  console.log('does not hasZkProgram');
+  return false;
+}
 
 /*
  * While o1js and the zkApp CLI have a major version of 0,
