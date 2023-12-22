@@ -330,8 +330,10 @@ export async function deploy({ alias, yes }) {
           isCached: true,
         };
       } else {
+        let verificationKey;
         try {
-          const { verificationKey } = await zkApp.compile(zkAppAddress);
+          const result = await zkApp.compile(zkAppAddress);
+          verificationKey = result.verificationKey;
         } catch (error) {
           zkProgramName = getZkProgramName(error.message);
           console.log('zkprog in catch', zkProgramName);
@@ -356,6 +358,7 @@ export async function deploy({ alias, yes }) {
           await zkProgram.compile();
 
           const result = await zkApp.compile(zkAppAddress);
+          verificationKey = result.verificationKey;
         }
 
         // update cache with new verification key and currrentDigest
@@ -583,38 +586,6 @@ function getInstalledCliVersion() {
   }
 
   return localCli;
-}
-
-/**
- * Determine if a smart contract verifies a  zkprogram.
- * @param {string}    contractName The user-specified contract name to deploy.
- * @returns {boolean}      Returns true if the smart contract verifies a zkprogram.
- */
-async function hasZkProgram(smartContractFile, buildPath) {
-  console.log('file inside has', smartContractFile);
-  if (process.platform === 'win32') {
-    buildPath = buildPath.replaceAll('\\', '/');
-  }
-  const files = await glob(buildPath);
-  // create storage for zkprograms
-  let zkPrograms = [];
-
-  for (const file of files) {
-    // if same file as smartcontract
-    if (path.basename(smartContractFile) === path.basename(file)) {
-      console.log('file', file);
-      const str = fs.readFileSync(file, 'utf-8');
-      // console.log('contract', str);
-      const re = /\.verify\(\)/g;
-      // Check if verify a zk program
-      if (re.test(str)) {
-        console.log('hasZkProgram!');
-        return;
-      }
-    }
-  }
-  console.log('does not hasZkProgram');
-  return false;
 }
 
 /*
