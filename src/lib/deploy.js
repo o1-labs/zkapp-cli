@@ -336,16 +336,9 @@ export async function deploy({ alias, yes }) {
       } else {
         try {
           const { verificationKey } = await zkApp.compile(zkAppAddress);
-        } catch (e) {
-          console.log('e.message', e.message);
-          const re =
-            /depends on (\w+), but we cannot find compilation output for (\w+)/;
-          const match = e.message.match(re);
-          console.log('match', match);
-          if (match && match[1] === match[2]) {
-            const program = match[1];
-            console.log('Program found:', program);
-          }
+        } catch (error) {
+          zkProgramName = getZkProgramName(error.message);
+          console.log('zkprog in catch', zkProgramName);
         }
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
@@ -359,6 +352,20 @@ export async function deploy({ alias, yes }) {
       }
     }
   );
+
+  function getZkProgramName(message) {
+    console.log('message', message);
+    let zkProgramName = null;
+    const re =
+      /depends on (\w+), but we cannot find compilation output for (\w+)/;
+    const match = message.match(re);
+    console.log('match', match);
+    if (match && match[1] === match[2]) {
+      zkProgramName = match[1];
+      return zkProgramName;
+    }
+    return zkProgramName;
+  }
 
   // Can't include the log message inside the callback b/c it will break
   // the step formatting.
