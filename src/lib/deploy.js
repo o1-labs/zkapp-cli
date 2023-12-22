@@ -336,17 +336,14 @@ export async function deploy({ alias, yes }) {
           verificationKey = result.verificationKey;
         } catch (error) {
           zkProgramName = getZkProgramName(error.message);
-          console.log('zkprog in catch', zkProgramName);
         }
         // import and compile ZKprogram if smart contract to deploy verifies it
         if (zkProgramName) {
-          // TODO: Check if zkprogram exists first
           let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
             `${DIR}/build/**/*.js`,
             zkProgramName
           );
 
-          // import ZkProgram
           const zkProgramImportPath =
             process.platform === 'win32'
               ? `file:// ${DIR}/build/src/${zkProgramFile}`
@@ -354,7 +351,7 @@ export async function deploy({ alias, yes }) {
 
           const zkProgramImports = await import(zkProgramImportPath);
 
-          const zkProgram = zkProgramImports[zkProgramVarName]; //  The specified zkApp class to deploy
+          const zkProgram = zkProgramImports[zkProgramVarName];
           await zkProgram.compile();
 
           const result = await zkApp.compile(zkAppAddress);
@@ -364,7 +361,6 @@ export async function deploy({ alias, yes }) {
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
-
         fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
           spaces: 2,
         });
@@ -373,19 +369,6 @@ export async function deploy({ alias, yes }) {
       }
     }
   );
-
-  function getZkProgramName(message) {
-    console.log('message', message);
-    let zkProgramName = null;
-    const re =
-      /depends on (\w+), but we cannot find compilation output for (\w+)/;
-    const match = message.match(re);
-    if (match && match[1] === match[2]) {
-      zkProgramName = match[1];
-      return zkProgramName;
-    }
-    return zkProgramName;
-  }
 
   // Can't include the log message inside the callback b/c it will break
   // the step formatting.
@@ -635,6 +618,18 @@ async function findZkPrograms(path) {
   }
 
   return zkPrograms;
+}
+
+function getZkProgramName(message) {
+  let zkProgramName = null;
+  const re =
+    /depends on (\w+), but we cannot find compilation output for (\w+)/;
+  const match = message.match(re);
+  if (match && match[1] === match[2]) {
+    zkProgramName = match[1];
+    return zkProgramName;
+  }
+  return zkProgramName;
 }
 /**
  * Find the user-specified class names for every instance of `SmartContract`
