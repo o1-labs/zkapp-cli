@@ -340,6 +340,16 @@ export async function deploy({ alias, yes }) {
           zkProgramName = getZkProgramName(error.message);
           console.log('zkprog in catch', zkProgramName);
         }
+        // import and compile ZKprogram if smart contract to deploy verifies it
+        if (zkProgramName) {
+          // TODO: Check if zkprogram exists first
+          let zkProgramFile = await findZkProgramFile(
+            `${DIR}/build/**/*.js`,
+            zkProgramName
+          );
+          console.log('zkProgramFile in cache', zkProgramFile);
+        }
+
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
