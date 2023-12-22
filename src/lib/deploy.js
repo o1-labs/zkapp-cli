@@ -355,6 +355,8 @@ export async function deploy({ alias, yes }) {
             process.platform === 'win32'
               ? `file:// ${DIR}/build/src/${zkProgramFile}`
               : `${DIR}/build/src/${zkProgramFile}`;
+
+          const zkProgramImports = await import(zkProgramImportPath);
         }
 
         // update cache with new verification key and currrentDigest
