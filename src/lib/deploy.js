@@ -301,7 +301,7 @@ export async function deploy({ alias, yes }) {
 
     process.exit(1);
   }
-  let zkProgramName;
+  let zkProgramNameArg;
   const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
@@ -335,13 +335,13 @@ export async function deploy({ alias, yes }) {
           const result = await zkApp.compile(zkAppAddress);
           verificationKey = result.verificationKey;
         } catch (error) {
-          zkProgramName = getZkProgramName(error.message);
+          zkProgramNameArg = getZkProgramNameArg(error.message);
         }
         // import and compile ZKprogram if smart contract to deploy verifies it
-        if (zkProgramName) {
+        if (zkProgramNameArg) {
           let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
             `${DIR}/build/**/*.js`,
-            zkProgramName
+            zkProgramNameArg
           );
 
           const zkProgramImportPath =
@@ -667,29 +667,31 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
   return '';
 }
 
-// finds the the user defined name argument of the ZkProgram that is verified in a smart contract
-function getZkProgramName(message) {
-  let zkProgramName = null;
+// Finds the the user defined name argument of the ZkProgram that is verified in a smart contract
+function getZkProgramNameArg(message) {
+  let zkProgramNameArg = null;
+
+  // Regex to parse the ZkProgram name argment that is specified in the given message
   const regex =
     /depends on (\w+), but we cannot find compilation output for (\w+)/;
   const match = message.match(regex);
   if (match && match[1] === match[2]) {
-    zkProgramName = match[1];
-    return zkProgramName;
+    zkProgramNameArg = match[1];
+    return zkProgramNameArg;
   }
-  return zkProgramName;
+  return zkProgramNameArg;
 }
 
 /**
  * Find the file and variable name of the ZkProgram.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
- * @param {string}    zkProgramName The user-specified ZkProgram name argument.
+ * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument.
  * @returns {Promise<{zkProgramVarName: string, zkProgramFile: string}>}
  *      An object containing the variable name (`zkProgramVarName`)
  *      of the ZkProgram and the file name (`zkProgramFile`) in which the specified ZkProgram is found.
  *      Returns null if the ZkProgram is not found.
  */
-async function findZkProgramFile(buildPath, zkProgramName) {
+async function findZkProgramFile(buildPath, zkProgramNameArg) {
   if (process.platform === 'win32') {
     buildPath = buildPath.replaceAll('\\', '/');
   }
@@ -708,7 +710,7 @@ async function findZkProgramFile(buildPath, zkProgramName) {
     while ((match = regex.exec(zkProgram)) !== null) {
       const [_, zkProgramVarName, nameArg] = match;
 
-      if (nameArg === zkProgramName) {
+      if (nameArg === zkProgramNameArg) {
         return { zkProgramVarName, zkProgramFile: path.basename(file) };
       }
     }
