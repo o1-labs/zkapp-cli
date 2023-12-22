@@ -343,8 +343,6 @@ export async function deploy({ alias, yes }) {
             `${DIR}/build/**/*.js`,
             zkProgramName
           );
-          console.log('zkProgramFile in cache', zkProgramFile);
-          console.log('zkProgramVarName in cache', zkProgramVarName);
 
           // import ZkProgram
           const zkProgramImportPath =
@@ -356,6 +354,8 @@ export async function deploy({ alias, yes }) {
 
           const zkProgram = zkProgramImports[zkProgramVarName]; //  The specified zkApp class to deploy
           await zkProgram.compile();
+
+          const result = await zkApp.compile(zkAppAddress);
         }
 
         // update cache with new verification key and currrentDigest
@@ -377,7 +377,6 @@ export async function deploy({ alias, yes }) {
     const re =
       /depends on (\w+), but we cannot find compilation output for (\w+)/;
     const match = message.match(re);
-    console.log('match', match);
     if (match && match[1] === match[2]) {
       zkProgramName = match[1];
       return zkProgramName;
@@ -737,7 +736,6 @@ async function findZkProgramFile(buildPath, zkProgramName) {
       const [_, zkProgramVarName, nameArg] = match;
       // returns the variable name assigned to the zkProgram with the matching name argument
       if (nameArg === zkProgramName) {
-        console.log('zkProgramVarName', zkProgramVarName);
         return { zkProgramVarName, zkProgramFile: path.basename(file) };
       }
     }
