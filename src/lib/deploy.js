@@ -348,6 +348,13 @@ export async function deploy({ alias, yes }) {
             zkProgramName
           );
           console.log('zkProgramFile in cache', zkProgramFile);
+          console.log('zkProgramVarName in cache', zkProgramVarName);
+
+          // import ZkProgram
+          const zkProgramImportPath =
+            process.platform === 'win32'
+              ? `file:// ${DIR}/build/src/${zkProgramFile}`
+              : `${DIR}/build/src/${zkProgramFile}`;
         }
 
         // update cache with new verification key and currrentDigest
