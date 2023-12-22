@@ -620,17 +620,6 @@ async function findZkPrograms(path) {
   return zkPrograms;
 }
 
-function getZkProgramName(message) {
-  let zkProgramName = null;
-  const re =
-    /depends on (\w+), but we cannot find compilation output for (\w+)/;
-  const match = message.match(re);
-  if (match && match[1] === match[2]) {
-    zkProgramName = match[1];
-    return zkProgramName;
-  }
-  return zkProgramName;
-}
 /**
  * Find the user-specified class names for every instance of `SmartContract`
  * in the build dir.
@@ -676,6 +665,19 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
   // If 2+ smartContract classes exist in build.json, return falsy.
   // We'll need to ask the user which they want to use for this deploy alias.
   return '';
+}
+
+// finds the the user defined name argument of the ZkProgram that is verified in a smart contract
+function getZkProgramName(message) {
+  let zkProgramName = null;
+  const regex =
+    /depends on (\w+), but we cannot find compilation output for (\w+)/;
+  const match = message.match(regex);
+  if (match && match[1] === match[2]) {
+    zkProgramName = match[1];
+    return zkProgramName;
+  }
+  return zkProgramName;
 }
 
 /**
