@@ -691,14 +691,22 @@ async function findZkProgramFile(buildPath, zkProgramName) {
     buildPath = buildPath.replaceAll('\\', '/');
   }
   const files = await glob(buildPath);
-  const re = new RegExp(
-    `export const ${zkProgramName} = ZkProgram\\(\\{`,
-    'gi'
-  );
+
   for (const file of files) {
     const zkProgram = fs.readFileSync(file, 'utf-8');
-    if (re.test(zkProgram)) {
-      return path.basename(file);
+
+    // Regular expression to match the ZkProgram pattern
+    const regex =
+      /(\w+)\s*=\s*ZkProgram\(\{[\s\S]*?name:\s*'(\w+)'[\s\S]*?\}\);/g;
+    let match;
+
+    while ((match = regex.exec(zkProgram)) !== null) {
+      const [_, zkProgramVarName, nameArg] = match;
+      // returns the variable name assigned to the zkProgram with the matching name argument
+      if (nameArg === zkProgramName) {
+        console.log('zkProgramVarName', zkProgramVarName);
+        return zkProgramVarName;
+      }
     }
   }
 }
