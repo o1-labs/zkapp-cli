@@ -353,6 +353,9 @@ export async function deploy({ alias, yes }) {
               : `${DIR}/build/src/${zkProgramFile}`;
 
           const zkProgramImports = await import(zkProgramImportPath);
+
+          const zkProgram = zkProgramImports[zkProgramVarName]; //  The specified zkApp class to deploy
+          await zkProgram.compile();
         }
 
         // update cache with new verification key and currrentDigest
