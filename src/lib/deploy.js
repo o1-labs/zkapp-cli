@@ -187,6 +187,9 @@ export async function deploy({ alias, yes }) {
     }
   }
 
+  // CHECK : zkProgram exists inside of smart contract
+  const zkPrograms = await findZkPrograms(`${DIR}/build/**/*.js`);
+
   // Set the default smartContract name for this deploy alias in config.json.
   // Occurs when this is the first time we're deploying to a given deploy alias.
   // Important to ensure the same smart contract will always be deployed to
@@ -239,14 +242,6 @@ export async function deploy({ alias, yes }) {
     `${DIR}/build/**/*.js`,
     contractName
   );
-
-  if (hasZkProgram(smartContractFile)) {
-    // TODO: Check if zkprogram exists first
-    let zkProgramFile = await findZkProgramFile(
-      `${DIR}/build/**/*.js`,
-      zkProgramName
-    );
-  }
 
   let smartContractImports;
   try {
@@ -306,6 +301,7 @@ export async function deploy({ alias, yes }) {
 
     process.exit(1);
   }
+  let zkProgramName;
   const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
