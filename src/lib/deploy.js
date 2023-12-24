@@ -704,7 +704,7 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
     // that has a matching name argument that is verified in the smart contract
     // to be deployed.
     const regex =
-      /(\w+)\s*=\s*ZkProgram\(\{[\s\S]*?name:\s*'(\w+)'[\s\S]*?\}\);/g;
+      /(\w+)\s*=\s*ZkProgram\(\{[\s\S]*?name:\s*'([\w-]+)'[\s\S]*?\}\);/g;
     let match;
 
     while ((match = regex.exec(zkProgram)) !== null) {
