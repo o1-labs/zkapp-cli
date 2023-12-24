@@ -673,7 +673,7 @@ function getZkProgramNameArg(message) {
 
   // Regex to parse the ZkProgram name argment that is specified in the given message
   const regex =
-    /depends on (\w+), but we cannot find compilation output for (\w+)/;
+    /depends on ([\w-]+), but we cannot find compilation output for ([\w-]+)/;
   const match = message.match(regex);
   if (match && match[1] === match[2]) {
     zkProgramNameArg = match[1];
