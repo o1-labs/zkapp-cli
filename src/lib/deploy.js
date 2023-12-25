@@ -367,6 +367,8 @@ export async function deploy({ alias, yes }) {
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
+        cache[contractName].zkProgram = zkProgramNameArg;
+
         fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
           spaces: 2,
         });
