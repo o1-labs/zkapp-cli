@@ -358,16 +358,24 @@ export async function deploy({ alias, yes }) {
           const zkProgramImports = await import(zkProgramImportPath);
 
           const zkProgram = zkProgramImports[zkProgramVarName];
-          await zkProgram.compile();
+          const currentZkProgramDigest = zkProgram.digest();
+          const zkProgramResult = zkProgram.compile();
 
           const result = await zkApp.compile(zkAppAddress);
           verificationKey = result.verificationKey;
+
+          // Add the ZkProgram verification key to the cache
+          cache[zkProgramVarName] = {
+            digest: currentZkProgramDigest,
+            verificationKey: zkProgramResult.verificationKey,
+          };
+          // Add Zkprogram name to cache of the  smart contract that verifies it
+          cache[contractName].zkProgram = zkProgramNameArg;
         }
 
         // update cache with new verification key and currrentDigest
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
-        cache[contractName].zkProgram = zkProgramNameArg;
 
         fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
           spaces: 2,
