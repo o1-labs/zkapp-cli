@@ -318,10 +318,16 @@ export async function deploy({ alias, yes }) {
       let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
+      console.log('currentDigest', currentDigest);
+      console.log('cache[contractName]?.digest ', cache[contractName]?.digest);
 
       // initialize cache if 'zk deploy' is run the first time on the contract
       if (!cache[contractName]) {
-        cache[contractName] = { digest: '', verificationKey: '' };
+        cache[contractName] = {
+          digest: '',
+          verificationKey: '',
+          zkProgram: '',
+        };
       }
 
       if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
