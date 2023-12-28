@@ -322,14 +322,35 @@ export async function deploy({ alias, yes }) {
       console.log('cache[contractName]?.digest ', cache[contractName]?.digest);
 
       // initialize cache if 'zk deploy' is run the first time on the contract
-      if (!cache[contractName]) {
-        cache[contractName] = {
-          digest: '',
-          verificationKey: '',
-          zkProgram: '',
-        };
+      cache[contractName] = cache[contractName] ?? {};
+
+      let cacheZkProgram;
+      let isZkProgramChange;
+      let zkProgram;
+      let currentZkProgramDigest;
+      let zkProgramNameArg;
+
+      // if zk program name is in the cache, import it to compute the digest to determine if it has changed
+      if (cache[contractName]?.zkProgram) {
+        zkProgramNameArg = cache[contractName]?.zkProgram;
+        let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
+          `${DIR}/build/**/*.js`,
+          zkProgramNameArg
+        );
+
+        const zkProgramImportPath =
+          process.platform === 'win32'
+            ? `file:// ${DIR}/build/src/${zkProgramFile}`
+            : `${DIR}/build/src/${zkProgramFile}`;
+
+        const zkProgramImports = await import(zkProgramImportPath);
+
+        zkProgram = zkProgramImports[zkProgramVarName];
+        console.log('zkprogam', zkProgram);
+        currentZkProgramDigest = await zkProgram.digest();
       }
 
+      // If smart contract doesn't change and no zkprogram return contract cached vk
       if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
         return {
           verificationKey: cache[contractName].verificationKey,
