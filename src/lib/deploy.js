@@ -363,6 +363,12 @@ export async function deploy({ alias, yes }) {
 
           const result = await zkApp.compile(zkAppAddress);
           verificationKey = result.verificationKey;
+
+          // Add Zkprogram name to cache of the smart contract that verifies it
+          cache[contractName].zkProgram = zkProgramNameArg;
+          // Initialize zkprogram cache if not defined
+          cache[zkProgramNameArg] = cache[zkProgramNameArg] ?? {};
+          cache[zkProgramNameArg].digest = currentZkProgramDigest;
         }
 
         // update cache with new smart contract verification key and currrentDigest
