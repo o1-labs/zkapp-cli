@@ -352,14 +352,32 @@ export async function deploy({ alias, yes }) {
 
       // If smart contract doesn't change and no zkprogram return contract cached vk
       if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
+        let isCached = true;
+        if (
+          cache[contractName]?.zkProgram &&
+          currentZkProgramDigest !== cache[zkProgramNameArg]?.digest
+        ) {
+          const zkProgramDigest = await zkProgram.digest();
+          await zkProgram.compile();
+
+          // update cache with zkprogram digest. VK is not necessary because not depoying the zkprogram
+          cache[zkProgramNameArg].digest = zkProgramDigest;
+
+          fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
+            spaces: 2,
+          });
+          isCached = false;
+        }
+        // return vk and isCached flag if only a smart contract that is unchanged or both zkprogram and smart contract unchanged
         return {
           verificationKey: cache[contractName].verificationKey,
-          isCached: true,
+          isCached,
         };
       } else {
         let verificationKey;
         try {
           const result = await zkApp.compile(zkAppAddress);
+
           verificationKey = result.verificationKey;
         } catch (error) {
           zkProgramNameArg = getZkProgramNameArg(error.message);
@@ -382,6 +400,7 @@ export async function deploy({ alias, yes }) {
           const currentZkProgramDigest = await zkProgram.digest();
           await zkProgram.compile();
 
+          //
           const result = await zkApp.compile(zkAppAddress);
           verificationKey = result.verificationKey;
 
