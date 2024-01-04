@@ -45,10 +45,10 @@ export async function deploy({ alias, yes }) {
   if (!installedCliVersion) {
     log(
       chalk.red(
-        `Failed to detect the installed zkapp-cli version. This might be possible if you are using Volta to manage your Node versions.`
+        `Failed to detect the installed zkapp-cli version. This might be possible if you are using Volta or something similar to manage your Node versions.`
       )
     );
-    log(chalk.red('As a workaround, you can as zkapp-cli as a local dependency by running `npm install zkapp-cli`'));
+    log(chalk.red('As a workaround, you can install zkapp-cli as a local dependency by running `npm install zkapp-cli`'));
     return;
   }
   
