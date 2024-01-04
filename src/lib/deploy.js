@@ -301,7 +301,7 @@ export async function deploy({ alias, yes }) {
 
     process.exit(1);
   }
-  let zkProgramNameArg;
+
   const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
@@ -318,14 +318,10 @@ export async function deploy({ alias, yes }) {
       let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
-      console.log('currentDigest', currentDigest);
-      console.log('cache[contractName]?.digest ', cache[contractName]?.digest);
 
       // initialize cache if 'zk deploy' is run the first time on the contract
       cache[contractName] = cache[contractName] ?? {};
 
-      let cacheZkProgram;
-      let isZkProgramChange;
       let zkProgram;
       let currentZkProgramDigest;
       let zkProgramNameArg;
@@ -346,12 +342,16 @@ export async function deploy({ alias, yes }) {
         const zkProgramImports = await import(zkProgramImportPath);
 
         zkProgram = zkProgramImports[zkProgramVarName];
-        console.log('zkprogam', zkProgram);
+        // console.log('zkprogam', zkProgram);
         currentZkProgramDigest = await zkProgram.digest();
       }
 
       // If smart contract doesn't change and no zkprogram return contract cached vk
       if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
+        console.log('zkapp digest unchanged insid if');
+
+        console.log('cache zkProgram digest', cache[zkProgramNameArg]?.digest);
+        console.log('current zkProgram digest', currentZkProgramDigest);
         let isCached = true;
         if (
           cache[contractName]?.zkProgram &&
