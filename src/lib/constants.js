@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
- * @typedef {'sudoku' | 'tictactoe'} ExampleType
+ * @typedef {'voting' | 'sudoku' | 'tictactoe'} ExampleType
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
@@ -14,7 +14,7 @@ import path from 'path';
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
-  exampleTypes: ['sudoku', 'tictactoe'],
+  exampleTypes: ['voting', 'sudoku', 'tictactoe'],
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
   lightnetWorkDir: path.resolve(`${homedir()}/.cache/zkapp-cli/lightnet`),
   lightnetModes: ['single-node', 'multi-node'],
