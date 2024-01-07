@@ -48,10 +48,14 @@ export async function deploy({ alias, yes }) {
         `Failed to detect the installed zkapp-cli version. This might be possible if you are using Volta or something similar to manage your Node versions.`
       )
     );
-    log(chalk.red('As a workaround, you can install zkapp-cli as a local dependency by running `npm install zkapp-cli`'));
+    log(
+      chalk.red(
+        'As a workaround, you can install zkapp-cli as a local dependency by running `npm install zkapp-cli`'
+      )
+    );
     return;
   }
-  
+
   // Checks if developer has the legacy networks or deploy aliases in config.json
   if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
     config.deployAliases = config?.networks;
