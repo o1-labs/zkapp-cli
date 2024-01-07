@@ -9,7 +9,7 @@ export const TestConstants: ConstantsType = Object.freeze({
   cliPromptMsDelay: 200,
   minaGraphQlPort: 8080,
   minaAccountsManagerPort: 8181,
-  mockedEndpointsServicePort: 8282,
+  mockedEndpointsServicePort: 8383,
   skipInteractiveSelectionOptions: [false, true],
   feePayerMgmtTypes: ['recover', 'new', 'cached'],
   feePayerTmpCacheDir: path.join(
