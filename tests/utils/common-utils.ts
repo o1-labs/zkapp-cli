@@ -1,5 +1,7 @@
 import { expect } from '@playwright/test';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
+import { ExecaChildProcess } from 'execa';
+import fkill from 'fkill';
 import fs from 'node:fs';
 import path from 'node:path';
 import Constants from '../../src/lib/constants.js';
@@ -343,11 +345,22 @@ export async function checkSmartContractsFilesystem(
 // We need to filter out the node ESM loader from NODE_OPTIONS for CLI tests.
 // Otherwise, `zkapp-cli` will also consume the loader and fail.
 //   https://github.com/microsoft/playwright/issues/24516
-export async function removeEnvCustomLoaders(): Promise<void> {
+export function removeEnvCustomLoaders(): void {
   if (process.env.NODE_OPTIONS) {
     process.env.NODE_OPTIONS = process.env.NODE_OPTIONS.replace(
       /--experimental-loader=[^\s]+/g,
       ''
     );
+  }
+}
+
+export async function killTheProcess(process: ExecaChildProcess | undefined) {
+  if (process && process.pid) {
+    console.info(`Killing the process with PID: ${process.pid}`);
+    await fkill(process.pid, {
+      force: true,
+      tree: true,
+      silent: false,
+    });
   }
 }
