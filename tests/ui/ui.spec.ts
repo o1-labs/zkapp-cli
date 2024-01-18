@@ -3,6 +3,7 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { ExecaChildProcess, execa } from 'execa';
 import fsExtra from 'fs-extra';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import portfinder from 'portfinder';
 import Constants from '../../src/lib/constants.js';
 import { LandingPage } from '../pages/example/LandingPage.js';
@@ -24,6 +25,11 @@ test.describe('Users', () => {
       page,
       context,
     }) => {
+      test.skip(
+        os.platform() === 'win32' && uiType === 'svelte',
+        'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
+      );
+
       const serverStdOut: string[] = [];
       const serverStdErr: string[] = [];
       const devServerPort = await portfinder.getPortPromise();

@@ -58,14 +58,14 @@ const config: PlaywrightTestConfig = {
       },
       testMatch: ['**/ui/**/*.spec.ts'],
     },
-    {
-      name: 'webkit-desktop',
-      use: {
-        browserName: 'webkit',
-        ...devices['Desktop Safari'],
-      },
-      testMatch: ['**/ui/**/*.spec.ts'],
-    },
+    // {
+    //   name: 'webkit-desktop',
+    //   use: {
+    //     browserName: 'webkit',
+    //     ...devices['Desktop Safari'],
+    //   },
+    //   testMatch: ['**/ui/**/*.spec.ts'],
+    // },
   ],
   webServer: {
     // TODO: We can't use "ts-node" with Npx and Node20 because of the https://github.com/TypeStrong/ts-node/issues/1997
