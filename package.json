@@ -38,8 +38,8 @@
     "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
     "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
     "e2e:install": "npx playwright-core install --with-deps",
-    "e2e:test": "npm run clean && npx playwright test --workers=1",
-    "e2e:test:ui": "npm run e2e:test -- --project=chromium-desktop --project=firefox-desktop",
+    "e2e:test": "npm run clean && DEBUG=pw:browser npx playwright test --workers=1",
+    "e2e:test:ui": "npm run e2e:test -- --project=chromium-desktop --project=firefox-desktop --project=webkit-desktop",
     "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'",
     "update-changelog": "./update-changelog.sh"
   },
