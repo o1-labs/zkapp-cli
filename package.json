@@ -37,8 +37,8 @@
     "eslint": "eslint . --ext .js,.ts --quiet --fix",
     "prettier-check": "prettier --no-editorconfig --check \"**/*.{js,ts}\"",
     "prettier": "prettier --no-editorconfig --write \"**/*.{js,ts}\"",
-    "e2e:install": "npx playwright-core install --with-deps",
-    "e2e:test": "npm run clean && cross-env DEBUG=pw:browser npx playwright test --workers=1",
+    "e2e:install": "npx playwright install --with-deps",
+    "e2e:test": "npm run clean && cross-env DEBUG=pw:api,pw:browser* npx playwright test --workers=1",
     "e2e:test:ui": "npm run e2e:test -- --project=chromium-desktop --project=firefox-desktop --project=webkit-desktop",
     "e2e:test:smoke": "npm run e2e:test -- --grep '@on-chain @interaction'",
     "update-changelog": "./update-changelog.sh"
