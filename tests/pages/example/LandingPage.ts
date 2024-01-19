@@ -4,6 +4,7 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test';
+import { UiType } from '../../models/types';
 
 export class LandingPage {
   readonly url: URL;
@@ -27,6 +28,36 @@ export class LandingPage {
   async goto(): Promise<void> {
     await this.page.bringToFront();
     await this.page.goto(this.url.toString());
+    await this.handleErrorPopUp();
+  }
+
+  async checkPageLabels(uiType: UiType): Promise<void> {
+    await this.page.locator('p', { hasText: 'built with o1js' }).isVisible();
+    switch (uiType) {
+      case 'next': {
+        await this.page
+          .locator('p', {
+            hasText:
+              'Get started by editing src/pages/index.js or src/pages/index.tsx',
+          })
+          .isVisible();
+        break;
+      }
+      case 'svelte': {
+        await this.page
+          .locator('p', {
+            hasText: 'Get started by editing src/routes/+page.svelte',
+          })
+          .isVisible();
+        break;
+      }
+      case 'nuxt': {
+        await this.page
+          .locator('p', { hasText: 'Get started by editing pages/index.vue' })
+          .isVisible();
+        break;
+      }
+    }
   }
 
   async openDocsPage(): Promise<void> {
@@ -63,9 +94,17 @@ export class LandingPage {
   private async openLinkInNewTab(locator: Locator): Promise<Page> {
     await this.page.bringToFront();
     const pagePromise = this.context.waitForEvent('page');
+    await this.handleErrorPopUp();
     await locator.click();
     const newPage = await pagePromise;
     await newPage.waitForLoadState();
     return newPage;
+  }
+
+  private async handleErrorPopUp(): Promise<void> {
+    const errorPopUp = this.page.getByLabel('Close');
+    if (await errorPopUp.isVisible()) {
+      await errorPopUp.click();
+    }
   }
 }

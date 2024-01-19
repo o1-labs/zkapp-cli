@@ -1,7 +1,5 @@
 import { expect } from '@playwright/test';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
-import { ExecaChildProcess } from 'execa';
-import fkill from 'fkill';
 import fs from 'node:fs';
 import path from 'node:path';
 import Constants from '../../src/lib/constants.js';
@@ -351,16 +349,5 @@ export function removeEnvCustomLoaders(): void {
       /--experimental-loader=[^\s]+/g,
       ''
     );
-  }
-}
-
-export async function killTheProcess(process: ExecaChildProcess | undefined) {
-  if (process && process.pid) {
-    console.info(`Killing the process with PID: ${process.pid}`);
-    await fkill(process.pid, {
-      force: true,
-      tree: true,
-      silent: false,
-    });
   }
 }

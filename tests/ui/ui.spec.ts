@@ -1,16 +1,14 @@
 import { test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
-import { ExecaChildProcess, execa } from 'execa';
 import fsExtra from 'fs-extra';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import portfinder from 'portfinder';
 import Constants from '../../src/lib/constants.js';
 import { LandingPage } from '../pages/example/LandingPage.js';
-import {
-  killTheProcess,
-  removeEnvCustomLoaders,
-} from '../utils/common-utils.js';
+import { closeBrowser } from '../utils/browser-utils.js';
+import { logProcessOutput, waitForServer } from '../utils/cli-utils.js';
+import { removeEnvCustomLoaders } from '../utils/common-utils.js';
 import { zkProject } from '../utils/project-utils.js';
 
 const actualUiTypes = Constants.uiTypes.filter(
@@ -25,18 +23,23 @@ test.describe('Users', () => {
       page,
       context,
     }) => {
+      // https://github.com/sveltejs/svelte/issues/8595
       test.skip(
         os.platform() === 'win32' && uiType === 'svelte',
-        'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
+        'Disabling tests involving zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
       );
 
-      const serverStdOut: string[] = [];
-      const serverStdErr: string[] = [];
       const devServerPort = await portfinder.getPortPromise();
       const devServerUrl = new URL(`http://localhost:${devServerPort}`);
       const projectName = crypto.randomUUID();
       const { spawn, cleanup, path } = await prepareEnvironment();
-      let devServerProcess: ExecaChildProcess | undefined = undefined;
+      /* eslint-disable no-unused-vars */
+      /* eslint-disable no-undef */
+      let killDevServerProcess: (signal: NodeJS.Signals) => void = () => {};
+      /* eslint-disable no-undef */
+      /* eslint-disable no-unused-vars */
+      let getDevServerStdout: () => string[] = () => [];
+      let getDevServerStderr: () => string[] = () => [];
       console.info(`[Test Execution] Path: ${path}`);
 
       try {
@@ -48,15 +51,16 @@ test.describe('Users', () => {
           await zkProject(projectName, uiType, true, spawn);
         });
         await test.step('Start Dev server', async () => {
-          devServerProcess = execa(
+          const { debug, getStdout, getStderr, kill } = await spawn(
             'npm',
-            ['run', 'dev', '--', '--port', `${devServerPort}`],
-            {
-              cwd: `${path}/${projectName}/ui`,
-            }
+            `run dev -- --port ${devServerPort}`,
+            `./${projectName}/ui`
           );
-          addServerOutputListeners(devServerProcess);
-          await waitForServer(devServerUrl);
+          debug();
+          killDevServerProcess = kill!;
+          getDevServerStdout = getStdout!;
+          getDevServerStderr = getStderr!;
+          await waitForServer(devServerUrl, getDevServerStdout);
         });
         await test.step('Interact with the zkApp UI in browser', async () => {
           const exampleLandingPage = new LandingPage(
@@ -65,6 +69,7 @@ test.describe('Users', () => {
             context
           );
           await exampleLandingPage.goto();
+          await exampleLandingPage.checkPageLabels(uiType);
           await exampleLandingPage.openDocsPage();
           await exampleLandingPage.openTutorialsPage();
           await exampleLandingPage.openQuestionsPage();
@@ -72,8 +77,11 @@ test.describe('Users', () => {
         });
       } finally {
         console.info('\nCleaning up...');
-        await killTheProcess(devServerProcess);
-        logServerOutput();
+        await closeBrowser(context);
+        // Investigate the issue with correct child processes termination in current setup.
+        // https://github.com/o1-labs/zkapp-cli/issues/558
+        killDevServerProcess('SIGTERM');
+        logProcessOutput(getDevServerStdout(), getDevServerStderr());
         try {
           fsExtra.rmdirSync(`${path}/${projectName}/ui`, {
             maxRetries: 3,
@@ -86,68 +94,6 @@ test.describe('Users', () => {
           );
         }
         await cleanup();
-      }
-
-      // The following 3 methods are part of the `test` class instance
-      // because we want tests to run in parallel.
-      function addServerOutputListeners(serverProcess: ExecaChildProcess) {
-        serverProcess.stdout?.on('data', (data) => {
-          serverStdOut.push(data.toString());
-        });
-        serverProcess.stderr?.on('data', (data) => {
-          serverStdErr.push(data.toString());
-        });
-      }
-
-      async function waitForServer(serverUrl: URL): Promise<void> {
-        const maxAttempts = 5;
-        const pollingIntervalMs = 3_000;
-        let currentAttempt = 1;
-        let isReady = false;
-
-        console.info('\n');
-        while (currentAttempt <= maxAttempts && !isReady) {
-          console.info(
-            `Waiting for server readiness. Attempt #${currentAttempt}`
-          );
-          if (
-            serverStdOut.some(
-              // We want to check data presence in process stdout independently
-              // because CLI output is usually formatted and colored using
-              // different libs and styles.
-              (item) =>
-                item.includes(`${serverUrl.protocol}`) &&
-                item.includes(`${serverUrl.hostname}`) &&
-                item.includes(`${serverUrl.port}`)
-            )
-          ) {
-            isReady = true;
-            break;
-          } else {
-            await new Promise((resolve) =>
-              setTimeout(resolve, pollingIntervalMs)
-            );
-          }
-          currentAttempt++;
-        }
-        if (!isReady) {
-          throw new Error('Maximum attempts reached. The server is not ready!');
-        } else {
-          console.info('\nServer is up and running!');
-        }
-      }
-
-      function logServerOutput() {
-        if (serverStdOut.length !== 0) {
-          console.info('\nServer StdOut:');
-          console.info(serverStdOut.join(''));
-          console.info('\n--------------------');
-        }
-        if (serverStdErr.length !== 0) {
-          console.info('\nServer StdErr:');
-          console.info(serverStdErr.join(''));
-          console.info('\n--------------------');
-        }
       }
     });
   }
