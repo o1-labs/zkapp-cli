@@ -169,4 +169,7 @@ export type ZkConfigCommandResults = {
 };
 
 export type UiType = (typeof CommonConstants.uiTypes)[number];
+
 export type ExampleType = (typeof CommonConstants.exampleTypes)[number];
+
+export type BrowserName = 'chromium' | 'firefox' | 'webkit';

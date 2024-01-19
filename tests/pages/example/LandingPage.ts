@@ -4,21 +4,31 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test';
-import { UiType } from '../../models/types';
+import { BrowserName, UiType } from '../../models/types';
 
 export class LandingPage {
   readonly url: URL;
   readonly page: Page;
-  context: BrowserContext;
+  readonly context: BrowserContext;
+  readonly browserName: BrowserName;
+  readonly uiType: UiType;
   readonly docsLink: Locator;
   readonly tutorialsLink: Locator;
   readonly questionsLink: Locator;
   readonly deployLink: Locator;
 
-  constructor(url: URL, page: Page, context: BrowserContext) {
+  constructor(
+    url: URL,
+    page: Page,
+    context: BrowserContext,
+    browserName: BrowserName,
+    uiType: UiType
+  ) {
     this.url = url;
     this.page = page;
     this.context = context;
+    this.browserName = browserName;
+    this.uiType = uiType;
     this.docsLink = page.locator('a', { hasText: 'DOCS' });
     this.tutorialsLink = page.locator('a', { hasText: 'TUTORIALS' });
     this.questionsLink = page.locator('a', { hasText: 'QUESTIONS' });
@@ -28,12 +38,16 @@ export class LandingPage {
   async goto(): Promise<void> {
     await this.page.bringToFront();
     await this.page.goto(this.url.toString());
-    await this.handleErrorPopUp();
+    // We need to handle the dev server's error pop-up (WebKit browser + NextJS project).
+    // https://github.com/o1-labs/zkapp-cli/issues/559
+    if (this.browserName === 'webkit' && this.uiType === 'next') {
+      await this.handleErrorPopUp();
+    }
   }
 
-  async checkPageLabels(uiType: UiType): Promise<void> {
+  async checkPageLabels(): Promise<void> {
     await this.page.locator('p', { hasText: 'built with o1js' }).isVisible();
-    switch (uiType) {
+    switch (this.uiType) {
       case 'next': {
         await this.page
           .locator('p', {
@@ -94,7 +108,6 @@ export class LandingPage {
   private async openLinkInNewTab(locator: Locator): Promise<Page> {
     await this.page.bringToFront();
     const pagePromise = this.context.waitForEvent('page');
-    await this.handleErrorPopUp();
     await locator.click();
     const newPage = await pagePromise;
     await newPage.waitForLoadState();
@@ -102,9 +115,12 @@ export class LandingPage {
   }
 
   private async handleErrorPopUp(): Promise<void> {
-    const errorPopUp = this.page.getByLabel('Close');
-    if (await errorPopUp.isVisible()) {
-      await errorPopUp.click();
+    const errorPopUpCloseButton = this.page.locator(
+      "button[aria-label='Close']"
+    );
+    await expect(errorPopUpCloseButton).toBeVisible({ timeout: 1 * 60 * 1000 });
+    if (await errorPopUpCloseButton.isVisible()) {
+      await errorPopUpCloseButton.click();
     }
   }
 }

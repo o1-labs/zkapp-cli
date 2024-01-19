@@ -22,22 +22,19 @@ test.describe('Users', () => {
     test(`should be able to interact in browser with zkApp project of ${uiType.toUpperCase()} UI type using Dev server, @parallel @e2e @in-browser @${uiType}-ui`, async ({
       page,
       context,
+      browserName,
     }) => {
       // https://github.com/sveltejs/svelte/issues/8595
       test.skip(
         os.platform() === 'win32' && uiType === 'svelte',
-        'Disabling tests involving zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
+        'Skipping tests that involve zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI.'
       );
 
       const devServerPort = await portfinder.getPortPromise();
       const devServerUrl = new URL(`http://localhost:${devServerPort}`);
       const projectName = crypto.randomUUID();
       const { spawn, cleanup, path } = await prepareEnvironment();
-      /* eslint-disable no-unused-vars */
-      /* eslint-disable no-undef */
-      let killDevServerProcess: (signal: NodeJS.Signals) => void = () => {};
-      /* eslint-disable no-undef */
-      /* eslint-disable no-unused-vars */
+      let killDevServerProcess: (signal: NodeJS.Signals) => void = () => {}; // eslint-disable-line
       let getDevServerStdout: () => string[] = () => [];
       let getDevServerStderr: () => string[] = () => [];
       console.info(`[Test Execution] Path: ${path}`);
@@ -66,10 +63,12 @@ test.describe('Users', () => {
           const exampleLandingPage = new LandingPage(
             devServerUrl,
             page,
-            context
+            context,
+            browserName,
+            uiType
           );
           await exampleLandingPage.goto();
-          await exampleLandingPage.checkPageLabels(uiType);
+          await exampleLandingPage.checkPageLabels();
           await exampleLandingPage.openDocsPage();
           await exampleLandingPage.openTutorialsPage();
           await exampleLandingPage.openQuestionsPage();

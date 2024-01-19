@@ -39,7 +39,7 @@ test.describe('zkApp-CLI', () => {
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
       test.skip(
         os.platform() === 'win32' && uiType === 'svelte',
-        'Disabling tests involving zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
+        'Skipping tests that involve zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI.'
       );
 
       for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
