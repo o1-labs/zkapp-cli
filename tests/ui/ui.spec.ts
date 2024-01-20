@@ -87,12 +87,12 @@ test.describe('Users', () => {
             retryDelay: 500,
             recursive: true,
           });
+          await cleanup();
         } catch (e) {
           console.error(
-            `Failed to remove ${path}/${projectName}/ui directory: ${e}`
+            `Failed to cleanup path ${path}/${projectName} with error: ${e}`
           );
         }
-        await cleanup();
       }
     });
   }
