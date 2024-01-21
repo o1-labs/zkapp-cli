@@ -48,9 +48,21 @@ test.describe('Users', () => {
           await zkProject(projectName, uiType, true, spawn);
         });
         await test.step('Start Dev server', async () => {
+          let devServerCommand: string = '';
+          switch (uiType) {
+            case 'next':
+              devServerCommand = 'next';
+              break;
+            case 'svelte':
+              devServerCommand = 'vite';
+              break;
+            case 'nuxt':
+              devServerCommand = 'nuxt';
+              break;
+          }
           const { debug, getStdout, getStderr, kill } = await spawn(
-            'npm',
-            `run dev -- --port ${devServerPort}`,
+            'npx',
+            `${devServerCommand} dev --port ${devServerPort}`,
             `./${projectName}/ui`
           );
           debug();
@@ -79,7 +91,7 @@ test.describe('Users', () => {
         await closeBrowser(context);
         // Investigate the issue with correct child processes termination in current setup.
         // https://github.com/o1-labs/zkapp-cli/issues/558
-        killDevServerProcess('SIGTERM');
+        killDevServerProcess('SIGKILL');
         logProcessOutput(getDevServerStdout(), getDevServerStderr());
         try {
           fsExtra.rmdirSync(`${path}/${projectName}/ui`, {
@@ -90,7 +102,7 @@ test.describe('Users', () => {
           await cleanup();
         } catch (e) {
           console.error(
-            `Failed to cleanup path ${path}/${projectName} with error: ${e}`
+            `Failed to cleanup the path ${path}/${projectName} with error: ${e}`
           );
         }
       }
