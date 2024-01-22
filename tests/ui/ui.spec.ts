@@ -26,8 +26,9 @@ test.describe('Users', () => {
     }) => {
       // https://github.com/sveltejs/svelte/issues/8595
       test.skip(
-        os.platform() === 'win32' && uiType === 'svelte',
-        'Skipping tests that involve zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI.'
+        (os.platform() === 'win32' && uiType === 'svelte') ||
+          (browserName === 'webkit' && os.platform() !== 'darwin'),
+        'Skipping tests in certain conditions (zkApp project generation for Svelte UI type on Windows and Webkit browser on non-Darwin platforms).'
       );
 
       const devServerPort = await portfinder.getPortPromise();
