@@ -1,4 +1,4 @@
-import { type PlaywrightTestConfig } from '@playwright/test';
+import { devices, type PlaywrightTestConfig } from '@playwright/test';
 import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.js';
 
 /**
@@ -42,30 +42,30 @@ const config: PlaywrightTestConfig = {
       name: 'cli',
       testMatch: '**/cli/**/*.spec.ts',
     },
-    // {
-    //   name: 'chromium-desktop',
-    //   use: {
-    //     browserName: 'chromium',
-    //     ...devices['Desktop Chrome'],
-    //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
-    // },
-    // {
-    //   name: 'firefox-desktop',
-    //   use: {
-    //     browserName: 'firefox',
-    //     ...devices['Desktop Firefox'],
-    //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
-    // },
-    // {
-    //   name: 'webkit-desktop',
-    //   use: {
-    //     browserName: 'webkit',
-    //     ...devices['Desktop Safari'],
-    //   },
-    //   testIgnore: ['**/cli/**/*.spec.ts'],
-    // },
+    {
+      name: 'chromium-desktop',
+      use: {
+        browserName: 'chromium',
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: ['**/ui/**/*.spec.ts'],
+    },
+    {
+      name: 'firefox-desktop',
+      use: {
+        browserName: 'firefox',
+        ...devices['Desktop Firefox'],
+      },
+      testMatch: ['**/ui/**/*.spec.ts'],
+    },
+    {
+      name: 'webkit-desktop',
+      use: {
+        browserName: 'webkit',
+        ...devices['Desktop Safari'],
+      },
+      testMatch: ['**/ui/**/*.spec.ts'],
+    },
   ],
   webServer: {
     // TODO: We can't use "ts-node" with Npx and Node20 because of the https://github.com/TypeStrong/ts-node/issues/1997

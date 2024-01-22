@@ -35,10 +35,11 @@ test.describe('zkApp-CLI', () => {
 
   // Tests for project generation of each UI type
   for (const uiType of Constants.uiTypes) {
+    // https://github.com/sveltejs/svelte/issues/8595
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
       test.skip(
         os.platform() === 'win32' && uiType === 'svelte',
-        'Disabling interactive zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI'
+        'Skipping tests that involve zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI.'
       );
 
       for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
