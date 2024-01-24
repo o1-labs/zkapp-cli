@@ -203,7 +203,18 @@ const network = Mina.Network({
   archive: 'http://localhost:8282',
   lightnetAccountManager: 'http://localhost:8181',
 });
+
+// Fee payer setup
+const feePayerPrivateKey = (await Lightnet.acquireKeyPair()).privateKey
+const feePayerAccount = feePayerPrivateKey.toPublicKey();
+
+// Fund the fee payer
+Mina.faucet(feePayerAccount);
 ```
+
+### Block Explorer
+
+If you require a block explorer, you can use [this lightweight one](https://github.com/o1-labs/mina-lightweight-explorer) alongside the lightnet.
 
 ## License
 
