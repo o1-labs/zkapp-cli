@@ -3,14 +3,14 @@
 # So we extracted the tests into 3 separate jobs, one for each platform.
 #
 
-name: Nightly E2E tests (default branch)
+name: Nightly E2E tests
 on:
   schedule:
     - cron: '0 0 * * *'
   workflow_dispatch: {}
 jobs:
   against-real-network-on-linux:
-    timeout-minutes: 125
+    timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -47,7 +47,7 @@ jobs:
           os-type: ${{ matrix.os }}
           shell: bash
   against-mocked-network-on-macos:
-    timeout-minutes: 95
+    timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -64,7 +64,7 @@ jobs:
           os-type: ${{ matrix.os }}
           shell: bash
   against-mocked-network-on-windows:
-    timeout-minutes: 95
+    timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true

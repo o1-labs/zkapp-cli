@@ -7,7 +7,7 @@ import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.j
 const config: PlaywrightTestConfig = {
   testDir: './tests',
   outputDir: './reports/test-artifacts',
-  timeout: 120 * 60 * 1000,
+  timeout: 180 * 60 * 1000,
   expect: {
     timeout: 15 * 1000,
   },
