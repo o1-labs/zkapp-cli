@@ -180,6 +180,31 @@ After you run `zk config`, the `zk deploy` command allows you to deploy a smart 
 
 Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` this _same_ smart contract automatically deploys to this alias. See [Tutorial 3: Deploy to a Live Network](https://docs.minaprotocol.com/zkapps/tutorials/deploying-to-a-network).
 
+## Running a Lightnet
+
+Prerequisite: Must have docker running locally with at least 8Gb of RAM allocated
+
+```sh
+zk lightnet start
+```
+
+This command will run a lightnet locally which can be used for interacting with a zkApp locally.  This network can be connected to in the following way:
+
+```js
+import {
+  Lightnet,
+  Mina,
+  ...
+} from 'o1js';
+
+// Network configuration
+const network = Mina.Network({
+  mina: 'http://localhost:8080/graphql',
+  archive: 'http://localhost:8282',
+  lightnetAccountManager: 'http://localhost:8181',
+});
+```
+
 ## License
 
 [Apache-2.0](https://github.com/o1-labs/zkapp-cli/blob/main/LICENSE)
