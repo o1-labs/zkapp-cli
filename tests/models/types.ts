@@ -138,6 +138,7 @@ export type CommandOptions = {
 
 export type ConfigOptions = {
   processHandler: CLITestEnvironment['spawn'];
+  networkId: string;
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;
@@ -158,6 +159,7 @@ export type CommandResults = {
 
 export type ZkConfigCommandResults = {
   workDir: string;
+  networkId: string;
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;

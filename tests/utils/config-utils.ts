@@ -23,6 +23,7 @@ export async function zkConfig(
   const command = 'config';
   const {
     processHandler,
+    networkId,
     deploymentAlias,
     feePayerAlias,
     feePayerAccount,
@@ -99,6 +100,10 @@ export async function zkConfig(
 
   const interactiveDialog = {
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
+    'Choose the target network ID': generateInputsForOptionSelection(
+      networkId,
+      Constants.networkIds.map((networkId) => networkId.name)
+    ),
     'Set the Mina GraphQL API URL to deploy to': [minaGraphQlEndpoint, 'enter'],
     'Set transaction fee to use when deploying (in MINA)': [
       transactionFee,
@@ -137,6 +142,7 @@ export async function maybeZkConfig(
 export function checkZkConfig(options: ZkConfigCommandResults): void {
   const {
     workDir,
+    networkId,
     deploymentAlias,
     feePayerAlias,
     feePayerAccount,
@@ -189,6 +195,7 @@ export function checkZkConfig(options: ZkConfigCommandResults): void {
   cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
   expect(JSON.stringify(config)).toEqual(
     JSON.stringify({
+      networkId,
       url: minaGraphQlEndpoint,
       keyPath: `keys/${sanitizedDeploymentAlias}.json`,
       feepayerKeyPath: cachedFeePayerAccountPath,

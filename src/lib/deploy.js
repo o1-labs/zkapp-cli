@@ -389,6 +389,7 @@ export async function deploy({ alias, yes }) {
   }
 
   let transaction = await step('Build transaction', async () => {
+    // TODO: Respect the config.networkId property.
     let Network = Mina.Network(graphQlUrl);
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {

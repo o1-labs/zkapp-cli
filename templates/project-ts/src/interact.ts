@@ -31,6 +31,7 @@ type Config = {
   deployAliases: Record<
     string,
     {
+      networkId: string;
       url: string;
       keyPath: string;
       fee: string;
@@ -53,6 +54,7 @@ let feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
 let zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);
 
 // set up Mina instance and contract we interact with
+// TODO: Respect the config.networkId property.
 const Network = Mina.Network(config.url);
 const fee = Number(config.fee) * 1e9; // in nanomina (1 billion = 1.0 mina)
 Mina.setActiveInstance(Network);

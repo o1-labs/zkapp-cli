@@ -30,6 +30,7 @@ export async function zkDeploy(
   cancelDeployment = false
 ): Promise<CommandResults> {
   const projectName = crypto.randomUUID();
+  const networkId = 'Testnet';
   const deploymentAlias = crypto.randomUUID();
   const feePayerAlias = crypto.randomUUID();
   const feePayerAccount = await acquireAvailableAccount();
@@ -68,6 +69,7 @@ export async function zkDeploy(
     }
     await zkConfig({
       processHandler,
+      networkId,
       deploymentAlias,
       feePayerAlias,
       feePayerAccount,

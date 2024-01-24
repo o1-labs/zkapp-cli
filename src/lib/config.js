@@ -159,6 +159,7 @@ async function config() {
   // If user presses "ctrl + c" during interactive prompt, exit.
   let {
     deployAliasName,
+    networkId,
     url,
     fee,
     feepayer,
@@ -210,6 +211,7 @@ async function config() {
       process.exit(1);
     }
     config.deployAliases[deployAliasName] = {
+      networkId,
       url,
       keyPath: `keys/${deployAliasName}.json`,
       feepayerKeyPath: `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,

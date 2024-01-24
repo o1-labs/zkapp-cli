@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { PrivateKey } from 'o1js';
+import Constants from './constants.js';
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.
@@ -41,6 +42,20 @@ const prompts = {
           .toLowerCase()
           .trim()
           .replace(/\s{1,}/g, '-'),
+    },
+    {
+      type: 'select',
+      name: 'networkId',
+      initial: 0, // 0 = testnet, 1 = mainnet, change it to 1 after the HF
+      choices: Constants.networkIds,
+      message: (state) => {
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
+        return style('Choose the target network ID:');
+      },
+      result() {
+        return this.focused.value;
+      },
     },
     {
       type: 'input',

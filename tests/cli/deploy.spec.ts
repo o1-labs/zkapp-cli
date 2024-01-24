@@ -142,4 +142,6 @@ test.describe('zkApp-CLI', () => {
       await cleanup();
     }
   });
+
+  // TODO: Respect the config.networkId property.
 });
