@@ -257,7 +257,12 @@ export async function lightnetStatus({
     );
     shell.exit(1);
   }
-  console.log('\n' + chalk.reset.bold('Lightweight Mina Blockchain Network'));
+  console.log(chalk.reset.bold('\nLightweight Mina blockchain network'));
+  console.log(
+    chalk.reset(
+      '\nMore information can be found at:\nhttps://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet\n'
+    )
+  );
   if (
     DockerContainerState.RUNNING === containerState &&
     fs.existsSync(lightnetConfigFile)
@@ -361,10 +366,10 @@ export async function lightnetFollowLogs({ process, debug }) {
 }
 
 /**
- * Launches the lightweight Mina Explorer.
+ * Launches the lightweight Mina explorer.
  * @param {object}  argv - The arguments object provided by yargs.
- * @param {string}  argv.use - The version of the lightweight Mina Explorer to use.
- * @param {boolean} argv.list - Whether to list the available versions of the lightweight Mina Explorer.
+ * @param {string}  argv.use - The version of the lightweight Mina explorer to use.
+ * @param {boolean} argv.list - Whether to list the available versions of the lightweight Mina explorer.
  * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
@@ -381,7 +386,7 @@ async function printExplorerVersions() {
   try {
     const releasesPrintLimit = 5;
     const border = getBorderCharacters('norc');
-    const boldTitle = chalk.reset.bold('Lightweight Mina Explorer versions');
+    const boldTitle = chalk.reset.bold('Lightweight Mina explorer versions');
     const versions = [
       [boldTitle, '', ''],
       ['Version', 'Published on', 'Is in use?'],
@@ -435,7 +440,7 @@ async function printExplorerVersions() {
     printErrorIfDebug(error);
     console.log(
       chalk.red(
-        '\nIssue happened while fetching the lightweight Mina Explorer available versions!'
+        '\nIssue happened while fetching the lightweight Mina explorer available versions!'
       )
     );
     shell.exit(1);
@@ -448,7 +453,7 @@ async function launchExplorer(use) {
     if (releases.length === 0) {
       console.log(
         chalk.red(
-          '\nNo lightweight Mina Explorer versions are available yet.\nPlease try again later.'
+          '\nNo lightweight Mina explorer versions are available yet.\nPlease try again later.'
         )
       );
       shell.exit(1);
@@ -464,19 +469,19 @@ async function launchExplorer(use) {
     if (!release) {
       console.log(
         chalk.red(
-          `\nThe specified version ("${useVersion}") of the lightweight Mina Explorer does not exist!`
+          `\nThe specified version ("${useVersion}") of the lightweight Mina explorer does not exist!`
         )
       );
       shell.exit(1);
     }
     await handleExplorerReleasePresence(explorerReleasePath, release);
     await updateCurrentExplorerVersion(useVersion);
-    await step('Launching the lightweight Mina Explorer', async () => {
+    await step('Launching the lightweight Mina explorer', async () => {
       opener(`file://${explorerReleaseIndexFilePath}`);
     });
     console.log(
       chalk.reset(
-        '\nThe lightweight Mina Explorer is available at the following path:' +
+        '\nThe lightweight Mina explorer is available at the following path:' +
           '\n\n' +
           chalk.green.bold(explorerReleaseIndexFilePath) +
           '\n'
@@ -486,7 +491,7 @@ async function launchExplorer(use) {
     printErrorIfDebug(error);
     console.log(
       chalk.red(
-        '\nIssue happened while launching the lightweight Mina Explorer!'
+        '\nIssue happened while launching the lightweight Mina explorer!'
       )
     );
     shell.exit(1);
@@ -504,7 +509,7 @@ async function updateCurrentExplorerVersion(version) {
   const currentVersion = getCurrentExplorerVersion();
   if (currentVersion !== version) {
     await step(
-      'Updating the current lightweight Mina Explorer version in use',
+      'Updating the current lightweight Mina explorer version in use',
       async () => {
         let explorerConfig = { version };
         if (fs.existsSync(lightnetExplorerConfigFile)) {
@@ -524,7 +529,7 @@ async function updateCurrentExplorerVersion(version) {
 async function fetchExplorerReleases() {
   let releases = [];
   await step(
-    'Fetching the lightweight Mina Explorer releases information',
+    'Fetching the lightweight Mina explorer releases information',
     async () => {
       const response = await fetch(
         'https://api.github.com/repos/o1-labs/mina-lightweight-explorer/releases',
@@ -549,7 +554,7 @@ async function fetchExplorerReleases() {
 
 async function downloadExplorerRelease(release) {
   await step(
-    'Downloading the lightweight Mina Explorer release bundle',
+    'Downloading the lightweight Mina explorer release bundle',
     async () => {
       const response = await fetch(release.zipball_url);
       if (!response.ok) {
