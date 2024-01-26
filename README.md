@@ -2,7 +2,7 @@
 
 The zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
 
-Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the Mina zkApp CLI.
+Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the zkApp CLI.
 
 ## Getting Started
 
@@ -36,7 +36,7 @@ You are prompted to install the new version if you are running an earlier zkApp 
 
 You are not prompted to update if you are using an earlier patch version. For example, you are not notified to upgrade when you are running 0.10.1, and the current version is 0.10.2.
 
-To update to the latest version of the Mina zkApp CLI:
+To update to the latest version of the zkApp CLI:
 
 ```sh
 $ npm update -g zkapp-cli
@@ -46,9 +46,9 @@ $ npm update -g zkapp-cli
 
 To use the zkApp CLI and o1js, your environment requires:
 
-- NodeJS v16 and later
-- NPM v8 and later
-- Git v2 and later
+- NodeJS v18 and later
+- NPM v10 and later
+- git v2 and later
 
 Use a package manager to install the required versions and upgrade older versions if needed. Package managers for the supported environments are:
 
