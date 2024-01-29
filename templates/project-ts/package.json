@@ -36,6 +36,7 @@
     "typescript": "^4.7.2"
   },
   "peerDependencies": {
-    "o1js": "0.15.*"
+    "o1js": "^0.15.4",
+    "mina-signer": "^2.1.2"
   }
 }

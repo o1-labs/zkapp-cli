@@ -13,6 +13,7 @@
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import fs from 'fs/promises';
+import { NetworkId } from 'mina-signer';
 import { Mina, PrivateKey } from 'o1js';
 import { Add } from './Add.js';
 
@@ -25,13 +26,14 @@ Usage:
 node build/src/interact.js <deployAlias>
 `);
 Error.stackTraceLimit = 1000;
+const DEFAULT_NETWORK_ID = 'testnet';
 
 // parse config and private key from file
 type Config = {
   deployAliases: Record<
     string,
     {
-      networkId: string;
+      networkId?: string;
       url: string;
       keyPath: string;
       fee: string;
@@ -54,13 +56,13 @@ let feepayerKey = PrivateKey.fromBase58(feepayerKeysBase58.privateKey);
 let zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);
 
 // set up Mina instance and contract we interact with
-// TODO: Respect the config.networkId property.
-// After https://github.com/o1-labs/o1js/pull/1387
-// const Network = Mina.Network({
-//   networkId: config.networkId,
-//   mina: config.url,
-// });
-const Network = Mina.Network(config.url);
+const Network = Mina.Network({
+  // We need to default to the testnet networkId if none is specified for this deploy alias in config.json
+  // This is to ensure the backward compatibility.
+  networkId: (config.networkId ?? DEFAULT_NETWORK_ID) as NetworkId,
+  mina: config.url,
+});
+// const Network = Mina.Network(config.url);
 const fee = Number(config.fee) * 1e9; // in nanomina (1 billion = 1.0 mina)
 Mina.setActiveInstance(Network);
 let feepayerAddress = feepayerKey.toPublicKey();
