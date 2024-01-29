@@ -46,7 +46,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should not create deployment alias if procedure was cancelled, @parallel @smoke @config @fail-cases`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'Berkeley testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -94,7 +94,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should properly validate input field values, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'Berkeley testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     // Serial because of  the following new aliases
@@ -241,7 +241,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment alias in case of no cached fee payer account available, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'Berkeley testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -294,7 +294,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment aliases using available fee payer account management approaches, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'Berkeley testnet';
     let deploymentAlias = crypto.randomUUID();
     let feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
