@@ -19,11 +19,11 @@ const Constants = Object.freeze({
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
   networkIds: [
     {
-      name: 'Testnet',
+      name: 'Berkeley testnet',
       value: 'testnet',
     },
     {
-      name: 'Mainnet',
+      name: 'Berkeley mainnet',
       value: 'mainnet',
     },
   ],
