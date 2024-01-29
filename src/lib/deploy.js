@@ -11,6 +11,8 @@ import util from 'util';
 import step from './helpers.js';
 
 const log = console.log;
+// TODO: Respect the config.networkId property.
+// const DEFAULT_NETWORK_ID = 'testnet';
 const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
@@ -221,6 +223,9 @@ export async function deploy({ alias, yes }) {
   }
   let { PrivateKey, Mina, AccountUpdate } = await import(o1jsImportPath);
 
+  // TODO: Respect the config.networkId property.
+  // const networkId =
+  //   config.deployAliases[alias]?.networkId ?? DEFAULT_NETWORK_ID;
   const graphQlUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
 
   const { data: nodeStatus } = await sendGraphQL(
@@ -390,7 +395,12 @@ export async function deploy({ alias, yes }) {
 
   let transaction = await step('Build transaction', async () => {
     // TODO: Respect the config.networkId property.
-    let Network = Mina.Network(graphQlUrl);
+    // After https://github.com/o1-labs/o1js/pull/1387
+    // const Network = Mina.Network({
+    //   networkId: networkId,
+    //   mina: graphQlUrl,
+    // });
+    const Network = Mina.Network(graphQlUrl);
     Mina.setActiveInstance(Network);
     let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
       AccountUpdate.fundNewAccount(feepayerAddress);

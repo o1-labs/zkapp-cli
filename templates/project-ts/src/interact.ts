@@ -55,6 +55,11 @@ let zkAppKey = PrivateKey.fromBase58(zkAppKeysBase58.privateKey);
 
 // set up Mina instance and contract we interact with
 // TODO: Respect the config.networkId property.
+// After https://github.com/o1-labs/o1js/pull/1387
+// const Network = Mina.Network({
+//   networkId: config.networkId,
+//   mina: config.url,
+// });
 const Network = Mina.Network(config.url);
 const fee = Number(config.fee) * 1e9; // in nanomina (1 billion = 1.0 mina)
 Mina.setActiveInstance(Network);
