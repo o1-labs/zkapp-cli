@@ -102,7 +102,7 @@ export async function zkConfig(
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
     'Choose the target network ID': generateInputsForOptionSelection(
       networkId,
-      Constants.networkIds.map((networkId) => networkId.name)
+      Constants.networkIds
     ),
     'Set the Mina GraphQL API URL to deploy to': [minaGraphQlEndpoint, 'enter'],
     'Set transaction fee to use when deploying (in MINA)': [

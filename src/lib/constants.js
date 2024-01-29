@@ -4,7 +4,7 @@ import path from 'path';
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
  * @typedef {'sudoku' | 'tictactoe'} ExampleType
- * @typedef {{ name: string, value: string }} NetworkId
+ * @typedef {'testnet' | 'mainnet'} NetworkId
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
@@ -17,16 +17,7 @@ const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
   exampleTypes: ['sudoku', 'tictactoe'],
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
-  networkIds: [
-    {
-      name: 'Berkeley testnet',
-      value: 'testnet',
-    },
-    {
-      name: 'Berkeley mainnet',
-      value: 'mainnet',
-    },
-  ],
+  networkIds: ['testnet', 'mainnet'],
   lightnetWorkDir: path.resolve(`${homedir()}/.cache/zkapp-cli/lightnet`),
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],

@@ -30,7 +30,7 @@ export async function zkDeploy(
   cancelDeployment = false
 ): Promise<CommandResults> {
   const projectName = crypto.randomUUID();
-  const networkId = 'Berkeley testnet';
+  const networkId = 'testnet';
   const deploymentAlias = crypto.randomUUID();
   const feePayerAlias = crypto.randomUUID();
   const feePayerAccount = await acquireAvailableAccount();

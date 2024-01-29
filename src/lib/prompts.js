@@ -47,7 +47,10 @@ const prompts = {
       type: 'select',
       name: 'networkId',
       initial: 0, // 0 = testnet, 1 = mainnet, change it to 1 after the HF
-      choices: Constants.networkIds,
+      choices: Constants.networkIds.map((networkId) => ({
+        name: capitalize(networkId),
+        value: networkId,
+      })),
       message: (state) => {
         const style =
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
@@ -287,4 +290,9 @@ function getFeepayorChoices(cachedFeepayerAliases) {
 
   return choices;
 }
+
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export default prompts;
