@@ -3,6 +3,7 @@ import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import Constants from '../../src/lib/constants.js';
+import { generateInputsForOptionSelection } from '../utils/cli-utils.js';
 import {
   TestConstants,
   cleanupFeePayerCache,
@@ -46,7 +47,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should not create deployment alias if procedure was cancelled, @parallel @smoke @config @fail-cases`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -94,7 +95,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should properly validate input field values, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     // Serial because of  the following new aliases
@@ -162,6 +163,10 @@ test.describe('zkApp-CLI', () => {
               newDeploymentAlias,
               'enter',
             ],
+            'Choose the target network ID': generateInputsForOptionSelection(
+              networkId,
+              Constants.networkIds
+            ),
             'Set the Mina GraphQL API URL to deploy to': ['enter'],
             // TODO: Add more URL validation cases after the fix of:
             // - https://github.com/o1-labs/zkapp-cli/issues/428
@@ -241,7 +246,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment alias in case of no cached fee payer account available, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -294,7 +299,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment aliases using available fee payer account management approaches, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'Testnet';
+    const networkId = 'testnet';
     let deploymentAlias = crypto.randomUUID();
     let feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
