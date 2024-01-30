@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
+import { NetworkId } from 'mina-signer';
 import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { executeInteractiveCommand } from '../utils/cli-utils.js';
@@ -64,7 +65,7 @@ test.describe('Users', () => {
 
   test(`should be able to interact on-chain with deployed zkApp, @parallel @smoke @on-chain @interaction`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -83,6 +84,7 @@ test.describe('Users', () => {
       await test.step('Deployment alias configuration', async () => {
         await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
           networkId,
           deploymentAlias,
           feePayerAlias,
@@ -139,8 +141,6 @@ test.describe('Users', () => {
       await cleanup();
     }
   });
-
-  // TODO: Respect the config.networkId property.
 });
 
 async function checkZkAppInteraction(

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
+import { NetworkId } from 'mina-signer';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import Constants from '../../src/lib/constants.js';
@@ -47,7 +48,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should not create deployment alias if procedure was cancelled, @parallel @smoke @config @fail-cases`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -62,6 +63,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('Deployment alias creation cancellation', async () => {
         const { exitCode } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
           networkId,
           deploymentAlias,
           feePayerAlias,
@@ -95,7 +97,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should properly validate input field values, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     // Serial because of  the following new aliases
@@ -113,6 +115,7 @@ test.describe('zkApp-CLI', () => {
         await zkProject(projectName, 'none', true, spawn);
         await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
           networkId,
           deploymentAlias,
           feePayerAlias,
@@ -246,7 +249,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment alias in case of no cached fee payer account available, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -266,6 +269,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('Deployment alias creation and results validation', async () => {
         const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
           networkId,
           deploymentAlias,
           feePayerAlias,
@@ -299,7 +303,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment aliases using available fee payer account management approaches, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId: NetworkId = 'testnet';
     let deploymentAlias = crypto.randomUUID();
     let feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -323,6 +327,7 @@ test.describe('zkApp-CLI', () => {
         await test.step(`Deployment alias creation (feePayerMgmtType=${feePayerMgmtType}) and results validation`, async () => {
           const { exitCode, stdOut } = await zkConfig({
             processHandler: spawn,
+            workDir: `${path}/${projectName}`,
             networkId,
             deploymentAlias,
             feePayerAlias,
@@ -352,6 +357,7 @@ test.describe('zkApp-CLI', () => {
       await test.step(`Deployment alias creation (feePayerMgmtType=another) and results validation`, async () => {
         const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
           networkId,
           deploymentAlias,
           feePayerAlias,

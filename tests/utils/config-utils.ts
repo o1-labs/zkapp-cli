@@ -23,6 +23,7 @@ export async function zkConfig(
   const command = 'config';
   const {
     processHandler,
+    workDir,
     networkId,
     deploymentAlias,
     feePayerAlias,
@@ -100,10 +101,9 @@ export async function zkConfig(
 
   const interactiveDialog = {
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
-    'Choose the target network ID': generateInputsForOptionSelection(
-      networkId,
-      Constants.networkIds
-    ),
+    'Choose the target network ID': networkId
+      ? generateInputsForOptionSelection(networkId, Constants.networkIds)
+      : ['enter'],
     'Set the Mina GraphQL API URL to deploy to': [minaGraphQlEndpoint, 'enter'],
     'Set transaction fee to use when deploying (in MINA)': [
       transactionFee,
@@ -120,6 +120,19 @@ export async function zkConfig(
     waitForCompletion,
     interactiveDialog,
   });
+
+  if (!networkId) {
+    const configFilePath = `${workDir}/config.json`;
+    const config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+    console.info(
+      `Source ${configFilePath} content:\n${JSON.stringify(config)}`
+    );
+    delete config.deployAliases[deploymentAlias].networkId;
+    fs.writeFileSync(configFilePath, JSON.stringify(config));
+    console.info(
+      `Updated ${configFilePath} content:\n${JSON.stringify(config)}`
+    );
+  }
 
   console.info(`[Config CLI StdOut] zk ${command}: ${stdOut}`);
   console.info(`[Config CLI StdErr] zk ${command}: ${stdErr}`);
