@@ -64,7 +64,7 @@ test.describe('Users', () => {
 
   test(`should be able to interact on-chain with deployed zkApp, @parallel @smoke @on-chain @interaction`, async () => {
     const projectName = crypto.randomUUID();
-    const networkId = 'testnet';
+    const networkId = 'Testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
