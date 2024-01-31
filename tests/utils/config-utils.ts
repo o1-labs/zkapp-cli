@@ -101,7 +101,7 @@ export async function zkConfig(
 
   const interactiveDialog = {
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
-    'Choose the target network ID': networkId
+    'Choose the target network': networkId
       ? generateInputsForOptionSelection(networkId, Constants.networkIds)
       : ['enter'],
     'Set the Mina GraphQL API URL to deploy to': [minaGraphQlEndpoint, 'enter'],

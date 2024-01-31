@@ -166,7 +166,7 @@ test.describe('zkApp-CLI', () => {
               newDeploymentAlias,
               'enter',
             ],
-            'Choose the target network ID': generateInputsForOptionSelection(
+            'Choose the target network': generateInputsForOptionSelection(
               networkId,
               Constants.networkIds
             ),

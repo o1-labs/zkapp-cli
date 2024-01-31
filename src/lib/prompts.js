@@ -54,7 +54,7 @@ const prompts = {
       message: (state) => {
         const style =
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
-        return style('Choose the target network ID:');
+        return style('Choose the target network:');
       },
       result() {
         return this.focused.value;

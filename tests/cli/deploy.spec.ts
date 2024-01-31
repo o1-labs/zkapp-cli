@@ -4,7 +4,10 @@ import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { removeEnvCustomLoaders } from '../utils/common-utils.js';
 import { checkZkDeploy, zkDeploy } from '../utils/deploy-utils.js';
-import { getMempoolTxns } from '../utils/network-utils.js';
+import {
+  getMempoolTxns,
+  isMockedMinaGraphQlEndpointInUse,
+} from '../utils/network-utils.js';
 import { zkProject } from '../utils/project-utils.js';
 
 test.describe('zkApp-CLI', () => {
@@ -148,6 +151,11 @@ test.describe('zkApp-CLI', () => {
   });
 
   test(`should not deploy zkApp configured with 'mainnet' network ID against the network respecting the 'testnet' one, @parallel @smoke @deployment`, async () => {
+    test.skip(
+      await isMockedMinaGraphQlEndpointInUse(),
+      'Skipping tests for environments that use mocked GraphQL implementation'
+    );
+
     const { spawn, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
