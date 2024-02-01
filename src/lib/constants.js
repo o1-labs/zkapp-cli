@@ -4,18 +4,20 @@ import path from 'path';
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
  * @typedef {'sudoku' | 'tictactoe'} ExampleType
+ * @typedef {'testnet' | 'mainnet'} NetworkId
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
  * @typedef {'o1js-main' | 'berkeley' | 'develop'} LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[] }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[] }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
   exampleTypes: ['sudoku', 'tictactoe'],
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
+  networkIds: ['testnet', 'mainnet'],
   lightnetWorkDir: path.resolve(`${homedir()}/.cache/zkapp-cli/lightnet`),
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],

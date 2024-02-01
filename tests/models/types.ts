@@ -1,5 +1,6 @@
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
+import { NetworkId } from 'mina-signer';
 import CommonConstants from '../../src/lib/constants.js';
 
 export type FailureReason = {
@@ -138,6 +139,8 @@ export type CommandOptions = {
 
 export type ConfigOptions = {
   processHandler: CLITestEnvironment['spawn'];
+  workDir: string;
+  networkId: NetworkId | undefined;
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;
@@ -158,6 +161,7 @@ export type CommandResults = {
 
 export type ZkConfigCommandResults = {
   workDir: string;
+  networkId: NetworkId | undefined;
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;

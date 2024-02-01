@@ -159,6 +159,7 @@ async function config() {
   // If user presses "ctrl + c" during interactive prompt, exit.
   let {
     deployAliasName,
+    networkId,
     url,
     fee,
     feepayer,
@@ -172,7 +173,7 @@ async function config() {
   let feepayerKeyPair;
   switch (feepayer) {
     case 'create':
-      feepayerKeyPair = await createKeyPairStep(feepayerAlias);
+      feepayerKeyPair = await createKeyPairStep(feepayerAlias, networkId);
       break;
     case 'recover':
       feepayerKeyPair = await recoverKeyPairStep(feepayerKey, feepayerAlias);
@@ -195,7 +196,7 @@ async function config() {
   await step(
     `Create zkApp key pair at keys/${deployAliasName}.json`,
     async () => {
-      const keyPair = createKeyPair('testnet');
+      const keyPair = createKeyPair(networkId);
       fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
         spaces: 2,
       });
@@ -210,6 +211,7 @@ async function config() {
       process.exit(1);
     }
     config.deployAliases[deployAliasName] = {
+      networkId,
       url,
       keyPath: `keys/${deployAliasName}.json`,
       feepayerKeyPath: `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
@@ -235,7 +237,7 @@ async function config() {
 }
 
 // Creates a new feepayer key pair
-async function createKeyPairStep(feepayerAlias) {
+async function createKeyPairStep(feepayerAlias, networkId) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
     log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
@@ -244,7 +246,7 @@ async function createKeyPairStep(feepayerAlias) {
   return await step(
     `Create fee payer key pair at ${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
     async () => {
-      const keyPair = createKeyPair('testnet');
+      const keyPair = createKeyPair(networkId);
 
       fs.outputJsonSync(
         `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
