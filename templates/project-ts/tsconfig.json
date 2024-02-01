@@ -17,7 +17,8 @@
     "declaration": true,
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": false,
   },
-  "include": ["./src"]
+  "include": ["./src"],
 }
