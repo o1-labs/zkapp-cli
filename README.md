@@ -186,7 +186,7 @@ To test your zkApps, you first create automated tests for your smart contract an
 Before you test with a live network, use Lightnet to test your zkApp locally on an accurate representation of a Mina blockchain. 
 
 ```sh
-zk lightnet
+zk lightnet --help
 ```
 
 See [Testing zkApps with Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet).
@@ -211,7 +211,9 @@ Join us in these zkApps channels:
 
 ## Feedback
 
-To provide feedback, first review existing issues. You can create issues for zkApp CLI and Lightnet in this [zkapp-cli rep](https://github.com/o1-labs/zkapp-cli/issues).
+To provide feedback, first review existing issues. You can create [issues](https://github.com/o1-labs/zkapp-cli/issues) with feature requests for zkApp CLI and Lightnet in this repository. 
+
+zkApp CLI is an open source project, see the [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/CONTRIBUTING.md) guidelines.
 
 ## License
 
