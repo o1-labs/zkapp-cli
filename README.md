@@ -173,48 +173,31 @@ zk deploy <alias>
 zk deploy // shows a list of aliases in your project to choose from
 ```
 
-_**Deployment is supported only to Berkeley Testnet and Testworld Mission 2.0, the Protocol Performance Testing program.
-zkApp programmability is not yet available on the Mina Mainnet.**_
+_**Deployment is supported only to Berkeley Testnet until zkApp programmability is available on Mina Mainnet.**_
 
 After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias.
 
 Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` this _same_ smart contract automatically deploys to this alias. See [Tutorial 3: Deploy to a Live Network](https://docs.minaprotocol.com/zkapps/tutorials/deploying-to-a-network).
 
-## Running a Lightnet
+## Testing your zkApp
 
-Prerequisite: Must have docker running locally with at least 8Gb of RAM allocated
+To test your zkApps, you first create automated tests for your smart contract and test with a simulated local blockchain. See [Testing zkApps Locally](https://docs.minaprotocol.com/zkapps/testing-zkapps-locally).
+
+Before you test with a live network, use Lightnet to test your zkApp locally on an accurate representation of a Mina blockchain. 
 
 ```sh
-zk lightnet start
+zk lightnet
 ```
 
-This command will run a lightnet locally which can be used for interacting with a zkApp locally.  This network can be connected to in the following way:
-
-```js
-import {
-  Lightnet,
-  Mina,
-  ...
-} from 'o1js';
-
-// Network configuration
-const network = Mina.Network({
-  mina: 'http://localhost:8080/graphql',
-  archive: 'http://localhost:8282',
-  lightnetAccountManager: 'http://localhost:8181',
-});
-
-// Fee payer setup
-const feePayerPrivateKey = (await Lightnet.acquireKeyPair()).privateKey
-const feePayerAccount = feePayerPrivateKey.toPublicKey();
-
-// Fund the fee payer
-Mina.faucet(feePayerAccount);
-```
+See [Testing zkApps with Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet).
 
 ### Block Explorer
 
-If you require a block explorer, you can use [this lightweight one](https://github.com/o1-labs/mina-lightweight-explorer) alongside the lightnet.
+To launch a lightweight Mina explorer to monitor transactions in a web browser:
+
+```sh
+zk lightnet explorer
+```
 
 ## License
 
