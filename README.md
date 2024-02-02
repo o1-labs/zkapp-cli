@@ -199,6 +199,20 @@ To launch a lightweight Mina explorer to monitor transactions in a web browser:
 zk lightnet explorer
 ```
 
+## Community Support and Participation
+
+[Mina Protocol Discord](https://discord.gg/minaprotocol) is the most popular place where Mina enthusiasts and technical contributors gather to share knowledge. 
+
+Join us in these zkApps channels:
+
+* [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) to meet other developers building zkApps with o1js
+* [#zkapps-general](https://discord.com/channels/484437221055922177/910549624413102100) to ask general questions about zkApps, how to use a zkApp, and so on
+* [#zkapps-questions](https://discord.com/channels/484437221055922177/1047214314349658172) to ask zkApps-related questions and see Q&A history
+
+## Feedback
+
+To provide feedback, first review existing issues. You can create issues for zkApp CLI and Lightnet in this [zkapp-cli rep](https://github.com/o1-labs/zkapp-cli/issues).
+
 ## License
 
 [Apache-2.0](https://github.com/o1-labs/zkapp-cli/blob/main/LICENSE)
