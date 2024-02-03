@@ -424,7 +424,6 @@ async function scaffoldNext(projectName) {
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
     useAppDir = fs.existsSync(path.join('ui', 'src', 'app'));
-    console.log('useAppDir', useAppDir);
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
