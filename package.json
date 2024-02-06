@@ -63,7 +63,7 @@
     "find-npm-prefix": "^1.0.2",
     "fs-extra": "^11.2.0",
     "gittar": "^0.1.1",
-    "mina-signer": "^2.1.2",
+    "mina-signer": "^3.0.0",
     "o1js": "^0.16.*",
     "opener": "^1.5.2",
     "ora": "^8.0.1",
