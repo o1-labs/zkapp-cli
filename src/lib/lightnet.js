@@ -458,7 +458,7 @@ async function launchExplorer(use) {
       console.log(
         chalk.yellow('  ' + 'Attempting to use the latest local version.')
       );
-      const localVersions = getLocalExplorerVersions(); // Implement this function to return local versions
+      const localVersions = getLocalExplorerVersions();
       if (localVersions.length === 0) {
         console.log(
           chalk.red(
