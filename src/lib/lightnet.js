@@ -3,7 +3,9 @@ import decompress from 'decompress';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
 import opener from 'opener';
+import ora from 'ora';
 import path from 'path';
+import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';
@@ -393,7 +395,7 @@ async function printExplorerVersions() {
     ];
     const releases = await fetchExplorerReleases();
     const currentVersion = getCurrentExplorerVersion();
-    if (releases.length === 0) {
+    if (!releases || releases.length === 0) {
       versions.push([
         chalk.yellow('No data available yet.\nPlease try again later.'),
         '',
@@ -449,27 +451,45 @@ async function printExplorerVersions() {
 
 async function launchExplorer(use) {
   try {
+    let useVersion;
+    let release = null;
     const releases = await fetchExplorerReleases();
-    if (releases.length === 0) {
+    if (releases === null) {
       console.log(
-        chalk.red(
-          '\nNo lightweight Mina explorer versions are available yet.\nPlease try again later.'
-        )
+        chalk.yellow('  ' + 'Attempting to use the latest local version.')
       );
-      shell.exit(1);
+      const localVersions = getLocalExplorerVersions();
+      if (localVersions.length === 0) {
+        console.log(
+          chalk.red(
+            '\nNo local versions of the lightweight Mina explorer are available. Please check your network connection and try again.'
+          )
+        );
+        shell.exit(1);
+      }
+      useVersion = localVersions[0];
+    } else {
+      if (releases.length === 0) {
+        console.log(
+          chalk.red(
+            '\nNo lightweight Mina explorer versions are available yet. Please try again later.'
+          )
+        );
+        shell.exit(1);
+      }
+      useVersion = use === 'latest' ? releases[0].name : use;
+      release = releases.find((release) => release.name === useVersion);
     }
-    const useVersion = use === 'latest' ? releases[0].name : use;
-    const release = releases.find((release) => release.name === useVersion);
     const explorerReleasePath = path.resolve(
       `${lightnetExplorerDir}/${useVersion}`
     );
     const explorerReleaseIndexFilePath = path.resolve(
       `${explorerReleasePath}/index.html`
     );
-    if (!release) {
+    if (releases && !release) {
       console.log(
         chalk.red(
-          `\nThe specified version ("${useVersion}") of the lightweight Mina explorer does not exist!`
+          `\nThe specified version ("${useVersion}") of the lightweight Mina explorer does not exist or is not available for download.`
         )
       );
       shell.exit(1);
@@ -527,29 +547,42 @@ async function updateCurrentExplorerVersion(version) {
 }
 
 async function fetchExplorerReleases() {
-  let releases = [];
-  await step(
-    'Fetching the lightweight Mina explorer releases information',
-    async () => {
-      const response = await fetch(
-        'https://api.github.com/repos/o1-labs/mina-lightweight-explorer/releases',
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(
-          `Received ${response.status} status code from the GitHub API.`
-        );
+  const stepName =
+    'Fetching the lightweight Mina explorer releases information...';
+  const spin = ora({
+    text: stepName,
+    discardStdin: true,
+  }).start();
+  try {
+    let releases = [];
+    const response = await fetch(
+      'https://api.github.com/repos/o1-labs/mina-lightweight-explorer/releases',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
       }
-      releases = await response.json();
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Received ${response.status} status code from the GitHub API.`
+      );
     }
-  );
-  return releases;
+    releases = await response.json();
+    spin.succeed(chalk.green(stepName));
+    return releases;
+  } catch (error) {
+    spin.warn(chalk.yellow(stepName));
+    console.log(
+      '  ' +
+        chalk.yellow(
+          'Warning: Unable to fetch lightweight Mina explorer releases. This may be due to connectivity issues.'
+        )
+    );
+    return null;
+  }
 }
 
 async function downloadExplorerRelease(release) {
@@ -574,10 +607,7 @@ async function downloadExplorerRelease(release) {
 }
 
 async function handleExplorerReleasePresence(explorerReleasePath, release) {
-  if (
-    !fs.existsSync(explorerReleasePath) ||
-    fs.readdirSync(explorerReleasePath).length === 0
-  ) {
+  if (!fs.existsSync(explorerReleasePath) && !!release) {
     const tmpDir = path.resolve(`${explorerReleasePath}-tmp`);
     await step('Preparing the file-system', async () => {
       fs.removeSync(explorerReleasePath);
@@ -601,6 +631,21 @@ async function handleExplorerReleasePresence(explorerReleasePath, release) {
       fs.removeSync(tmpDir);
     });
   }
+}
+
+function getLocalExplorerVersions() {
+  if (!fs.existsSync(lightnetExplorerDir)) {
+    return [];
+  }
+  const versions = fs.readdirSync(lightnetExplorerDir).filter((file) => {
+    const filePath = path.join(lightnetExplorerDir, file);
+    return (
+      fs.statSync(filePath).isDirectory() && file.match(/^v\d+\.\d+\.\d+$/)
+    );
+  });
+  return versions.sort((a, b) => {
+    return semver.compare(b, a);
+  });
 }
 
 function getProcessToLogFileMapping({ mode, archive }) {

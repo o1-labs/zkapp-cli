@@ -183,7 +183,7 @@ Note: When you deploy to an alias for the first time, you are prompted to choose
 
 To test your zkApps, you first create automated tests for your smart contract and test with a simulated local blockchain. See [Testing zkApps Locally](https://docs.minaprotocol.com/zkapps/testing-zkapps-locally).
 
-Before you test with a live network, use Lightnet to test your zkApp locally on an accurate representation of a Mina blockchain. 
+Before you test with a live network, use Lightnet to test your zkApp locally on an accurate representation of a Mina blockchain.
 
 ```sh
 zk lightnet --help
@@ -191,7 +191,7 @@ zk lightnet --help
 
 See [Testing zkApps with Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet).
 
-### Block Explorer
+### Block explorer
 
 To launch a lightweight Mina explorer to monitor transactions in a web browser:
 
@@ -201,17 +201,17 @@ zk lightnet explorer
 
 ## Community Support and Participation
 
-[Mina Protocol Discord](https://discord.gg/minaprotocol) is the most popular place where Mina enthusiasts and technical contributors gather to share knowledge. 
+[Mina Protocol Discord](https://discord.gg/minaprotocol) is the most popular place where Mina enthusiasts and technical contributors gather to share knowledge.
 
 Join us in these zkApps channels:
 
-* [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) to meet other developers building zkApps with o1js
-* [#zkapps-general](https://discord.com/channels/484437221055922177/910549624413102100) to ask general questions about zkApps, how to use a zkApp, and so on
-* [#zkapps-questions](https://discord.com/channels/484437221055922177/1047214314349658172) to ask zkApps-related questions and see Q&A history
+- [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) to meet other developers building zkApps with o1js
+- [#zkapps-general](https://discord.com/channels/484437221055922177/910549624413102100) to ask general questions about zkApps, how to use a zkApp, and so on
+- [#zkapps-questions](https://discord.com/channels/484437221055922177/1047214314349658172) to ask zkApps-related questions and see Q&A history
 
 ## Feedback
 
-To provide feedback, first review existing issues. You can create [issues](https://github.com/o1-labs/zkapp-cli/issues) with feature requests for zkApp CLI and Lightnet in this repository. 
+To provide feedback, first review existing issues. You can create [issues](https://github.com/o1-labs/zkapp-cli/issues) with feature requests for zkApp CLI and Lightnet in this repository.
 
 zkApp CLI is an open source project, see the [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/CONTRIBUTING.md) guidelines.
 

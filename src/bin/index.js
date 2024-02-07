@@ -291,7 +291,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: 'latest',
               description:
-                'The version of the lightweight Mina Explorer to use.\nThe "latest" value will use the latest available version.',
+                'The version of the lightweight Mina explorer to use.\nThe "latest" value will use the latest available version.',
             },
             list: {
               alias: 'l',
@@ -300,7 +300,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: false,
               description:
-                'Whether to list the available versions of the lightweight Mina Explorer.',
+                'Whether to list the available versions of the lightweight Mina explorer.',
             },
             ...commonOptions,
           },
