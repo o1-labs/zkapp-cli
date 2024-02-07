@@ -19,6 +19,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- Automate "zk config" if Lightnet is in use. [#579](https://github.com/o1-labs/zkapp-cli/pull/579)
+  - Automatically configures zkApp project's deployment alias in case if Lightnet is in use.
 - Allow to use locally available lightweight Mina explorer in case of network issues. [#577](https://github.com/o1-labs/zkapp-cli/pull/577)
 
 ## [0.17.0](https://github.com/o1-labs/zkapp-cli/compare/v16.2...v17.0) - 2024-02-03
