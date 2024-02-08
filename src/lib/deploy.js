@@ -322,8 +322,6 @@ export async function deploy({ alias, yes }) {
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
   const feepayerPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
   const feepayerAddress = feepayerPrivateKey.toPublicKey(); //  The public key of the feepayer
-  console.log('feepayerAddress', feepayerAddress.toBase58());
-  console.log('zkAppAddress', zkAppAddress.toBase58());
 
   // guide user to choose a feepayer account that is different from the zkApp account
   if (feepayerAddress.toBase58() === zkAppAddress.toBase58()) {
