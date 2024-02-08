@@ -330,6 +330,7 @@ export async function deploy({ alias, yes }) {
         `  The feepayer account is the same as the zkapp account.\n  Please use a different feepayer account or generate a new one by entering zk config.`
       )
     );
+    process.exit(1);
   }
 
   // figure out if the zkApp has a @method init() - in that case we need to create a proof,
