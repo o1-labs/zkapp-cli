@@ -19,6 +19,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- Update `getCachedFeepayerAliases()` logic to prevent edge case bugs. [#581](https://github.com/o1-labs/zkapp-cli/pull/581)
+
 - Allow to use locally available lightweight Mina explorer in case of network issues. [#577](https://github.com/o1-labs/zkapp-cli/pull/577)
 
 ## [0.17.0](https://github.com/o1-labs/zkapp-cli/compare/v16.2...v17.0) - 2024-02-03
