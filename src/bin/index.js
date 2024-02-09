@@ -85,7 +85,31 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     async (argv) => await file(argv.name)
   )
-  .command(['config'], 'Add a new deploy alias', {}, async () => await config())
+  .command(
+    ['config [list] [lightnet]'],
+    'List or add a new deploy alias',
+    {
+      list: {
+        alias: 'l',
+        demand: false,
+        boolean: true,
+        hidden: false,
+        default: false,
+        description:
+          'Whether to list the available deploy aliases and their configurations.',
+      },
+      lightnet: {
+        alias: 'ln',
+        demand: false,
+        boolean: true,
+        hidden: false,
+        default: false,
+        description:
+          'Whether to automatically configure the deploy alias compatible with the lightweight Mina blockchain network.',
+      },
+    },
+    async (argv) => await config(argv)
+  )
   .command(
     ['deploy [alias]'],
     'Deploy or redeploy a zkApp',

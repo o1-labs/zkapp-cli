@@ -19,11 +19,9 @@ test.describe('zkApp-CLI', () => {
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { stdout } = await execute('zk', cliArg);
+      const { stdout, code } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
-
-      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
-      // expect(code).toBeGreaterThan(0);
+      expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
@@ -50,7 +48,7 @@ test.describe('zkApp-CLI', () => {
         );
         console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-        expect(code).toBe(0);
+        expect(code).toBeGreaterThan(0);
         expect(stdout).toContain('No deploy aliases found in config.json.');
       });
       await test.step('ZkApp deployment failure attempt (unknown alias provided)', async () => {
@@ -62,7 +60,7 @@ test.describe('zkApp-CLI', () => {
         );
         console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-        expect(code).toBe(0);
+        expect(code).toBeGreaterThan(0);
         expect(stdout).toContain('Deploy alias name not found in config.json.');
       });
     } finally {
@@ -169,7 +167,7 @@ test.describe('zkApp-CLI', () => {
           spawn,
           false
         );
-        expect(exitCode).not.toBe(0);
+        expect(exitCode).toBeGreaterThan(0);
         expect(
           stdOut.some((message) => message.includes('Invalid_signature'))
         ).toBe(true);

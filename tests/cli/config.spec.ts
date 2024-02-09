@@ -33,14 +33,49 @@ test.describe('zkApp-CLI', () => {
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { stdout } = await execute('zk', cliArg);
+      const { stdout, code } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
-
-      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
-      // expect(code).toBeGreaterThan(0);
+      expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should not list deployment aliases if not within the project dir, @parallel @smoke @config @fail-cases`, async () => {
+    const cliArg = 'config --list';
+    const { execute, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      const { stdout, code } = await execute('zk', cliArg);
+      console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
+      expect(code).toBeGreaterThan(0);
+      expect(stdout.at(-1)).toContain(
+        "config.json not found. Make sure you're in a zkApp project directory."
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should list deployment aliases, @parallel @smoke @config`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, execute } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await zkProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Deploy aliases listing', async () => {
+        const cliArg = 'config --list';
+        const { stdout, code } = await execute('zk', cliArg);
+        expect(code).toBe(0);
+        expect(stdout.some((line) => line.includes('None found'))).toBeTruthy();
+      });
     } finally {
       await cleanup();
     }
@@ -389,5 +424,5 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
-  // TODO: Respect the config.networkId property (check that saved data reflects user's selection).
+  // TODO: https://github.com/o1-labs/zkapp-cli/issues/582
 });

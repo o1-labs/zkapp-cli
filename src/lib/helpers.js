@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import fetch from 'node-fetch';
 import ora from 'ora';
 
 /**
@@ -21,6 +22,22 @@ async function step(str, fn) {
     console.error('  ' + chalk.red(err)); // maintain expected indentation
     console.log(err);
     process.exit(1);
+  }
+}
+
+export async function isMinaGraphQlEndpointAvailable(endpoint) {
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: '{ syncStatus }' }),
+    });
+    if (!response.ok) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    return false;
   }
 }
 
