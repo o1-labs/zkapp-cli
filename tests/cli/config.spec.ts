@@ -72,7 +72,13 @@ test.describe('zkApp-CLI', () => {
       });
       await test.step('Deploy aliases listing', async () => {
         const cliArg = 'config --list';
-        const { stdout, code } = await execute('zk', cliArg);
+        const { stdout, stderr, code } = await execute(
+          'zk',
+          cliArg,
+          projectName
+        );
+        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
+        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
         expect(code).toBe(0);
         expect(stdout.some((line) => line.includes('None found'))).toBeTruthy();
       });
