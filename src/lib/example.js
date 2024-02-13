@@ -47,16 +47,15 @@ export async function example(example) {
   const lang = 'ts';
   const isWindows = process.platform === 'win32';
 
-  if (!(await fetchProjectTemplate(dir, lang))) return;
-
-  if (!(await extractExample(example, dir, lang))) return;
+  if (!(await fetchProjectTemplate(dir, lang))) shell.exit(1);
+  if (!(await extractExample(example, dir, lang))) shell.exit(1);
 
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   shell.cd(dir);
 
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
-    return;
+    shell.exit(1);
   }
 
   await step('Initialize Git repo', 'git init -q');

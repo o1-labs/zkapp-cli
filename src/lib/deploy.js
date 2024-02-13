@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';
+import { readDeployAliasesConfig } from './config.js';
 import step from './helpers.js';
 
 const log = console.log;
@@ -22,24 +23,9 @@ const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // Th
  * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
  */
 export async function deploy({ alias, yes }) {
-  // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
-
-  let config;
-  try {
-    config = fs.readJsonSync(`${DIR}/config.json`);
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project directory.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(chalk.red(str));
-    return;
-  }
-
+  // Get project root directory, so that the CLI command can be executed anywhere within the project.
+  const projectRoot = await findPrefix(process.cwd());
+  const config = readDeployAliasesConfig(projectRoot);
   const latestCliVersion = await getLatestCliVersion();
   const installedCliVersion = getInstalledCliVersion();
 
@@ -54,12 +40,8 @@ export async function deploy({ alias, yes }) {
         'As a workaround, you can install zkapp-cli as a local dependency by running `npm install zkapp-cli`'
       )
     );
-    return;
+    process.exit(1);
   }
-
-  // Checks if developer has the legacy networks or deploy aliases in config.json
-  if (!Object.prototype.hasOwnProperty.call(config, 'deployAliases'))
-    config.deployAliases = config?.networks;
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
     log(
@@ -69,7 +51,7 @@ export async function deploy({ alias, yes }) {
     );
     log(chalk.red(`The current version is ${latestCliVersion}.`));
     log(chalk.red('Run `npm update -g zkapp-cli && npm install o1js@latest`.'));
-    return;
+    process.exit(1);
   }
 
   if (!alias) {
@@ -77,7 +59,7 @@ export async function deploy({ alias, yes }) {
     if (!aliases.length) {
       log(chalk.red('No deploy aliases found in config.json.'));
       log(chalk.red('Run `zk config` to add a deploy alias, then try again.'));
-      return;
+      process.exit(1);
     }
 
     const res = await enquirer.prompt({
@@ -110,7 +92,7 @@ export async function deploy({ alias, yes }) {
   if (!config.deployAliases[alias]) {
     log(chalk.red('Deploy alias name not found in config.json.'));
     log(chalk.red('You can add a deploy alias by running `zk config`.'));
-    return;
+    process.exit(1);
   }
 
   if (!config.deployAliases[alias].url) {
@@ -120,16 +102,14 @@ export async function deploy({ alias, yes }) {
       )
     );
     log(chalk.red(`Please correct your config.json and try again.`));
-
     process.exit(1);
-    return;
   }
 
   await step('Build project', async () => {
     // store cache to add after build directory is emptied
     let cache;
     try {
-      cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
     } catch (err) {
       if (err.code === 'ENOENT') {
         cache = {};
@@ -138,18 +118,20 @@ export async function deploy({ alias, yes }) {
       }
     }
 
-    fs.emptyDirSync(`${DIR}/build`); // ensure old artifacts don't remain
-    fs.outputJsonSync(`${DIR}/build/cache.json`, cache, { spaces: 2 });
+    fs.emptyDirSync(`${projectRoot}/build`); // ensure old artifacts don't remain
+    fs.outputJsonSync(`${projectRoot}/build/cache.json`, cache, { spaces: 2 });
 
     execSync('npm run build --silent');
   });
 
   const build = await step('Generate build.json', async () => {
     // Identify all instances of SmartContract in the build.
-    const smartContracts = await findSmartContracts(`${DIR}/build/**/*.js`);
+    const smartContracts = await findSmartContracts(
+      `${projectRoot}/build/**/*.js`
+    );
 
     fs.outputJsonSync(
-      `${DIR}/build/build.json`,
+      `${projectRoot}/build/build.json`,
       { smartContracts },
       { spaces: 2 }
     );
@@ -208,14 +190,14 @@ export async function deploy({ alias, yes }) {
   // the same deploy alias.
   if (config.deployAliases[alias]?.smartContract !== contractName) {
     config.deployAliases[alias].smartContract = contractName;
-    fs.writeJSONSync(`${DIR}/config.json`, config, { spaces: 2 });
+    fs.writeJSONSync(`${projectRoot}/config.json`, config, { spaces: 2 });
     log(
       `  Your config.json was updated to always use this\n  smart contract when deploying to this deploy alias.`
     );
   }
 
   // import o1js from the user directory
-  let o1jsImportPath = `${DIR}/node_modules/o1js/dist/node/index.js`;
+  let o1jsImportPath = `${projectRoot}/node_modules/o1js/dist/node/index.js`;
 
   if (process.platform === 'win32') {
     o1jsImportPath = 'file://' + o1jsImportPath;
@@ -241,27 +223,25 @@ export async function deploy({ alias, yes }) {
         `  Transaction relayer node is offline. Please try again or use a different "url" for this deploy alias in your config.json`
       )
     );
-
-    return;
+    process.exit(1);
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
     log(
       chalk.red(
         `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this deploy alias in your config.json`
       )
     );
-
     process.exit(1);
   }
 
   // Find the users file to import the smart contract from
   let smartContractFile = await findSmartContractToDeploy(
-    `${DIR}/build/**/*.js`,
+    `${projectRoot}/build/**/*.js`,
     contractName
   );
 
   let smartContractImports;
   try {
-    let smartContractImportPath = `${DIR}/build/src/${smartContractFile}`;
+    let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
     if (process.platform === 'win32') {
       smartContractImportPath = 'file://' + smartContractImportPath;
     }
@@ -306,7 +286,7 @@ export async function deploy({ alias, yes }) {
 
   try {
     zkAppPrivateKeyBase58 = fs.readJsonSync(
-      `${DIR}/${config.deployAliases[alias].keyPath}`
+      `${projectRoot}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {
     log(
@@ -340,7 +320,7 @@ export async function deploy({ alias, yes }) {
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
     async () => {
-      let cache = fs.readJsonSync(`${DIR}/build/cache.json`);
+      let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
       let currentDigest = await zkApp.digest(zkAppAddress);
 
@@ -360,7 +340,7 @@ export async function deploy({ alias, yes }) {
         cache[contractName].verificationKey = verificationKey;
         cache[contractName].digest = currentDigest;
 
-        fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
+        fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
           spaces: 2,
         });
 
@@ -398,9 +378,7 @@ export async function deploy({ alias, yes }) {
         `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
     );
-
     process.exit(1);
-    return;
   }
 
   let transaction = await step('Build transaction', async () => {
@@ -510,7 +488,6 @@ export async function deploy({ alias, yes }) {
     // Note that the thrown error object is already console logged via step().
     log(chalk.red(getErrorMessage(txn)));
     process.exit(1);
-    return;
   }
 
   const str =

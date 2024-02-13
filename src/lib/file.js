@@ -32,7 +32,7 @@ export async function file(_path) {
       'Please choose a different name or delete the existing file' +
         (fileExists && testExists ? 's' : '')
     );
-    return;
+    process.exit(1);
   }
 
   // TODO: Add o1js import to fileContent, when it's ready.

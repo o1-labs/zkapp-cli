@@ -32,12 +32,12 @@ const isWindows = process.platform === 'win32';
 export async function project({ name, ui }) {
   if (fs.existsSync(name)) {
     console.error(chalk.red(`Directory already exists. Not proceeding`));
-    return;
+    shell.exit(1);
   }
 
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
-    return;
+    shell.exit(1);
   }
 
   let res;
@@ -121,7 +121,7 @@ export async function project({ name, ui }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await fetchProjectTemplate())) return;
+  if (!(await fetchProjectTemplate())) shell.exit(1);
 
   await step(
     'NPM install',

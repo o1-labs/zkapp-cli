@@ -24,9 +24,6 @@ const lightnetExplorerConfigFile = path.resolve(
   `${lightnetExplorerDir}/config.json`
 );
 const lightnetDockerContainerName = 'mina-local-lightnet';
-const lightnetMinaDaemonGraphQlEndpoint = 'http://localhost:8080/graphql';
-const lightnetAccountsManagerEndpoint = 'http://localhost:8181';
-const lightnetArchiveNodeApiEndpoint = 'http://localhost:8282';
 const archiveNodeApiProcessName = 'Archive-Node-API application';
 const minaArchiveProcessName = 'Mina Archive process';
 const multiPurposeMinaDaemonProcessName = 'Mina multi-purpose Daemon';
@@ -972,11 +969,14 @@ async function waitForBlockchainNetworkReadiness(mode) {
   };
   while (blockchainSyncAttempt <= maxAttempts && !blockchainIsReady) {
     try {
-      const response = await fetch(lightnetMinaDaemonGraphQlEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(syncStatusGraphQlQuery),
-      });
+      const response = await fetch(
+        Constants.lightnetMinaDaemonGraphQlEndpoint,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(syncStatusGraphQlQuery),
+        }
+      );
       if (!response.ok) {
         await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
       } else {
@@ -1030,17 +1030,17 @@ function printUsefulUrls() {
   const urls = [
     [
       chalk.bold('Mina Daemon GraphQL endpoint'),
-      chalk.reset(lightnetMinaDaemonGraphQlEndpoint),
+      chalk.reset(Constants.lightnetMinaDaemonGraphQlEndpoint),
     ],
     [
       chalk.bold('Accounts Manager endpoint'),
-      chalk.reset(lightnetAccountsManagerEndpoint),
+      chalk.reset(Constants.lightnetAccountManagerEndpoint),
     ],
   ];
   if (archive) {
     urls.push([
       chalk.bold('Archive-Node-API endpoint'),
-      chalk.reset(lightnetArchiveNodeApiEndpoint),
+      chalk.reset(Constants.lightnetArchiveNodeApiEndpoint),
     ]);
     urls.push([
       chalk.bold('PostgreSQL connection string'),
@@ -1117,7 +1117,7 @@ async function printBlockchainNetworkProperties() {
       variables: null,
       operationName: null,
     };
-    const response = await fetch(lightnetMinaDaemonGraphQlEndpoint, {
+    const response = await fetch(Constants.lightnetMinaDaemonGraphQlEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(graphQlQuery),
@@ -1203,9 +1203,9 @@ function printZkAppSnippet() {
 
 // Network configuration
 const network = Mina.Network({
-  mina: '${lightnetMinaDaemonGraphQlEndpoint}',
-  archive: '${lightnetArchiveNodeApiEndpoint}',
-  lightnetAccountManager: '${lightnetAccountsManagerEndpoint}',
+  mina: '${Constants.lightnetMinaDaemonGraphQlEndpoint}',
+  archive: '${Constants.lightnetArchiveNodeApiEndpoint}',
+  lightnetAccountManager: '${Constants.lightnetAccountManagerEndpoint}',
 });
 Mina.setActiveInstance(network);
 
