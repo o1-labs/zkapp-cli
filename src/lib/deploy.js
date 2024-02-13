@@ -303,6 +303,16 @@ export async function deploy({ alias, yes }) {
   const feepayerPrivateKey = PrivateKey.fromBase58(feepayerPrivateKeyBase58); //  The private key of the feepayer
   const feepayerAddress = feepayerPrivateKey.toPublicKey(); //  The public key of the feepayer
 
+  // guide user to choose a feepayer account that is different from the zkApp account
+  if (feepayerAddress.toBase58() === zkAppAddress.toBase58()) {
+    log(
+      chalk.red(
+        `  The feepayer account is the same as the zkApp account.\n  Please use a different feepayer account or generate a new one by entering zk config.`
+      )
+    );
+    process.exit(1);
+  }
+
   // figure out if the zkApp has a @method init() - in that case we need to create a proof,
   // so we need to compile no matter what, and we show a separate step to create the proof
   let isInitMethod = zkApp._methods?.some((intf) => intf.methodName === 'init');

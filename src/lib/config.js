@@ -353,7 +353,7 @@ function getCachedFeepayerAliases() {
   let aliases = fs.readdirSync(Constants.feePayerCacheDir);
 
   aliases = aliases
-    .filter((fileName) => fileName.includes('json'))
+    .filter((fileName) => fileName.endsWith('.json'))
     .map((name) => name.slice(0, -5));
 
   return aliases;
