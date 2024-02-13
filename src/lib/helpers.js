@@ -38,12 +38,7 @@ export async function isMinaGraphQlEndpointAvailable(endpoint) {
       body: JSON.stringify({ query: '{ syncStatus }' }),
     });
     return !!response.ok;
-  } catch (error) {
-    console.log(
-      chalk.yellow(
-        `\nError checking Mina GraphQL endpoint: ${JSON.stringify(error)}`
-      )
-    );
+  } catch (_) {
     return false;
   }
 }
