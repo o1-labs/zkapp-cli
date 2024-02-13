@@ -212,13 +212,16 @@ test.describe('zkApp-CLI', () => {
               Constants.networkIds
             ),
             'Set the Mina GraphQL API URL to deploy to': ['enter'],
-            // TODO: Add more URL validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/428
-            'Url is required': [minaGraphQlEndpoint, 'enter'],
+            'Url is required': [' ', 'enter'],
+            'Enter a valid URL': ['backSpace', 'not-url', 'backSpace', 'enter'],
+            'Enter a valid URL.': [
+              ...Array.from({ length: 'not-url'.length }, () => 'backSpace'),
+              minaGraphQlEndpoint,
+              'enter',
+            ],
             'Set transaction fee to use when deploying': ['enter'],
-            'Fee is required': [' -1 ', 'enter'],
-            // TODO: Add more Fee validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/428
+            'Fee is required': [' ', 'enter'],
+            'Fee is required.': ['backSpace', ' -1 ', 'enter'],
             "Fee can't be negative": [
               'backSpace',
               'backSpace',

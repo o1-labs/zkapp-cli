@@ -27,21 +27,14 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: async (val) => {
-        val = val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
+        val = val.toLowerCase().trim().replace(/\s+/g, '-');
         if (!val) return chalk.red('Name is required.');
         if (Object.keys(config.deployAliases).includes(val)) {
           return chalk.red('Name already exists.');
         }
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => val.toLowerCase().trim().replace(/\s+/g, '-'),
     },
     {
       type: 'select',
@@ -71,6 +64,11 @@ const prompts = {
       prefix: formatPrefixSymbol,
       validate: (val) => {
         if (!val) return chalk.red('Url is required.');
+        try {
+          new URL(val);
+        } catch (err) {
+          return chalk.red('Enter a valid URL.');
+        }
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
@@ -85,7 +83,8 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return chalk.red('Fee is required.');
+        if (!val || val.trim().length === 0)
+          return chalk.red('Fee is required.');
         if (isNaN(val)) return chalk.red('Fee must be a number.');
         if (val < 0) return chalk.red("Fee can't be negative.");
         return true;
@@ -177,21 +176,14 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
+        val.toLowerCase().trim().replace(/\s+/g, '-');
 
         if (cachedFeepayerAliases?.includes(val))
           return chalk.red(`Fee payer alias ${val} already exists`);
         if (!val) return chalk.red('Fee payer alias is required.');
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => val.toLowerCase().trim().replace(/\s+/g, '-'),
     },
     {
       type: 'input',
@@ -225,21 +217,14 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
+        val.toLowerCase().trim().replace(/\s+/g, '-');
 
         if (cachedFeepayerAliases?.includes(val))
           return chalk.red(`Fee payer alias ${val} already exists`);
         if (!val) return chalk.red('Fee payer alias is required.');
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => val.toLowerCase().trim().replace(/\s+/g, '-'),
     },
   ],
 
