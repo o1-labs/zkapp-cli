@@ -327,7 +327,7 @@ export async function deploy({ alias, yes }) {
   if (feepayerAddress.toBase58() === zkAppAddress.toBase58()) {
     log(
       chalk.red(
-        `  The feepayer account is the same as the zkapp account.\n  Please use a different feepayer account or generate a new one by entering zk config.`
+        `  The feepayer account is the same as the zkApp account.\n  Please use a different feepayer account or generate a new one by entering zk config.`
       )
     );
     process.exit(1);
