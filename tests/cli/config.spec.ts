@@ -235,13 +235,23 @@ test.describe('zkApp-CLI', () => {
               'enter',
             ],
             'Create an alias for this account': ['enter'],
-            'Fee payer alias is required': [feePayerAlias, 'enter'],
-            // TODO: Add more Fee Payer Alias validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/462
-            // - https://github.com/o1-labs/zkapp-cli/issues/463
+            'Fee payer alias is required': [' ', 'enter'],
+            'Fee payer alias is required.': [
+              'backSpace',
+              feePayerAlias,
+              'enter',
+            ],
             'already exists': [
               ...Array.from(
                 { length: feePayerAlias.length },
+                () => 'backSpace'
+              ),
+              ` ${feePayerAlias} `,
+              'enter',
+            ],
+            'already exist': [
+              ...Array.from(
+                { length: ` ${feePayerAlias} `.length },
                 () => 'backSpace'
               ),
               newFeePayerAlias,
