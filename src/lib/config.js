@@ -54,14 +54,14 @@ export function readDeployAliasesConfig(projectRoot) {
 async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
   const networkId = 'testnet';
   const deployAliasPrefix = 'lightnet';
-  const minaGraphQlEndpoint = 'http://localhost:8080/graphql';
   let nextAliasNumber = 1;
   await step(`Check Mina GraphQL endpoint availability`, async () => {
-    const minaGraphQlEndpointIsAvailable =
-      await isMinaGraphQlEndpointAvailable(minaGraphQlEndpoint);
-    if (!minaGraphQlEndpointIsAvailable) {
+    const endpointStatus = await isMinaGraphQlEndpointAvailable(
+      Constants.lightnetMinaDaemonGraphQlEndpoint
+    );
+    if (!endpointStatus) {
       throw new Error(
-        `Mina GraphQL endpoint ${minaGraphQlEndpoint} is not available.`
+        `Mina GraphQL endpoint ${Constants.lightnetMinaDaemonGraphQlEndpoint} is not available.`
       );
     }
   });
@@ -78,8 +78,8 @@ async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
       async () => {
         const minaNetworkInstance = Mina.Network({
           networkId,
-          mina: minaGraphQlEndpoint,
-          lightnetAccountManager: 'http://localhost:8181',
+          mina: Constants.lightnetMinaDaemonGraphQlEndpoint,
+          lightnetAccountManager: Constants.lightnetAccountManagerEndpoint,
         });
         Mina.setActiveInstance(minaNetworkInstance);
         const keyPair = await Lightnet.acquireKeyPair();
@@ -99,7 +99,7 @@ async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
     projectRoot,
     deployAliasName,
     networkId,
-    url: minaGraphQlEndpoint,
+    url: Constants.lightnetMinaDaemonGraphQlEndpoint,
     fee: '0.01',
     feepayerAlias: deployAliasName,
   });

@@ -11,7 +11,7 @@ import path from 'path';
  * @typedef {'o1js-main' | 'berkeley' | 'develop'} LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[] }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
@@ -44,6 +44,9 @@ const Constants = Object.freeze({
     'Error',
     'Fatal',
   ],
+  lightnetMinaDaemonGraphQlEndpoint: 'http://localhost:8080/graphql',
+  lightnetAccountManagerEndpoint: 'http://localhost:8181',
+  lightnetArchiveNodeApiEndpoint: 'http://localhost:8282',
 });
 
 export default Constants;

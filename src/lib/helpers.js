@@ -25,6 +25,11 @@ async function step(str, fn) {
   }
 }
 
+/**
+ * Checks the Mina GraphQL endpoint availability.
+ * @param {endpoint} The GraphQL endpoint to check.
+ * @returns {Promise<boolean>} Whether the endpoint is available.
+ */
 export async function isMinaGraphQlEndpointAvailable(endpoint) {
   try {
     const response = await fetch(endpoint, {
@@ -32,11 +37,13 @@ export async function isMinaGraphQlEndpointAvailable(endpoint) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: '{ syncStatus }' }),
     });
-    if (!response.ok) {
-      return false;
-    }
-    return true;
+    return !!response.ok;
   } catch (error) {
+    console.log(
+      chalk.yellow(
+        `\nError checking Mina GraphQL endpoint: ${JSON.stringify(error)}`
+      )
+    );
     return false;
   }
 }
