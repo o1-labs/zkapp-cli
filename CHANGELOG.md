@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## Unreleased
 
 ### Changed
-- Improve error handling for zk deploy when fee payer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
+- Improve error handling for zk deploy when feepayer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
 
 - Allow to use locally available lightweight Mina explorer in case of network issues. [#577](https://github.com/o1-labs/zkapp-cli/pull/577)
 
