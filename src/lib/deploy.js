@@ -258,7 +258,7 @@ export async function deploy({ alias, yes }) {
 
       process.exit(1);
     }
-    process.exit(1);
+    throw error;
   }
 
   // Attempt to import the zkApp private key from the `keys` directory and the feepayer private key. These keys will be used to deploy the zkApp.
