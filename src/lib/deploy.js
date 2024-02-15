@@ -246,7 +246,8 @@ export async function deploy({ alias, yes }) {
       smartContractImportPath = 'file://' + smartContractImportPath;
     }
     smartContractImports = await import(smartContractImportPath);
-  } catch (_) {
+  } catch (error) {
+    throw error;
     log(
       chalk.red(
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you want to deploy to this deploy alias.`
