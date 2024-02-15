@@ -247,25 +247,26 @@ export async function deploy({ alias, yes }) {
     }
     smartContractImports = await import(smartContractImportPath);
   } catch (error) {
-    throw error;
+    if (!smartContractImports) {
+      throw error;
+    }
     log(
       chalk.red(
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you want to deploy to this deploy alias.`
       )
     );
 
-    process.exit(1);
-  }
+    // Attempt to import the smart contract class to deploy from the user's file.
+    // If we cannot find the named export log an error message and return early.
+    if (!(contractName in smartContractImports)) {
+      log(
+        chalk.red(
+          `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
+        )
+      );
 
-  // Attempt to import the smart contract class to deploy from the user's file.
-  // If we cannot find the named export log an error message and return early.
-  if (!(contractName in smartContractImports)) {
-    log(
-      chalk.red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
-      )
-    );
-
+      process.exit(1);
+    }
     process.exit(1);
   }
 
