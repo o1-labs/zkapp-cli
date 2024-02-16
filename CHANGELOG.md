@@ -19,9 +19,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Improve error handling for zk deploy when feepayer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
+- Improve error handling when imported smart contract is not found. [#586](https://github.com/o1-labs/zkapp-cli/pull/586)
 
 - Update `getCachedFeepayerAliases()` logic to prevent edge case bugs. [#581](https://github.com/o1-labs/zkapp-cli/pull/581)
+
+- Improve error handling for zk deploy when feepayer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
+
 
 - Automate "zk config" if Lightnet is in use. [#579](https://github.com/o1-labs/zkapp-cli/pull/579)
   - The `--lightnet` option was added to `zk config` in order to automatically configures zkApp project's deploy aliases.
