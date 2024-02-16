@@ -239,28 +239,22 @@ export async function deploy({ alias, yes }) {
     contractName
   );
 
-  let smartContractImports;
-  try {
-    let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
-    if (process.platform === 'win32') {
-      smartContractImportPath = 'file://' + smartContractImportPath;
-    }
-    smartContractImports = await import(smartContractImportPath);
-  } catch (error) {
-    // Attempt to import the smart contract class to deploy from the user's file.
-    // If we cannot find the named export log an error message and return early.
-    console.log('contractName', contractName);
-    // console.log('smartContractImports', smartContractImports);
-    if (smartContractImports && !(contractName in smartContractImports)) {
-      log(
-        chalk.red(
-          `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy to this deploy alias and check that\n  you have exported your smart contract class using a named export and try again.`
-        )
-      );
+  let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
+  if (process.platform === 'win32') {
+    smartContractImportPath = 'file://' + smartContractImportPath;
+  }
+  // Attempt to import the smart contract class to deploy from the user's file.
+  const smartContractImports = await import(smartContractImportPath);
 
-      process.exit(1);
-    }
-    throw error;
+  // If we cannot find the named export log an error message and return early.
+  if (smartContractImports && !(contractName in smartContractImports)) {
+    log(
+      chalk.red(
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy to this deploy alias, and check that\n  you have exported your smart contract class using a named export and try again.`
+      )
+    );
+
+    process.exit(1);
   }
 
   // Attempt to import the zkApp private key from the `keys` directory and the feepayer private key. These keys will be used to deploy the zkApp.
