@@ -27,21 +27,15 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: async (val) => {
-        val = val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
-        if (!val) return chalk.red('Name is required.');
-        if (Object.keys(config.deployAliases).includes(val)) {
+        if (!val || val.trim().length === 0)
+          return chalk.red('Name is required.');
+        const alias = sanitizeAliasName(val);
+        if (Object.keys(config.deployAliases).includes(alias)) {
           return chalk.red('Name already exists.');
         }
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => sanitizeAliasName(val),
     },
     {
       type: 'select',
@@ -70,7 +64,13 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return chalk.red('Url is required.');
+        if (!val || val.trim().length === 0)
+          return chalk.red('Url is required.');
+        try {
+          new URL(val);
+        } catch (err) {
+          return chalk.red('Enter a valid URL.');
+        }
         return true;
       },
       result: (val) => val.trim().replace(/ /, ''),
@@ -85,12 +85,13 @@ const prompts = {
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
-        if (!val) return chalk.red('Fee is required.');
+        if (!val || val.trim().length === 0)
+          return chalk.red('Fee is required.');
         if (isNaN(val)) return chalk.red('Fee must be a number.');
         if (val < 0) return chalk.red("Fee can't be negative.");
         return true;
       },
-      result: (val) => val.trim().replace(/ /, ''),
+      result: (val) => val.trim().replace(/ /, '').replace(/-/, ''),
     },
   ],
 
@@ -177,21 +178,14 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
-
-        if (cachedFeepayerAliases?.includes(val))
-          return chalk.red(`Fee payer alias ${val} already exists`);
-        if (!val) return chalk.red('Fee payer alias is required.');
+        if (!val || val.trim().length === 0)
+          return chalk.red('Fee payer alias is required.');
+        const alias = sanitizeAliasName(val);
+        if (cachedFeepayerAliases?.includes(alias))
+          return chalk.red(`Fee payer alias ${alias} already exists`);
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => sanitizeAliasName(val),
     },
     {
       type: 'input',
@@ -225,21 +219,14 @@ const prompts = {
         return style('Create an alias for this account');
       },
       validate: async (val) => {
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-');
-
-        if (cachedFeepayerAliases?.includes(val))
-          return chalk.red(`Fee payer alias ${val} already exists`);
-        if (!val) return chalk.red('Fee payer alias is required.');
+        if (!val || val.trim().length === 0)
+          return chalk.red('Fee payer alias is required.');
+        const alias = sanitizeAliasName(val);
+        if (cachedFeepayerAliases?.includes(alias))
+          return chalk.red(`Fee payer alias ${alias} already exists`);
         return true;
       },
-      result: (val) =>
-        val
-          .toLowerCase()
-          .trim()
-          .replace(/\s{1,}/g, '-'),
+      result: (val) => sanitizeAliasName(val),
     },
   ],
 
@@ -293,6 +280,10 @@ function getFeepayorChoices(cachedFeepayerAliases) {
 
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function sanitizeAliasName(aliasName) {
+  return aliasName.toLowerCase().trim().replace(/\s+/g, '-');
 }
 
 export default prompts;

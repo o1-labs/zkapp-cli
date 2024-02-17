@@ -37,6 +37,6 @@
   },
   "peerDependencies": {
     "o1js": "0.16.*",
-    "mina-signer": "^3.0.0"
+    "mina-signer": "^3.0.2"
   }
 }

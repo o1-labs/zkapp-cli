@@ -17,10 +17,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.17.1](https://github.com/o1-labs/zkapp-cli/compare/v17.0...v17.1) - 2024-02-17
+
 ### Changed
 
 - Improve error handling when imported smart contract is not found. [#586](https://github.com/o1-labs/zkapp-cli/pull/586)
-
 - Update `getCachedFeepayerAliases()` logic to prevent edge case bugs. [#581](https://github.com/o1-labs/zkapp-cli/pull/581)
 
 - Improve error handling for zk deploy when feepayer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
@@ -42,7 +43,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Update project scaffold tsconfig to handle esnext and es2022 targets. [#570](https://github.com/o1-labs/zkapp-cli/pull/570)
-
 - Dependencies updated. [#573](https://github.com/o1-labs/zkapp-cli/pull/573)
 
 ## [0.16.1](https://github.com/o1-labs/zkapp-cli/compare/v16.0...v16.1) - 2024-02-01
@@ -221,15 +221,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Release `0.8.0` [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
-
   - Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
   - Add state.getAndAssertEquals() to examples and test contracts.
   - Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest o1js release.
   - Exit the cli config and deploy processes on success and error.
   - Increase the template/example project jest test timeout.
-
 - Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
-
 - Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
 
 ## [0.7.6] - 2023-04-25
@@ -237,15 +234,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Remove postinstall script to speed up zkApp cli installations and upgrades [#391](https://github.com/o1-labs/zkapp-cli/pull/391)
-
 - UI scaffold updates. [#388](https://github.com/o1-labs/zkapp-cli/pull/388)
 
 ### Added
 
 - Landing page with next steps for Nuxt UI scaffold. [#386](https://github.com/o1-labs/zkapp-cli/pull/386)
-
 - Landing page with next steps for Svelte UI scaffold. [#385](https://github.com/o1-labs/zkapp-cli/pull/385)
-
 - Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o1-labs/zkapp-cli/pull/384)
 
 ## [0.7.5] - 2023-03-16
@@ -287,7 +281,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Add timeout to warm gittar cache step during zkapp-cli install or upgrade. [#362](https://github.com/o1-labs/zkapp-cli/pull/362)
-
 - Update 'networks' in config.json to 'deployAliases'. [#360](https://github.com/o1-labs/zkapp-cli/pull/360)
 
 ## [0.6.2] - 2023-02-02
@@ -376,14 +369,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add ability to generate UI project alongsde the smart contract.
-
   - Add an option to NextJS to set it up for github pages. [#292](https://github.com/o1-labs/zkapp-cli/pull/292)
   - Import a smart contract into the NextJS UI project scaffold. [#290](https://github.com/o1-labs/zkapp-cli/pull/290)
   - Fixes to the NextJS project for o1js + typescript. [#287](https://github.com/o1-labs/zkapp-cli/pull/287)
   - Add a NextJS typescript prompt. [#285](https://github.com/o1-labs/zkapp-cli/pull/285)
   - Add COOP & COEP headers for SvelteKit, NextJS, & NuxtJS. [#279](https://github.com/o1-labs/zkapp-cli/pull/279)
   - Working mvp of UI monorepo. [#266](https://github.com/o1-labs/zkapp-cli/pull/266)
-
 - Add Github issue templates. [#270](https://github.com/o1-labs/zkapp-cli/pull/270), [#275](https://github.com/o1-labs/zkapp-cli/pull/275), & [#276](https://github.com/o1-labs/zkapp-cli/pull/276)
 
 ## [0.4.17] - 2022-10-07
