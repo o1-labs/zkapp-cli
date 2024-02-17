@@ -29,7 +29,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Improve error handling for zk deploy when fee payer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
 
-
 - Automate "zk config" if Lightnet is in use. [#579](https://github.com/o1-labs/zkapp-cli/pull/579)
   - The `--lightnet` option was added to `zk config` in order to automatically configures zkApp project's deploy aliases.
   - The [Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet) should be up and running before executing the `zk config --lightnet` command.
