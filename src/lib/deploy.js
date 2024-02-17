@@ -239,29 +239,18 @@ export async function deploy({ alias, yes }) {
     contractName
   );
 
-  let smartContractImports;
-  try {
-    let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
-    if (process.platform === 'win32') {
-      smartContractImportPath = 'file://' + smartContractImportPath;
-    }
-    smartContractImports = await import(smartContractImportPath);
-  } catch (_) {
-    log(
-      chalk.red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart contract that you want to deploy to this deploy alias.`
-      )
-    );
-
-    process.exit(1);
+  let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
+  if (process.platform === 'win32') {
+    smartContractImportPath = 'file://' + smartContractImportPath;
   }
-
   // Attempt to import the smart contract class to deploy from the user's file.
+  const smartContractImports = await import(smartContractImportPath);
+
   // If we cannot find the named export log an error message and return early.
-  if (!(contractName in smartContractImports)) {
+  if (smartContractImports && !(contractName in smartContractImports)) {
     log(
       chalk.red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Check that you have exported your smart contract class using a named export and try again.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy using this deploy alias, check that\n  you have exported your smart contract class using a named export and try again.`
       )
     );
 
