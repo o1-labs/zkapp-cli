@@ -250,7 +250,7 @@ export async function deploy({ alias, yes }) {
   if (smartContractImports && !(contractName in smartContractImports)) {
     log(
       chalk.red(
-        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy to this deploy alias, and check that\n  you have exported your smart contract class using a named export and try again.`
+        `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy using this deploy alias, check that\n  you have exported your smart contract class using a named export and try again.`
       )
     );
 
