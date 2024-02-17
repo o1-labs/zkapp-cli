@@ -1,6 +1,6 @@
 {
   "name": "zkapp-cli",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "description": "CLI to create zkApps (zero-knowledge apps) for Mina Protocol",
   "homepage": "https://github.com/o1-labs/zkapp-cli/",
   "keywords": [
@@ -63,7 +63,7 @@
     "find-npm-prefix": "^1.0.2",
     "fs-extra": "^11.2.0",
     "gittar": "^0.1.1",
-    "mina-signer": "^3.0.0",
+    "mina-signer": "^3.0.2",
     "o1js": "^0.16.*",
     "opener": "^1.5.2",
     "ora": "^8.0.1",
@@ -84,7 +84,7 @@
     "eslint-plugin-o1js": "^0.4.0",
     "execa": "^8.0.1",
     "fkill": "^9.0.0",
-    "husky": "^9.0.10",
+    "husky": "^9.0.11",
     "jest": "^29.7.0",
     "lint-staged": "^15.2.2",
     "portfinder": "^1.0.32",
