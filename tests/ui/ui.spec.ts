@@ -91,8 +91,6 @@ test.describe('Users', () => {
       } finally {
         console.info('\nCleaning up...');
         await closeBrowser(context);
-        // Investigate the issue with correct child processes termination in current setup.
-        // https://github.com/o1-labs/zkapp-cli/issues/558
         logProcessOutput(devServerProcessStdout, devServerProcessStderr);
         devServerProcess?.kill('SIGKILL');
         try {
