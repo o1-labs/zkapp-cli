@@ -4,6 +4,7 @@ import fsExtra from 'fs-extra';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import portfinder from 'portfinder';
+import 'zx/globals';
 import Constants from '../../src/lib/constants.js';
 import { LandingPage } from '../pages/example/LandingPage.js';
 import { closeBrowser } from '../utils/browser-utils.js';
@@ -35,9 +36,9 @@ test.describe('Users', () => {
       const devServerUrl = new URL(`http://localhost:${devServerPort}`);
       const projectName = crypto.randomUUID();
       const { spawn, cleanup, path } = await prepareEnvironment();
-      let killDevServerProcess: (signal: NodeJS.Signals) => void = () => {}; // eslint-disable-line
-      let getDevServerStdout: () => string[] = () => [];
-      let getDevServerStderr: () => string[] = () => [];
+      let devServerProcess: ProcessPromise | undefined; // eslint-disable-line
+      let devServerProcessStdout: string[] = [];
+      let devServerProcessStderr: string[] = [];
       console.info(`[Test Execution] Path: ${path}`);
 
       try {
@@ -61,16 +62,16 @@ test.describe('Users', () => {
               devServerCommand = 'nuxt';
               break;
           }
-          const { debug, getStdout, getStderr, kill } = await spawn(
-            'npx',
-            `${devServerCommand} dev --port ${devServerPort}`,
-            `./${projectName}/ui`
-          );
-          debug();
-          killDevServerProcess = kill!;
-          getDevServerStdout = getStdout!;
-          getDevServerStderr = getStderr!;
-          await waitForServer(devServerUrl, getDevServerStdout);
+          $.cwd = `${path}/${projectName}/ui`; // eslint-disable-line
+          devServerProcess =
+            $`npx ${devServerCommand} dev --port ${devServerPort}`.nothrow(); // eslint-disable-line
+          devServerProcess.stdout.on('data', (chunk: string) => {
+            devServerProcessStdout.push(chunk);
+          });
+          devServerProcess.stderr.on('data', (chunk: string) => {
+            devServerProcessStderr.push(chunk);
+          });
+          await waitForServer(devServerUrl, devServerProcessStdout);
         });
         await test.step('Interact with the zkApp UI in browser', async () => {
           const exampleLandingPage = new LandingPage(
@@ -92,8 +93,8 @@ test.describe('Users', () => {
         await closeBrowser(context);
         // Investigate the issue with correct child processes termination in current setup.
         // https://github.com/o1-labs/zkapp-cli/issues/558
-        killDevServerProcess('SIGKILL');
-        logProcessOutput(getDevServerStdout(), getDevServerStderr());
+        logProcessOutput(devServerProcessStdout, devServerProcessStderr);
+        devServerProcess?.kill('SIGKILL');
         try {
           fsExtra.rmdirSync(`${path}/${projectName}/ui`, {
             maxRetries: 3,

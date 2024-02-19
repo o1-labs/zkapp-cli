@@ -13,8 +13,7 @@
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import fs from 'fs/promises';
-import { NetworkId } from 'mina-signer';
-import { Mina, PrivateKey } from 'o1js';
+import { Mina, NetworkId, PrivateKey } from 'o1js';
 import { Add } from './Add.js';
 
 // check command line arg

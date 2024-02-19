@@ -75,7 +75,7 @@ export function generateInputsForOptionSelection(
 
 export async function waitForServer(
   serverUrl: URL,
-  getProcessStdout: () => string[]
+  processStdout: string[]
 ): Promise<void> {
   const maxAttempts = 5;
   const pollingIntervalMs = 3_000;
@@ -86,7 +86,7 @@ export async function waitForServer(
   while (currentAttempt <= maxAttempts && !isReady) {
     console.info(`Waiting for server readiness. Attempt #${currentAttempt}`);
     if (
-      getProcessStdout().some(
+      processStdout.some(
         // We want to check data presence in process stdout independently
         // because CLI output is usually formatted and colored using
         // different libs and styles.
@@ -110,15 +110,18 @@ export async function waitForServer(
   }
 }
 
-export function logProcessOutput(stdOut: string[], stdErr: string[]): void {
-  if (stdOut.length !== 0) {
+export function logProcessOutput(
+  processStdout: string[],
+  processStderr: string[]
+): void {
+  if (processStdout.length > 0) {
     console.info('Process StdOut:');
-    console.info(stdOut.join('\n'));
+    console.info(processStdout.join('\n'));
     console.info('\n--------------------');
   }
-  if (stdErr.length !== 0) {
+  if (processStderr.length > 0) {
     console.info('Process StdErr:');
-    console.info(stdErr.join('\n'));
+    console.info(processStderr.join('\n'));
     console.info('\n--------------------');
   }
 }
