@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.17.2](https://github.com/o1-labs/zkapp-cli/compare/v17.1...v17.2) - 2024-02-19
+
 ### Changed
 
 - Improve error handling when imported smart contract is not found. [#586](https://github.com/o1-labs/zkapp-cli/pull/586)

@@ -212,8 +212,8 @@ test.describe('zkApp-CLI', () => {
               Constants.networkIds
             ),
             'Set the Mina GraphQL API URL to deploy to': ['enter'],
-            'Url is required': [' ', 'enter'],
-            'Enter a valid URL': ['backSpace', 'not-url', 'backSpace', 'enter'],
+            'Url is required.': [' ', 'enter'],
+            'Url is required': ['backSpace', 'not-url', 'backSpace', 'enter'],
             'Enter a valid URL.': [
               ...Array.from({ length: 'not-url'.length }, () => 'backSpace'),
               minaGraphQlEndpoint,
