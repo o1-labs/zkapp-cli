@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
+import { NetworkId } from 'mina-signer';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import Constants from '../../src/lib/constants.js';
+import { generateInputsForOptionSelection } from '../utils/cli-utils.js';
 import {
   TestConstants,
   cleanupFeePayerCache,
@@ -31,11 +33,9 @@ test.describe('zkApp-CLI', () => {
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { stdout } = await execute('zk', cliArg);
+      const { stdout, code } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
-
-      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
-      // expect(code).toBeGreaterThan(0);
+      expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
@@ -44,8 +44,52 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
+  test(`should not list deployment aliases if not within the project dir, @parallel @smoke @config @fail-cases`, async () => {
+    const cliArg = 'config --list';
+    const { execute, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      const { stdout, code } = await execute('zk', cliArg);
+      console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
+      expect(code).toBeGreaterThan(0);
+      expect(stdout.at(-1)).toContain(
+        "config.json not found. Make sure you're in a zkApp project directory."
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should list deployment aliases, @parallel @smoke @config`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, execute } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await zkProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Deploy aliases listing', async () => {
+        const cliArg = 'config --list';
+        const { stdout, stderr, code } = await execute(
+          'zk',
+          cliArg,
+          projectName
+        );
+        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
+        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
+        expect(code).toBe(0);
+        expect(stdout.some((line) => line.includes('None found'))).toBeTruthy();
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   test(`should not create deployment alias if procedure was cancelled, @parallel @smoke @config @fail-cases`, async () => {
     const projectName = crypto.randomUUID();
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -60,6 +104,8 @@ test.describe('zkApp-CLI', () => {
       await test.step('Deployment alias creation cancellation', async () => {
         const { exitCode } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -92,6 +138,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should properly validate input field values, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     // Serial because of  the following new aliases
@@ -109,6 +156,8 @@ test.describe('zkApp-CLI', () => {
         await zkProject(projectName, 'none', true, spawn);
         await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -158,14 +207,21 @@ test.describe('zkApp-CLI', () => {
               newDeploymentAlias,
               'enter',
             ],
+            'Choose the target network': generateInputsForOptionSelection(
+              networkId,
+              Constants.networkIds
+            ),
             'Set the Mina GraphQL API URL to deploy to': ['enter'],
-            // TODO: Add more URL validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/428
-            'Url is required': [minaGraphQlEndpoint, 'enter'],
+            'Url is required.': [' ', 'enter'],
+            'Url is required': ['backSpace', 'not-url', 'backSpace', 'enter'],
+            'Enter a valid URL.': [
+              ...Array.from({ length: 'not-url'.length }, () => 'backSpace'),
+              minaGraphQlEndpoint,
+              'enter',
+            ],
             'Set transaction fee to use when deploying': ['enter'],
-            'Fee is required': [' -1 ', 'enter'],
-            // TODO: Add more Fee validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/428
+            'Fee is required': [' ', 'enter'],
+            'Fee is required.': ['backSpace', ' -1 ', 'enter'],
             "Fee can't be negative": [
               'backSpace',
               'backSpace',
@@ -179,13 +235,23 @@ test.describe('zkApp-CLI', () => {
               'enter',
             ],
             'Create an alias for this account': ['enter'],
-            'Fee payer alias is required': [feePayerAlias, 'enter'],
-            // TODO: Add more Fee Payer Alias validation cases after the fix of:
-            // - https://github.com/o1-labs/zkapp-cli/issues/462
-            // - https://github.com/o1-labs/zkapp-cli/issues/463
+            'Fee payer alias is required': [' ', 'enter'],
+            'Fee payer alias is required.': [
+              'backSpace',
+              feePayerAlias,
+              'enter',
+            ],
             'already exists': [
               ...Array.from(
                 { length: feePayerAlias.length },
+                () => 'backSpace'
+              ),
+              ` ${feePayerAlias} `,
+              'enter',
+            ],
+            'already exist': [
+              ...Array.from(
+                { length: ` ${feePayerAlias} `.length },
                 () => 'backSpace'
               ),
               newFeePayerAlias,
@@ -216,6 +282,7 @@ test.describe('zkApp-CLI', () => {
 
         checkZkConfig({
           workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias: newDeploymentAlias,
           feePayerAlias: newFeePayerAlias,
           feePayerAccount,
@@ -236,6 +303,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment alias in case of no cached fee payer account available, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
+    const networkId: NetworkId = 'testnet';
     const deploymentAlias = crypto.randomUUID();
     const feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -255,6 +323,8 @@ test.describe('zkApp-CLI', () => {
       await test.step('Deployment alias creation and results validation', async () => {
         const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -267,6 +337,7 @@ test.describe('zkApp-CLI', () => {
         });
         checkZkConfig({
           workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -286,6 +357,7 @@ test.describe('zkApp-CLI', () => {
 
   test(`should create deployment aliases using available fee payer account management approaches, @serial @smoke @config`, async () => {
     const projectName = crypto.randomUUID();
+    const networkId: NetworkId = 'testnet';
     let deploymentAlias = crypto.randomUUID();
     let feePayerAlias = crypto.randomUUID();
     const feePayerAccount = await acquireAvailableAccount();
@@ -309,6 +381,8 @@ test.describe('zkApp-CLI', () => {
         await test.step(`Deployment alias creation (feePayerMgmtType=${feePayerMgmtType}) and results validation`, async () => {
           const { exitCode, stdOut } = await zkConfig({
             processHandler: spawn,
+            workDir: `${path}/${projectName}`,
+            networkId,
             deploymentAlias,
             feePayerAlias,
             feePayerAccount,
@@ -321,6 +395,7 @@ test.describe('zkApp-CLI', () => {
           });
           checkZkConfig({
             workDir: `${path}/${projectName}`,
+            networkId,
             deploymentAlias,
             feePayerAlias,
             feePayerAccount,
@@ -336,6 +411,8 @@ test.describe('zkApp-CLI', () => {
       await test.step(`Deployment alias creation (feePayerMgmtType=another) and results validation`, async () => {
         const { exitCode, stdOut } = await zkConfig({
           processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -348,6 +425,7 @@ test.describe('zkApp-CLI', () => {
         });
         checkZkConfig({
           workDir: `${path}/${projectName}`,
+          networkId,
           deploymentAlias,
           feePayerAlias,
           feePayerAccount,
@@ -364,4 +442,6 @@ test.describe('zkApp-CLI', () => {
       await cleanup();
     }
   });
+
+  // TODO: https://github.com/o1-labs/zkapp-cli/issues/582
 });

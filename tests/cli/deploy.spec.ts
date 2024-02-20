@@ -4,7 +4,10 @@ import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { removeEnvCustomLoaders } from '../utils/common-utils.js';
 import { checkZkDeploy, zkDeploy } from '../utils/deploy-utils.js';
-import { getMempoolTxns } from '../utils/network-utils.js';
+import {
+  getMempoolTxns,
+  isMockedMinaGraphQlEndpointInUse,
+} from '../utils/network-utils.js';
 import { zkProject } from '../utils/project-utils.js';
 
 test.describe('zkApp-CLI', () => {
@@ -16,11 +19,9 @@ test.describe('zkApp-CLI', () => {
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
-      const { stdout } = await execute('zk', cliArg);
+      const { stdout, code } = await execute('zk', cliArg);
       console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
-
-      // TODO: https://github.com/o1-labs/zkapp-cli/issues/454
-      // expect(code).toBeGreaterThan(0);
+      expect(code).toBeGreaterThan(0);
       expect(stdout.at(-1)).toContain(
         "config.json not found. Make sure you're in a zkApp project directory."
       );
@@ -47,7 +48,7 @@ test.describe('zkApp-CLI', () => {
         );
         console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-        expect(code).toBe(0);
+        expect(code).toBeGreaterThan(0);
         expect(stdout).toContain('No deploy aliases found in config.json.');
       });
       await test.step('ZkApp deployment failure attempt (unknown alias provided)', async () => {
@@ -59,7 +60,7 @@ test.describe('zkApp-CLI', () => {
         );
         console.info(`[CLI StdOut] zk ${cliArg}: ${JSON.stringify(stdout)}`);
 
-        expect(code).toBe(0);
+        expect(code).toBeGreaterThan(0);
         expect(stdout).toContain('Deploy alias name not found in config.json.');
       });
     } finally {
@@ -76,6 +77,7 @@ test.describe('zkApp-CLI', () => {
         const mempoolTxns = await getMempoolTxns();
         const { exitCode, stdOut } = await zkDeploy(
           path,
+          'testnet',
           'none',
           true,
           spawn,
@@ -99,6 +101,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('ZkApp project generation, configuration, deployment (interactive mode) and results validation', async () => {
         const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
           path,
+          'testnet',
           'none',
           true,
           spawn,
@@ -109,6 +112,7 @@ test.describe('zkApp-CLI', () => {
       await test.step('ZkApp project generation, configuration, deployment (non-interactive mode) and results validation', async () => {
         const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
           path,
+          'testnet',
           'next', // Can't do Svelte on Windows, see Project generation tests for more info.
           false,
           spawn,
@@ -130,6 +134,7 @@ test.describe('zkApp-CLI', () => {
         await test.step(`Example zkApp project generation (${exampleType.toUpperCase()}), configuration, deployment and results validation`, async () => {
           const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
             path,
+            'testnet',
             exampleType,
             false,
             spawn,
@@ -138,6 +143,56 @@ test.describe('zkApp-CLI', () => {
           await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
         });
       }
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should not deploy zkApp configured with 'mainnet' network ID against the network respecting the 'testnet' one, @parallel @smoke @deployment`, async () => {
+    test.skip(
+      await isMockedMinaGraphQlEndpointInUse(),
+      'Skipping tests for environments that use mocked GraphQL implementation'
+    );
+
+    const { spawn, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('ZkApp project generation, configuration and deployment attempt', async () => {
+        const { exitCode, stdOut } = await zkDeploy(
+          path,
+          'mainnet',
+          'none',
+          false,
+          spawn,
+          false
+        );
+        expect(exitCode).toBeGreaterThan(0);
+        expect(
+          stdOut.some((message) => message.includes('Invalid_signature'))
+        ).toBe(true);
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should allow deploying zkApp with legacy deployment alias configuration (backward compatibility), @parallel @smoke @deployment`, async () => {
+    const { spawn, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('ZkApp project generation, configuration, deployment (interactive mode) and results validation', async () => {
+        const { zkAppPublicKey, exitCode, stdOut } = await zkDeploy(
+          path,
+          undefined, // To test backward compatibility (deployment aliases without the 'networkId' property).
+          'none',
+          false,
+          spawn,
+          false
+        );
+        await checkZkDeploy(zkAppPublicKey, exitCode, stdOut);
+      });
     } finally {
       await cleanup();
     }

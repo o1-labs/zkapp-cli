@@ -85,7 +85,31 @@ yargs(hideBin(process.argv))
     { name: { demand: true, string: true, hidden: true } },
     async (argv) => await file(argv.name)
   )
-  .command(['config'], 'Add a new deploy alias', {}, async () => await config())
+  .command(
+    ['config [list] [lightnet]'],
+    'List or add a new deploy alias',
+    {
+      list: {
+        alias: 'l',
+        demand: false,
+        boolean: true,
+        hidden: false,
+        default: false,
+        description:
+          'Whether to list the available deploy aliases and their configurations.',
+      },
+      lightnet: {
+        alias: 'ln',
+        demand: false,
+        boolean: true,
+        hidden: false,
+        default: false,
+        description:
+          'Whether to automatically configure the deploy alias compatible with the lightweight Mina blockchain network.',
+      },
+    },
+    async (argv) => await config(argv)
+  )
   .command(
     ['deploy [alias]'],
     'Deploy or redeploy a zkApp',
@@ -118,7 +142,7 @@ yargs(hideBin(process.argv))
   .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
   .command(
     ['lightnet <sub-command> [options]'],
-    'Manage the lightweight Mina blockchain for zkApps development and testing purposes.\nYou can find more information about the Docker image in use at\nhttps://hub.docker.com/r/o1labs/mina-local-network',
+    'Manage the lightweight Mina blockchain network for zkApps development and testing purposes.\nMore information can be found at:\nhttps://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet',
     (yargs) => {
       yargs
         .command(
@@ -282,7 +306,7 @@ yargs(hideBin(process.argv))
         )
         .command(
           ['explorer [use] [list] [debug]'],
-          'Launch the lightweight Mina Explorer.',
+          'Launch the lightweight Mina explorer.',
           {
             use: {
               alias: 'u',
@@ -291,7 +315,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: 'latest',
               description:
-                'The version of the lightweight Mina Explorer to use.\nThe "latest" value will use the latest available version.',
+                'The version of the lightweight Mina explorer to use.\nThe "latest" value will use the latest available version.',
             },
             list: {
               alias: 'l',
@@ -300,7 +324,7 @@ yargs(hideBin(process.argv))
               hidden: false,
               default: false,
               description:
-                'Whether to list the available versions of the lightweight Mina Explorer.',
+                'Whether to list the available versions of the lightweight Mina explorer.',
             },
             ...commonOptions,
           },

@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import fetch from 'node-fetch';
 import ora from 'ora';
 
 /**
@@ -21,6 +22,24 @@ async function step(str, fn) {
     console.error('  ' + chalk.red(err)); // maintain expected indentation
     console.log(err);
     process.exit(1);
+  }
+}
+
+/**
+ * Checks the Mina GraphQL endpoint availability.
+ * @param {endpoint} The GraphQL endpoint to check.
+ * @returns {Promise<boolean>} Whether the endpoint is available.
+ */
+export async function isMinaGraphQlEndpointAvailable(endpoint) {
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: '{ syncStatus }' }),
+    });
+    return !!response.ok;
+  } catch (_) {
+    return false;
   }
 }
 

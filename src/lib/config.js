@@ -3,26 +3,41 @@ import enquirer from 'enquirer';
 import findPrefix from 'find-npm-prefix';
 import fs from 'fs-extra';
 import Client from 'mina-signer';
-import { PrivateKey, PublicKey } from 'o1js';
+import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step from './helpers.js';
+import step, { isMinaGraphQlEndpointAvailable } from './helpers.js';
 import prompts from './prompts.js';
 
 const log = console.log;
 
 /**
- * Show existing deploy aliases in `config.json` and allow a user to add a new
- * deploy alias and url--and generate a key pair for it.
+ * Show existing deploy aliases in `config.json` and allow user to add a new
+ * deploy alias.
+ * @param {object}  argv - The arguments object provided by yargs.
+ * @param {boolean} argv.list - Whether to list the available deploy aliases and their configurations.
+ * @param {boolean} argv.lightnet - Whether to automatically configure the deploy alias compatible with the lightweight Mina blockchain network.
  * @returns {Promise<void>}
  */
-async function config() {
-  // Get project root, so the CLI command can be run anywhere inside their proj.
-  const DIR = await findPrefix(process.cwd());
+async function config({ list, lightnet }) {
+  // Get project root directory, so that the CLI command can be executed anywhere within the project.
+  const projectRoot = await findPrefix(process.cwd());
+  const deployAliasesConfig = readDeployAliasesConfig(projectRoot);
+  if (list) {
+    await printDeployAliasesConfig(deployAliasesConfig);
+    return;
+  }
+  if (lightnet) {
+    await createLightnetDeployAlias(projectRoot, deployAliasesConfig);
+    return;
+  }
+  await createDeployAlias(projectRoot, deployAliasesConfig);
+}
 
-  let config;
+export function readDeployAliasesConfig(projectRoot) {
   try {
-    config = fs.readJsonSync(`${DIR}/config.json`);
+    const deployAliasesConfig = fs.readJsonSync(`${projectRoot}/config.json`);
+    return deployAliasesConfig;
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {
@@ -32,9 +47,66 @@ async function config() {
       console.error(err);
     }
     log(chalk.red(str));
-    return;
+    process.exit(1);
   }
+}
 
+async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
+  const networkId = 'testnet';
+  const deployAliasPrefix = 'lightnet';
+  let nextAliasNumber = 1;
+  await step(`Check Mina GraphQL endpoint availability`, async () => {
+    const endpointStatus = await isMinaGraphQlEndpointAvailable(
+      Constants.lightnetMinaDaemonGraphQlEndpoint
+    );
+    if (!endpointStatus) {
+      throw new Error(
+        `Mina GraphQL endpoint ${Constants.lightnetMinaDaemonGraphQlEndpoint} is not available.`
+      );
+    }
+  });
+  while (
+    deployAliasesConfig.deployAliases[`${deployAliasPrefix}${nextAliasNumber}`]
+  ) {
+    nextAliasNumber++;
+  }
+  const deployAliasName = `${deployAliasPrefix}${nextAliasNumber}`;
+  const feePayerPath = `${Constants.feePayerCacheDir}/${deployAliasName}.json`;
+  if (!fs.existsSync(feePayerPath)) {
+    await step(
+      `Create zkApp fee payer key pair at ${feePayerPath}`,
+      async () => {
+        const minaNetworkInstance = Mina.Network({
+          networkId,
+          mina: Constants.lightnetMinaDaemonGraphQlEndpoint,
+          lightnetAccountManager: Constants.lightnetAccountManagerEndpoint,
+        });
+        Mina.setActiveInstance(minaNetworkInstance);
+        const keyPair = await Lightnet.acquireKeyPair();
+        fs.outputJsonSync(
+          feePayerPath,
+          {
+            publicKey: keyPair.publicKey.toBase58(),
+            privateKey: keyPair.privateKey.toBase58(),
+          },
+          { spaces: 2 }
+        );
+      }
+    );
+  }
+  await createZkAppKeyPairAndSaveDeployAliasConfig({
+    deployAliasesConfig,
+    projectRoot,
+    deployAliasName,
+    networkId,
+    url: Constants.lightnetMinaDaemonGraphQlEndpoint,
+    fee: '0.01',
+    feepayerAlias: deployAliasName,
+  });
+  printLightnetDeployAliasConfigSuccessMessage(deployAliasName);
+}
+
+async function createDeployAlias(projectRoot, deployAliasesConfig) {
   let isFeepayerCached = false;
   let defaultFeepayerAlias;
   let cachedFeepayerAliases;
@@ -52,50 +124,7 @@ async function config() {
     }
   }
 
-  // Checks if developer has the legacy networks in config.json and renames it to deploy aliases.
-  if (Object.prototype.hasOwnProperty.call(config, 'networks')) {
-    Object.assign(config, { deployAliases: config.networks });
-    delete config.networks;
-  }
-
-  // Build table of existing deploy aliases found in their config.json
-  let tableData = [
-    [chalk.bold('Name'), chalk.bold('URL'), chalk.bold('Smart Contract')],
-  ];
-  for (const deployAliasName in config.deployAliases) {
-    const { url, smartContract } = config.deployAliases[deployAliasName];
-    tableData.push([
-      deployAliasName,
-      url ?? '',
-      smartContract ?? chalk.gray('(never deployed)'),
-    ]);
-  }
-
-  // Sort alphabetically by deploy alias name.
-  tableData = tableData.sort((a, b) => a[0].localeCompare(b[0]));
-
-  const tableConfig = {
-    border: getBorderCharacters('norc'),
-    header: {
-      alignment: 'center',
-      content: chalk.bold('Deploy aliases in config.json'),
-    },
-  };
-
-  // Show "none found", if no deploy aliases exist.
-  if (tableData.length === 1) {
-    // Add some padding to empty name & url columns, to feel more natural.
-    tableData[0][0] = tableData[0][0] + ' '.repeat(2);
-    tableData[0][1] = tableData[0][1] + ' '.repeat(3);
-
-    tableData.push([[chalk.gray('None found')], [], []]);
-    tableConfig.spanningCells = [{ col: 0, row: 1, colSpan: 3 }];
-  }
-
-  // Print the table. Indented by 2 spaces for alignment in terminal.
-  const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
-  log(msg);
-
+  await printDeployAliasesConfig(deployAliasesConfig);
   log('Enter values to create a deploy alias:');
 
   const {
@@ -105,16 +134,14 @@ async function config() {
     otherFeepayerPrompts,
     feepayerAliasPrompt,
   } = prompts;
-
   const initialPromptResponse = await enquirer.prompt([
-    ...deployAliasPrompts(config),
+    ...deployAliasPrompts(deployAliasesConfig),
     ...initialFeepayerPrompts(
       defaultFeepayerAlias,
       defaultFeepayerAddress,
       isFeepayerCached
     ),
   ]);
-
   let recoverFeepayerResponse;
   let feepayerAliasResponse;
   let otherFeepayerResponse;
@@ -159,6 +186,7 @@ async function config() {
   // If user presses "ctrl + c" during interactive prompt, exit.
   let {
     deployAliasName,
+    networkId,
     url,
     fee,
     feepayer,
@@ -167,12 +195,12 @@ async function config() {
     alternateCachedFeepayerAlias,
   } = promptResponse;
 
-  if (!deployAliasName || !url || !fee) return;
+  if (!deployAliasName || !url || !fee) process.exit(1);
 
   let feepayerKeyPair;
   switch (feepayer) {
     case 'create':
-      feepayerKeyPair = await createKeyPairStep(feepayerAlias);
+      feepayerKeyPair = await createKeyPairStep(feepayerAlias, networkId);
       break;
     case 'recover':
       feepayerKeyPair = await recoverKeyPairStep(feepayerKey, feepayerAlias);
@@ -192,59 +220,76 @@ async function config() {
       break;
   }
 
+  await createZkAppKeyPairAndSaveDeployAliasConfig({
+    deployAliasesConfig,
+    projectRoot,
+    deployAliasName,
+    networkId,
+    url,
+    fee,
+    feepayerAlias,
+  });
+  printInteractiveDeployAliasConfigSuccessMessage(
+    deployAliasesConfig,
+    deployAliasName,
+    feepayerKeyPair
+  );
+}
+
+async function createZkAppKeyPairAndSaveDeployAliasConfig({
+  deployAliasesConfig,
+  projectRoot,
+  deployAliasName,
+  networkId,
+  url,
+  fee,
+  feepayerAlias,
+}) {
   await step(
     `Create zkApp key pair at keys/${deployAliasName}.json`,
     async () => {
-      const keyPair = createKeyPair('testnet');
-      fs.outputJsonSync(`${DIR}/keys/${deployAliasName}.json`, keyPair, {
-        spaces: 2,
-      });
+      const keyPair = createKeyPair(networkId);
+      fs.outputJsonSync(
+        `${projectRoot}/keys/${deployAliasName}.json`,
+        keyPair,
+        {
+          spaces: 2,
+        }
+      );
       return keyPair;
     }
   );
-
   await step(`Add deploy alias to config.json`, async () => {
     if (!feepayerAlias) {
       // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
       log(chalk.red(`Invalid fee payer alias ${feepayerAlias}" .`));
       process.exit(1);
     }
-    config.deployAliases[deployAliasName] = {
+    deployAliasesConfig.deployAliases[deployAliasName] = {
+      networkId,
       url,
       keyPath: `keys/${deployAliasName}.json`,
       feepayerKeyPath: `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
       feepayerAlias,
       fee,
     };
-    fs.outputJsonSync(`${DIR}/config.json`, config, { spaces: 2 });
+    fs.outputJsonSync(`${projectRoot}/config.json`, deployAliasesConfig, {
+      spaces: 2,
+    });
   });
-
-  const explorerName = getExplorerName(
-    config.deployAliases[deployAliasName]?.url
-  );
-
-  const str =
-    `\nSuccess!\n` +
-    `\nNext steps:` +
-    `\n  - If this is a testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
-      feepayerKeyPair.publicKey
-    )}&?explorer=${explorerName}` +
-    `\n  - To deploy, run: \`zk deploy ${deployAliasName}\``;
-
-  log(chalk.green(str));
 }
 
 // Creates a new feepayer key pair
-async function createKeyPairStep(feepayerAlias) {
+async function createKeyPairStep(feepayerAlias, networkId) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
     log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
-    return;
+    process.exit(1);
   }
   return await step(
     `Create fee payer key pair at ${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
     async () => {
-      const keyPair = createKeyPair('testnet');
+      const keyPair = createKeyPair(networkId);
 
       fs.outputJsonSync(
         `${Constants.feePayerCacheDir}/${feepayerAlias}.json`,
@@ -308,7 +353,7 @@ function getCachedFeepayerAliases() {
   let aliases = fs.readdirSync(Constants.feePayerCacheDir);
 
   aliases = aliases
-    .filter((fileName) => fileName.includes('json'))
+    .filter((fileName) => fileName.endsWith('.json'))
     .map((name) => name.slice(0, -5));
 
   return aliases;
@@ -331,6 +376,69 @@ function getExplorerName(graphQLUrl) {
   return new URL(graphQLUrl).hostname
     .split('.')
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
+}
+
+async function printDeployAliasesConfig(deployAliasesConfig) {
+  // Build table of existing deploy aliases found in their config.json
+  let tableData = [
+    [chalk.bold('Name'), chalk.bold('URL'), chalk.bold('Smart Contract')],
+  ];
+  for (const deployAliasName in deployAliasesConfig.deployAliases) {
+    const { url, smartContract } =
+      deployAliasesConfig.deployAliases[deployAliasName];
+    tableData.push([
+      deployAliasName,
+      url ?? '',
+      smartContract ?? chalk.gray('(never deployed)'),
+    ]);
+  }
+  // Sort alphabetically by deploy alias name.
+  tableData = tableData.sort((a, b) => a[0].localeCompare(b[0]));
+  const tableConfig = {
+    border: getBorderCharacters('norc'),
+    header: {
+      alignment: 'center',
+      content: chalk.bold('Deploy aliases in config.json'),
+    },
+  };
+  // Show "none found", if no deploy aliases exist.
+  if (tableData.length === 1) {
+    // Add some padding to empty name & url columns, to feel more natural.
+    tableData[0][0] = tableData[0][0] + ' '.repeat(2);
+    tableData[0][1] = tableData[0][1] + ' '.repeat(3);
+
+    tableData.push([[chalk.gray('None found')], [], []]);
+    tableConfig.spanningCells = [{ col: 0, row: 1, colSpan: 3 }];
+  }
+  // Print the table. Indented by 2 spaces for alignment in terminal.
+  const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
+  log(msg);
+}
+
+function printInteractiveDeployAliasConfigSuccessMessage(
+  deployAliasesConfig,
+  deployAliasName,
+  feepayerKeyPair
+) {
+  const explorerName = getExplorerName(
+    deployAliasesConfig.deployAliases[deployAliasName]?.url
+  );
+  const str =
+    `\nSuccess!\n` +
+    `\nNext steps:` +
+    `\n  - If this is the testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
+      feepayerKeyPair.publicKey
+    )}&?explorer=${explorerName}` +
+    `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
+  log(chalk.green(str));
+}
+
+function printLightnetDeployAliasConfigSuccessMessage(deployAliasName) {
+  const str =
+    `\nSuccess!\n` +
+    `\nNext steps:` +
+    `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
+  log(chalk.green(str));
 }
 
 export default config;

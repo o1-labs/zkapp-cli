@@ -17,7 +17,45 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
-## [0.16.0] - 2023-12-11
+## [0.17.2](https://github.com/o1-labs/zkapp-cli/compare/v17.1...v17.2) - 2024-02-19
+
+### Changed
+
+- Improve error handling when imported smart contract is not found. [#586](https://github.com/o1-labs/zkapp-cli/pull/586)
+
+## [0.17.1](https://github.com/o1-labs/zkapp-cli/compare/v17.0...v17.1) - 2024-02-17
+
+### Changed
+
+- Update `getCachedFeepayerAliases()` logic to prevent edge case bugs. [#581](https://github.com/o1-labs/zkapp-cli/pull/581)
+
+- Improve error handling for zk deploy when fee payer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
+
+- Automate "zk config" if Lightnet is in use. [#579](https://github.com/o1-labs/zkapp-cli/pull/579)
+  - The `--lightnet` option was added to `zk config` in order to automatically configures zkApp project's deploy aliases.
+  - The [Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet) should be up and running before executing the `zk config --lightnet` command.
+- Allow to use locally available lightweight Mina explorer in case of network issues. [#577](https://github.com/o1-labs/zkapp-cli/pull/577)
+
+## [0.17.0](https://github.com/o1-labs/zkapp-cli/compare/v16.2...v17.0) - 2024-02-03
+
+### Changed
+
+- Bump minor version to 0.17.0. [#574](https://github.com/o1-labs/zkapp-cli/pull/574)
+
+## [0.16.2](https://github.com/o1-labs/zkapp-cli/compare/v16.1...v16.2) - 2024-02-03
+
+### Changed
+
+- Update project scaffold tsconfig to handle esnext and es2022 targets. [#570](https://github.com/o1-labs/zkapp-cli/pull/570)
+- Dependencies updated. [#573](https://github.com/o1-labs/zkapp-cli/pull/573)
+
+## [0.16.1](https://github.com/o1-labs/zkapp-cli/compare/v16.0...v16.1) - 2024-02-01
+
+### Added
+
+- Possibility to configure the target network to testnet or mainnet during the `zk config` process. [#564](https://github.com/o1-labs/zkapp-cli/pull/564)
+
+## [0.16.0](https://github.com/o1-labs/zkapp-cli/compare/v15.2...v16.0) - 2023-12-11
 
 ### Added
 
@@ -31,31 +69,31 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix to allow a deployment to Github Pages using the npm run deploy command in a NextJS UI project[#534](https://github.com/o1-labs/zkapp-cli/pull/534).
 
-## [0.15.2] - 2023-12-04
+## [0.15.2](https://github.com/o1-labs/zkapp-cli/compare/v15.1...v15.2) - 2023-12-04
 
 ### Added
 
 - Lightnet sub-commands implementation (`explorer`). [#521](https://github.com/o1-labs/zkapp-cli/pull/521)
 
-## [0.15.1] - 2023-11-29
+## [0.15.1](https://github.com/o1-labs/zkapp-cli/compare/v15.0...v15.1) - 2023-11-29
 
 ### Added
 
 - Lightnet sub-commands implementation (`logs`). [#520](https://github.com/o1-labs/zkapp-cli/pull/520)
 
-## [0.15.0] - 2023-11-07
+## [0.15.0](https://github.com/o1-labs/zkapp-cli/compare/v14.1...v15.0) - 2023-11-07
 
 ### Added
 
 - Lightnet sub-commands implementation (`start`/`stop`/`status`). [#510](https://github.com/o1-labs/zkapp-cli/pull/510)
 
-## [0.14.1] - 2023-11-03
+## [0.14.1](https://github.com/o1-labs/zkapp-cli/compare/v14.0...v14.1) - 2023-11-03
 
 ### Changed
 
 - Explorer links for deployment and interaction transactions. [#516](https://github.com/o1-labs/zkapp-cli/pull/516)
 
-## [0.14.0] - 2023-10-31
+## [0.14.0](https://github.com/o1-labs/zkapp-cli/compare/v13.2...v14.0) - 2023-10-31
 
 ### Changed
 
@@ -63,7 +101,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.14.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.14.\*.
 
-## [0.13.2] - 2023-10-22
+## [0.13.2](https://github.com/o1-labs/zkapp-cli/compare/v0.13.0...v13.2) - 2023-10-22
 
 ### Changed
 
@@ -75,7 +113,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - This PR removes Husky and the pre-commit hooks from the project templates to remove friction and create a better DX when building zkApps. [#505](https://github.com/o1-labs/zkapp-cli/pull/505).
 
-## [0.13.0] - 2023-09-14
+## [0.13.0](https://github.com/o1-labs/zkapp-cli/compare/v0.12.1...v0.13.0) - 2023-09-14
 
 ### Changed
 
@@ -83,7 +121,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.13.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.13.\*.
 
-## [0.12.1] - 2023-09-09
+## [0.12.1](https://github.com/o1-labs/zkapp-cli/compare/v0.12.0...v0.12.1) - 2023-09-09
 
 ### Changed
 
@@ -93,7 +131,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix to allow the zkApp-cli to be used from a projects local node_modules[#448](https://github.com/o1-labs/zkapp-cli/pull/448).
 
-## [0.12.0] - 2023-09-09
+## [0.12.0](https://github.com/o1-labs/zkapp-cli/compare/v0.11.2...v0.12.0) - 2023-09-09
 
 ### Changed
 
@@ -103,7 +141,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - E2E tests for critical user flows against mocked and real networks [#447](https://github.com/o1-labs/zkapp-cli/pull/447).
 
-## [0.11.2] - 2023-09-05
+## [0.11.2](https://github.com/o1-labs/zkapp-cli/compare/v0.11.0...v0.11.2) - 2023-09-05
 
 ### Changed
 
@@ -119,7 +157,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - A fix to deploy a NextJS UI project to GitHub Pages without manual configuration by running `npm run deploy` [#468](https://github.com/o1-labs/zkapp-cli/pull/468)
 
-## [0.11.0] - 2023-07-14
+## [0.11.0](https://github.com/o1-labs/zkapp-cli/compare/v0.10.2...v0.11.0) - 2023-07-14
 
 ### Changed
 
@@ -127,7 +165,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - o1js minor version dependency updated in cli package.json to 0.12.\*.
   - o1js minor version peer dependency updated in template/example contract package.json to 0.12.\*.
 
-## [0.10.2] - 2023-07-09
+## [0.10.2](https://github.com/o1-labs/zkapp-cli/compare/v0.10.1...v0.10.2) - 2023-07-09
 
 ### Changed
 
@@ -137,13 +175,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Fix for zkApp project generation with `Nuxt` UI framework issue ([#449](https://github.com/o1-labs/zkapp-cli/issues/449))
 
-## [0.10.1] - 2023-06-22
+## [0.10.1](https://github.com/o1-labs/zkapp-cli/compare/v0.10.0...v0.10.1) - 2023-06-22
 
 ### Changed
 
 - Update cli prompt language and upgrade version instructions [#437](https://github.com/o1-labs/zkapp-cli/pull/437) & [#438](https://github.com/o1-labs/zkapp-cli/pull/438)
 
-## [0.10.0] - 2023-06-20
+## [0.10.0](https://github.com/o1-labs/zkapp-cli/compare/v0.9.1...v0.10.0) - 2023-06-20
 
 ## Added
 
@@ -154,7 +192,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - A fee payer tries to pay the fee using signature authorization (proofs are not supported). If the zkApp account is used as fee payer after deployment, the transaction was rejected because the permissions of the account would be violated, breaking all re-deployments and the interact.ts script in the template project. [#424](https://github.com/o1-labs/zkapp-cli/pull/424)
 
-## [0.9.1] - 2023-06-17
+## [0.9.1](https://github.com/o1-labs/zkapp-cli/compare/v0.1.4...v0.9.1) - 2023-06-17
 
 ### Changed
 
@@ -187,15 +225,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Release `0.8.0` [#399](https://github.com/o1-labs/zkapp-cli/pull/399)
-
   - Remove deprecated isReady and shutdown from cli, template/examples contracts, and UI scaffolds for each supported framework.
   - Add state.getAndAssertEquals() to examples and test contracts.
   - Configure UI scaffolds for NextJS, Svelte, and Nuxt to support top-level await used in the latest o1js release.
   - Exit the cli config and deploy processes on success and error.
   - Increase the template/example project jest test timeout.
-
 - Update interact script config field. [#396](https://github.com/o1-labs/zkapp-cli/pull/396)
-
 - Update help text. [#392](https://github.com/o1-labs/zkapp-cli/pull/392)
 
 ## [0.7.6] - 2023-04-25
@@ -203,15 +238,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Remove postinstall script to speed up zkApp cli installations and upgrades [#391](https://github.com/o1-labs/zkapp-cli/pull/391)
-
 - UI scaffold updates. [#388](https://github.com/o1-labs/zkapp-cli/pull/388)
 
 ### Added
 
 - Landing page with next steps for Nuxt UI scaffold. [#386](https://github.com/o1-labs/zkapp-cli/pull/386)
-
 - Landing page with next steps for Svelte UI scaffold. [#385](https://github.com/o1-labs/zkapp-cli/pull/385)
-
 - Landing page with next steps for NextJS UI scaffold. [#384](https://github.com/o1-labs/zkapp-cli/pull/384)
 
 ## [0.7.5] - 2023-03-16
@@ -253,7 +285,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Add timeout to warm gittar cache step during zkapp-cli install or upgrade. [#362](https://github.com/o1-labs/zkapp-cli/pull/362)
-
 - Update 'networks' in config.json to 'deployAliases'. [#360](https://github.com/o1-labs/zkapp-cli/pull/360)
 
 ## [0.6.2] - 2023-02-02
@@ -342,14 +373,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Add ability to generate UI project alongsde the smart contract.
-
   - Add an option to NextJS to set it up for github pages. [#292](https://github.com/o1-labs/zkapp-cli/pull/292)
   - Import a smart contract into the NextJS UI project scaffold. [#290](https://github.com/o1-labs/zkapp-cli/pull/290)
   - Fixes to the NextJS project for o1js + typescript. [#287](https://github.com/o1-labs/zkapp-cli/pull/287)
   - Add a NextJS typescript prompt. [#285](https://github.com/o1-labs/zkapp-cli/pull/285)
   - Add COOP & COEP headers for SvelteKit, NextJS, & NuxtJS. [#279](https://github.com/o1-labs/zkapp-cli/pull/279)
   - Working mvp of UI monorepo. [#266](https://github.com/o1-labs/zkapp-cli/pull/266)
-
 - Add Github issue templates. [#270](https://github.com/o1-labs/zkapp-cli/pull/270), [#275](https://github.com/o1-labs/zkapp-cli/pull/275), & [#276](https://github.com/o1-labs/zkapp-cli/pull/276)
 
 ## [0.4.17] - 2022-10-07

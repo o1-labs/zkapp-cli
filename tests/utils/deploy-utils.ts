@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { ExitCode } from '@shimkiv/cli-testing-library/lib/createExecute';
 import { CLITestEnvironment } from '@shimkiv/cli-testing-library/lib/types';
+import { NetworkId } from 'mina-signer';
 import crypto from 'node:crypto';
 import Constants from '../../src/lib/constants.js';
 import { CommandResults, ExampleType, UiType } from '../models/types.js';
@@ -24,6 +25,7 @@ import { zkProject } from './project-utils.js';
 
 export async function zkDeploy(
   path: string,
+  networkId: NetworkId | undefined,
   projectType: UiType | ExampleType,
   interactiveMode: boolean,
   processHandler: CLITestEnvironment['spawn'],
@@ -68,6 +70,8 @@ export async function zkDeploy(
     }
     await zkConfig({
       processHandler,
+      workDir: `${path}/${workDir}`,
+      networkId,
       deploymentAlias,
       feePayerAlias,
       feePayerAccount,

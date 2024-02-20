@@ -72,3 +72,56 @@ export function generateInputsForOptionSelection(
   inputs.push('enter');
   return inputs;
 }
+
+export async function waitForServer(
+  serverUrl: URL,
+  processStdout: string[]
+): Promise<void> {
+  const maxAttempts = 5;
+  const pollingIntervalMs = 3_000;
+  let currentAttempt = 1;
+  let isReady = false;
+
+  console.info('\n');
+  while (currentAttempt <= maxAttempts && !isReady) {
+    console.info(`Waiting for server readiness. Attempt #${currentAttempt}`);
+    if (
+      processStdout.some(
+        // We want to check data presence in process stdout independently
+        // because CLI output is usually formatted and colored using
+        // different libs and styles.
+        (item) =>
+          item.includes(`${serverUrl.protocol}`) &&
+          item.includes(`${serverUrl.hostname}`) &&
+          item.includes(`${serverUrl.port}`)
+      )
+    ) {
+      isReady = true;
+      break;
+    } else {
+      await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
+    }
+    currentAttempt++;
+  }
+  if (!isReady) {
+    throw new Error('Maximum attempts reached. The server is not ready!');
+  } else {
+    console.info('\nServer is up and running!');
+  }
+}
+
+export function logProcessOutput(
+  processStdout: string[],
+  processStderr: string[]
+): void {
+  if (processStdout.length > 0) {
+    console.info('Process StdOut:');
+    console.info(processStdout.join('\n'));
+    console.info('\n--------------------');
+  }
+  if (processStderr.length > 0) {
+    console.info('Process StdErr:');
+    console.info(processStderr.join('\n'));
+    console.info('\n--------------------');
+  }
+}

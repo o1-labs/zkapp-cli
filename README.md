@@ -2,7 +2,7 @@
 
 The zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
 
-Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the Mina zkApp CLI.
+Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the zkApp CLI.
 
 ## Getting Started
 
@@ -36,7 +36,7 @@ You are prompted to install the new version if you are running an earlier zkApp 
 
 You are not prompted to update if you are using an earlier patch version. For example, you are not notified to upgrade when you are running 0.10.1, and the current version is 0.10.2.
 
-To update to the latest version of the Mina zkApp CLI:
+To update to the latest version of the zkApp CLI:
 
 ```sh
 $ npm update -g zkapp-cli
@@ -46,9 +46,9 @@ $ npm update -g zkapp-cli
 
 To use the zkApp CLI and o1js, your environment requires:
 
-- NodeJS v16 and later
-- NPM v8 and later
-- Git v2 and later
+- NodeJS v18 and later
+- NPM v10 and later
+- git v2 and later
 
 Use a package manager to install the required versions and upgrade older versions if needed. Package managers for the supported environments are:
 
@@ -173,12 +173,47 @@ zk deploy <alias>
 zk deploy // shows a list of aliases in your project to choose from
 ```
 
-_**Deployment is supported only to Berkeley Testnet and Testworld Mission 2.0, the Protocol Performance Testing program.
-zkApp programmability is not yet available on the Mina Mainnet.**_
+_**Deployment is supported only to Berkeley Testnet until zkApp programmability is available on Mina Mainnet.**_
 
 After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias.
 
 Note: When you deploy to an alias for the first time, you are prompted to choose which smart contract you want to deploy from those that exist as _named_ exports in your project. The name of the smart contract that you choose is remembered by being saved into your `config.json` for this alias. For safety, the next time you run `zk deploy <alias>` this _same_ smart contract automatically deploys to this alias. See [Tutorial 3: Deploy to a Live Network](https://docs.minaprotocol.com/zkapps/tutorials/deploying-to-a-network).
+
+## Testing your zkApp
+
+To test your zkApps, you first create automated tests for your smart contract and test with a simulated local blockchain. See [Testing zkApps Locally](https://docs.minaprotocol.com/zkapps/testing-zkapps-locally).
+
+Before you test with a live network, use Lightnet to test your zkApp locally on an accurate representation of a Mina blockchain.
+
+```sh
+zk lightnet --help
+```
+
+See [Testing zkApps with Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet).
+
+### Block explorer
+
+To launch a lightweight Mina explorer to monitor transactions in a web browser:
+
+```sh
+zk lightnet explorer
+```
+
+## Community Support and Participation
+
+[Mina Protocol Discord](https://discord.gg/minaprotocol) is the most popular place where Mina enthusiasts and technical contributors gather to share knowledge.
+
+Join us in these zkApps channels:
+
+- [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) to meet other developers building zkApps with o1js
+- [#zkapps-general](https://discord.com/channels/484437221055922177/910549624413102100) to ask general questions about zkApps, how to use a zkApp, and so on
+- [#zkapps-questions](https://discord.com/channels/484437221055922177/1047214314349658172) to ask zkApps-related questions and see Q&A history
+
+## Feedback
+
+To provide feedback, first review existing issues. You can create [issues](https://github.com/o1-labs/zkapp-cli/issues) with feature requests for zkApp CLI and Lightnet in this repository.
+
+zkApp CLI is an open source project, see the [CONTRIBUTING](https://github.com/o1-labs/zkapp-cli/blob/main/CONTRIBUTING.md) guidelines.
 
 ## License
 

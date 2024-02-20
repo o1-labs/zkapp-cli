@@ -9,7 +9,7 @@ export const TestConstants: ConstantsType = Object.freeze({
   cliPromptMsDelay: 200,
   minaGraphQlPort: 8080,
   minaAccountsManagerPort: 8181,
-  mockedEndpointsServicePort: 8282,
+  mockedEndpointsServicePort: 8383,
   skipInteractiveSelectionOptions: [false, true],
   feePayerMgmtTypes: ['recover', 'new', 'cached'],
   feePayerTmpCacheDir: path.join(
@@ -343,11 +343,15 @@ export async function checkSmartContractsFilesystem(
 // We need to filter out the node ESM loader from NODE_OPTIONS for CLI tests.
 // Otherwise, `zkapp-cli` will also consume the loader and fail.
 //   https://github.com/microsoft/playwright/issues/24516
-export async function removeEnvCustomLoaders(): Promise<void> {
+export function removeEnvCustomLoaders(): void {
   if (process.env.NODE_OPTIONS) {
     process.env.NODE_OPTIONS = process.env.NODE_OPTIONS.replace(
       /--experimental-loader=[^\s]+/g,
       ''
     );
   }
+}
+
+export function capitalize(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
