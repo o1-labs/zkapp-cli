@@ -185,7 +185,7 @@ export async function deploy({ alias, yes }) {
   }
 
   // CHECK : zkProgram exists inside of smart contract
-  const zkPrograms = await findZkPrograms(`${DIR}/build/**/*.js`);
+  const zkPrograms = await findZkPrograms(`${projectRoot}/build/**/*.js`);
 
   // Set the default smartContract name for this deploy alias in config.json.
   // Occurs when this is the first time we're deploying to a given deploy alias.
@@ -312,6 +312,7 @@ export async function deploy({ alias, yes }) {
 
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
+
     async () => {
       let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
       // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
@@ -328,14 +329,14 @@ export async function deploy({ alias, yes }) {
       if (cache[contractName]?.zkProgram) {
         zkProgramNameArg = cache[contractName]?.zkProgram;
         let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-          `${DIR}/build/**/*.js`,
+          `${projectRoot}/build/**/*.js`,
           zkProgramNameArg
         );
 
         const zkProgramImportPath =
           process.platform === 'win32'
-            ? `file:// ${DIR}/build/src/${zkProgramFile}`
-            : `${DIR}/build/src/${zkProgramFile}`;
+            ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
+            : `${projectRoot}/build/src/${zkProgramFile}`;
 
         const zkProgramImports = await import(zkProgramImportPath);
 
@@ -361,7 +362,7 @@ export async function deploy({ alias, yes }) {
           // update cache with zkprogram digest. VK is not necessary because not depoying the zkprogram
           cache[zkProgramNameArg].digest = zkProgramDigest;
 
-          fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
+          fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
             spaces: 2,
           });
           isCached = false;
@@ -383,14 +384,14 @@ export async function deploy({ alias, yes }) {
         // import and compile ZKprogram if smart contract to deploy verifies it
         if (zkProgramNameArg) {
           let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-            `${DIR}/build/**/*.js`,
+            `${projectRoot}/build/**/*.js`,
             zkProgramNameArg
           );
 
           const zkProgramImportPath =
             process.platform === 'win32'
-              ? `file:// ${DIR}/build/src/${zkProgramFile}`
-              : `${DIR}/build/src/${zkProgramFile}`;
+              ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
+              : `${projectRoot}/build/src/${zkProgramFile}`;
 
           const zkProgramImports = await import(zkProgramImportPath);
 
