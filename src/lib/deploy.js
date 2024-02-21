@@ -313,114 +313,7 @@ export async function deploy({ alias, yes }) {
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
 
-    async () => {
-      let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
-      // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
-      let currentDigest = await zkApp.digest(zkAppAddress);
-
-      // initialize cache if 'zk deploy' is run the first time on the contract
-      cache[contractName] = cache[contractName] ?? {};
-
-      let zkProgram;
-      let currentZkProgramDigest;
-      let zkProgramNameArg;
-
-      // if zk program name is in the cache, import it to compute the digest to determine if it has changed
-      if (cache[contractName]?.zkProgram) {
-        zkProgramNameArg = cache[contractName]?.zkProgram;
-        let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-          `${projectRoot}/build/**/*.js`,
-          zkProgramNameArg
-        );
-
-        const zkProgramImportPath =
-          process.platform === 'win32'
-            ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
-            : `${projectRoot}/build/src/${zkProgramFile}`;
-
-        const zkProgramImports = await import(zkProgramImportPath);
-
-        zkProgram = zkProgramImports[zkProgramVarName];
-        // console.log('zkprogam', zkProgram);
-        currentZkProgramDigest = await zkProgram.digest();
-      }
-
-      // If smart contract doesn't change and no zkprogram return contract cached vk
-      if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
-        console.log('zkapp digest unchanged insid if');
-
-        console.log('cache zkProgram digest', cache[zkProgramNameArg]?.digest);
-        console.log('current zkProgram digest', currentZkProgramDigest);
-        let isCached = true;
-        if (
-          cache[contractName]?.zkProgram &&
-          currentZkProgramDigest !== cache[zkProgramNameArg]?.digest
-        ) {
-          const zkProgramDigest = await zkProgram.digest();
-          await zkProgram.compile();
-
-          // update cache with zkprogram digest. VK is not necessary because not depoying the zkprogram
-          cache[zkProgramNameArg].digest = zkProgramDigest;
-
-          fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
-            spaces: 2,
-          });
-          isCached = false;
-        }
-        // return vk and isCached flag if only a smart contract that is unchanged or both zkprogram and smart contract unchanged
-        return {
-          verificationKey: cache[contractName].verificationKey,
-          isCached,
-        };
-      } else {
-        let verificationKey;
-        try {
-          const result = await zkApp.compile(zkAppAddress);
-
-          verificationKey = result.verificationKey;
-        } catch (error) {
-          zkProgramNameArg = getZkProgramNameArg(error.message);
-        }
-        // import and compile ZKprogram if smart contract to deploy verifies it
-        if (zkProgramNameArg) {
-          let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-            `${projectRoot}/build/**/*.js`,
-            zkProgramNameArg
-          );
-
-          const zkProgramImportPath =
-            process.platform === 'win32'
-              ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
-              : `${projectRoot}/build/src/${zkProgramFile}`;
-
-          const zkProgramImports = await import(zkProgramImportPath);
-
-          const zkProgram = zkProgramImports[zkProgramVarName];
-          const currentZkProgramDigest = await zkProgram.digest();
-          await zkProgram.compile();
-
-          //
-          const result = await zkApp.compile(zkAppAddress);
-          verificationKey = result.verificationKey;
-
-          // Add Zkprogram name to cache of the smart contract that verifies it
-          cache[contractName].zkProgram = zkProgramNameArg;
-          // Initialize zkprogram cache if not defined
-          cache[zkProgramNameArg] = cache[zkProgramNameArg] ?? {};
-          cache[zkProgramNameArg].digest = currentZkProgramDigest;
-        }
-
-        // update cache with new smart contract verification key and currrentDigest
-        cache[contractName].verificationKey = verificationKey;
-        cache[contractName].digest = currentDigest;
-
-        fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
-          spaces: 2,
-        });
-
-        return { verificationKey, isCached: false };
-      }
-    }
+    generateVerificationKey
   );
 
   // Can't include the log message inside the callback b/c it will break
@@ -574,6 +467,115 @@ export async function deploy({ alias, yes }) {
 
   log(chalk.green(str));
   process.exit(0);
+}
+
+async function generateVerificationKey() {
+  let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
+  // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
+  let currentDigest = await zkApp.digest(zkAppAddress);
+
+  // initialize cache if 'zk deploy' is run the first time on the contract
+  cache[contractName] = cache[contractName] ?? {};
+
+  let zkProgram;
+  let currentZkProgramDigest;
+  let zkProgramNameArg;
+
+  // if zk program name is in the cache, import it to compute the digest to determine if it has changed
+  if (cache[contractName]?.zkProgram) {
+    zkProgramNameArg = cache[contractName]?.zkProgram;
+    let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
+      `${DIR}/build/**/*.js`,
+      zkProgramNameArg
+    );
+
+    const zkProgramImportPath =
+      process.platform === 'win32'
+        ? `file:// ${DIR}/build/src/${zkProgramFile}`
+        : `${DIR}/build/src/${zkProgramFile}`;
+
+    const zkProgramImports = await import(zkProgramImportPath);
+
+    zkProgram = zkProgramImports[zkProgramVarName];
+    // console.log('zkprogam', zkProgram);
+    currentZkProgramDigest = await zkProgram.digest();
+  }
+
+  // If smart contract doesn't change and no zkprogram return contract cached vk
+  if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
+    console.log('zkapp digest unchanged insid if');
+
+    console.log('cache zkProgram digest', cache[zkProgramNameArg]?.digest);
+    console.log('current zkProgram digest', currentZkProgramDigest);
+    let isCached = true;
+    if (
+      cache[contractName]?.zkProgram &&
+      currentZkProgramDigest !== cache[zkProgramNameArg]?.digest
+    ) {
+      const zkProgramDigest = await zkProgram.digest();
+      await zkProgram.compile();
+
+      // update cache with zkprogram digest. VK is not necessary because not depoying the zkprogram
+      cache[zkProgramNameArg].digest = zkProgramDigest;
+
+      fs.writeJSONSync(`${DIR}/build/cache.json`, cache, {
+        spaces: 2,
+      });
+      isCached = false;
+    }
+    // return vk and isCached flag if only a smart contract that is unchanged or both zkprogram and smart contract unchanged
+    return {
+      verificationKey: cache[contractName].verificationKey,
+      isCached,
+    };
+  } else {
+    let verificationKey;
+    try {
+      const result = await zkApp.compile(zkAppAddress);
+
+      verificationKey = result.verificationKey;
+    } catch (error) {
+      zkProgramNameArg = getZkProgramNameArg(error.message);
+    }
+    // import and compile ZKprogram if smart contract to deploy verifies it
+    if (zkProgramNameArg) {
+      let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
+        `${DIR}/build/**/*.js`,
+        zkProgramNameArg
+      );
+
+      const zkProgramImportPath =
+        process.platform === 'win32'
+          ? `file:// ${DIR}/build/src/${zkProgramFile}`
+          : `${DIR}/build/src/${zkProgramFile}`;
+
+      const zkProgramImports = await import(zkProgramImportPath);
+
+      const zkProgram = zkProgramImports[zkProgramVarName];
+      const currentZkProgramDigest = await zkProgram.digest();
+      await zkProgram.compile();
+
+      //
+      const result = await zkApp.compile(zkAppAddress);
+      verificationKey = result.verificationKey;
+
+      // Add Zkprogram name to cache of the smart contract that verifies it
+      cache[contractName].zkProgram = zkProgramNameArg;
+      // Initialize zkprogram cache if not defined
+      cache[zkProgramNameArg] = cache[zkProgramNameArg] ?? {};
+      cache[zkProgramNameArg].digest = currentZkProgramDigest;
+    }
+
+    // update cache with new smart contract verification key and currrentDigest
+    cache[contractName].verificationKey = verificationKey;
+    cache[contractName].digest = currentDigest;
+
+    fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
+      spaces: 2,
+    });
+
+    return { verificationKey, isCached: false };
+  }
 }
 
 // Get the specified blockchain explorer url with txn hash
