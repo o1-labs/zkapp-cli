@@ -495,9 +495,7 @@ async function generateVerificationKey(
   // initialize cache if 'zk deploy' is run the first time on the contract
   cache[contractName] = cache[contractName] ?? {};
 
-  let zkProgram;
-  let currentZkProgramDigest;
-  let zkProgramNameArg;
+  let zkProgram, currentZkProgramDigest, zkProgramNameArg;
 
   // if zk program name is in the cache, import it to compute the digest to determine if it has changed
   if (cache[contractName]?.zkProgram) {
@@ -519,13 +517,14 @@ async function generateVerificationKey(
     currentZkProgramDigest = await zkProgram.digest();
   }
 
-  // If smart contract doesn't change and no zkprogram return contract cached vk
+  // If smart contract doesn't change and there is no zkprogram return contract cached vk
   if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
     console.log('zkapp digest unchanged insid if');
 
     console.log('cache zkProgram digest', cache[zkProgramNameArg]?.digest);
     console.log('current zkProgram digest', currentZkProgramDigest);
     let isCached = true;
+
     if (
       cache[contractName]?.zkProgram &&
       currentZkProgramDigest !== cache[zkProgramNameArg]?.digest
