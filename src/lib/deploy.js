@@ -740,6 +740,7 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
 }
 
 // Finds the the user defined name argument of the ZkProgram that is verified in a smart contract
+// https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
 function getZkProgramNameArg(message) {
   let zkProgramNameArg = null;
 
