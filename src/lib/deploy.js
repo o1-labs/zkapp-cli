@@ -62,7 +62,7 @@ export async function deploy({ alias, yes }) {
       process.exit(1);
     }
 
-    const res = await enquirer.prompt({
+    const networkResponse = await enquirer.prompt({
       type: 'select',
       name: 'network',
       choices: aliases,
@@ -84,7 +84,7 @@ export async function deploy({ alias, yes }) {
           : chalk.red(state.symbols.cross);
       },
     });
-    alias = res.network;
+    alias = networkResponse.network;
   }
 
   alias = alias.toLowerCase();
