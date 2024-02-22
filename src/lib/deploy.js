@@ -62,7 +62,7 @@ export async function deploy({ alias, yes }) {
       process.exit(1);
     }
 
-    const networkResponse = await enquirer.prompt({
+    const deployAliasResponse = await enquirer.prompt({
       type: 'select',
       name: 'network',
       choices: aliases,
@@ -84,7 +84,7 @@ export async function deploy({ alias, yes }) {
           : chalk.red(state.symbols.cross);
       },
     });
-    alias = networkResponse.network;
+    alias = deployAliasResponse.network;
   }
 
   alias = alias.toLowerCase();
@@ -145,7 +145,7 @@ export async function deploy({ alias, yes }) {
   // If no smart contract is specified for this deploy alias in config.json &
   // 2+ smart contracts exist in build.json, ask which they want to use.
   if (!contractName) {
-    const res = await enquirer.prompt({
+    const contractNameResponse = await enquirer.prompt({
       type: 'select',
       name: 'contractName',
       choices: build.smartContracts,
@@ -167,7 +167,7 @@ export async function deploy({ alias, yes }) {
           : chalk.red(state.symbols.cross);
       },
     });
-    contractName = res.contractName;
+    contractName = contractNameResponse.contractName;
   } else {
     // Can't include the log message inside this callback b/c it will mess up
     // the step formatting.
