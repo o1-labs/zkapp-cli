@@ -139,50 +139,7 @@ export async function deploy({ alias, yes }) {
     return { smartContracts };
   });
 
-  // Identify which smart contract to be deployed for this deploy alias.
-  let contractName = chooseSmartContract(config, build, alias);
-
-  // If no smart contract is specified for this deploy alias in config.json &
-  // 2+ smart contracts exist in build.json, ask which they want to use.
-  if (!contractName) {
-    const contractNameResponse = await enquirer.prompt({
-      type: 'select',
-      name: 'contractName',
-      choices: build.smartContracts,
-      message: (state) => {
-        // Makes the step text green upon success, else uses reset.
-        const style =
-          state.submitted && !state.cancelled
-            ? state.styles.success
-            : chalk.reset;
-        return style('Choose smart contract to deploy');
-      },
-      prefix: (state) => {
-        // Shows a cyan question mark when not submitted.
-        // Shows a green check mark if submitted.
-        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
-        if (!state.submitted) return state.symbols.question;
-        return !state.cancelled
-          ? state.symbols.check
-          : chalk.red(state.symbols.cross);
-      },
-    });
-    contractName = contractNameResponse.contractName;
-  } else {
-    // Can't include the log message inside this callback b/c it will mess up
-    // the step formatting.
-    await step('Choose smart contract', async () => {});
-
-    if (config.deployAliases[alias]?.smartContract) {
-      log(
-        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
-      );
-    } else {
-      log(
-        `  Only one smart contract exists in the project: ${build.smartContracts[0]}`
-      );
-    }
-  }
+  const contractName = await getContractName(config, build, alias);
 
   // CHECK : zkProgram exists inside of smart contract
   const zkPrograms = await findZkPrograms(`${projectRoot}/build/**/*.js`);
@@ -474,6 +431,54 @@ export async function deploy({ alias, yes }) {
 
   log(chalk.green(str));
   process.exit(0);
+}
+
+async function getContractName(config, build, alias) {
+  // Identify which smart contract to be deployed for this deploy alias.
+  let contractName = chooseSmartContract(config, build, alias);
+
+  // If no smart contract is specified for this deploy alias in config.json &
+  // 2+ smart contracts exist in build.json, ask which they want to use.
+  if (!contractName) {
+    const contractNameResponse = await enquirer.prompt({
+      type: 'select',
+      name: 'contractName',
+      choices: build.smartContracts,
+      message: (state) => {
+        // Makes the step text green upon success, else uses reset.
+        const style =
+          state.submitted && !state.cancelled
+            ? state.styles.success
+            : chalk.reset;
+        return style('Choose smart contract to deploy');
+      },
+      prefix: (state) => {
+        // Shows a cyan question mark when not submitted.
+        // Shows a green check mark if submitted.
+        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
+        if (!state.submitted) return state.symbols.question;
+        return !state.cancelled
+          ? state.symbols.check
+          : chalk.red(state.symbols.cross);
+      },
+    });
+    contractName = contractNameResponse.contractName;
+  } else {
+    // Can't include the log message inside this callback b/c it will mess up
+    // the step formatting.
+    await step('Choose smart contract', async () => {});
+
+    if (config.deployAliases[alias]?.smartContract) {
+      log(
+        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
+      );
+    } else {
+      log(
+        `  Only one smart contract exists in the project: ${build.smartContracts[0]}`
+      );
+    }
+  }
+  return contractName;
 }
 
 async function generateVerificationKey(
