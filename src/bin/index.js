@@ -41,8 +41,6 @@ yargs(hideBin(process.argv))
   .usage('Usage: $0 <command> [options]')
   .strictCommands()
   .strictOptions()
-  // https://github.com/yargs/yargs/issues/199
-  // https://github.com/yargs/yargs/blob/master/locales/en.json
   .updateStrings(getCustomizedStrings())
   .demandCommand(1, chalk.red('Please provide a command.'))
   .command(projectCli())
@@ -365,6 +363,8 @@ function lightnetCli() {
 }
 
 function getCustomizedStrings() {
+  // https://github.com/yargs/yargs/issues/199
+  // https://github.com/yargs/yargs/blob/master/locales/en.json
   return {
     'Not enough non-option arguments: got %s, need at least %s': {
       one: chalk.red(
