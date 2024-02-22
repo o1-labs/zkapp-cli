@@ -757,7 +757,7 @@ function getZkProgramNameArg(message) {
 /**
  * Find the file and variable name of the ZkProgram.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
- * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument.
+ * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
  * @returns {Promise<{zkProgramVarName: string, zkProgramFile: string}>}
  *      An object containing the variable name (`zkProgramVarName`)
  *      of the ZkProgram and the file name (`zkProgramFile`) in which the specified ZkProgram is found.
