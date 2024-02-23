@@ -533,13 +533,22 @@ async function generateVerificationKey(
       isCached,
     };
   } else {
+    // case when smart contract has changed or has an init method
     let verificationKey;
     try {
+      // attempt to compile the zkApp
       const result = await zkApp.compile(zkAppAddress);
 
       verificationKey = result.verificationKey;
     } catch (error) {
-      zkProgramNameArg = getZkProgramNameArg(error.message);
+      // if the zkApp compilation fails because the ZkProgram compilation output that the smart contract verifies is not found,
+      // the error message is parsed to get the ZkProgram name argument.
+      if (error.message.includes(`but we cannot find compilation output for`)) {
+        zkProgramNameArg = getZkProgramNameArg(error.message);
+      } else {
+        console.error(error);
+        process.exit(1);
+      }
     }
     // import and compile ZKprogram if smart contract to deploy verifies it
     if (zkProgramNameArg) {
