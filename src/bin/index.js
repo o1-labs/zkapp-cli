@@ -363,7 +363,7 @@ function lightnetCli() {
 }
 
 function getCustomizedStrings() {
-  // https://github.com/yargs/yargs/issues/199
+  // Overridden messages source can be found here:
   // https://github.com/yargs/yargs/blob/master/locales/en.json
   return {
     'Not enough non-option arguments: got %s, need at least %s': {
