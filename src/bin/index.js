@@ -41,33 +41,38 @@ yargs(hideBin(process.argv))
   .usage('Usage: $0 <command> [options]')
   .strictCommands()
   .strictOptions()
-
-  // https://github.com/yargs/yargs/issues/199
-  // https://github.com/yargs/yargs/blob/master/locales/en.json
-  .updateStrings({
-    'Missing required argument: %s': {
-      one: chalk.red('Missing required argument: %s'),
-    },
-    'Unknown argument: %s': {
-      one: chalk.red('Unknown argument: %s'),
-    },
-    'Unknown command: %s': {
-      one: chalk.red('Unknown command: %s'),
-    },
-    'Invalid values:': chalk.red('Invalid values:'),
-    'Argument: %s, Given: %s, Choices: %s': chalk.red(
-      `%s was %s. Must be one of: %s.`
-    ),
-    'Not enough non-option arguments: %s': {
-      one: chalk.red('Not enough non-option arguments: %s'),
-    },
-  })
+  .updateStrings(getCustomizedStrings())
   .demandCommand(1, chalk.red('Please provide a command.'))
+  .command(projectCli())
+  .command(fileCli())
+  .command(configCli())
+  .command(deployCli())
+  .command(exampleCli())
+  .command(systemCli())
+  .command(lightnetCli())
+  .version(
+    fs.readJsonSync(path.join(__dirname, '..', '..', 'package.json')).version
+  )
+  .alias('h', 'help')
+  .alias('v', 'version')
+  .epilog(
+    // chalk.reset is a hack to force the terminal to retain a line break below
+    chalk.reset(
+      `
 
-  .command(
-    ['project [name]', 'proj [name]', 'p [name]'],
-    'Create a new project',
-    {
+    █▄ ▄█ █ █▄ █ ▄▀▄
+    █ ▀ █ █ █ ▀█ █▀█
+
+     Mina Protocol
+      `
+    )
+  ).argv;
+
+function projectCli() {
+  return {
+    command: ['project [name]', 'proj [name]', 'p [name]'],
+    describe: 'Create a new project',
+    builder: {
       name: { demand: true, string: true, hidden: true },
       ui: {
         demand: false,
@@ -77,18 +82,24 @@ yargs(hideBin(process.argv))
         description: 'Creates an accompanying UI',
       },
     },
-    async (argv) => await project(argv)
-  )
-  .command(
-    ['file [name]', 'f [name]'],
-    'Create a file and generate the corresponding test file',
-    { name: { demand: true, string: true, hidden: true } },
-    async (argv) => await file(argv.name)
-  )
-  .command(
-    ['config [list] [lightnet]'],
-    'List or add a new deploy alias',
-    {
+    handler: async (argv) => await project(argv),
+  };
+}
+
+function fileCli() {
+  return {
+    command: ['file [name]', 'f [name]'],
+    describe: 'Create a file and generate the corresponding test file',
+    builder: { name: { demand: true, string: true, hidden: true } },
+    handler: async (argv) => await file(argv.name),
+  };
+}
+
+function configCli() {
+  return {
+    command: ['config [list] [lightnet]'],
+    describe: 'List or add a new deploy alias',
+    builder: {
       list: {
         alias: 'l',
         demand: false,
@@ -108,12 +119,15 @@ yargs(hideBin(process.argv))
           'Whether to automatically configure the deploy alias compatible with the lightweight Mina blockchain network.',
       },
     },
-    async (argv) => await config(argv)
-  )
-  .command(
-    ['deploy [alias]'],
-    'Deploy or redeploy a zkApp',
-    {
+    handler: async (argv) => await config(argv),
+  };
+}
+
+function deployCli() {
+  return {
+    command: ['deploy [alias]'],
+    describe: 'Deploy or redeploy a zkApp',
+    builder: {
       alias: { demand: false, string: true, hidden: true },
       y: {
         alias: 'yes',
@@ -124,12 +138,15 @@ yargs(hideBin(process.argv))
           'Respond `yes` to all confirmation prompts.\nAllows running non-interactively within a script.',
       },
     },
-    async (argv) => await deploy(argv)
-  )
-  .command(
-    ['example [name]', 'e [name]'],
-    'Create an example project',
-    {
+    handler: async (argv) => await deploy(argv),
+  };
+}
+
+function exampleCli() {
+  return {
+    command: ['example [name]', 'e [name]'],
+    describe: 'Create an example project',
+    builder: {
       name: {
         demand: false,
         string: true,
@@ -137,13 +154,25 @@ yargs(hideBin(process.argv))
         choices: Constants.exampleTypes,
       },
     },
-    async (argv) => await example(argv.name)
-  )
-  .command(['system', 'sys', 's'], 'Show system info', {}, () => system())
-  .command(
-    ['lightnet <sub-command> [options]'],
-    'Manage the lightweight Mina blockchain network for zkApps development and testing purposes.\nMore information can be found at:\nhttps://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet',
-    (yargs) => {
+    handler: async (argv) => await example(argv.name),
+  };
+}
+
+function systemCli() {
+  return {
+    command: ['system', 'sys', 's'],
+    describe: 'Show system info',
+    builder: {},
+    handler: () => system(),
+  };
+}
+
+function lightnetCli() {
+  return {
+    command: ['lightnet <sub-command> [options]'],
+    describe:
+      'Manage the lightweight Mina blockchain network for zkApps development and testing purposes.\nMore information can be found at:\nhttps://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet',
+    builder: (yargs) => {
       yargs
         .command(
           [
@@ -300,8 +329,7 @@ yargs(hideBin(process.argv))
                   ...commonOptions,
                 },
                 async (argv) => await lightnetFollowLogs(argv)
-              )
-              .demandCommand();
+              );
           }
         )
         .command(
@@ -329,25 +357,54 @@ yargs(hideBin(process.argv))
             ...commonOptions,
           },
           async (argv) => await lightnetExplorer(argv)
-        )
-        .demandCommand();
-    }
-  )
-  .version(
-    fs.readJsonSync(path.join(__dirname, '..', '..', 'package.json')).version
-  )
-  .alias('h', 'help')
-  .alias('v', 'version')
+        );
+    },
+  };
+}
 
-  .epilog(
-    // chalk.reset is a hack to force the terminal to retain a line break below
-    chalk.reset(
-      `
-
-    █▄ ▄█ █ █▄ █ ▄▀▄
-    █ ▀ █ █ █ ▀█ █▀█
-
-     Mina Protocol
-      `
-    )
-  ).argv;
+function getCustomizedStrings() {
+  // Overridden messages source can be found here:
+  // https://github.com/yargs/yargs/blob/master/locales/en.json
+  return {
+    'Not enough non-option arguments: got %s, need at least %s': {
+      one: chalk.red(
+        'Not enough non-option arguments: got %s, need at least %s'
+      ),
+      other: chalk.red(
+        'Not enough non-option arguments: got %s, need at least %s'
+      ),
+    },
+    'Too many non-option arguments: got %s, maximum of %s': {
+      one: chalk.red('Too many non-option arguments: got %s, maximum of %s'),
+      other: chalk.red('Too many non-option arguments: got %s, maximum of %s'),
+    },
+    'Missing argument value: %s': {
+      one: chalk.red('Missing argument value: %s'),
+      other: chalk.red('Missing argument values: %s'),
+    },
+    'Missing required argument: %s': {
+      one: chalk.red('Missing required argument: %s'),
+      other: chalk.red('Missing required arguments: %s'),
+    },
+    'Unknown argument: %s': {
+      one: chalk.red('Unknown argument: %s'),
+      other: chalk.red('Unknown arguments: %s'),
+    },
+    'Unknown command: %s': {
+      one: chalk.red('Unknown command: %s'),
+      other: chalk.red('Unknown commands: %s'),
+    },
+    'Invalid values:': chalk.red('Invalid values:'),
+    'Argument check failed: %s': chalk.red('Argument check failed: %s'),
+    'Implications failed:': chalk.red('Missing dependent arguments:'),
+    'Not enough arguments following: %s': chalk.red(
+      'Not enough arguments following: %s'
+    ),
+    'Invalid JSON config file: %s': chalk.red('Invalid JSON config file: %s'),
+    'Arguments %s and %s are mutually exclusive': chalk.yellow(
+      'Arguments %s and %s are mutually exclusive'
+    ),
+    deprecated: chalk.yellow('deprecated'),
+    'deprecated: %s': chalk.yellow('deprecated: %s'),
+  };
+}

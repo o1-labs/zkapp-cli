@@ -17,6 +17,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+### Changed
+
+- Improve CLI error handling. [#591](https://github.com/o1-labs/zkapp-cli/pull/591)
+
 ## [0.17.2](https://github.com/o1-labs/zkapp-cli/compare/v17.1...v17.2) - 2024-02-19
 
 ### Changed
