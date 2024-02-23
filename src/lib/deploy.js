@@ -790,6 +790,8 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
   }
 }
 
+async function getZkProgram(buildPath, projectRoot, zkProgramNameArg) {}
+
 /**
  * Find the file name of the smart contract to be deployed.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
