@@ -68,10 +68,10 @@ let feepayerAddress = feepayerKey.toPublicKey();
 let zkAppAddress = zkAppKey.toPublicKey();
 let zkApp = new Add(zkAppAddress);
 
-let sentTx;
 // compile the contract to create prover keys
 console.log('compile the contract...');
 await Add.compile();
+
 try {
   // call update() and send transaction
   console.log('build transaction and create proof...');
@@ -79,19 +79,19 @@ try {
     zkApp.update();
   });
   await tx.prove();
+
   console.log('send transaction...');
-  sentTx = await tx.sign([feepayerKey]).send();
+  const sentTx = await tx.sign([feepayerKey]).send();
+  if (sentTx.isSuccess && sentTx.errors.length === 0) {
+    console.log(
+      '\nSuccess! Update transaction sent.\n' +
+        '\nYour smart contract state will be updated' +
+        '\nas soon as the transaction is included in a block:' +
+        `\n${getTxnUrl(config.url, sentTx.hash)}`
+    );
+  }
 } catch (err) {
   console.log(err);
-}
-if (sentTx?.hash !== undefined) {
-  console.log(`
-Success! Update transaction sent.
-
-Your smart contract state will be updated
-as soon as the transaction is included in a block:
-${getTxnUrl(config.url, sentTx.hash)}
-`);
 }
 
 function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
