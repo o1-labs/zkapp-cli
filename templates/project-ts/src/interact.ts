@@ -84,13 +84,13 @@ try {
 } catch (err) {
   console.log(err);
 }
-if (sentTx?.hash() !== undefined) {
+if (sentTx?.hash !== undefined) {
   console.log(`
 Success! Update transaction sent.
 
 Your smart contract state will be updated
 as soon as the transaction is included in a block:
-${getTxnUrl(config.url, sentTx.hash())}
+${getTxnUrl(config.url, sentTx.hash)}
 `);
 }
 
