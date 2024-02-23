@@ -506,10 +506,6 @@ async function generateVerificationKey(
 
   // If smart contract doesn't change and there is no zkprogram return contract cached vk
   if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
-    console.log('zkapp digest unchanged insid if');
-
-    console.log('cache zkProgram digest', cache[zkProgramNameArg]?.digest);
-    console.log('current zkProgram digest', currentZkProgramDigest);
     let isCached = true;
 
     if (
@@ -533,7 +529,7 @@ async function generateVerificationKey(
       isCached,
     };
   } else {
-    // case when smart contract has changed or has an init method
+    // case when deploy is run for the first time or smart contract has changed or has an init method
     let verificationKey;
     try {
       // attempt to compile the zkApp
@@ -550,7 +546,7 @@ async function generateVerificationKey(
         process.exit(1);
       }
     }
-    // import and compile ZKprogram if smart contract to deploy verifies it
+    // import and compile ZkProgram if smart contract to deploy verifies it
     if (zkProgramNameArg) {
       zkProgram = await getZkProgram(projectRoot, zkProgramNameArg);
       const currentZkProgramDigest = await zkProgram.digest();
@@ -560,7 +556,7 @@ async function generateVerificationKey(
       const result = await zkApp.compile(zkAppAddress);
       verificationKey = result.verificationKey;
 
-      // Add Zkprogram name to cache of the smart contract that verifies it
+      // Add ZkProgram name to cache of the smart contract that verifies it
       cache[contractName].zkProgram = zkProgramNameArg;
       // Initialize zkprogram cache if not defined
       cache[zkProgramNameArg] = cache[zkProgramNameArg] ?? {};
