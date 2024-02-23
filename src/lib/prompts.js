@@ -69,6 +69,9 @@ const prompts = {
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Provide a custom network id:');
       },
+      result(val) {
+        return sanitizeCustomNetworkId(val);
+      },
     },
     {
       type: 'input',
@@ -300,6 +303,10 @@ function capitalize(string) {
 
 function sanitizeAliasName(aliasName) {
   return aliasName.toLowerCase().trim().replace(/\s+/g, '-');
+}
+
+function sanitizeCustomNetworkId(networkId) {
+  return networkId.trim().replace(/\s+/g, '-');
 }
 
 export default prompts;
