@@ -500,20 +500,7 @@ async function generateVerificationKey(
   // if zk program name is in the cache, import it to compute the digest to determine if it has changed
   if (cache[contractName]?.zkProgram) {
     zkProgramNameArg = cache[contractName]?.zkProgram;
-    let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-      `${projectRoot}/build/**/*.js`,
-      zkProgramNameArg
-    );
-
-    const zkProgramImportPath =
-      process.platform === 'win32'
-        ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
-        : `${projectRoot}/build/src/${zkProgramFile}`;
-
-    const zkProgramImports = await import(zkProgramImportPath);
-
-    zkProgram = zkProgramImports[zkProgramVarName];
-
+    zkProgram = await getZkProgram(projectRoot, zkProgramNameArg);
     currentZkProgramDigest = await zkProgram.digest();
   }
 
@@ -556,19 +543,7 @@ async function generateVerificationKey(
     }
     // import and compile ZKprogram if smart contract to deploy verifies it
     if (zkProgramNameArg) {
-      let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
-        `${projectRoot}/build/**/*.js`,
-        zkProgramNameArg
-      );
-
-      const zkProgramImportPath =
-        process.platform === 'win32'
-          ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
-          : `${projectRoot}/build/src/${zkProgramFile}`;
-
-      const zkProgramImports = await import(zkProgramImportPath);
-
-      const zkProgram = zkProgramImports[zkProgramVarName];
+      zkProgram = await getZkProgram(projectRoot, zkProgramNameArg);
       const currentZkProgramDigest = await zkProgram.digest();
       await zkProgram.compile();
 
