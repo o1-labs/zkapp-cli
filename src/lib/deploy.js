@@ -790,8 +790,22 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
   }
 }
 
-async function getZkProgram(buildPath, projectRoot, zkProgramNameArg) {}
+async function getZkProgram(projectRoot, zkProgramNameArg) {
+  let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
+    `${projectRoot}/build/**/*.js`,
+    zkProgramNameArg
+  );
 
+  const zkProgramImportPath =
+    process.platform === 'win32'
+      ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
+      : `${projectRoot}/build/src/${zkProgramFile}`;
+
+  const zkProgramImports = await import(zkProgramImportPath);
+  const zkProgram = zkProgramImports[zkProgramVarName];
+
+  return zkProgram;
+}
 /**
  * Find the file name of the smart contract to be deployed.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
