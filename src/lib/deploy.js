@@ -513,7 +513,7 @@ async function generateVerificationKey(
     const zkProgramImports = await import(zkProgramImportPath);
 
     zkProgram = zkProgramImports[zkProgramVarName];
-    // console.log('zkprogam', zkProgram);
+
     currentZkProgramDigest = await zkProgram.digest();
   }
 
@@ -790,6 +790,13 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
   }
 }
 
+/**
+ * Find and import the ZkProgram.
+ * @param {string}    projectRoot    The root directory path of the smart contract
+ * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+ * @returns {Promise<object>}          The ZkProgram.
+ *
+ */
 async function getZkProgram(projectRoot, zkProgramNameArg) {
   let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
     `${projectRoot}/build/**/*.js`,
