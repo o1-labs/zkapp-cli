@@ -141,9 +141,6 @@ export async function deploy({ alias, yes }) {
 
   const contractName = await getContractName(config, build, alias);
 
-  // CHECK : zkProgram exists inside of smart contract
-  const zkPrograms = await findZkPrograms(`${projectRoot}/build/**/*.js`);
-
   // Set the default smartContract name for this deploy alias in config.json.
   // Occurs when this is the first time we're deploying to a given deploy alias.
   // Important to ensure the same smart contract will always be deployed to
@@ -645,31 +642,6 @@ function hasBreakingChanges(installedVersion, latestVersion) {
   }
 
   return installedVersionArr[0] < latestVersionArr[0];
-}
-
-/**
- * Find the user-specified name for every exported instance of `ZkProgram`
- * in the build dir.
- * @param {string} path The glob pattern--e.g. `build/**\/*.js`
- * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
- */
-async function findZkPrograms(path) {
-  if (process.platform === 'win32') {
-    path = path.replaceAll('\\', '/');
-  }
-  const files = await glob(path);
-  // create storage for zkprograms
-  let zkPrograms = [];
-
-  for (const file of files) {
-    const str = fs.readFileSync(file, 'utf-8');
-    let results = str.matchAll(/export const (\w*) = ZkProgram\(\{/g);
-    results = Array.from(results) ?? []; // prevent error if no results
-    results = results.map((zkprogram) => zkprogram[1]); // only keep capture groups
-    zkPrograms.push(...results);
-  }
-
-  return zkPrograms;
 }
 
 /**
