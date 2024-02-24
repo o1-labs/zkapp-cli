@@ -41,10 +41,15 @@ const prompts = {
       type: 'select',
       name: 'networkId',
       initial: 0, // 0 = testnet, 1 = mainnet, change it to 1 after the HF
-      choices: Constants.networkIds.map((networkId) => ({
-        name: capitalize(networkId),
-        value: networkId,
-      })),
+      choices: Constants.networkIds
+        .map((networkId) => ({
+          name: capitalize(networkId),
+          value: networkId,
+        }))
+        .concat({
+          name: 'Custom network',
+          value: 'selectCustom',
+        }),
       message: (state) => {
         const style =
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
@@ -52,6 +57,20 @@ const prompts = {
       },
       result() {
         return this.focused.value;
+      },
+    },
+    {
+      type() {
+        return this.answers.networkId === 'selectCustom' ? 'text' : null;
+      },
+      name: 'networkId',
+      message: (state) => {
+        const style =
+          state.submitted && !state.cancelled ? chalk.green : chalk.reset;
+        return style('Provide a custom network id:');
+      },
+      result(val) {
+        return sanitizeCustomNetworkId(val);
       },
     },
     {
@@ -284,6 +303,10 @@ function capitalize(string) {
 
 function sanitizeAliasName(aliasName) {
   return aliasName.toLowerCase().trim().replace(/\s+/g, '-');
+}
+
+function sanitizeCustomNetworkId(networkId) {
+  return networkId.trim().replace(/\s+/g, '-');
 }
 
 export default prompts;
