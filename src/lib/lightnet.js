@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import createDebug from 'debug';
 import decompress from 'decompress';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
@@ -12,7 +13,8 @@ import util from 'util';
 import Constants from './constants.js';
 import step from './helpers.js';
 
-const shellExec = util.promisify(shell.exec);
+const debug = createDebug('zk:lightnet');
+const shellExecAsync = util.promisify(shell.exec);
 const lightnetConfigFile = path.resolve(
   `${Constants.lightnetWorkDir}/config.json`
 );
@@ -35,12 +37,16 @@ const ContainerLogFilesPrefix = {
   SINGLE_NODE: '/root',
   MULTI_NODE: '/root/.mina-network/mina-local-network-2-1-1/nodes',
 };
-let isDebug = false;
+const commonServicesPorts = [8080, 8181];
+const archivePorts = [5432, 8282];
+const singleNodePorts = [3085];
+const multiNodePorts = [4001, 4006, 5001, 6001];
 let quotes = "'";
 let escapeQuotes = '';
 if (process.platform === 'win32') {
   quotes = '"';
   const { code } = shell.exec('Get-ChildItem', { silent: true });
+  // Is it PowerShell?
   if (code == 0) {
     escapeQuotes = '\\`';
   } else {
@@ -59,7 +65,6 @@ if (process.platform === 'win32') {
  * @param {boolean} argv.sync - Whether to wait for the network to sync.
  * @param {boolean} argv.pull - Whether to pull the latest version of the Docker image from the Docker Hub.
  * @param {string}  argv.minaLogLevel - Mina processes logging level to use.
- * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
 export async function lightnetStart({
@@ -71,14 +76,12 @@ export async function lightnetStart({
   sync,
   pull,
   minaLogLevel,
-  debug,
 }) {
-  isDebug = debug;
   let containerId = null;
   let containerVolume = null;
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
-    await handleStartCommandChecks(lightnetDockerContainerName);
+    await handleStartCommandChecks(lightnetDockerContainerName, mode, archive);
   });
   await step(
     'Stopping and removing the existing Docker container',
@@ -89,11 +92,10 @@ export async function lightnetStart({
   );
   if (pull) {
     await step('Pulling the corresponding Docker image', async () => {
-      await shellExec(
+      await executeCmdWithMaybeDebugLogging(
         `docker pull o1labs/mina-local-network:${minaBranch}-latest-${
           type === 'fast' ? 'lightnet' : 'devnet'
-        }`,
-        { silent: !isDebug }
+        }`
       );
       await removeDanglingDockerImages();
     });
@@ -101,28 +103,21 @@ export async function lightnetStart({
   await step(
     'Starting the lightweight Mina blockchain network Docker container',
     async () => {
-      await shellExec(
+      await executeCmdWithMaybeDebugLogging(
         `docker run --name ${lightnetDockerContainerName} --pull=missing -id ` +
           `--env NETWORK_TYPE="${mode}" ` +
           `--env PROOF_LEVEL="${proofLevel}" ` +
           `--env LOG_LEVEL="${minaLogLevel}" ` +
           `--env RUN_ARCHIVE_NODE="${archive}" ` +
-          '-p 3085:3085 ' +
-          '-p 4001:4001 ' +
-          '-p 4006:4006 ' +
-          '-p 5001:5001 ' +
-          '-p 5432:5432 ' +
-          '-p 6001:6001 ' +
-          '-p 8080:8080 ' +
-          '-p 8181:8181 ' +
-          '-p 8282:8282 ' +
+          getDockerContainerStartupCmdPorts(mode, archive) +
           `o1labs/mina-local-network:${minaBranch}-latest-${
             type === 'fast' ? 'lightnet' : 'devnet'
-          }`,
-        { silent: !isDebug }
+          }`
       );
-      containerId = getDockerContainerId(lightnetDockerContainerName);
-      containerVolume = getDockerContainerVolume(lightnetDockerContainerName);
+      containerId = await getDockerContainerId(lightnetDockerContainerName);
+      containerVolume = await getDockerContainerVolume(
+        lightnetDockerContainerName
+      );
     }
   );
   await step('Preserving the network configuration', async () => {
@@ -152,7 +147,7 @@ export async function lightnetStart({
     });
     const statusColored = chalk.green.bold('is ready');
     console.log(`\nBlockchain network ${statusColored} in ${runTime}.`);
-    await lightnetStatus({ preventDockerEngineAvailabilityCheck: true, debug });
+    await lightnetStatus(true);
   } else {
     const statusColored = chalk.green.bold('is running');
     console.log(
@@ -169,11 +164,9 @@ export async function lightnetStart({
  * @param {object}  argv - The arguments object provided by yargs.
  * @param {boolean} argv.saveLogs - Whether to save the Docker container processes logs to the host file system.
  * @param {boolean} argv.cleanUp - Whether to perform the clean up.
- * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function lightnetStop({ saveLogs, cleanUp, debug }) {
-  isDebug = debug;
+export async function lightnetStop({ saveLogs, cleanUp }) {
   let logsDir = null;
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
@@ -189,7 +182,7 @@ export async function lightnetStop({ saveLogs, cleanUp, debug }) {
     saveLogs &&
     fs.existsSync(lightnetConfigFile) &&
     DockerContainerState.NOT_FOUND !==
-      getDockerContainerState(lightnetDockerContainerName)
+      (await getDockerContainerState(lightnetDockerContainerName))
   ) {
     await step('Preserving the Docker container processes logs', async () => {
       logsDir = await saveDockerContainerProcessesLogs();
@@ -210,7 +203,7 @@ export async function lightnetStop({ saveLogs, cleanUp, debug }) {
             fs.readJSONSync(lightnetConfigFile).containerVolume
           );
         }
-        await fs.remove(lightnetConfigFile);
+        fs.removeSync(lightnetConfigFile);
       }
     );
   }
@@ -235,19 +228,18 @@ export async function lightnetStop({ saveLogs, cleanUp, debug }) {
 
 /**
  * Gets the lightweight Mina blockchain network status.
- * @param {boolean} object.preventDockerEngineAvailabilityCheck - Whether to prevent the Docker Engine availability check.
- * @param {boolean} object.debug - Whether to print the debug information.
+ * @param {boolean} preventDockerEngineAvailabilityCheck - Whether to prevent the Docker Engine availability check.
  * @returns {Promise<void>}
  */
-export async function lightnetStatus({
-  preventDockerEngineAvailabilityCheck = false,
-  debug,
-} = {}) {
-  isDebug = debug;
+export async function lightnetStatus(
+  preventDockerEngineAvailabilityCheck = false
+) {
   if (!preventDockerEngineAvailabilityCheck) {
     await checkDockerEngineAvailability();
   }
-  const containerState = getDockerContainerState(lightnetDockerContainerName);
+  const containerState = await getDockerContainerState(
+    lightnetDockerContainerName
+  );
   if (DockerContainerState.NOT_FOUND === containerState) {
     console.log(
       chalk.red(
@@ -270,7 +262,7 @@ export async function lightnetStatus({
     printDockerContainerProcessesLogPaths();
     await printBlockchainNetworkProperties();
     printZkAppSnippet();
-    printExtendedDockerContainerState(lightnetDockerContainerName);
+    await printExtendedDockerContainerState(lightnetDockerContainerName);
   } else {
     console.log(
       chalk.yellow.bold(
@@ -279,24 +271,21 @@ export async function lightnetStatus({
           '\nOnly limited information is available.'
       )
     );
-    printExtendedDockerContainerState(lightnetDockerContainerName);
+    await printExtendedDockerContainerState(lightnetDockerContainerName);
   }
 }
 
 /**
  * Saves the lightweight Mina blockchain network Docker container processes logs to the host file system.
- * @param {object}  argv - The arguments object provided by yargs.
- * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function lightnetSaveLogs({ debug }) {
-  isDebug = debug;
+export async function lightnetSaveLogs() {
   let logsDir = null;
   await checkDockerEngineAvailability();
   if (
     fs.existsSync(lightnetConfigFile) &&
     DockerContainerState.NOT_FOUND !==
-      getDockerContainerState(lightnetDockerContainerName)
+      (await getDockerContainerState(lightnetDockerContainerName))
   ) {
     await step('Preserving the Docker container processes logs', async () => {
       logsDir = await saveDockerContainerProcessesLogs();
@@ -331,16 +320,14 @@ export async function lightnetSaveLogs({ debug }) {
  * Follows one of the lightweight Mina blockchain network Docker container processes logs.
  * @param {object}  argv - The arguments object provided by yargs.
  * @param {string}  argv.process - The name of the Docker container process to follow the logs of.
- * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function lightnetFollowLogs({ process, debug }) {
-  isDebug = debug;
+export async function lightnetFollowLogs({ process }) {
   await checkDockerEngineAvailability();
   const isDockerContainerRunning =
     fs.existsSync(lightnetConfigFile) &&
     DockerContainerState.RUNNING ===
-      getDockerContainerState(lightnetDockerContainerName);
+      (await getDockerContainerState(lightnetDockerContainerName));
   if (!isDockerContainerRunning) {
     console.log(
       chalk.red(
@@ -369,11 +356,9 @@ export async function lightnetFollowLogs({ process, debug }) {
  * @param {object}  argv - The arguments object provided by yargs.
  * @param {string}  argv.use - The version of the lightweight Mina explorer to use.
  * @param {boolean} argv.list - Whether to list the available versions of the lightweight Mina explorer.
- * @param {boolean} argv.debug - Whether to print the debug information.
  * @returns {Promise<void>}
  */
-export async function lightnetExplorer({ use, list, debug }) {
-  isDebug = debug;
+export async function lightnetExplorer({ use, list }) {
   if (list) {
     await printExplorerVersions();
   } else {
@@ -436,7 +421,7 @@ async function printExplorerVersions() {
       );
     }
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(error);
     console.log(
       chalk.red(
         '\nIssue happened while fetching the lightweight Mina explorer available versions!'
@@ -505,7 +490,7 @@ async function launchExplorer(use) {
       )
     );
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(error);
     console.log(
       chalk.red(
         '\nIssue happened while launching the lightweight Mina explorer!'
@@ -704,15 +689,19 @@ async function checkDockerEngineAvailability() {
   await step('Checking the Docker Engine availability', async () => {
     if (!shell.which('docker')) {
       console.log(
-        '\n\nPlease ensure that Docker Engine is installed, then try again.' +
-          '\nSee https://docs.docker.com/engine/install/ for more information.'
+        chalk.red(
+          '\n\nPlease ensure that Docker Engine is installed, then try again.' +
+            '\nSee https://docs.docker.com/engine/install/ for more information.'
+        )
       );
       shell.exit(1);
     }
-    const { code } = shell.exec('docker ps -a', { silent: !isDebug });
+    const { code } = await executeCmdWithMaybeDebugLogging('docker ps -a');
     if (code !== 0) {
       console.log(
-        '\n\nPlease ensure that Docker Engine is running, then try again.'
+        chalk.red(
+          '\n\nPlease ensure that Docker Engine is running, then try again.'
+        )
       );
       shell.exit(1);
     }
@@ -720,7 +709,8 @@ async function checkDockerEngineAvailability() {
 }
 
 async function handleStartCommandChecks(containerName) {
-  const containerState = getDockerContainerState(containerName);
+  //, mode, archive
+  const containerState = await getDockerContainerState(containerName);
   if (
     DockerContainerState.RUNNING === containerState &&
     fs.existsSync(lightnetConfigFile)
@@ -734,17 +724,19 @@ async function handleStartCommandChecks(containerName) {
   } else if (
     DockerContainerState.NOT_FOUND !== containerState &&
     (!fs.existsSync(lightnetConfigFile) ||
-      !dockerContainerIdMatchesConfig(containerName))
+      !(await dockerContainerIdMatchesConfig(containerName)))
   ) {
     await handleDockerContainerPresence();
   }
+  // TODO: Add ports and RAM checks.
 }
 
 async function handleStopCommandChecks(containerName) {
   if (
-    DockerContainerState.NOT_FOUND !== getDockerContainerState(containerName) &&
+    DockerContainerState.NOT_FOUND !==
+      (await getDockerContainerState(containerName)) &&
     (!fs.existsSync(lightnetConfigFile) ||
-      !dockerContainerIdMatchesConfig(containerName))
+      !(await dockerContainerIdMatchesConfig(containerName)))
   ) {
     await handleDockerContainerPresence();
   }
@@ -777,64 +769,49 @@ async function handleDockerContainerPresence() {
   }
 }
 
-function getDockerContainerState(containerName) {
-  const { stdout } = shell.exec(
-    `docker inspect -f ${quotes}{{.State.Status}}${quotes} ${containerName}`,
-    { silent: !isDebug }
+async function getDockerContainerState(containerName) {
+  const { stdout } = await executeCmdWithMaybeDebugLogging(
+    `docker inspect -f ${quotes}{{.State.Status}}${quotes} ${containerName}`
   );
   return stdout.trim() === '' ? DockerContainerState.NOT_FOUND : stdout.trim();
 }
 
-function getDockerContainerId(containerName) {
-  const { stdout } = shell.exec(
-    `docker inspect -f ${quotes}{{.Id}}${quotes} ${containerName}`,
-    { silent: !isDebug }
+async function getDockerContainerId(containerName) {
+  const { stdout } = await executeCmdWithMaybeDebugLogging(
+    `docker inspect -f ${quotes}{{.Id}}${quotes} ${containerName}`
   );
   return stdout.trim();
 }
 
-function getDockerContainerVolume(containerName) {
-  const { stdout } = shell.exec(
-    `docker inspect -f ${quotes}{{range .Mounts}}{{if eq .Type ${escapeQuotes}"volume${escapeQuotes}"}}{{.Name}}{{end}}{{end}}${quotes} ${containerName}`,
-    { silent: !isDebug }
+async function getDockerContainerVolume(containerName) {
+  const { stdout } = await executeCmdWithMaybeDebugLogging(
+    `docker inspect -f ${quotes}{{range .Mounts}}{{if eq .Type ${escapeQuotes}"volume${escapeQuotes}"}}{{.Name}}{{end}}{{end}}${quotes} ${containerName}`
   );
   return stdout.trim();
 }
 
-function dockerContainerIdMatchesConfig(containerName) {
-  const actualId = getDockerContainerId(containerName);
+async function dockerContainerIdMatchesConfig(containerName) {
+  const actualId = await getDockerContainerId(containerName);
   const expectedId = fs.readJSONSync(lightnetConfigFile).containerId;
   return actualId === expectedId;
 }
 
 async function stopDockerContainer(containerName) {
-  try {
-    await shellExec(`docker stop ${containerName}`, { silent: !isDebug });
-  } catch (error) {
-    printErrorIfDebug(error);
-  }
+  await executeCmdWithMaybeDebugLogging(`docker stop ${containerName}`);
 }
 
 async function removeDockerContainer(containerName) {
-  try {
-    await shellExec(`docker rm ${containerName}`, { silent: !isDebug });
-  } catch (error) {
-    printErrorIfDebug(error);
-  }
+  await executeCmdWithMaybeDebugLogging(`docker rm ${containerName}`);
 }
 
 async function removeDockerVolume(volume) {
-  try {
-    await shellExec(`docker volume rm ${volume}`, { silent: !isDebug });
-  } catch (error) {
-    printErrorIfDebug(error);
-  }
+  await executeCmdWithMaybeDebugLogging(`docker volume rm ${volume}`);
 }
 
 async function removeDanglingDockerImages() {
-  await shellExec('docker image prune -f --filter "dangling=true"', {
-    silent: !isDebug,
-  });
+  await executeCmdWithMaybeDebugLogging(
+    'docker image prune -f --filter "dangling=true"'
+  );
 }
 
 async function streamDockerContainerFileContent(containerName, filePath) {
@@ -849,11 +826,14 @@ async function streamDockerContainerFileContent(containerName, filePath) {
           }
         )
     );
-    await shellExec(`docker exec ${containerName} tail -n 50 -f ${filePath}`, {
-      silent: false,
-    });
+    await shellExecAsync(
+      `docker exec ${containerName} tail -n 50 -f ${filePath}`,
+      {
+        silent: false,
+      }
+    );
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(error);
     console.log(
       chalk.red(
         '\nIssue happened while streaming the Docker container file content!'
@@ -879,7 +859,7 @@ async function saveDockerContainerProcessesLogs() {
     }
     return logsDir;
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(error);
     fs.removeSync(logsDir);
     return null;
   }
@@ -916,7 +896,7 @@ async function processSingleNodeLogs(logFilePaths, logsDir) {
         ContainerLogFilesPrefix.SINGLE_NODE
       );
     } catch (error) {
-      printErrorIfDebug(error);
+      debug(error);
     }
   }
 }
@@ -930,7 +910,7 @@ async function processMultiNodeLogs(logFilePaths, logsDir) {
         ContainerLogFilesPrefix.MULTI_NODE
       );
     } catch (error) {
-      printErrorIfDebug(error);
+      debug(error);
     }
   }
 }
@@ -943,7 +923,7 @@ async function processArchiveNodeApiLogs(logsDir) {
       ContainerLogFilesPrefix.SINGLE_NODE
     );
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(error);
   }
 }
 
@@ -951,9 +931,8 @@ async function copyContainerLogToHost(logFilePath, logsDir, prefix) {
   const destinationFilePath = path.resolve(
     `${logsDir}/${logFilePath.replace(/\//g, '_')}`
   );
-  await shellExec(
-    `docker cp ${lightnetDockerContainerName}:${prefix}/${logFilePath} ${destinationFilePath}`,
-    { silent: !isDebug }
+  await executeCmdWithMaybeDebugLogging(
+    `docker cp ${lightnetDockerContainerName}:${prefix}/${logFilePath} ${destinationFilePath}`
   );
 }
 
@@ -967,6 +946,8 @@ async function waitForBlockchainNetworkReadiness(mode) {
     variables: null,
     operationName: null,
   };
+  const debugMessage =
+    'Blockchain network readiness check attempt #%d, retrying in %d seconds...';
   while (blockchainSyncAttempt <= maxAttempts && !blockchainIsReady) {
     try {
       const response = await fetch(
@@ -978,6 +959,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
         }
       );
       if (!response.ok) {
+        debug(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
         await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
       } else {
         const responseJson = await response.json();
@@ -990,7 +972,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
         }
       }
     } catch (error) {
-      printErrorIfDebug(error);
+      debug(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
       await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
     }
     blockchainSyncAttempt++;
@@ -1008,15 +990,14 @@ async function waitForBlockchainNetworkReadiness(mode) {
   }
 }
 
-function printExtendedDockerContainerState(containerName) {
-  const { stdout } = shell.exec(
+async function printExtendedDockerContainerState(containerName) {
+  const { stdout } = await executeCmdWithMaybeDebugLogging(
     `docker inspect -f ` +
       `${quotes}Status: {{.State.Status}}; ` +
       `Is running: {{.State.Running}}; ` +
       `{{if .State.ExitCode}}Exit code: {{.State.ExitCode}}; {{end}}` +
       `Killed by OOM: {{.State.OOMKilled}}; ` +
-      `{{if .State.Error}}Error: {{.State.Error}}{{end}}${quotes} ${containerName}`,
-    { silent: !isDebug }
+      `{{if .State.Error}}Error: {{.State.Error}}{{end}}${quotes} ${containerName}`
   );
   const boldTitle = chalk.reset.bold('\nDocker container state\n');
   console.log(boldTitle + stdout.trim());
@@ -1179,7 +1160,10 @@ async function printBlockchainNetworkProperties() {
       }
     }
   } catch (error) {
-    printErrorIfDebug(error);
+    debug(
+      'Issue happened while printing the blockchain network properties:\n%o',
+      error
+    );
     data = noData;
   }
   console.log(boldTitle);
@@ -1246,16 +1230,45 @@ function secondsToHms(seconds) {
   return result.endsWith(', ') ? result.slice(0, -2) : result;
 }
 
-function printErrorIfDebug(error) {
-  if (isDebug) {
-    console.log(
-      chalk.red(
-        '\n\nAn error occurred during the execution of the command:\n\n' +
-          chalk.reset(
-            error.message || error.toString() || JSON.stringify(error)
-          ) +
-          '\n'
-      )
-    );
+function getDockerContainerStartupCmdPorts(mode, archive) {
+  let ports = '';
+  if (mode === 'single-node') {
+    ports += singleNodePorts.map((port) => `-p ${port}:${port} `).join('');
+  } else {
+    ports += multiNodePorts.map((port) => `-p ${port}:${port} `).join('');
   }
+  if (archive) {
+    ports += archivePorts.map((port) => `-p ${port}:${port} `).join('');
+  }
+  ports += commonServicesPorts.map((port) => `-p ${port}:${port} `).join('');
+  return ports;
+}
+
+function printCmdDebugOutput(command, stdOut, stdErr) {
+  debug('');
+  debug(chalk.bold(`${command}`));
+  if (stdOut) {
+    debug(chalk.bold('StdOut:\n %o'), stdOut);
+  }
+  if (stdErr) {
+    debug(chalk.bold('StdErr:\n %o'), stdErr);
+  }
+}
+
+function shellExec(command, options = {}) {
+  return new Promise((resolve) => {
+    options = { ...options, async: false };
+    const result = shell.exec(command, options);
+    resolve({
+      code: result.code,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    });
+  });
+}
+
+async function executeCmdWithMaybeDebugLogging(command, silent = true) {
+  const { code, stdout, stderr } = await shellExec(command, { silent });
+  printCmdDebugOutput(command, stdout, stderr);
+  return { code, stdout, stderr };
 }
