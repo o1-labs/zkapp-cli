@@ -982,10 +982,34 @@ async function copyContainerLogToHost(logFilePath, logsDir, prefix) {
   );
 }
 
+async function getBlockchainNetworkReadinessMaxAttempts(mode) {
+  const { cpu: availableCpus } = await getAvailableDockerEngineResources();
+  const baseCpus = 8;
+  const singleNodeBaseAttempts = 50;
+  const multiNodeBaseAttempts = 210;
+  const cpusDiff = availableCpus - baseCpus;
+  let adjustmentFactor;
+  if (cpusDiff <= 0) {
+    // Increase maxAttempts for fewer than base CPUs
+    adjustmentFactor = 1 + Math.abs(cpusDiff) / baseCpus;
+  } else {
+    // Decrease maxAttempts for more than base CPUs
+    adjustmentFactor = 1 / (1 + cpusDiff / baseCpus);
+  }
+  const baseAttempts =
+    mode === 'single-node' ? singleNodeBaseAttempts : multiNodeBaseAttempts;
+  const maxAttempts = Math.round(baseAttempts * adjustmentFactor);
+  debugLog(
+    'Calculated maximum blockchain network readiness check attempts: %d',
+    maxAttempts
+  );
+  return maxAttempts;
+}
+
 async function waitForBlockchainNetworkReadiness(mode) {
   let blockchainSyncAttempt = 1;
   let blockchainIsReady = false;
-  const maxAttempts = mode === 'single-node' ? 90 : 210; // TODO: Calculate this based on resources available.
+  const maxAttempts = await getBlockchainNetworkReadinessMaxAttempts(mode);
   const pollingIntervalMs = 10_000;
   const syncStatusGraphQlQuery = {
     query: '{ syncStatus }',
@@ -1286,17 +1310,18 @@ function secondsToHms(seconds) {
 }
 
 async function isEnoughDockerEngineResourcesAvailable(mode, archive) {
-  const { memoryGB } = await getAvailableDockerEngineResources();
-  let baseRequired = 3.5; // In GB
+  const { memoryGB: availableMemGB } =
+    await getAvailableDockerEngineResources();
+  let baseRequiredMemGB = 3.5;
   if (mode === 'single-node' && archive) {
-    baseRequired += 1.0;
+    baseRequiredMemGB += 1.0;
   } else if (mode === 'multi-node') {
-    baseRequired = 16.0;
+    baseRequiredMemGB = 16.0;
   }
-  if (memoryGB < baseRequired) {
+  if (availableMemGB < baseRequiredMemGB) {
     return {
       error: true,
-      message: `Insufficient Docker Engine resources available. The lightweight Mina blockchain network requires at least ${baseRequired} GB of RAM to start.`,
+      message: `Insufficient Docker Engine resources available. The lightweight Mina blockchain network requires at least ${baseRequiredMemGB} GB of RAM to start.`,
     };
   } else {
     return { error: false };
