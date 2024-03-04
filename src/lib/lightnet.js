@@ -10,12 +10,21 @@ import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step from './helpers.js';
+import step, { checkLocalPortsAvailability } from './helpers.js';
 
 const debug = createDebug('zk:lightnet');
 const debugLog = (formatter, ...args) => {
-  // We want to outline the debug output, so we print new line first.
-  console.log('');
+  if (process.env.DEBUG) {
+    const namespaces = process.env.DEBUG.split(',');
+    if (
+      namespaces.includes('*') ||
+      namespaces.includes('zk:*') ||
+      namespaces.includes('zk:lightnet')
+    ) {
+      // We want to outline the debug output, so we print new line first.
+      console.log('');
+    }
+  }
   debug(formatter, ...args);
 };
 const lightnetConfigFile = path.resolve(
@@ -208,7 +217,7 @@ export async function lightnetStop({ saveLogs, cleanUp }) {
             fs.readJSONSync(lightnetConfigFile).containerVolume
           );
         }
-        debugLog('\nRemoving file or dir %s\n\n\n\n', lightnetConfigFile);
+        debugLog('Removing file or dir %s\n\n\n\n', lightnetConfigFile);
         fs.removeSync(lightnetConfigFile);
       }
     );
@@ -226,7 +235,7 @@ export async function lightnetStop({ saveLogs, cleanUp }) {
       fs.existsSync(lightnetLogsDir) &&
       fs.readdirSync(lightnetLogsDir).length === 0
     ) {
-      debugLog('\nRemoving file or dir %s\n\n\n\n', lightnetLogsDir);
+      debugLog('Removing file or dir %s\n\n\n\n', lightnetLogsDir);
       fs.removeSync(lightnetLogsDir);
     }
     console.log('\nDone\n');
@@ -716,8 +725,7 @@ async function checkDockerEngineAvailability() {
   });
 }
 
-async function handleStartCommandChecks(containerName) {
-  //, mode, archive
+async function handleStartCommandChecks(containerName, mode, archive) {
   const containerState = await getDockerContainerState(containerName);
   if (
     DockerContainerState.RUNNING === containerState &&
@@ -736,7 +744,26 @@ async function handleStartCommandChecks(containerName) {
   ) {
     await handleDockerContainerPresence();
   }
-  // TODO: Add ports and RAM checks.
+  const requiredDockerContainerPorts = getRequiredDockerContainerPorts(
+    mode,
+    archive
+  );
+  debugLog(
+    'Checking the following ports availability: %o',
+    requiredDockerContainerPorts
+  );
+  const result = await checkLocalPortsAvailability(
+    requiredDockerContainerPorts
+  );
+  if (result.error) {
+    console.log(chalk.red(`\n\n${result.message}`));
+    shell.exit(1);
+  }
+  const { error: resourcesError, message: resourcesErrorMessage } =
+    await isEnoughDockerEngineResourcesAvailable(mode, archive);
+  if (resourcesError) {
+    await handleYesNoConfirmation(resourcesErrorMessage);
+  }
 }
 
 async function handleStopCommandChecks(containerName) {
@@ -751,20 +778,23 @@ async function handleStopCommandChecks(containerName) {
 }
 
 async function handleDockerContainerPresence() {
+  await handleYesNoConfirmation(
+    'The lightweight Mina blockchain network Docker container already exists and it was created outside of this application.'
+  );
+}
+
+async function handleYesNoConfirmation(message) {
   const res = await enquirer.prompt({
     type: 'select',
     name: 'proceed',
     choices: ['Yes', 'No'],
     message: () => {
       return chalk.reset(
-        'The lightweight Mina blockchain network Docker container already exists and it was created outside of this application.' +
-          '\nDo you want to proceed anyway?'
+        chalk.bold.yellow(message) +
+          chalk.reset('\nDo you want to proceed anyway?')
       );
     },
     prefix: (state) => {
-      // Shows a cyan question mark when not submitted.
-      // Shows a green check mark if submitted.
-      // Shows a red "x" if ctrl+C is pressed (default is a magenta).
       if (!state.submitted) return `\n${state.symbols.question}`;
       return !state.cancelled
         ? state.symbols.check
@@ -818,6 +848,17 @@ async function removeDockerVolume(volume) {
 
 async function removeDanglingDockerImages() {
   await executeCmd('docker image prune -f --filter "dangling=true"');
+}
+
+async function getAvailableDockerEngineResources() {
+  const { stdout } = await executeCmd(
+    "docker info -f '{{.NCPU}}:{{.MemTotal}}'"
+  );
+  const [cpu, memory] = stdout.trim().split(':');
+  return {
+    cpu: parseInt(cpu),
+    memoryGB: parseFloat((parseInt(memory) / 1024 / 1024 / 1024).toFixed(2)),
+  };
 }
 
 async function streamDockerContainerFileContent(containerName, filePath) {
@@ -1244,6 +1285,24 @@ function secondsToHms(seconds) {
   return result.endsWith(', ') ? result.slice(0, -2) : result;
 }
 
+async function isEnoughDockerEngineResourcesAvailable(mode, archive) {
+  const { memoryGB } = await getAvailableDockerEngineResources();
+  let baseRequired = 3.5; // In GB
+  if (mode === 'single-node' && archive) {
+    baseRequired += 1.0;
+  } else if (mode === 'multi-node') {
+    baseRequired = 16.0;
+  }
+  if (memoryGB < baseRequired) {
+    return {
+      error: true,
+      message: `Insufficient Docker Engine resources available. The lightweight Mina blockchain network requires at least ${baseRequired} GB of RAM to start.`,
+    };
+  } else {
+    return { error: false };
+  }
+}
+
 function getRequiredDockerContainerPorts(mode, archive) {
   let ports = commonServicesPorts;
   if (mode === 'single-node') {
@@ -1259,7 +1318,7 @@ function getRequiredDockerContainerPorts(mode, archive) {
 
 function getDockerContainerStartupCmdPorts(mode, archive) {
   return getRequiredDockerContainerPorts(mode, archive)
-    .map((port) => `-p ${port}:${port} `)
+    .map((port) => `-p 127.0.0.1:${port}:${port} `)
     .join('');
 }
 
