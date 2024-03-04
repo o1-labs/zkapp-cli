@@ -27,8 +27,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
       - `zk:*`
       - `zk:lightnet`
     - Example: `DEBUG=zk:lightnet zk lightnet start`
-    - More details about the `DEBUG` environment variable can be found [here](https://www.npmjs.com/package/debug#usage).
-  - We are going to leverage the new debug logging capabilities with other parts of the CLI in the future.
+    - For details about the `DEBUG` environment variable, see Debug [Usage](https://www.npmjs.com/package/debug#usage).
+  - This improved debug logging capabilities can be leveraged with other parts of the zkApp CLI in the future.
 
 ### Changed
 
