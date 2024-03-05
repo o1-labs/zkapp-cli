@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import net from 'net';
 import fetch from 'node-fetch';
 import ora from 'ora';
 
@@ -40,6 +41,48 @@ export async function isMinaGraphQlEndpointAvailable(endpoint) {
     return !!response.ok;
   } catch (_) {
     return false;
+  }
+}
+
+/**
+ * Checks if a single port is available.
+ * @param {number} port The port number to check.
+ * @returns {Promise<{port: number, busy: boolean}>} A promise that resolves with an object containing the port number and a boolean indicating if the port is busy.
+ */
+export async function checkLocalPortAvailability(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.listen(port, '127.0.0.1');
+    server.on('listening', () => {
+      server.close();
+      resolve({ port, busy: false });
+    });
+    server.on('error', () => {
+      resolve({ port, busy: true });
+    });
+  });
+}
+
+/**
+ * Checks multiple ports for availability and identifies any that are not.
+ * @param {number[]} ports An array of port numbers to check.
+ * @returns {Promise<{error: boolean, message: string}>} A promise that resolves with an object containing an error flag and a message indicating the result.
+ */
+export async function checkLocalPortsAvailability(ports) {
+  const checks = ports.map((port) => checkLocalPortAvailability(port));
+  const results = await Promise.all(checks);
+  const busyPorts = results
+    .filter((result) => result.busy)
+    .map((result) => result.port);
+  if (busyPorts.length > 0) {
+    return {
+      error: true,
+      message:
+        `The following local ports are required but unavailable at this time: ${busyPorts.join(', ')}`.trim() +
+        '\nYou can close applications that use these ports and try again.',
+    };
+  } else {
+    return { error: false };
   }
 }
 

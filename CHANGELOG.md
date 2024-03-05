@@ -17,6 +17,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+### Breaking changes
+
+- Lightnet error and edge cases handling. [#597](https://github.com/o1-labs/zkapp-cli/pull/597)
+  - We removed common `--debug` CLI option in favor of [DEBUG](https://www.npmjs.com/package/debug) environment variable presence.
+  - From now on, in order to enable debug logging, you must set `DEBUG` environment variable to `<namespace>` value.
+    - Where `<namespace>` can be one of the following:
+      - `*`
+      - `zk:*`
+      - `zk:lightnet`
+    - Example: `DEBUG=zk:lightnet zk lightnet start`
+    - For details about the `DEBUG` environment variable, see Debug [Usage](https://www.npmjs.com/package/debug#usage).
+  - This improved debug logging capabilities can be leveraged with other parts of the zkApp CLI in the future.
+
 ### Changed
 
 - Improve CLI error handling. [#591](https://github.com/o1-labs/zkapp-cli/pull/591)
