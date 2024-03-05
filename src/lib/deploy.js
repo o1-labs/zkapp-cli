@@ -512,7 +512,7 @@ async function generateVerificationKey(
       const zkProgramDigest = await zkProgram.digest();
       await zkProgram.compile();
 
-      // update cache with zkprogram digest. VK is not necessary because not depoying the zkprogram
+      // update cache with zkprogram digest.
       cache[zkProgramNameArg].digest = zkProgramDigest;
 
       fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
@@ -549,7 +549,6 @@ async function generateVerificationKey(
       const currentZkProgramDigest = await zkProgram.digest();
       await zkProgram.compile();
 
-      //
       const result = await zkApp.compile(zkAppAddress);
       verificationKey = result.verificationKey;
 
