@@ -82,7 +82,7 @@ try {
 
   console.log('send transaction...');
   const sentTx = await tx.sign([feepayerKey]).send();
-  if (sentTx.isSuccess && sentTx.errors.length === 0) {
+  if (sentTx.status === 'pending') {
     console.log(
       '\nSuccess! Update transaction sent.\n' +
         '\nYour smart contract state will be updated' +
