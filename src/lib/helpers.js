@@ -78,7 +78,8 @@ export async function checkLocalPortsAvailability(ports) {
     return {
       error: true,
       message:
-        `The following local ports are required but unavailable at this time: ${busyPorts.join(', ')}`.trim(),
+        `The following local ports are required but unavailable at this time: ${busyPorts.join(', ')}`.trim() +
+        '\nYou can close applications that use these ports and try again.',
     };
   } else {
     return { error: false };
