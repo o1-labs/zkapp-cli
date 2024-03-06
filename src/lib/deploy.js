@@ -3,7 +3,6 @@ import { execSync } from 'child_process';
 import enquirer from 'enquirer';
 import glob from 'fast-glob';
 import findPrefix from 'find-npm-prefix';
-import fetch from 'node:fetch';
 import fs from 'fs-extra';
 import path from 'path';
 import { getBorderCharacters, table } from 'table';
