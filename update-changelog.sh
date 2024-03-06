@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Step 1: Capture the latest version
 latest_version=$(grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+(?=\])' CHANGELOG.md | head -1)
 echo "Latest version: $latest_version"
 
 # Step 2: Bump the patch version
-IFS='.' read -r -a version_parts <<< "$latest_version"
+IFS='.' read -r -a version_parts <<<"$latest_version"
 let version_parts[2]+=1
 new_version="${version_parts[0]}.${version_parts[1]}.${version_parts[2]}"
 echo "New version: $new_version"

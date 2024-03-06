@@ -25,17 +25,6 @@ import system from '../lib/system.js';
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const commonOptions = {
-  debug: {
-    alias: 'd',
-    demand: false,
-    boolean: true,
-    hidden: false,
-    default: false,
-    description: 'Whether to print the debug information.',
-  },
-};
-
 yargs(hideBin(process.argv))
   .scriptName(chalk.green('zk'))
   .usage('Usage: $0 <command> [options]')
@@ -176,7 +165,7 @@ function lightnetCli() {
       yargs
         .command(
           [
-            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [mina-log-level] [debug]',
+            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [mina-log-level]',
           ],
           'Start the lightweight Mina blockchain network Docker container.',
           {
@@ -256,12 +245,11 @@ function lightnetCli() {
               default: 'Trace',
               description: 'Mina processes logging level to use.',
             },
-            ...commonOptions,
           },
           async (argv) => await lightnetStart(argv)
         )
         .command(
-          ['stop [save-logs] [clean-up] [debug]'],
+          ['stop [save-logs] [clean-up]'],
           'Stop the lightweight Mina blockchain network Docker container and perform the cleanup.',
           {
             'save-logs': {
@@ -282,21 +270,13 @@ function lightnetCli() {
               description:
                 'Whether to remove the Docker container, dangling Docker images, consumed Docker volume, and the blockchain network configuration.',
             },
-            ...commonOptions,
           },
           async (argv) => await lightnetStop(argv)
         )
         .command(
-          ['status [debug]'],
+          ['status'],
           'Get the lightweight Mina blockchain network status.',
-          {
-            ...commonOptions,
-          },
-          async (argv) =>
-            await lightnetStatus({
-              preventDockerEngineAvailabilityCheck: false,
-              debug: argv.debug,
-            })
+          async () => await lightnetStatus()
         )
         .command(
           ['logs <sub-command> [options]'],
@@ -304,15 +284,12 @@ function lightnetCli() {
           (yargs) => {
             yargs
               .command(
-                ['save [debug]'],
+                ['save'],
                 'Save the lightweight Mina blockchain network Docker container processes logs to the host file system.',
-                {
-                  ...commonOptions,
-                },
-                async (argv) => await lightnetSaveLogs(argv)
+                async () => await lightnetSaveLogs()
               )
               .command(
-                ['follow [process] [debug]'],
+                ['follow [process]'],
                 'Follow one of the lightweight Mina blockchain network Docker container processes logs.',
                 {
                   process: {
@@ -326,14 +303,13 @@ function lightnetCli() {
                     description:
                       'The name of the Docker container process to follow the logs of.',
                   },
-                  ...commonOptions,
                 },
                 async (argv) => await lightnetFollowLogs(argv)
               );
           }
         )
         .command(
-          ['explorer [use] [list] [debug]'],
+          ['explorer [use] [list]'],
           'Launch the lightweight Mina explorer.',
           {
             use: {
@@ -354,7 +330,6 @@ function lightnetCli() {
               description:
                 'Whether to list the available versions of the lightweight Mina explorer.',
             },
-            ...commonOptions,
           },
           async (argv) => await lightnetExplorer(argv)
         );
