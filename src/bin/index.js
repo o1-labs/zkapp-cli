@@ -370,6 +370,9 @@ function getCustomizedStrings() {
       other: chalk.red('Unknown commands: %s'),
     },
     'Invalid values:': chalk.red('Invalid values:'),
+    'Argument: %s, Given: %s, Choices: %s': chalk.red(
+      'Argument: %s, Given: %s, Choices: %s'
+    ),
     'Argument check failed: %s': chalk.red('Argument check failed: %s'),
     'Implications failed:': chalk.red('Missing dependent arguments:'),
     'Not enough arguments following: %s': chalk.red(

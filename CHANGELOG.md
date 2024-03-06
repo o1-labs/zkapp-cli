@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.18.0](https://github.com/o1-labs/zkapp-cli/compare/v17.2...v18.0) - 2024-03-06
+
 ### Breaking changes
 
 - Lightnet error and edge cases handling. [#597](https://github.com/o1-labs/zkapp-cli/pull/597)
