@@ -756,7 +756,7 @@ async function getZkProgram(projectRoot, zkProgramNameArg) {
 
   const zkProgramImportPath =
     process.platform === 'win32'
-      ? `file:// ${projectRoot}/build/src/${zkProgramFile}`
+      ? `file://${projectRoot}/build/src/${zkProgramFile}`
       : `${projectRoot}/build/src/${zkProgramFile}`;
 
   const zkProgramImports = await import(zkProgramImportPath);
