@@ -4,7 +4,6 @@ import enquirer from 'enquirer';
 import glob from 'fast-glob';
 import findPrefix from 'find-npm-prefix';
 import fs from 'fs-extra';
-import fetch from 'node-fetch';
 import path from 'path';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';

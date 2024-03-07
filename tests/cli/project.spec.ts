@@ -24,9 +24,9 @@ test.describe('zkApp-CLI', () => {
 
       expect(code).toBeGreaterThan(0);
       expect(stderr.at(-1)).toContain(
-        `ui was "test". Must be one of: ${getArrayValuesAsString(
+        `Argument: ui, Given: "test", Choices: ${getArrayValuesAsString(
           Constants.uiTypes
-        )}.`
+        )}`
       );
     } finally {
       await cleanup();
