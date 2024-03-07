@@ -731,6 +731,7 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
     let match;
 
     while ((match = regex.exec(zkProgram)) !== null) {
+      // eslint-disable-next-line no-unused-vars
       const [_, zkProgramVarName, nameArg] = match;
 
       if (nameArg === zkProgramNameArg) {
