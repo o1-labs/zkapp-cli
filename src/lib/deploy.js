@@ -61,7 +61,7 @@ export async function deploy({ alias, yes }) {
       process.exit(1);
     }
 
-    const res = await enquirer.prompt({
+    const deployAliasResponse = await enquirer.prompt({
       type: 'select',
       name: 'network',
       choices: aliases,
@@ -83,7 +83,7 @@ export async function deploy({ alias, yes }) {
           : chalk.red(state.symbols.cross);
       },
     });
-    alias = res.network;
+    alias = deployAliasResponse.network;
   }
 
   alias = alias.toLowerCase();
@@ -138,50 +138,7 @@ export async function deploy({ alias, yes }) {
     return { smartContracts };
   });
 
-  // Identify which smart contract to be deployed for this deploy alias.
-  let contractName = chooseSmartContract(config, build, alias);
-
-  // If no smart contract is specified for this deploy alias in config.json &
-  // 2+ smart contracts exist in build.json, ask which they want to use.
-  if (!contractName) {
-    const res = await enquirer.prompt({
-      type: 'select',
-      name: 'contractName',
-      choices: build.smartContracts,
-      message: (state) => {
-        // Makes the step text green upon success, else uses reset.
-        const style =
-          state.submitted && !state.cancelled
-            ? state.styles.success
-            : chalk.reset;
-        return style('Choose smart contract to deploy');
-      },
-      prefix: (state) => {
-        // Shows a cyan question mark when not submitted.
-        // Shows a green check mark if submitted.
-        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
-        if (!state.submitted) return state.symbols.question;
-        return !state.cancelled
-          ? state.symbols.check
-          : chalk.red(state.symbols.cross);
-      },
-    });
-    contractName = res.contractName;
-  } else {
-    // Can't include the log message inside this callback b/c it will mess up
-    // the step formatting.
-    await step('Choose smart contract', async () => {});
-
-    if (config.deployAliases[alias]?.smartContract) {
-      log(
-        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
-      );
-    } else {
-      log(
-        `  Only one smart contract exists in the project: ${build.smartContracts[0]}`
-      );
-    }
-  }
+  const contractName = await getContractName(config, build, alias);
 
   // Set the default smartContract name for this deploy alias in config.json.
   // Occurs when this is the first time we're deploying to a given deploy alias.
@@ -285,6 +242,7 @@ export async function deploy({ alias, yes }) {
 
     process.exit(1);
   }
+
   const zkApp = smartContractImports[contractName]; //  The specified zkApp class to deploy
   const zkAppPrivateKey = PrivateKey.fromBase58(zkAppPrivateKeyBase58); //  The private key of the zkApp
   const zkAppAddress = zkAppPrivateKey.toPublicKey(); //  The public key of the zkApp
@@ -307,34 +265,15 @@ export async function deploy({ alias, yes }) {
 
   const { verificationKey, isCached } = await step(
     'Generate verification key (takes 10-30 sec)',
-    async () => {
-      let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
-      // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
-      let currentDigest = await zkApp.digest(zkAppAddress);
 
-      // initialize cache if 'zk deploy' is run the first time on the contract
-      if (!cache[contractName]) {
-        cache[contractName] = { digest: '', verificationKey: '' };
-      }
-
-      if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
-        return {
-          verificationKey: cache[contractName].verificationKey,
-          isCached: true,
-        };
-      } else {
-        const { verificationKey } = await zkApp.compile(zkAppAddress);
-        // update cache with new verification key and currrentDigest
-        cache[contractName].verificationKey = verificationKey;
-        cache[contractName].digest = currentDigest;
-
-        fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
-          spaces: 2,
-        });
-
-        return { verificationKey, isCached: false };
-      }
-    }
+    async () =>
+      await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        isInitMethod
+      )
   );
 
   // Can't include the log message inside the callback b/c it will break
@@ -490,6 +429,147 @@ export async function deploy({ alias, yes }) {
   process.exit(0);
 }
 
+async function getContractName(config, build, alias) {
+  // Identify which smart contract to be deployed for this deploy alias.
+  let contractName = chooseSmartContract(config, build, alias);
+
+  // If no smart contract is specified for this deploy alias in config.json &
+  // 2+ smart contracts exist in build.json, ask which they want to use.
+  if (!contractName) {
+    const contractNameResponse = await enquirer.prompt({
+      type: 'select',
+      name: 'contractName',
+      choices: build.smartContracts,
+      message: (state) => {
+        // Makes the step text green upon success, else uses reset.
+        const style =
+          state.submitted && !state.cancelled
+            ? state.styles.success
+            : chalk.reset;
+        return style('Choose smart contract to deploy');
+      },
+      prefix: (state) => {
+        // Shows a cyan question mark when not submitted.
+        // Shows a green check mark if submitted.
+        // Shows a red "x" if ctrl+C is pressed (default is a magenta).
+        if (!state.submitted) return state.symbols.question;
+        return !state.cancelled
+          ? state.symbols.check
+          : chalk.red(state.symbols.cross);
+      },
+    });
+    contractName = contractNameResponse.contractName;
+  } else {
+    // Can't include the log message inside this callback b/c it will mess up
+    // the step formatting.
+    await step('Choose smart contract', async () => {});
+
+    if (config.deployAliases[alias]?.smartContract) {
+      log(
+        `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
+      );
+    } else {
+      log(
+        `  Only one smart contract exists in the project: ${build.smartContracts[0]}`
+      );
+    }
+  }
+  return contractName;
+}
+
+async function generateVerificationKey(
+  projectRoot,
+  contractName,
+  zkApp,
+  zkAppAddress,
+  isInitMethod
+) {
+  let cache = fs.readJsonSync(`${projectRoot}/build/cache.json`);
+  // compute a hash of the contract's circuit to determine if 'zkapp.compile' should re-run or cached verfification key can be used
+  let currentDigest = await zkApp.digest(zkAppAddress);
+
+  // initialize cache if 'zk deploy' is run the first time on the contract
+  cache[contractName] = cache[contractName] ?? {};
+
+  let zkProgram, currentZkProgramDigest, zkProgramNameArg;
+
+  // if zk program name is in the cache, import it to compute the digest to determine if it has changed
+  if (cache[contractName]?.zkProgram) {
+    zkProgramNameArg = cache[contractName]?.zkProgram;
+    zkProgram = await getZkProgram(projectRoot, zkProgramNameArg);
+    currentZkProgramDigest = await zkProgram.digest();
+  }
+
+  // If smart contract doesn't change and there is no zkprogram return contract cached vk
+  if (!isInitMethod && cache[contractName]?.digest === currentDigest) {
+    let isCached = true;
+
+    if (
+      cache[contractName]?.zkProgram &&
+      currentZkProgramDigest !== cache[zkProgramNameArg]?.digest
+    ) {
+      const zkProgramDigest = await zkProgram.digest();
+      await zkProgram.compile();
+
+      // update cache with zkprogram digest.
+      cache[zkProgramNameArg].digest = zkProgramDigest;
+
+      fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
+        spaces: 2,
+      });
+      isCached = false;
+    }
+    // return vk and isCached flag if only a smart contract that is unchanged or both zkprogram and smart contract unchanged
+    return {
+      verificationKey: cache[contractName].verificationKey,
+      isCached,
+    };
+  } else {
+    // case when deploy is run for the first time or smart contract has changed or has an init method
+    let verificationKey;
+    try {
+      // attempt to compile the zkApp
+      const result = await zkApp.compile(zkAppAddress);
+
+      verificationKey = result.verificationKey;
+    } catch (error) {
+      // if the zkApp compilation fails because the ZkProgram compilation output that the smart contract verifies is not found,
+      // the error message is parsed to get the ZkProgram name argument.
+      if (error.message.includes(`but we cannot find compilation output for`)) {
+        zkProgramNameArg = getZkProgramNameArg(error.message);
+      } else {
+        console.error(error);
+        process.exit(1);
+      }
+    }
+    // import and compile ZkProgram if smart contract to deploy verifies it
+    if (zkProgramNameArg) {
+      zkProgram = await getZkProgram(projectRoot, zkProgramNameArg);
+      const currentZkProgramDigest = await zkProgram.digest();
+      await zkProgram.compile();
+
+      const result = await zkApp.compile(zkAppAddress);
+      verificationKey = result.verificationKey;
+
+      // Add ZkProgram name to cache of the smart contract that verifies it
+      cache[contractName].zkProgram = zkProgramNameArg;
+      // Initialize zkprogram cache if not defined
+      cache[zkProgramNameArg] = cache[zkProgramNameArg] ?? {};
+      cache[zkProgramNameArg].digest = currentZkProgramDigest;
+    }
+
+    // update cache with new smart contract verification key and currrentDigest
+    cache[contractName].verificationKey = verificationKey;
+    cache[contractName].digest = currentDigest;
+
+    fs.writeJSONSync(`${projectRoot}/build/cache.json`, cache, {
+      spaces: 2,
+    });
+
+    return { verificationKey, isCached: false };
+  }
+}
+
 // Get the specified blockchain explorer url with txn hash
 function getTxnUrl(graphQlUrl, txn) {
   const txnBroadcastServiceName = new URL(graphQlUrl).hostname
@@ -568,13 +648,14 @@ function hasBreakingChanges(installedVersion, latestVersion) {
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
  * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
  */
+
 export async function findSmartContracts(path) {
   if (process.platform === 'win32') {
     path = path.replaceAll('\\', '/');
   }
   const files = await glob(path);
-
   let smartContracts = [];
+
   for (const file of files) {
     const str = fs.readFileSync(file, 'utf-8');
     let results = str.matchAll(/class (\w*) extends SmartContract/gi);
@@ -582,7 +663,6 @@ export async function findSmartContracts(path) {
     results = results.map((result) => result[1]); // only keep capture groups
     smartContracts.push(...results);
   }
-
   return smartContracts;
 }
 
@@ -609,6 +689,81 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
   return '';
 }
 
+// Finds the the user defined name argument of the ZkProgram that is verified in a smart contract
+// https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+function getZkProgramNameArg(message) {
+  let zkProgramNameArg = null;
+
+  // Regex to parse the ZkProgram name argment that is specified in the given message
+  const regex =
+    /depends on ([\w-]+), but we cannot find compilation output for ([\w-]+)/;
+  const match = message.match(regex);
+  if (match && match[1] === match[2]) {
+    zkProgramNameArg = match[1];
+    return zkProgramNameArg;
+  }
+  return zkProgramNameArg;
+}
+
+/**
+ * Find the file and variable name of the ZkProgram.
+ * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
+ * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+ * @returns {Promise<{zkProgramVarName: string, zkProgramFile: string}>}
+ *      An object containing the variable name (`zkProgramVarName`)
+ *      of the ZkProgram and the file name (`zkProgramFile`) in which the specified ZkProgram is found.
+ *      Returns null if the ZkProgram is not found.
+ */
+async function findZkProgramFile(buildPath, zkProgramNameArg) {
+  if (process.platform === 'win32') {
+    buildPath = buildPath.replaceAll('\\', '/');
+  }
+  const files = await glob(buildPath);
+
+  for (const file of files) {
+    const zkProgram = fs.readFileSync(file, 'utf-8');
+
+    // Regex is used to find and extract the variable name of the ZkProgram
+    // that has a matching name argument that is verified in the smart contract
+    // to be deployed.
+    const regex =
+      /(\w+)\s*=\s*ZkProgram\(\{[\s\S]*?name:\s*'([\w-]+)'[\s\S]*?\}\);/g;
+    let match;
+
+    while ((match = regex.exec(zkProgram)) !== null) {
+      // eslint-disable-next-line no-unused-vars
+      const [_, zkProgramVarName, nameArg] = match;
+
+      if (nameArg === zkProgramNameArg) {
+        return { zkProgramVarName, zkProgramFile: path.basename(file) };
+      }
+    }
+  }
+}
+
+/**
+ * Find and import the ZkProgram.
+ * @param {string}    projectRoot    The root directory path of the smart contract
+ * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+ * @returns {Promise<object>}          The ZkProgram.
+ *
+ */
+async function getZkProgram(projectRoot, zkProgramNameArg) {
+  let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
+    `${projectRoot}/build/**/*.js`,
+    zkProgramNameArg
+  );
+
+  const zkProgramImportPath =
+    process.platform === 'win32'
+      ? `file://${projectRoot}/build/src/${zkProgramFile}`
+      : `${projectRoot}/build/src/${zkProgramFile}`;
+
+  const zkProgramImports = await import(zkProgramImportPath);
+  const zkProgram = zkProgramImports[zkProgramVarName];
+
+  return zkProgram;
+}
 /**
  * Find the file name of the smart contract to be deployed.
  * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
