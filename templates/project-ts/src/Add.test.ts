@@ -55,8 +55,8 @@ describe('Add', () => {
     await localDeploy();
 
     // update transaction
-    const txn = await Mina.transaction(senderAccount, () => {
-      zkApp.update();
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.update();
     });
     await txn.prove();
     await txn.sign([senderKey]).send();
