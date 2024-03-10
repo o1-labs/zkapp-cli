@@ -26,10 +26,10 @@ const zkApp = new SudokuZkApp(zkAppAddress);
 
 console.log('Deploying and initializing Sudoku...');
 await SudokuZkApp.compile();
-let tx = await Mina.transaction(sender, () => {
+let tx = await Mina.transaction(sender, async () => {
   AccountUpdate.fundNewAccount(sender);
-  zkApp.deploy();
-  zkApp.update(Sudoku.from(sudoku));
+  await zkApp.deploy();
+  await zkApp.update(Sudoku.from(sudoku));
 });
 await tx.prove();
 /**
