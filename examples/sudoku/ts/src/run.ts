@@ -52,8 +52,8 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  let tx = await Mina.transaction(sender, () => {
-    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
+  let tx = await Mina.transaction(sender, async () => {
+    await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();
   await tx.sign([senderKey]).send();
