@@ -115,7 +115,7 @@ async function makeMove(
   const [x, y] = [Field(x0), Field(y0)];
   const txn = await Mina.transaction(currentPlayer, async () => {
     const signature = Signature.create(currentPlayerKey, [x, y]);
-    zkApp.play(currentPlayer, signature, x, y);
+    await zkApp.play(currentPlayer, signature, x, y);
   });
   await txn.prove();
   await txn.sign([currentPlayerKey]).send();
