@@ -38,7 +38,7 @@ class SudokuZkApp extends SmartContract {
     super.init();
   }
 
-  @method update(sudokuInstance: Sudoku) {
+  @method async update(sudokuInstance: Sudoku) {
     this.sudokuHash.set(sudokuInstance.hash());
     this.isSolved.set(Bool(false));
   }
