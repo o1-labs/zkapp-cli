@@ -34,7 +34,7 @@ class SudokuZkApp extends SmartContract {
    * to ensure the entire state is overwritten.
    * however, it's good to have an example which tests the CLI's ability to handle init() decorated with `@method`.
    */
-  @method init() {
+  @method async init() {
     super.init();
   }
 
