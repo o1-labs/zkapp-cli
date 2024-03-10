@@ -176,7 +176,12 @@ class TicTacToe extends SmartContract {
   // 0 | x  x  x
   // 1 | x  x  x
   // 2 | x  x  x
-  @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
+  @method async play(
+    pubkey: PublicKey,
+    signature: Signature,
+    x: Field,
+    y: Field
+  ) {
     // 1. if the game is already finished, abort.
     this.gameDone.requireEquals(Bool(false)); // precondition on this.gameDone
 
