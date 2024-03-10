@@ -43,7 +43,10 @@ class SudokuZkApp extends SmartContract {
     this.isSolved.set(Bool(false));
   }
 
-  @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
+  @method async submitSolution(
+    sudokuInstance: Sudoku,
+    solutionInstance: Sudoku
+  ) {
     let sudoku = sudokuInstance.value;
     let solution = solutionInstance.value;
 
