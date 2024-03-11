@@ -65,8 +65,8 @@ console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // submit the actual solution
 console.log('Submitting solution...');
-tx = await Mina.transaction(sender, () => {
-  zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
+tx = await Mina.transaction(sender, async () => {
+  await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
 });
 await tx.prove();
 await tx.sign([senderKey]).send();
