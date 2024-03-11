@@ -73,10 +73,10 @@ async function deploy(
   sender: PublicKey,
   senderKey: PrivateKey
 ) {
-  let tx = await Mina.transaction(sender, () => {
+  let tx = await Mina.transaction(sender, async () => {
     AccountUpdate.fundNewAccount(sender);
-    zkApp.deploy();
-    zkApp.update(Sudoku.from(sudoku));
+    await zkApp.deploy();
+    await zkApp.update(Sudoku.from(sudoku));
   });
   await tx.prove();
   // this tx needs .sign(), because `deploy()` adds an account update that requires signature authorization
