@@ -29,9 +29,9 @@ describe('sudoku', () => {
 
     let solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    let tx = await Mina.transaction(sender, () => {
+    let tx = await Mina.transaction(sender, async () => {
       let zkApp = new SudokuZkApp(zkAppAddress);
-      zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
+      await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
     });
     await tx.prove();
     await tx.sign([senderKey]).send();
