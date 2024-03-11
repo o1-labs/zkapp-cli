@@ -314,11 +314,14 @@ export async function deploy({ alias, yes }) {
       mina: graphQlUrl,
     });
     Mina.setActiveInstance(Network);
-    let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
-      AccountUpdate.fundNewAccount(feepayerAddress);
-      let zkapp = new zkApp(zkAppAddress);
-      zkapp.deploy({ verificationKey });
-    });
+    let tx = await Mina.transaction(
+      { sender: feepayerAddress, fee },
+      async () => {
+        AccountUpdate.fundNewAccount(feepayerAddress);
+        let zkapp = new zkApp(zkAppAddress);
+        await zkapp.deploy({ verificationKey });
+      }
+    );
     return {
       tx,
       json: tx.sign([zkAppPrivateKey, feepayerPrivateKey]).toJSON(),
