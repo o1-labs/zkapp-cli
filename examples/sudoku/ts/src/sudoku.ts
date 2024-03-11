@@ -34,16 +34,19 @@ class SudokuZkApp extends SmartContract {
    * to ensure the entire state is overwritten.
    * however, it's good to have an example which tests the CLI's ability to handle init() decorated with `@method`.
    */
-  @method init() {
+  @method async init() {
     super.init();
   }
 
-  @method update(sudokuInstance: Sudoku) {
+  @method async update(sudokuInstance: Sudoku) {
     this.sudokuHash.set(sudokuInstance.hash());
     this.isSolved.set(Bool(false));
   }
 
-  @method submitSolution(sudokuInstance: Sudoku, solutionInstance: Sudoku) {
+  @method async submitSolution(
+    sudokuInstance: Sudoku,
+    solutionInstance: Sudoku
+  ) {
     let sudoku = sudokuInstance.value;
     let solution = solutionInstance.value;
 

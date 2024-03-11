@@ -157,7 +157,7 @@ class TicTacToe extends SmartContract {
     this.player2.set(PublicKey.empty());
   }
 
-  @method startGame(player1: PublicKey, player2: PublicKey) {
+  @method async startGame(player1: PublicKey, player2: PublicKey) {
     // you can only start a new game if the current game is done
     this.gameDone.requireEquals(Bool(true));
     this.gameDone.set(Bool(false));
@@ -176,7 +176,12 @@ class TicTacToe extends SmartContract {
   // 0 | x  x  x
   // 1 | x  x  x
   // 2 | x  x  x
-  @method play(pubkey: PublicKey, signature: Signature, x: Field, y: Field) {
+  @method async play(
+    pubkey: PublicKey,
+    signature: Signature,
+    x: Field,
+    y: Field
+  ) {
     // 1. if the game is already finished, abort.
     this.gameDone.requireEquals(Bool(false)); // precondition on this.gameDone
 
