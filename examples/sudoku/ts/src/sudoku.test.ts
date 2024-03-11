@@ -50,9 +50,12 @@ describe('sudoku', () => {
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
     await expect(async () => {
-      let tx = await Mina.transaction(sender, () => {
+      let tx = await Mina.transaction(sender, async () => {
         let zkApp = new SudokuZkApp(zkAppAddress);
-        zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
+        await zkApp.submitSolution(
+          Sudoku.from(sudoku),
+          Sudoku.from(noSolution)
+        );
       });
       await tx.prove();
       await tx.sign([senderKey]).send();
