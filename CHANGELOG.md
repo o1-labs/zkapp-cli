@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.18.1](https://github.com/o1-labs/zkapp-cli/compare/0.18.0...0.18.1) - 2024-03-19
+
 ### Changed
 
 - Add support to deploy smart contracts that verify ZkProgram proofs. [#547](https://github.com/o1-labs/zkapp-cli/pull/547)
