@@ -24,7 +24,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
-- Issue when `zk system` command did not reported the `zkapp-cli` version. [#612](https://github.com/o1-labs/zkapp-cli/pull/612)
+- Issue when `zk system` command did not reported the `zkapp-cli` version on Windows. [#612](https://github.com/o1-labs/zkapp-cli/pull/612)
 
 ## [0.18.0](https://github.com/o1-labs/zkapp-cli/compare/v17.2...v18.0) - 2024-03-06
 
