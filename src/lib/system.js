@@ -2,7 +2,11 @@ import { execSync } from 'child_process';
 import envinfo from 'envinfo';
 
 function system() {
-  const installedO1jsVersion = getInstalledO1jsVersion();
+  const installedO1jsVersion = getInstalledPackageVersion();
+  const installedZkAppCliVersion = getInstalledPackageVersion({
+    packageName: 'zkapp-cli',
+    isGlobal: true,
+  });
   console.log(
     'Be sure to include the following system information when submitting a GitHub issue:'
   );
@@ -23,15 +27,29 @@ function system() {
         `o1js: ${installedO1jsVersion || 'Not Found (not in a project)'}`
       );
     })
+    .then((env) => {
+      const str = 'zkapp-cli: Not Found';
+      return env.replace(
+        str,
+        `zkapp-cli: ${installedZkAppCliVersion || 'Not Found'}`
+      );
+    })
     .then((env) => console.log(env));
 }
 
-function getInstalledO1jsVersion() {
-  const installedPkgs = execSync('npm list --all --depth 0 --json', {
-    encoding: 'utf-8',
-  });
+function getInstalledPackageVersion(
+  options = { packageName: 'o1js', isGlobal: false }
+) {
+  const { packageName, isGlobal } = options;
+  const maybeGlobalArg = isGlobal ? '-g' : '';
+  const installedPkgs = execSync(
+    `npm list ${maybeGlobalArg} --all --depth 0 --json`,
+    {
+      encoding: 'utf-8',
+    }
+  );
 
-  return JSON.parse(installedPkgs)['dependencies']?.['o1js']?.['version'];
+  return JSON.parse(installedPkgs).dependencies?.[packageName]?.version;
 }
 
 export default system;
