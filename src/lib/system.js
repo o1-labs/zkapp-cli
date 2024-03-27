@@ -2,8 +2,10 @@ import { execSync } from 'child_process';
 import envinfo from 'envinfo';
 
 function system() {
-  const installedO1jsVersion = getInstalledPackageVersion();
-  const installedZkAppCliVersion = getInstalledPackageVersion({
+  const installedO1jsVersion = getInstalledNpmPackageVersion({
+    packageName: 'o1js',
+  });
+  const installedZkAppCliVersion = getInstalledNpmPackageVersion({
     packageName: 'zkapp-cli',
     isGlobal: true,
   });
@@ -37,8 +39,8 @@ function system() {
     .then((env) => console.log(env));
 }
 
-function getInstalledPackageVersion(
-  options = { packageName: 'o1js', isGlobal: false }
+function getInstalledNpmPackageVersion(
+  options = { packageName: '', isGlobal: false }
 ) {
   const { packageName, isGlobal } = options;
   const maybeGlobalArg = isGlobal ? '-g' : '';
