@@ -40,7 +40,7 @@ function system() {
 }
 
 function getInstalledNpmPackageVersion(
-  options = { packageName: '', isGlobal: false }
+  options = { packageName: null, isGlobal: false }
 ) {
   const { packageName, isGlobal } = options;
   const maybeGlobalArg = isGlobal ? '-g' : '';

@@ -20,8 +20,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Add support to deploy smart contracts that verify ZkProgram proofs. [#547](https://github.com/o1-labs/zkapp-cli/pull/547)
-
 - Remove `node-fetch` dependency in favor of NodeJS native fetch. [#602](https://github.com/o1-labs/zkapp-cli/pull/602)
+
+### Fixed
+
+- Issue when `zk system` command did not reported the `zkapp-cli` version. [#612](https://github.com/o1-labs/zkapp-cli/pull/612)
 
 ## [0.18.0](https://github.com/o1-labs/zkapp-cli/compare/v17.2...v18.0) - 2024-03-06
 
@@ -53,9 +56,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Update `getCachedFeepayerAliases()` logic to prevent edge case bugs. [#581](https://github.com/o1-labs/zkapp-cli/pull/581)
-
 - Improve error handling for zk deploy when fee payer has insufficient permissions. [#580](https://github.com/o1-labs/zkapp-cli/pull/580)
-
 - Automate "zk config" if Lightnet is in use. [#579](https://github.com/o1-labs/zkapp-cli/pull/579)
   - The `--lightnet` option was added to `zk config` in order to automatically configures zkApp project's deploy aliases.
   - The [Lightnet](https://docs.minaprotocol.com/zkapps/testing-zkapps-lightnet) should be up and running before executing the `zk config --lightnet` command.
