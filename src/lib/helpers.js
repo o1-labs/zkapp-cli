@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import net from 'net';
-import fetch from 'node-fetch';
 import ora from 'ora';
 
 /**
