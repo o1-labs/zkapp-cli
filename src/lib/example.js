@@ -109,9 +109,7 @@ async function fetchProjectTemplate(name, lang) {
       shell.mkdir('-p', path.join(TEMP, templatePath));
       shell.cp('-r', `${templatePath}/.`, path.join(TEMP, templatePath));
     } else {
-      const src =
-        'github:o1-labs/zkapp-cli#feature/async-circuits-compatibility';
-      // const src = 'github:o1-labs/zkapp-cli#main';
+      const src = 'github:o1-labs/zkapp-cli#main';
       await gittar.fetch(src, { force: true });
 
       // Note: Extract will overwrite any existing dir's contents. But we're
