@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.19.0](https://github.com/o1-labs/zkapp-cli/compare/v18.0...v19.0) - 2024-03-06
+
+### Breaking changes
+
+- The CLI , templates, and examples to be compatible with the latest version `0.18.0` of `o1js` that was released to be compatible with the `Devnet` upgrade. This includes updating all code with async circuits, and removing all deprecated APIs. [#606](https://github.com/o1-labs/zkapp-cli/pull/606)
+
 ### Changed
 
 - Add support to deploy smart contracts that verify ZkProgram proofs. [#547](https://github.com/o1-labs/zkapp-cli/pull/547)
