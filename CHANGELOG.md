@@ -21,7 +21,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Breaking changes
 
-- The CLI , templates, and examples to be compatible with the latest version `0.18.0` of `o1js` that was released to be compatible with the `Devnet` upgrade. This includes updating all code with async circuits, and removing all deprecated APIs. [#606](https://github.com/o1-labs/zkapp-cli/pull/606)
+- The CLI, templates, and examples have bee updated to be compatible with the latest version `0.18.0` of `o1js` that was released to be compatible with the `Devnet` upgrade. This includes updating all code with async circuits, and removing all deprecated APIs. [#606](https://github.com/o1-labs/zkapp-cli/pull/606)
 
 ### Changed
 
