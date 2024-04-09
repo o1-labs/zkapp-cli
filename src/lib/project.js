@@ -162,7 +162,8 @@ async function fetchProjectTemplate() {
   const spin = ora({ text: `${step}...`, discardStdin: true }).start();
 
   try {
-    const src = 'github:o1-labs/zkapp-cli#main';
+    const src = 'github:o1-labs/zkapp-cli#feature/async-circuits-compatibility';
+    // const src = 'github:o1-labs/zkapp-cli#main';
     await gittar.fetch(src, { force: true });
 
     // Note: Extract will overwrite any existing dir's contents. Ensure
