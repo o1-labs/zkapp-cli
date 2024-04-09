@@ -33,10 +33,10 @@ const zkApp = new TicTacToe(zkAppPublicKey);
 
 // Create a new instance of the contract
 console.log('\n\n====== DEPLOYING ======\n\n');
-const txn = await Mina.transaction(player1, () => {
+const txn = await Mina.transaction(player1, async () => {
   AccountUpdate.fundNewAccount(player1);
-  zkApp.deploy();
-  zkApp.startGame(player1, player2);
+  await zkApp.deploy();
+  await zkApp.startGame(player1, player2);
 });
 await txn.prove();
 /**
@@ -115,7 +115,7 @@ async function makeMove(
   const [x, y] = [Field(x0), Field(y0)];
   const txn = await Mina.transaction(currentPlayer, async () => {
     const signature = Signature.create(currentPlayerKey, [x, y]);
-    zkApp.play(currentPlayer, signature, x, y);
+    await zkApp.play(currentPlayer, signature, x, y);
   });
   await txn.prove();
   await txn.sign([currentPlayerKey]).send();

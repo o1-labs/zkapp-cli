@@ -27,10 +27,10 @@ describe('tictactoe', () => {
 
   it('generates and deploys tictactoe', async () => {
     const zkApp = new TicTacToe(zkAppAddress);
-    const txn = await Mina.transaction(player1, () => {
+    const txn = await Mina.transaction(player1, async () => {
       AccountUpdate.fundNewAccount(player1);
-      zkApp.deploy();
-      zkApp.startGame(player1, player2);
+      await zkApp.deploy();
+      await zkApp.startGame(player1, player2);
     });
     await txn.prove();
     await txn.sign([zkAppPrivateKey, player1Key]).send();
@@ -42,10 +42,10 @@ describe('tictactoe', () => {
     const zkApp = new TicTacToe(zkAppAddress);
 
     // deploy
-    let txn = await Mina.transaction(player1, () => {
+    let txn = await Mina.transaction(player1, async () => {
       AccountUpdate.fundNewAccount(player1);
-      zkApp.deploy();
-      zkApp.startGame(player1, player2);
+      await zkApp.deploy();
+      await zkApp.startGame(player1, player2);
     });
     await txn.prove();
     await txn.sign([zkAppPrivateKey, player1Key]).send();

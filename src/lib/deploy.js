@@ -12,7 +12,7 @@ import step from './helpers.js';
 
 const log = console.log;
 const DEFAULT_NETWORK_ID = 'testnet';
-const DEFAULT_GRAPHQL = 'https://proxy.berkeley.minaexplorer.com/graphql'; // The endpoint used to interact with the network
+const DEFAULT_GRAPHQL = 'https://proxy.devnet.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
 /**
  * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
@@ -165,7 +165,11 @@ export async function deploy({ alias, yes }) {
   const networkId =
     config.deployAliases[alias]?.networkId ?? DEFAULT_NETWORK_ID;
   const graphQlUrl = config.deployAliases[alias]?.url ?? DEFAULT_GRAPHQL;
-
+  const Network = Mina.Network({
+    networkId,
+    mina: graphQlUrl,
+  });
+  Mina.setActiveInstance(Network);
   const { data: nodeStatus } = await sendGraphQL(
     graphQlUrl,
     `query {
@@ -309,16 +313,14 @@ export async function deploy({ alias, yes }) {
   }
 
   let transaction = await step('Build transaction', async () => {
-    const Network = Mina.Network({
-      networkId,
-      mina: graphQlUrl,
-    });
-    Mina.setActiveInstance(Network);
-    let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
-      AccountUpdate.fundNewAccount(feepayerAddress);
-      let zkapp = new zkApp(zkAppAddress);
-      zkapp.deploy({ verificationKey });
-    });
+    let tx = await Mina.transaction(
+      { sender: feepayerAddress, fee },
+      async () => {
+        AccountUpdate.fundNewAccount(feepayerAddress);
+        let zkapp = new zkApp(zkAppAddress);
+        await zkapp.deploy({ verificationKey });
+      }
+    );
     return {
       tx,
       json: tx.sign([zkAppPrivateKey, feepayerPrivateKey]).toJSON(),
@@ -577,7 +579,9 @@ function getTxnUrl(graphQlUrl, txn) {
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
   const networkName = new URL(graphQlUrl).hostname
     .split('.')
-    .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
+    .filter(
+      (item) => item === 'berkeley' || item === 'testworld' || item === 'devnet'
+    )?.[0];
   if (txnBroadcastServiceName && networkName) {
     return `https://minascan.io/${networkName}/tx/${txn.data.sendZkapp.zkapp.hash}?type=zk-tx`;
   }

@@ -75,9 +75,12 @@ await Add.compile();
 try {
   // call update() and send transaction
   console.log('build transaction and create proof...');
-  let tx = await Mina.transaction({ sender: feepayerAddress, fee }, () => {
-    zkApp.update();
-  });
+  let tx = await Mina.transaction(
+    { sender: feepayerAddress, fee },
+    async () => {
+      await zkApp.update();
+    }
+  );
   await tx.prove();
 
   console.log('send transaction...');
@@ -100,7 +103,9 @@ function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
     .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
   const networkName = new URL(graphQlUrl).hostname
     .split('.')
-    .filter((item) => item === 'berkeley' || item === 'testworld')?.[0];
+    .filter(
+      (item) => item === 'berkeley' || item === 'testworld' || item === 'devnet'
+    )?.[0];
   if (txnBroadcastServiceName && networkName) {
     return `https://minascan.io/${networkName}/tx/${txnHash}?type=zk-tx`;
   }

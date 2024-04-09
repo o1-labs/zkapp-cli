@@ -26,10 +26,10 @@ const zkApp = new SudokuZkApp(zkAppAddress);
 
 console.log('Deploying and initializing Sudoku...');
 await SudokuZkApp.compile();
-let tx = await Mina.transaction(sender, () => {
+let tx = await Mina.transaction(sender, async () => {
   AccountUpdate.fundNewAccount(sender);
-  zkApp.deploy();
-  zkApp.update(Sudoku.from(sudoku));
+  await zkApp.deploy();
+  await zkApp.update(Sudoku.from(sudoku));
 });
 await tx.prove();
 /**
@@ -52,8 +52,8 @@ noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  let tx = await Mina.transaction(sender, () => {
-    zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
+  let tx = await Mina.transaction(sender, async () => {
+    await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();
   await tx.sign([senderKey]).send();
@@ -65,8 +65,8 @@ console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
 // submit the actual solution
 console.log('Submitting solution...');
-tx = await Mina.transaction(sender, () => {
-  zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
+tx = await Mina.transaction(sender, async () => {
+  await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
 });
 await tx.prove();
 await tx.sign([senderKey]).send();
