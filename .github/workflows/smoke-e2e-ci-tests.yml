@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest]
     services:
       mina-local-network:
-        image: o1labs/mina-local-network:o1js-main-latest-lightnet
+        image: o1labs/mina-local-network:berkeley-latest-lightnet
         env:
           NETWORK_TYPE: 'single-node'
           PROOF_LEVEL: 'none'
