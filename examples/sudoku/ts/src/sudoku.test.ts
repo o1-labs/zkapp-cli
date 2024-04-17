@@ -11,7 +11,7 @@ describe('sudoku', () => {
     senderKey: PrivateKey;
 
   beforeEach(async () => {
-    let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+    let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     sender = Local.testAccounts[0].publicKey;
     senderKey = Local.testAccounts[0].privateKey;
