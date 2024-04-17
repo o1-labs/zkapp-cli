@@ -23,8 +23,8 @@ describe('Add', () => {
     if (proofsEnabled) await Add.compile();
   });
 
-  beforeEach(() => {
-    const Local = Mina.LocalBlockchain({ proofsEnabled });
+  beforeEach(async () => {
+    const Local = await Mina.LocalBlockchain({ proofsEnabled });
     Mina.setActiveInstance(Local);
     ({ privateKey: deployerKey, publicKey: deployerAccount } =
       Local.testAccounts[0]);
