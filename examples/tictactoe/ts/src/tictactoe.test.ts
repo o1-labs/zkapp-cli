@@ -17,7 +17,7 @@ describe('tictactoe', () => {
     zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
-    let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+    let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     [{ publicKey: player1, privateKey: player1Key }, { publicKey: player2 }] =
       Local.testAccounts;
