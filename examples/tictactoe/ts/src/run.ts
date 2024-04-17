@@ -20,7 +20,7 @@ import {
 } from 'o1js';
 import { TicTacToe, Board } from './tictactoe.js';
 
-let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
 Mina.setActiveInstance(Local);
 const [
   { publicKey: player1, privateKey: player1Key },
