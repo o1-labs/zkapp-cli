@@ -56,7 +56,7 @@ yargs(hideBin(process.argv))
    | (_) | |_| (_| | |_) \\__ \\
     \\___/|____\\__,_|_.__/|___/         
          
-      
+        https://o1labs.org
                                   
       `
     )
