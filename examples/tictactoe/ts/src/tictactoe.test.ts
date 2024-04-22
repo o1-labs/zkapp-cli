@@ -10,17 +10,19 @@ import {
 } from 'o1js';
 
 describe('tictactoe', () => {
-  let player1: PublicKey,
+  let player1: Mina.TestPublicKey,
     player1Key: PrivateKey,
-    player2: PublicKey,
+    player2: Mina.TestPublicKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
     let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    [{ publicKey: player1, privateKey: player1Key }, { publicKey: player2 }] =
-      Local.testAccounts;
+
+    [player1, player2] = Local.testAccounts;
+    player1Key = player1.key;
+
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
   });
