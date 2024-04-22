@@ -14,10 +14,11 @@ import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { AccountUpdate, Mina, PrivateKey } from 'o1js';
 
 // setup
-const Local = Mina.LocalBlockchain();
+const Local = await Mina.LocalBlockchain();
 Mina.setActiveInstance(Local);
 
-const { privateKey: senderKey, publicKey: sender } = Local.testAccounts[0];
+const sender = Local.testAccounts[0];
+const senderKey = sender.key;
 const sudoku = generateSudoku(0.5);
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppAddress = zkAppPrivateKey.toPublicKey();

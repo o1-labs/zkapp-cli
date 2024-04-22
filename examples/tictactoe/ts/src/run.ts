@@ -20,13 +20,11 @@ import {
 } from 'o1js';
 import { TicTacToe, Board } from './tictactoe.js';
 
-let Local = Mina.LocalBlockchain({ proofsEnabled: false });
+let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
 Mina.setActiveInstance(Local);
-const [
-  { publicKey: player1, privateKey: player1Key },
-  { publicKey: player2, privateKey: player2Key },
-] = Local.testAccounts;
-
+const [player1, player2] = Local.testAccounts;
+const player1Key = player1.key;
+const player2Key = player2.key;
 const zkAppPrivateKey = PrivateKey.random();
 const zkAppPublicKey = zkAppPrivateKey.toPublicKey();
 const zkApp = new TicTacToe(zkAppPublicKey);
