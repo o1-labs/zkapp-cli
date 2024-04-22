@@ -7,14 +7,14 @@ describe('sudoku', () => {
     zkAppPrivateKey: PrivateKey,
     zkAppAddress: PublicKey,
     sudoku: number[][],
-    sender: PublicKey,
+    sender: Mina.TestPublicKey,
     senderKey: PrivateKey;
 
   beforeEach(async () => {
     let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
-    sender = Local.testAccounts[0].publicKey;
-    senderKey = Local.testAccounts[0].privateKey;
+    sender = Local.testAccounts[0];
+    senderKey = sender.key;
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
     zkApp = new SudokuZkApp(zkAppAddress);
