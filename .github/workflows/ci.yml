@@ -79,7 +79,9 @@ jobs:
         env:
           CI: true
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # TODO: Add successful e2e smoke testing to preconditions after the https://github.com/o1-labs/zkapp-cli/issues/615 is resolved
     needs: [ci, sudoku-example, tictactoe-example]
     strategy:
       matrix:
@@ -97,7 +99,6 @@ jobs:
           npm run build --if-present
       - name: Publish to NPM if version has changed
         uses: JS-DevTools/npm-publish@v1
-        if: github.ref == 'refs/heads/main'
         with:
           token: ${{ secrets.NPM_TOKEN }}
         env:

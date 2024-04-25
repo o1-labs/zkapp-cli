@@ -17,7 +17,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
-## [0.19.0](https://github.com/o1-labs/zkapp-cli/compare/v18.0...v19.0) - 2024-03-06
+## [0.20.0](https://github.com/o1-labs/zkapp-cli/compare/v19.0...v20.0) - 2024-04-22
+
+- The CLI, templates, and examples have been updated to be compatible with the latest version `1.0.0` of `o1js`. This includes updating all instances of Mina.LocalBlochain() and Proof.fromJSON() to be async. [#623](https://github.com/o1-labs/zkapp-cli/pull/623)
+
+## [0.19.0](https://github.com/o1-labs/zkapp-cli/compare/v18.0...v19.0) - 2024-04-09
 
 ### Breaking changes
 
