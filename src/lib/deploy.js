@@ -257,7 +257,7 @@ export async function deploy({ alias, yes }) {
   if (feepayerAddress.toBase58() === zkAppAddress.toBase58()) {
     log(
       chalk.red(
-        `  The feepayer account is the same as the zkApp account.\n  Please use a different feepayer account or generate a new one by entering zk config.`
+        `  The feepayer account is the same as the zkApp account.\n  Please use a different feepayer account or generate a new one by executing 'zk config' command.`
       )
     );
     process.exit(1);
@@ -348,6 +348,7 @@ export async function deploy({ alias, yes }) {
     [chalk.bold('Fee Payer Alias'), chalk.reset(feepayerAlias)],
     [chalk.bold('URL'), chalk.reset(url)],
     [chalk.bold('Smart Contract'), chalk.reset(contractName)],
+    [chalk.bold('zkApp account'), chalk.reset(zkAppAddress.toBase58())],
   ];
 
   let confirm;
@@ -424,6 +425,7 @@ export async function deploy({ alias, yes }) {
     `\n` +
     `\nNext step:` +
     `\n  Your smart contract will be live (or updated)` +
+    `\n  at ${zkAppAddress.toBase58()}` +
     `\n  as soon as the transaction is included in a block:` +
     `\n  ${getTxnUrl(graphQlUrl, txn)}`;
 
