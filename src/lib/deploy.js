@@ -344,17 +344,21 @@ export async function deploy({ alias, yes }) {
   let transactionJson = transaction.json;
   let { feepayerAlias, url } = config.deployAliases[alias];
   const settings = [
-    [chalk.bold('Deploy Alias'), chalk.reset(alias)],
+    [chalk.bold('Deploy alias'), chalk.reset(alias)],
     [chalk.bold('Network kind'), chalk.reset(networkId)],
     [chalk.bold('URL'), chalk.reset(url)],
     [
-      chalk.bold('Fee Payer'),
+      chalk.bold('Fee payer'),
       chalk.reset(
-        `Alias:   ${feepayerAlias}\nAccount: ${feepayerAddressBase58}`
+        `Alias         : ${feepayerAlias}\nAccount       : ${feepayerAddressBase58}`
       ),
     ],
-    [chalk.bold('zkApp'), chalk.reset(`Account: ${zkAppAddress.toBase58()}`)],
-    [chalk.bold('Smart Contract'), chalk.reset(contractName)],
+    [
+      chalk.bold('zkApp'),
+      chalk.reset(
+        `Smart contract: ${contractName}\nAccount       : ${zkAppAddress.toBase58()}`
+      ),
+    ],
     [chalk.bold('Transaction fee'), chalk.reset(`${Number(fee) / 1e9} Mina`)],
   ];
 
