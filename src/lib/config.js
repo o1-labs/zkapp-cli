@@ -429,7 +429,7 @@ function printInteractiveDeployAliasConfigSuccessMessage(
     `\n  - If this is the testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
       feepayerKeyPair.publicKey
     )}` +
-    (explorerName ? `&?explorer=${explorerName}` : '') +
+    (explorerName ? `&explorer=${explorerName}` : '') +
     `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
   log(chalk.green(str));
 }
