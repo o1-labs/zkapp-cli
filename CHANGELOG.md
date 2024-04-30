@@ -21,7 +21,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- Extend information printed during deployment procedure. [#631](https://github.com/o1-labs/zkapp-cli/pull/631)
+
 - Add ASCII o1Labs logo to zk help menu. [#620](https://github.com/o1-labs/zkapp-cli/pull/620)
+
+### Fixed
+
+-Fix for Faucet URL. [#631](https://github.com/o1-labs/zkapp-cli/pull/631)
 
 ## [0.20.0](https://github.com/o1-labs/zkapp-cli/compare/v19.0...v20.0) - 2024-04-22
 
