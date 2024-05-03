@@ -98,14 +98,13 @@ try {
 }
 
 function getTxnUrl(graphQlUrl: string, txnHash: string | undefined) {
-  const txnBroadcastServiceName = new URL(graphQlUrl).hostname
+  const hostName = new URL(graphQlUrl).hostname;
+  const txnBroadcastServiceName = hostName
     .split('.')
-    .filter((item) => item === 'minascan' || item === 'minaexplorer')?.[0];
-  const networkName = new URL(graphQlUrl).hostname
-    .split('.')
-    .filter(
-      (item) => item === 'berkeley' || item === 'testworld' || item === 'devnet'
-    )?.[0];
+    .filter((item) => item === 'minascan')?.[0];
+  const networkName = graphQlUrl
+    .split('/')
+    .filter((item) => item === 'mainnet' || item === 'devnet')?.[0];
   if (txnBroadcastServiceName && networkName) {
     return `https://minascan.io/${networkName}/tx/${txnHash}?type=zk-tx`;
   }
