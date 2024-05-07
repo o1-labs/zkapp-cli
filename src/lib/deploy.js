@@ -674,9 +674,11 @@ export async function findSmartContracts(path) {
 
   for (const file of files) {
     const str = fs.readFileSync(file, 'utf-8');
-    let results = str.matchAll(/class (\w*) extends SmartContract/gi);
+    // TODO: Implement better SmartContract classes lookup.
+    // https://github.com/o1-labs/zkapp-cli/issues/636
+    let results = str.matchAll(/class (\w+) (extends|implements) (\w+)/gi);
     results = Array.from(results) ?? []; // prevent error if no results
-    results = results.map((result) => result[1]); // only keep capture groups
+    results = results.map((result) => result[1]); // only keep first capture group, the class name
     smartContracts.push(...results);
   }
   return smartContracts;

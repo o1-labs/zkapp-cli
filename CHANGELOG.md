@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.20.2](https://github.com/o1-labs/zkapp-cli/compare/0.20.1...0.20.2) - 2024-05-07
+
+### Fixed
+
+- [Hotfix] SmartContract classes lookup for deployment. [#637](https://github.com/o1-labs/zkapp-cli/pull/637)
+
 ## [0.20.1](https://github.com/o1-labs/zkapp-cli/compare/0.20.0...0.20.1) - 2024-04-30
 
 ### Added
