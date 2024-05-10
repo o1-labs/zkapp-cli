@@ -62,7 +62,7 @@ export async function zkDeploy(
       // https://github.com/o1-labs/zkapp-cli/issues/636
       interactiveDialog = {
         ...interactiveDialog,
-        'Choose smart contract to deploy': ['enter'],
+        'Choose smart contract to deploy': ['arrowDown', 'enter'],
       };
       workDir = `./${projectType}`;
       await zkExample(projectType as ExampleType, true, processHandler);
