@@ -58,12 +58,6 @@ export async function zkDeploy(
 
   try {
     if ((Constants.exampleTypes as string[]).includes(projectType)) {
-      // TODO: Get rid of this workaround once the issue is fixed
-      // https://github.com/o1-labs/zkapp-cli/issues/636
-      interactiveDialog = {
-        ...interactiveDialog,
-        'Choose smart contract to deploy': ['arrowDown', 'enter'],
-      };
       workDir = `./${projectType}`;
       await zkExample(projectType as ExampleType, true, processHandler);
     } else {
