@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Improved the classes `SmartContract` inheritance lookup used during the zkApps deployment procedure. [#639](https://github.com/o1-labs/zkapp-cli/pull/639)
+- Improved the classes `SmartContract` inheritance lookup used during the zkApps deployment procedure. [#640](https://github.com/o1-labs/zkapp-cli/pull/640)
 
 ## [0.20.2](https://github.com/o1-labs/zkapp-cli/compare/0.20.1...0.20.2) - 2024-05-07
 
