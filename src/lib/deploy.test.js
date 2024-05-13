@@ -3,11 +3,15 @@ import fs from 'node:fs';
 import { chooseSmartContract } from './deploy.js';
 import { findIfClassExtendsOrImplementsSmartContract } from './helpers.js';
 
-// Reset the mocks and ensure clean state in each test
 beforeEach(() => {
   jest.resetAllMocks();
-  fs.readFileSync = jest.fn();
-  fs.readdirSync = jest.fn();
+  jest.spyOn(fs, 'readFileSync').mockImplementation(() => {});
+  jest.spyOn(fs, 'readdirSync').mockImplementation(() => []);
+});
+
+// After all tests, restore the original fs functions
+afterAll(() => {
+  jest.restoreAllMocks();
 });
 
 describe('deploy.js', () => {
