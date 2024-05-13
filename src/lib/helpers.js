@@ -94,7 +94,7 @@ export async function checkLocalPortsAvailability(ports) {
  * Finds all classes that extend or implement the 'SmartContract' class.
  *
  * @param {string} entryFilePath - The path of the entry file.
- * @returns {Array<Object>} - A promise that resolves to an array of objects containing the class name and file path of the smart contract classes found.
+ * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
  */
 export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
   const classesMap = buildClassHierarchy(entryFilePath);
