@@ -94,17 +94,15 @@ export async function checkLocalPortsAvailability(ports) {
  * Finds all classes that extend or implement the 'SmartContract' class.
  *
  * @param {string} entryFilePath - The path of the entry file.
- * @returns {Promise<Array<Object>>} - A promise that resolves to an array of objects containing the class name and file path of the smart contract classes found.
+ * @returns {Array<Object>} - A promise that resolves to an array of objects containing the class name and file path of the smart contract classes found.
  */
-export async function findIfClassExtendsOrImplementsSmartContract(
-  entryFilePath
-) {
-  const classesMap = await buildClassHierarchy(entryFilePath);
-  const importMappings = await resolveImports(entryFilePath);
+export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
+  const classesMap = buildClassHierarchy(entryFilePath);
+  const importMappings = resolveImports(entryFilePath);
   const smartContractClasses = [];
 
   for (let className of Object.keys(classesMap)) {
-    const result = await checkClassInheritance(
+    const result = checkClassInheritance(
       className,
       'SmartContract',
       classesMap,
@@ -128,7 +126,7 @@ export async function findIfClassExtendsOrImplementsSmartContract(
  * @param {string} filePath - The path to the file containing the class declarations.
  * @returns {Object} - The class hierarchy map, where keys are class names and values are objects containing class information.
  */
-async function buildClassHierarchy(filePath) {
+function buildClassHierarchy(filePath) {
   const source = fs.readFileSync(filePath, 'utf-8');
   const ast = acornParse(source, {
     ecmaVersion: 2020,
@@ -161,7 +159,7 @@ async function buildClassHierarchy(filePath) {
  * @param {string} filePath - The path of the file to resolve imports for.
  * @returns {Object} - The import mappings where the keys are the local names and the values are the resolved paths.
  */
-async function resolveImports(filePath) {
+function resolveImports(filePath) {
   const source = fs.readFileSync(filePath, 'utf-8');
   const ast = acornParse(source, {
     ecmaVersion: 2020,
@@ -191,8 +189,7 @@ async function resolveImports(filePath) {
  *
  * @param {string} moduleName - The name of the module to resolve.
  * @param {string} basePath - The base path to resolve the module path relative to.
- * @returns {string|null} - The resolved module path, or null if the module is a Node.js built-in module.
- * @throws {Error} - If the module is not found in the './node_modules' directory.
+ * @returns {string|null} - The resolved module path, or null if the module is not found or is a built-in module.
  */
 function resolveModulePath(moduleName, basePath) {
   // Check if the module is a Node.js built-in module
@@ -226,7 +223,10 @@ function resolveModulePath(moduleName, basePath) {
 
       return path.join(packagePath, mainFile);
     } else {
-      throw new Error(`Module ${moduleName} not found in './node_modules'.`);
+      console.error(
+        `Module '${moduleName}' not found in the './node_modules' directory.`
+      );
+      return null;
     }
   }
 }
@@ -241,7 +241,7 @@ function resolveModulePath(moduleName, basePath) {
  * @param {Object} importMappings - A map of class names to resolved file paths.
  * @returns {boolean} - Returns true if the class inherits from the target class, false otherwise.
  */
-async function checkClassInheritance(
+function checkClassInheritance(
   className,
   targetClass,
   classesMap,
@@ -255,9 +255,7 @@ async function checkClassInheritance(
     let resolvedPath = importMappings[className];
     if (!resolvedPath) return false;
 
-    await buildClassHierarchy(resolvedPath).then((newMap) => {
-      Object.assign(classesMap, newMap);
-    });
+    Object.assign(classesMap, buildClassHierarchy(resolvedPath));
   }
 
   const classInfo = classesMap[className];
@@ -268,13 +266,13 @@ async function checkClassInheritance(
   for (const iface of classInfo.implements) {
     if (
       iface === targetClass ||
-      (await checkClassInheritance(
+      checkClassInheritance(
         iface,
         targetClass,
         classesMap,
         visitedClasses,
         importMappings
-      ))
+      )
     ) {
       return true;
     }

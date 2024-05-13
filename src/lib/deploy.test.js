@@ -75,7 +75,7 @@ describe('deploy.js', () => {
       fs.readFileSync.mockReturnValue(fakeFileContent); // Use the mocked function
       fs.readdirSync.mockReturnValue(['TestZkApp.js']);
 
-      const result = await findIfClassExtendsOrImplementsSmartContract(
+      const result = findIfClassExtendsOrImplementsSmartContract(
         './build/TestZkApp.js'
       );
       expect(result).toEqual([
@@ -92,7 +92,7 @@ describe('deploy.js', () => {
       fs.readFileSync.mockReturnValue(fakeFileContent);
       fs.readdirSync.mockReturnValue(['MultipleInheritance.js']);
 
-      const result = await findIfClassExtendsOrImplementsSmartContract(
+      const result = findIfClassExtendsOrImplementsSmartContract(
         './build/MultipleInheritance.js'
       );
       expect(result).toEqual([
@@ -121,16 +121,15 @@ describe('deploy.js', () => {
       });
       fs.readdirSync.mockReturnValue(['TestZkApp.js', 'AnotherTestZkApp.js']);
 
-      const resultForTestZkApp =
-        await findIfClassExtendsOrImplementsSmartContract(
-          './build/TestZkApp.js'
-        );
+      const resultForTestZkApp = findIfClassExtendsOrImplementsSmartContract(
+        './build/TestZkApp.js'
+      );
       expect(resultForTestZkApp).toEqual([
         { className: 'TestZkApp', filePath: './build/TestZkApp.js' },
       ]);
 
       const resultForAnotherTestZkApp =
-        await findIfClassExtendsOrImplementsSmartContract(
+        findIfClassExtendsOrImplementsSmartContract(
           './build/AnotherTestZkApp.js'
         );
       expect(resultForAnotherTestZkApp).toEqual([

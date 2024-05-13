@@ -672,7 +672,7 @@ export async function findSmartContracts(path) {
   const smartContracts = [];
 
   for (const file of files) {
-    const result = await findIfClassExtendsOrImplementsSmartContract(file);
+    const result = findIfClassExtendsOrImplementsSmartContract(file);
     if (result) {
       smartContracts.push(...result);
     }
