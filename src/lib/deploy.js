@@ -8,7 +8,9 @@ import path from 'path';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';
 import { readDeployAliasesConfig } from './config.js';
-import step from './helpers.js';
+import step, {
+  findIfClassExtendsOrImplementsSmartContract,
+} from './helpers.js';
 
 const log = console.log;
 const DEFAULT_NETWORK_ID = 'testnet';
@@ -194,12 +196,9 @@ export async function deploy({ alias, yes }) {
   }
 
   // Find the users file to import the smart contract from
-  let smartContractFile = await findSmartContractToDeploy(
-    `${projectRoot}/build/**/*.js`,
-    contractName
-  );
-
-  let smartContractImportPath = `${projectRoot}/build/src/${smartContractFile}`;
+  let smartContractImportPath = build.smartContracts.find(
+    (contract) => contract.className === contractName
+  ).filePath;
   if (process.platform === 'win32') {
     smartContractImportPath = 'file://' + smartContractImportPath;
   }
@@ -454,7 +453,7 @@ async function getContractName(config, build, alias) {
     const contractNameResponse = await enquirer.prompt({
       type: 'select',
       name: 'contractName',
-      choices: build.smartContracts,
+      choices: build.smartContracts.map((contract) => contract.className),
       message: (state) => {
         // Makes the step text green upon success, else uses reset.
         const style =
@@ -485,7 +484,7 @@ async function getContractName(config, build, alias) {
       );
     } else {
       log(
-        `  Only one smart contract exists in the project: ${build.smartContracts[0]}`
+        `  Only one smart contract exists in the project: ${build.smartContracts[0].className}`
       );
     }
   }
@@ -662,7 +661,7 @@ function hasBreakingChanges(installedVersion, latestVersion) {
  * Find the user-specified class names for every instance of `SmartContract`
  * in the build dir.
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
- * @returns {Promise<array>} The user-specified class names--e.g. ['Foo', 'Bar']
+ * @returns {Promise<array>} The user-specified names of the classes that extend or implement o1js `SmartContract`, e.g. ['Foo', 'Bar']
  */
 
 export async function findSmartContracts(path) {
@@ -670,17 +669,15 @@ export async function findSmartContracts(path) {
     path = path.replaceAll('\\', '/');
   }
   const files = await glob(path);
-  let smartContracts = [];
+  const smartContracts = [];
 
   for (const file of files) {
-    const str = fs.readFileSync(file, 'utf-8');
-    // TODO: Implement better SmartContract classes lookup.
-    // https://github.com/o1-labs/zkapp-cli/issues/636
-    let results = str.matchAll(/class (\w+) (extends|implements) (\w+)/gi);
-    results = Array.from(results) ?? []; // prevent error if no results
-    results = results.map((result) => result[1]); // only keep first capture group, the class name
-    smartContracts.push(...results);
+    const result = await findIfClassExtendsOrImplementsSmartContract(file);
+    if (result) {
+      smartContracts.push(...result);
+    }
   }
+
   return smartContracts;
 }
 
@@ -699,7 +696,7 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
 
   // If only one smart contract exists in the build, use it.
   if (deploy.smartContracts.length === 1) {
-    return deploy.smartContracts[0];
+    return deploy.smartContracts[0].className;
   }
 
   // If 2+ smartContract classes exist in build.json, return falsy.
@@ -781,25 +778,6 @@ async function getZkProgram(projectRoot, zkProgramNameArg) {
   const zkProgram = zkProgramImports[zkProgramVarName];
 
   return zkProgram;
-}
-/**
- * Find the file name of the smart contract to be deployed.
- * @param {string}    buildPath    The glob pattern--e.g. `build/**\/*.js`
- * @param {string}    contractName The user-specified contract name to deploy.
- * @returns {Promise<string>}      The file name of the user-specified smart contract.
- */
-async function findSmartContractToDeploy(buildPath, contractName) {
-  if (process.platform === 'win32') {
-    buildPath = buildPath.replaceAll('\\', '/');
-  }
-  const files = await glob(buildPath);
-  const re = new RegExp(`class ${contractName} extends SmartContract`, 'gi');
-  for (const file of files) {
-    const contract = fs.readFileSync(file, 'utf-8');
-    if (re.test(contract)) {
-      return path.basename(file);
-    }
-  }
 }
 
 async function sendGraphQL(graphQLUrl, query) {
