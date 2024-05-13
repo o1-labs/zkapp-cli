@@ -10,7 +10,7 @@ import { Add } from './Add';
 
 let proofsEnabled = false;
 
-describe('Add', async () => {
+describe('Add', () => {
   let deployerAccount: Mina.TestPublicKey,
     deployerKey: PrivateKey,
     senderAccount: Mina.TestPublicKey,
