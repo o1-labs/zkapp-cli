@@ -9,7 +9,6 @@ beforeEach(() => {
   jest.spyOn(fs, 'readdirSync').mockImplementation(() => []);
 });
 
-// After all tests, restore the original fs functions
 afterAll(() => {
   jest.restoreAllMocks();
 });
