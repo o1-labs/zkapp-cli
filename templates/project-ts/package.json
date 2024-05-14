@@ -37,5 +37,8 @@
   },
   "peerDependencies": {
     "o1js": "1.*"
+  },
+  "engines": {
+    "node": ">=18.14.0"
   }
 }
