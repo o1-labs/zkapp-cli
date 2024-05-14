@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.20.3](https://github.com/o1-labs/zkapp-cli/compare/0.20.2...0.20.3) - 2024-05-14
+
 ### Breaking changes
 
 - NodeJS minimum version changed in order to reflect the `o1js` requirements. [#641](https://github.com/o1-labs/zkapp-cli/pull/641)
