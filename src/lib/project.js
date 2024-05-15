@@ -13,6 +13,10 @@ import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
 import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
+import {
+  serverHooksSvelteJavaScript,
+  serverHooksSvelteTypeScript,
+} from '../lib/ui/svelte/serverHooksSvelte.js';
 import Constants from './constants.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
 
@@ -263,11 +267,6 @@ function scaffoldSvelte() {
     shell: true,
   });
 
-  shell.cp(
-    path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
-    path.join('ui', 'src')
-  );
-
   const customTsConfig = ` {
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
@@ -327,6 +326,19 @@ function scaffoldSvelte() {
   );
 
   fs.writeFileSync(path.join('ui', viteConfigFileName), customViteConfig);
+
+  const serverHooksSvelteFileName = useTypescript
+    ? 'hooks.server.ts'
+    : 'hooks.server.js';
+
+  const serverHooksSvelte = useTypescript
+    ? serverHooksSvelteTypeScript
+    : serverHooksSvelteJavaScript;
+
+  fs.writeFileSync(
+    path.join('ui', 'src', serverHooksSvelteFileName),
+    serverHooksSvelte
+  );
 
   // Remove Sveltekit demo pages and components if found
   fs.emptyDirSync(path.join('ui', 'src', 'routes'));
