@@ -1,6 +1,17 @@
+import { parse as acornParse } from 'acorn';
+import { simple as simpleAcornWalk } from 'acorn-walk';
 import chalk from 'chalk';
 import net from 'net';
+import fs from 'node:fs';
+import { builtinModules } from 'node:module';
+import path from 'node:path';
 import ora from 'ora';
+
+const acornOptions = {
+  ecmaVersion: 2020,
+  sourceType: 'module',
+  allowAwaitOutsideFunction: true,
+};
 
 /**
  * Helper for any steps for a consistent UX.
@@ -83,6 +94,247 @@ export async function checkLocalPortsAvailability(ports) {
   } else {
     return { error: false };
   }
+}
+
+/**
+ * Finds all classes that extend or implement the 'SmartContract' class from 'o1js'.
+ *
+ * @param {string} entryFilePath - The path of the entry file.
+ * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
+ */
+export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
+  const classesMap = buildClassHierarchy(entryFilePath);
+  const importMappings = resolveImports(entryFilePath);
+  const smartContractClasses = [];
+
+  // Check each class in the class map for inheritance from the o1js `SmartContract`
+  for (let className of Object.keys(classesMap)) {
+    const result = checkClassInheritance(
+      className,
+      'SmartContract',
+      classesMap,
+      new Set(),
+      importMappings
+    );
+    if (result) {
+      smartContractClasses.push({
+        className,
+        filePath: classesMap[className].filePath,
+      });
+    }
+  }
+
+  return smartContractClasses;
+}
+
+/**
+ * Builds a class hierarchy map based on the provided file path.
+ *
+ * @param {string} filePath - The path to the file containing the class declarations.
+ * @returns {Object} - The class hierarchy map, where keys are class names and values are objects containing class information.
+ */
+function buildClassHierarchy(filePath) {
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const ast = acornParse(source, acornOptions);
+  const classesMap = {};
+  const importSet = new Set();
+
+  // Traverse the AST to find class declarations and imports
+  simpleAcornWalk(ast, {
+    ClassDeclaration(node) {
+      const currentClass = node.id.name;
+      const parentClass = node.superClass ? node.superClass.name : null;
+      const implementedInterfaces = node.implements
+        ? node.implements.map((iface) => iface.id.name)
+        : [];
+      classesMap[currentClass] = {
+        extends: parentClass,
+        implements: implementedInterfaces,
+        filePath,
+        inheritsFromO1jsSmartContract: false,
+      };
+    },
+    ImportDeclaration(node) {
+      if (node.source.value === 'o1js') {
+        node.specifiers.forEach((specifier) => {
+          importSet.add(specifier.local.name);
+        });
+      }
+    },
+  });
+
+  // Mark classes that extend `SmartContract` from `o1js` in the same file
+  Object.values(classesMap).forEach((classInfo) => {
+    if (importSet.has(classInfo.extends)) {
+      classInfo.inheritsFromO1jsSmartContract = true;
+    }
+  });
+
+  return classesMap;
+}
+
+/**
+ * Resolves the imports in the given file path and returns the import mappings.
+ *
+ * @param {string} filePath - The path of the file to resolve imports for.
+ * @returns {Object} - The import mappings where the keys are the local names and the values are objects with the resolved paths and module names.
+ */
+function resolveImports(filePath) {
+  const source = fs.readFileSync(filePath, 'utf-8');
+  const ast = acornParse(source, acornOptions);
+  const importMappings = {};
+
+  // Traverse the AST to find import declarations
+  simpleAcornWalk(ast, {
+    ImportDeclaration(node) {
+      const sourcePath = node.source.value;
+      node.specifiers.forEach((specifier) => {
+        const resolvedPath = resolveModulePath(
+          sourcePath,
+          path.dirname(filePath)
+        );
+        importMappings[specifier.local.name] = {
+          resolvedPath,
+          moduleName: sourcePath,
+        };
+      });
+    },
+  });
+
+  return importMappings;
+}
+
+/**
+ * Resolves the path of a module based on the provided module name and base path.
+ *
+ * @param {string} moduleName - The name of the module to resolve.
+ * @param {string} basePath - The base path to resolve the module path relative to.
+ * @returns {string|null} - The resolved module path, or null if the module is not found or is a built-in module.
+ */
+function resolveModulePath(moduleName, basePath) {
+  // Check if the module is a Node.js built-in module
+  if (builtinModules.includes(moduleName)) {
+    return null;
+  }
+
+  // Resolve relative or absolute paths based on the current file's directory
+  if (path.isAbsolute(moduleName) || moduleName.startsWith('.')) {
+    return path.resolve(basePath, moduleName);
+  } else {
+    // Module is a node_modules dependency
+    const packagePath = path.join('node_modules', moduleName);
+    const packageJsonPath = path.join(packagePath, 'package.json');
+
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+      // Try to resolve the main file using the package.json
+      let mainFile =
+        packageJson.main || packageJson?.exports?.node?.import || 'index.js';
+      return path.join(packagePath, mainFile);
+    } else {
+      console.error(
+        `Module '${moduleName}' not found in the './node_modules' directory.`
+      );
+      return null;
+    }
+  }
+}
+
+/**
+ * Checks if a class inherits from a target class by traversing the class hierarchy.
+ *
+ * @param {string} className - The name of the class to check.
+ * @param {string} targetClass - The name of the target class to check inheritance against.
+ * @param {Object} classesMap - A map of class names to class information.
+ * @param {Set} visitedClasses - A set of visited class names to avoid infinite loops.
+ * @param {Object} importMappings - A map of class names to resolved file paths and module names.
+ * @returns {boolean} - Returns true if the class inherits from the target class from 'o1js', false otherwise.
+ */
+function checkClassInheritance(
+  className,
+  targetClass,
+  classesMap,
+  visitedClasses,
+  importMappings
+) {
+  // Avoid infinite loops by tracking visited classes
+  if (visitedClasses.has(className)) return false;
+  visitedClasses.add(className);
+
+  // If the class is not found in the current classesMap, build its hierarchy from imports
+  if (!classesMap[className]) {
+    let importMapping = importMappings[className];
+    if (!importMapping) return false;
+
+    Object.assign(classesMap, buildClassHierarchy(importMapping.resolvedPath));
+    importMappings = Object.assign(
+      importMappings,
+      resolveImports(importMapping.resolvedPath)
+    );
+  }
+
+  const classInfo = classesMap[className];
+  if (!classInfo) return false;
+
+  // Ensure that the parent class hierarchy is processed
+  if (classInfo.extends && !classesMap[classInfo.extends]) {
+    const parentMapping = importMappings[classInfo.extends];
+    if (parentMapping) {
+      Object.assign(
+        classesMap,
+        buildClassHierarchy(parentMapping.resolvedPath)
+      );
+      importMappings = Object.assign(
+        importMappings,
+        resolveImports(parentMapping.resolvedPath)
+      );
+    }
+  }
+
+  // Check if the class extends the target class from 'o1js'
+  if (
+    classInfo.extends === targetClass &&
+    classInfo.inheritsFromO1jsSmartContract
+  ) {
+    return true;
+  }
+
+  // Check each implemented interface
+  for (const iface of classInfo.implements) {
+    if (
+      (iface === targetClass && classInfo.inheritsFromO1jsSmartContract) ||
+      checkClassInheritance(
+        iface,
+        targetClass,
+        classesMap,
+        visitedClasses,
+        importMappings
+      )
+    ) {
+      classInfo.inheritsFromO1jsSmartContract = true;
+      return true;
+    }
+  }
+
+  // If there is no parent class, return false
+  if (!classInfo.extends) return false;
+
+  // Recursively check the parent class
+  const parentClassResult = checkClassInheritance(
+    classInfo.extends,
+    targetClass,
+    classesMap,
+    visitedClasses,
+    importMappings
+  );
+
+  // Propagate the inheritsFromO1jsSmartContract flag
+  if (parentClassResult) {
+    classInfo.inheritsFromO1jsSmartContract = true;
+    return true;
+  }
+
+  return false;
 }
 
 export default step;

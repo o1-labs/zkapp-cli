@@ -21,6 +21,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - NodeJS minimum version changed in order to reflect the `o1js` requirements. [#641](https://github.com/o1-labs/zkapp-cli/pull/641)
 
+### Changed
+
+- Improved `SmartContract` classes inheritance lookup used during the zkApps deployment procedure. [#640](https://github.com/o1-labs/zkapp-cli/pull/640)
+
 ## [0.20.2](https://github.com/o1-labs/zkapp-cli/compare/0.20.1...0.20.2) - 2024-05-07
 
 ### Fixed
