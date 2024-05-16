@@ -29,11 +29,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Improved `SmartContract` classes inheritance lookup used during the zkApps deployment procedure. [#640](https://github.com/o1-labs/zkapp-cli/pull/640)
 
+### Fixed
+
+- Handle case when ZkProgram name argument is in double quotes during deployment [#649](https://github.com/o1-labs/zkapp-cli/pull/649)
+
 ## [0.20.2](https://github.com/o1-labs/zkapp-cli/compare/0.20.1...0.20.2) - 2024-05-07
 
 ### Fixed
-
-- Update ZkProgram proof detection during deployment [#649](https://github.com/o1-labs/zkapp-cli/pull/649)
 
 - [Hotfix] SmartContract classes lookup for deployment. [#637](https://github.com/o1-labs/zkapp-cli/pull/637)
 
