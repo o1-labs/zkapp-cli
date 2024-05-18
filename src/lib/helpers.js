@@ -10,7 +10,12 @@ import ora from 'ora';
 const acornOptions = {
   ecmaVersion: 2020,
   sourceType: 'module',
+  allowReturnOutsideFunction: true,
+  allowImportExportEverywhere: true,
   allowAwaitOutsideFunction: true,
+  allowSuperOutsideMethod: true,
+  allowHashBang: true,
+  checkPrivateFields: false,
 };
 
 /**
