@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.21.2](https://github.com/o1-labs/zkapp-cli/compare/0.21.0...0.21.2) - 2024-05-20
+
 ### Changed
 
 - Migrate to **Next.js** `v14.2.3` and fix the latest `o1js` usage issue. [#652](https://github.com/o1-labs/zkapp-cli/pull/652)
