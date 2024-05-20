@@ -225,13 +225,10 @@ function resolveModulePath(moduleName, basePath) {
   // Resolve relative or absolute paths based on the current file's directory
   if (path.isAbsolute(moduleName) || moduleName.startsWith('.')) {
     let modulePath = path.resolve(basePath, moduleName);
-    if (!fs.existsSync(modulePath)) {
-      // If the modulePath doesn't exist and doesn't already end with '.js'
-      if (!modulePath.endsWith('.js')) {
-        modulePath += '.js';
-      }
+    if (!fs.existsSync(modulePath) && !modulePath.endsWith('.js')) {
+      modulePath += '.js';
     }
-    return path.resolve(modulePath);
+    return modulePath;
   } else {
     // Module is a node_modules dependency
     const packagePath = path.join('node_modules', moduleName);
