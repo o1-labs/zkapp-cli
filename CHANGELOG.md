@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.21.3](https://github.com/o1-labs/zkapp-cli/compare/0.21.2...0.21.3) - 2024-05-20
+
+### Fixed
+
+- Fixed the deployment procedure for zkApps that use `o1js` of version < `v1.0.1` and that use local imports without '.js' extension. [#654](https://github.com/o1-labs/zkapp-cli/pull/654)
+
 ## [0.21.2](https://github.com/o1-labs/zkapp-cli/compare/0.21.0...0.21.2) - 2024-05-20
 
 ### Changed
