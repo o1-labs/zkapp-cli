@@ -268,7 +268,7 @@ function scaffoldSvelte() {
     path.join('ui', 'src')
   );
 
-  const customTsConfig = ` {
+  const customTsConfig = `{
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
     "target": "es2020",
@@ -427,7 +427,7 @@ async function scaffoldNext(projectName) {
   );
 
   let newNextConfig = nextConfig.replace(
-    /^};(.*?)$/gm, // Search for the last '}' in the file.
+    /^};(.*?)$/gm, // Search for the last '};' in the file.
     `
   webpack(config) {
     config.experiments = { ...config.experiments, topLevelAwait: true };
@@ -698,14 +698,11 @@ function scaffoldNuxt() {
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.ts'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
     'export default defineNuxtConfig({',
-    `
-  export default defineNuxtConfig({
-    
+    `export default defineNuxtConfig({
     vite: {
       build: { target: "esnext" },
       optimizeDeps: { esbuildOptions: { target: "esnext" } },
     },
-
     css: ['~/assets/styles/globals.css'],
   `
   );
