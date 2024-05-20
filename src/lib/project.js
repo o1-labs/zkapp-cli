@@ -100,7 +100,7 @@ export async function project({ name, ui }) {
       // Add dependencies object if none is found in the package.json because generated
       // SvelteKit projects do not have dependencies included.
       if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
-      pkgJson.dependencies.o1js = '0.*';
+      pkgJson.dependencies.o1js = '^1.*';
       fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
