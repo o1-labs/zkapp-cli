@@ -100,7 +100,7 @@ export async function project({ name, ui }) {
       // Add dependencies object if none is found in the package.json because generated
       // SvelteKit projects do not have dependencies included.
       if (!pkgJson.dependencies) pkgJson['dependencies'] = {};
-      pkgJson.dependencies.o1js = '0.*';
+      pkgJson.dependencies.o1js = '^1.*';
       fs.writeJSONSync(path.join('ui', 'package.json'), pkgJson, { spaces: 2 });
 
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
@@ -268,7 +268,7 @@ function scaffoldSvelte() {
     path.join('ui', 'src')
   );
 
-  const customTsConfig = ` {
+  const customTsConfig = `{
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
     "target": "es2020",
@@ -394,7 +394,7 @@ async function scaffoldNext(projectName) {
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
-    'create-next-app@13.4.1',
+    'create-next-app@14.2.3',
     'ui',
     '--use-npm',
     '--src-dir',
@@ -421,17 +421,15 @@ async function scaffoldNext(projectName) {
     useTypescript = false;
   }
 
-  const nextConfig = fs.readFileSync(path.join('ui', 'next.config.js'), 'utf8');
+  const nextConfig = fs.readFileSync(
+    path.join('ui', 'next.config.mjs'),
+    'utf8'
+  );
 
   let newNextConfig = nextConfig.replace(
-    /^}(.*?)$/gm, // Search for the last '}' in the file.
+    /^};(.*?)$/gm, // Search for the last '};' in the file.
     `
-
   webpack(config) {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      o1js: require('path').resolve('node_modules/o1js')
-    };
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
@@ -463,7 +461,7 @@ async function scaffoldNext(projectName) {
     'reactStrictMode: false'
   );
 
-  fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+  fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
 
   const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
 
@@ -494,38 +492,37 @@ async function scaffoldNext(projectName) {
     path.join('ui', 'public', 'assets')
   );
 
-  const tsconfig = `
-    {
-    "compilerOptions": {
-        "target": "es2020",
-        "module": "esnext",
-        "lib": ["dom", "dom.iterable","esnext"],
-        "strict": true,
-        "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "allowJs": true,
-        "declaration": true,
-        "sourceMap": true,
-        "noFallthroughCasesInSwitch": true,
-        "allowSyntheticDefaultImports": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "incremental": true,
-        "resolveJsonModule": true,
-        "jsx": "preserve",
-        "paths": {
-          "@/*": ["./src/*"]
+  const tsconfig = `{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "strict": true,
+    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./src/*"]
     }
-      },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-    "exclude": ["node_modules"]
-    }
-  `;
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+`;
 
   if (useTypescript) {
     fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
@@ -533,19 +530,22 @@ async function scaffoldNext(projectName) {
     // Add a script to the package.json
     let x = fs.readJsonSync(path.join('ui', 'package.json'));
     x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
+    x.scripts['build'] = 'next build --no-lint';
+    x.type = 'module';
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
   }
 
   if (useGHPages) {
     const nextConfig = fs.readFileSync(
-      path.join('ui', 'next.config.js'),
+      path.join('ui', 'next.config.mjs'),
       'utf8'
     );
 
     console.log(
-      'Using project name ' +
-        projectName +
-        ' for GitHub repo name. Change in next.config.js and pages/reactCOIServiceWorker.tsx if this is not correct or changes'
+      `Using project name '${projectName}' as the GitHub repository name.`
+    );
+    console.log(
+      "Please update it in 'next.config.mjs' and 'pages/reactCOIServiceWorker.tsx' files if this is not correct or if it will be changed.\n"
     );
 
     let newNextConfig = nextConfig.replace(
@@ -555,15 +555,15 @@ async function scaffoldNext(projectName) {
     unoptimized: true,
   },
   output: 'export',
-  /* Used to serve the Next.js app from a subdirectory (the GitHub repo name) and 
-   * assetPrefix is used to serve assets (JS, CSS, images, etc.) from that subdirectory 
+  /* Used to serve the Next.js app from a subdirectory (the GitHub repo name) and
+   * assetPrefix is used to serve assets (JS, CSS, images, etc.) from that subdirectory
    * when deployed to GitHub Pages. The assetPrefix needs to be added manually to any assets
-   * if they're not loaded by Next.js' automatic handling (for example, in CSS files or in a <img> element). 
-   * The 'ghp-postbuild.js' script in this project prepends the repo name to asset urls in the built css files 
+   * if they're not loaded by Next.js' automatic handling (for example, in CSS files or in a <img> element).
+   * The 'ghp-postbuild.js' script in this project prepends the repo name to asset urls in the built css files
    * after runing 'npm run deploy'.
    */
-  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : '', // update if your repo name changes for 'npm run deploy' to work successfully
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : '', // update if your repo name changes for 'npm run deploy' to work successfully
+  basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : '', // update if your repo name changes for 'npm run deploy' to work correctly
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : '', // update if your repo name changes for 'npm run deploy' to work correctly
 };`
     );
 
@@ -580,12 +580,11 @@ async function scaffoldNext(projectName) {
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
     );
 
-    fs.writeFileSync(path.join('ui', 'next.config.js'), newNextConfig);
+    fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
 
     // Add some scripts to the package.json
     let x = fs.readJsonSync(`ui/package.json`);
-    x.scripts['export'] = 'next export';
-    const deployScript = `next build && next export && ${
+    const deployScript = `next build --no-lint && ${
       isWindows
         ? `type nul > ${path.join('out', '.nojekyll')}`
         : `touch ${path.join('out', '.nojekyll')}`
@@ -647,13 +646,15 @@ export default function`
 
     fs.writeFileSync(
       path.join('ui', 'src', 'pages', reactCOIServiceWorkerFileName),
-      `
-export {}
+      `export {};
 
 function loadCOIServiceWorker() {
-  if (typeof window !== 'undefined' && window.location.hostname != 'localhost') {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname != 'localhost'
+  ) {
     const coi = window.document.createElement('script');
-    coi.setAttribute('src','/${projectName}/coi-serviceworker.min.js'); // update if your repo name changes for npm run deploy to work successfully
+    coi.setAttribute('src', '/${projectName}/coi-serviceworker.min.js'); // update if your repo name changes for 'npm run deploy' to work correctly
     window.document.head.appendChild(coi);
   }
 }
@@ -697,14 +698,11 @@ function scaffoldNuxt() {
   const nuxtConfig = fs.readFileSync(path.join('ui', 'nuxt.config.ts'), 'utf8');
   let newNuxtConfig = nuxtConfig.replace(
     'export default defineNuxtConfig({',
-    `
-  export default defineNuxtConfig({
-    
+    `export default defineNuxtConfig({
     vite: {
       build: { target: "esnext" },
       optimizeDeps: { esbuildOptions: { target: "esnext" } },
     },
-
     css: ['~/assets/styles/globals.css'],
   `
   );
