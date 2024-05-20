@@ -224,15 +224,25 @@ function resolveModulePath(moduleName, basePath) {
 
   // Resolve relative or absolute paths based on the current file's directory
   if (path.isAbsolute(moduleName) || moduleName.startsWith('.')) {
-    return path.resolve(basePath, moduleName);
+    let modulePath = path.resolve(basePath, moduleName);
+    if (!fs.existsSync(modulePath) && !modulePath.endsWith('.js')) {
+      modulePath += '.js';
+    }
+    return modulePath;
   } else {
     // Module is a node_modules dependency
     const packagePath = path.join('node_modules', moduleName);
     const packageJsonPath = path.join(packagePath, 'package.json');
 
+    // Try to resolve the main file using the package.json
     if (fs.existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      // Try to resolve the main file using the package.json
+      // Skip the primary entry point for the 'o1js' module
+      // This is necessary if the 'o1js' module is of < v1.0.1
+      // https://github.com/o1-labs/o1js/commit/0a56798210e9e6678a2b18ca0cecd683b05ba6e5
+      if (moduleName === 'o1js') {
+        delete packageJson['main'];
+      }
       let mainFile =
         packageJson.main || packageJson?.exports?.node?.import || 'index.js';
       return path.join(packagePath, mainFile);
