@@ -17,6 +17,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+### Changed
+
+- Migrate to **Next.js** `v14.2.3` and fix the latest `o1js` usage issue. [#652](https://github.com/o1-labs/zkapp-cli/pull/652)
+
 ## [0.21.0](https://github.com/o1-labs/zkapp-cli/compare/0.20.1...0.21.0) - 2024-05-16
 
 ### Breaking changes
@@ -26,7 +30,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - Update ZkProgram proof detection during deployment [#649](https://github.com/o1-labs/zkapp-cli/pull/649)
-
 - Improved `SmartContract` classes inheritance lookup used during the zkApps deployment procedure. [#640](https://github.com/o1-labs/zkapp-cli/pull/640)
 
 ### Fixed
