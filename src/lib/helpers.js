@@ -242,6 +242,7 @@ function resolveModulePath(moduleName, basePath) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
       // Skip the primary entry point for the 'o1js' module
       // This is necessary if the 'o1js' module is of < v1.0.1
+      // https://github.com/o1-labs/o1js/commit/0a56798210e9e6678a2b18ca0cecd683b05ba6e5
       if (moduleName === 'o1js') {
         delete packageJson['main'];
       }
