@@ -4,7 +4,6 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test';
-import os from 'node:os';
 import { BrowserName, UiType } from '../../models/types';
 
 export class LandingPage {
@@ -39,15 +38,6 @@ export class LandingPage {
   async goto(): Promise<void> {
     await this.page.bringToFront();
     await this.page.goto(this.url.toString());
-    // We need to handle the dev server's error pop-up (macOS + WebKit + NextJS project).
-    // https://github.com/o1-labs/zkapp-cli/issues/559
-    if (
-      this.browserName === 'webkit' &&
-      this.uiType === 'next' &&
-      os.platform() === 'darwin'
-    ) {
-      await this.handleErrorPopUp();
-    }
   }
 
   async checkPageLabels(): Promise<void> {
