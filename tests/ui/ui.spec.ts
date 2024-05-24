@@ -33,7 +33,7 @@ test.describe('Users', () => {
       );
 
       const devServerPort = await portfinder.getPortPromise();
-      const devServerUrl = new URL(`http://localhost:${devServerPort}`);
+      const devServerUrl = new URL(`http://127.0.0.1:${devServerPort}`);
       const projectName = crypto.randomUUID();
       const { spawn, cleanup, path } = await prepareEnvironment();
       let devServerProcess: ProcessPromise | undefined; // eslint-disable-line
