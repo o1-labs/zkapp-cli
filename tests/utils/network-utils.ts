@@ -10,14 +10,14 @@ import {
 import { TestConstants } from './common-utils.js';
 
 export function getMockedEndpointsServiceEndpoint(): string {
-  return `http://localhost:${
+  return `http://127.0.0.1:${
     process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
     TestConstants.mockedEndpointsServicePort
   }`;
 }
 
 export async function getMinaGraphQlEndpoint(): Promise<string> {
-  const minaGraphQlEndpoint = `http://localhost:${
+  const minaGraphQlEndpoint = `http://127.0.0.1:${
     process.env.MINA_GRAPHQL_PORT ?? TestConstants.minaGraphQlPort
   }/graphql`;
 
@@ -252,11 +252,11 @@ async function getMinaAccountsManagerEndpoint(
     ? 'acquire-account'
     : 'release-account';
   const endpointPort = (await isEndpointAvailable(
-    `http://localhost:${accountsManagerPort}`,
+    `http://127.0.0.1:${accountsManagerPort}`,
     false
   ))
     ? accountsManagerPort
     : mockedAccountsManagerPort;
 
-  return `http://localhost:${endpointPort}/${endpointAction}`;
+  return `http://127.0.0.1:${endpointPort}/${endpointAction}`;
 }

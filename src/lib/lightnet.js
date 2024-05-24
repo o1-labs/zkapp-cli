@@ -1099,7 +1099,7 @@ function printUsefulUrls() {
     ]);
     urls.push([
       chalk.bold('PostgreSQL connection string'),
-      chalk.reset('postgresql://postgres:postgres@localhost:5432/archive'),
+      chalk.reset('postgresql://postgres:postgres@127.0.0.1:5432/archive'),
     ]);
   }
   console.log(boldTitle);

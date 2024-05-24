@@ -7,7 +7,7 @@ import http, {
 import { TestConstants, generateRandomInt } from '../utils/common-utils.js';
 
 const applicationName = '⚡️[Mocked Endpoints Service]';
-const host = 'localhost';
+const host = '127.0.0.1';
 const port = Number(
   process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??
     TestConstants.mockedEndpointsServicePort
@@ -16,7 +16,7 @@ const port = Number(
 // Start the mocked endpoints service.
 const server: Server = http.createServer(createRequestListener());
 server.listen(port, host, () => {
-  console.log(`${applicationName}: Is running on http://localhost:${port}`);
+  console.log(`${applicationName}: Is running on http://${host}:${port}`);
 });
 
 function createRequestListener(): RequestListener {

@@ -44,9 +44,9 @@ const Constants = Object.freeze({
     'Error',
     'Fatal',
   ],
-  lightnetMinaDaemonGraphQlEndpoint: 'http://localhost:8080/graphql',
-  lightnetAccountManagerEndpoint: 'http://localhost:8181',
-  lightnetArchiveNodeApiEndpoint: 'http://localhost:8282',
+  lightnetMinaDaemonGraphQlEndpoint: 'http://127.0.0.1:8080/graphql',
+  lightnetAccountManagerEndpoint: 'http://127.0.0.1:8181',
+  lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
 });
 
 export default Constants;
