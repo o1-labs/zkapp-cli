@@ -436,11 +436,13 @@ const __dirname = path.dirname(__filename);
   newNextConfig += nextConfig.replace(
     /^};(.*?)$/gm, // Search for the last '};' in the file.
     `
-  webpack(config) {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
-    };
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
+      };
+    }
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
