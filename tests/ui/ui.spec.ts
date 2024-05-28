@@ -51,20 +51,24 @@ test.describe('Users', () => {
         });
         await test.step('Start Dev server', async () => {
           let devServerCommand: string = '';
+          let devServerHostParam: string = '';
           switch (uiType) {
             case 'next':
               devServerCommand = 'next';
+              devServerHostParam = '--hostname';
               break;
             case 'svelte':
               devServerCommand = 'vite';
+              devServerHostParam = '--host';
               break;
             case 'nuxt':
               devServerCommand = 'nuxt';
+              devServerHostParam = '--host';
               break;
           }
           $.cwd = `${path}/${projectName}/ui`; // eslint-disable-line
           devServerProcess =
-            $`npx ${devServerCommand} dev --port ${devServerPort}`.nothrow(); // eslint-disable-line
+            $`npx ${devServerCommand} dev ${devServerHostParam} 127.0.0.1 --port ${devServerPort}`.nothrow(); // eslint-disable-line
           devServerProcess.stdout.on('data', (chunk: string) => {
             devServerProcessStdout.push(chunk);
           });
