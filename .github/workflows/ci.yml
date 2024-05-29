@@ -24,10 +24,20 @@ jobs:
         run: |
           npm ci
           npm run build --if-present
-          npm run test
+          npm run coverage
           cd templates/project-ts
           npm install || true
           npm run test
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: zkapp-cli
+          verbose: true
+          handle_no_reports_found: true
+          fail_ci_if_error: false
         env:
           CI: true
   sudoku-example:
