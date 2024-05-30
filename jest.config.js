@@ -11,10 +11,10 @@ export default {
   coveragePathIgnorePatterns: ['/node_modules/'],
   coverageThreshold: {
     global: {
-      branches: 1,
-      functions: 1,
-      lines: 1,
-      statements: 1,
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
   },
 };
