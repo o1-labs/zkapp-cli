@@ -28,6 +28,8 @@ jobs:
           cd templates/project-ts
           npm install || true
           npm run test
+        env:
+          CI: true
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -38,8 +40,6 @@ jobs:
           verbose: true
           handle_no_reports_found: true
           fail_ci_if_error: false
-        env:
-          CI: true
   sudoku-example:
     runs-on: ubuntu-latest
     strategy:
