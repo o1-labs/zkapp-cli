@@ -183,7 +183,7 @@ export function kebabCase(str) {
  * @returns {Promise<boolean>} True if successful; false if not.
  */
 export async function updateExampleSources(example, name, lang) {
-  const step = 'Prepare example sources';
+  const step = 'Update example sources';
   const spin = ora(`${step}...`).start();
 
   try {
