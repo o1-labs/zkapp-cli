@@ -56,7 +56,6 @@ export async function checkZkExample(
   expect(stdOut).toContain('Next steps:');
   await checkSmartContractsFilesystem(
     path,
-    false,
     listFilesystemFn,
     existsOnFilesystemFn
   );

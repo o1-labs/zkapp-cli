@@ -108,7 +108,6 @@ export async function checkZkProject(
     case 'nuxt': {
       await checkSmartContractsFilesystem(
         contractsPath,
-        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
@@ -118,7 +117,6 @@ export async function checkZkProject(
     case 'empty': {
       await checkSmartContractsFilesystem(
         contractsPath,
-        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
@@ -129,7 +127,6 @@ export async function checkZkProject(
     case 'none': {
       await checkSmartContractsFilesystem(
         `./${projectName}`,
-        true,
         listFilesystemFn,
         existsOnFilesystemFn
       );
