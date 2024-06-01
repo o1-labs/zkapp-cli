@@ -69,7 +69,7 @@ export async function setupProject(destination, lang) {
     const destDir = path.resolve(destination);
     shell.mkdir('-p', destDir);
     shell.cd(destDir);
-    // node:fs.cpSync instead of shell.cp because ShellJS does not implement `cp -a`
+    // `node:fs.cpSync` instead of the `shell.cp` because `ShellJS` does not implement `cp -a`
     // https://github.com/shelljs/shelljs/issues/79#issuecomment-30821277
     fs.cpSync(`${templatePath}/`, `${destDir}/`, { recursive: true });
     shell.mv(

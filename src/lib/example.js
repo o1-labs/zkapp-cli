@@ -207,7 +207,7 @@ export async function updateExampleSources(example, name, lang) {
     // Delete the project template's `src` & use the example's `src` instead.
     const srcPath = path.resolve(name, 'src');
     shell.rm('-r', srcPath);
-    // node:fs.cpSync instead of shell.cp because ShellJS does not implement `cp -a`
+    // `node:fs.cpSync` instead of the `shell.cp` because `ShellJS` does not implement `cp -a`
     // https://github.com/shelljs/shelljs/issues/79#issuecomment-30821277
     fs.cpSync(`${examplePath}/`, `${srcPath}/`, { recursive: true });
     spin.succeed(chalk.green(step));
