@@ -5,7 +5,12 @@ import net from 'net';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
 import path from 'node:path';
+import url from 'node:url';
 import ora from 'ora';
+import shell from 'shelljs';
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const acornOptions = {
   ecmaVersion: 2020,
@@ -38,6 +43,50 @@ async function step(str, fn) {
     console.error('  ' + chalk.red(err)); // maintain expected indentation
     console.log(err);
     process.exit(1);
+  }
+}
+
+/**
+ * Sets up the new project from the template.
+ * @param {string} destination Destination dir path.
+ * @param {string} lang        ts or js
+ * @returns {Promise<boolean>} True if successful; false if not.
+ */
+export async function setupProject(destination, lang) {
+  const currentDir = shell.pwd().toString();
+  const projectName = lang === 'ts' ? 'project-ts' : 'project';
+  const templatePath = path.resolve(
+    __dirname,
+    '..',
+    '..',
+    'templates',
+    projectName
+  );
+  const step = 'Set up project';
+  const spin = ora({ text: `${step}...`, discardStdin: true }).start();
+
+  try {
+    const destDir = path.resolve(destination);
+    shell.mkdir('-p', destDir);
+    shell.cd(destDir);
+    fs.cpSync(`${templatePath}/`, `${destDir}/`, { recursive: true });
+    shell.mv(
+      path.resolve(destDir, '_.gitignore'),
+      path.resolve(destDir, '.gitignore')
+    );
+    shell.mv(
+      path.resolve(destDir, '_.npmignore'),
+      path.resolve(destDir, '.npmignore')
+    );
+    spin.succeed(chalk.green(step));
+
+    return true;
+  } catch (err) {
+    spin.fail(step);
+    console.error(err);
+    return false;
+  } finally {
+    shell.cd(currentDir);
   }
 }
 

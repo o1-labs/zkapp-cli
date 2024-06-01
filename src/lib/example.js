@@ -1,12 +1,16 @@
 import chalk from 'chalk';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
-import gittar from 'gittar';
+import url from 'node:url';
 import ora from 'ora';
 import path from 'path';
 import shell from 'shelljs';
 import util from 'util';
 import Constants from './constants.js';
+import { setupProject } from './helpers.js';
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const shellExec = util.promisify(shell.exec);
 
@@ -18,6 +22,11 @@ const shellExec = util.promisify(shell.exec);
  * @return {Promise<void>}
  */
 export async function example(example) {
+  if (!shell.which('git')) {
+    console.error(chalk.red('Please ensure Git is installed, then try again.'));
+    shell.exit(1);
+  }
+
   if (!example) {
     const res = await enquirer.prompt({
       type: 'select',
@@ -47,16 +56,15 @@ export async function example(example) {
   const lang = 'ts';
   const isWindows = process.platform === 'win32';
 
-  if (!(await fetchProjectTemplate(dir, lang))) shell.exit(1);
-  if (!(await extractExample(example, dir, lang))) shell.exit(1);
+  if (!(await setupProject(path.join(shell.pwd().toString(), dir), lang))) {
+    shell.exit(1);
+  }
+  if (!(await updateExampleSources(example, dir, lang))) {
+    shell.exit(1);
+  }
 
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   shell.cd(dir);
-
-  if (!shell.which('git')) {
-    console.error(chalk.red('Please ensure Git is installed, then try again.'));
-    shell.exit(1);
-  }
 
   await step('Initialize Git repo', 'git init -q');
 
@@ -88,48 +96,6 @@ export async function example(example) {
 
   console.log(chalk.green(str));
   process.exit(0);
-}
-
-/**
- * Fetch project template.
- * @param {string} example     Name of the destination dir.
- * @param {string} lang        ts or js
- * @returns {Promise<boolean>} True if successful; false if not.
- */
-async function fetchProjectTemplate(name, lang) {
-  const projectName = lang === 'ts' ? 'project-ts' : 'project';
-  const step = 'Fetch project template';
-  const spin = ora(`${step}...`).start();
-
-  try {
-    const TEMP = '.temp-dir';
-    const templatePath = `templates/${projectName}`;
-
-    if (process.env.CI) {
-      shell.mkdir('-p', path.join(TEMP, templatePath));
-      shell.cp('-r', `${templatePath}/.`, path.join(TEMP, templatePath));
-    } else {
-      const src = 'github:o1-labs/zkapp-cli#main';
-      await gittar.fetch(src, { force: true });
-
-      // Note: Extract will overwrite any existing dir's contents. But we're
-      // using an always-unique name.
-      await gittar.extract(src, TEMP, {
-        filter(path) {
-          return path.includes(templatePath);
-        },
-      });
-    }
-
-    shell.mv(path.join(TEMP, templatePath), name);
-    shell.rm('-r', TEMP);
-    spin.succeed(chalk.green(step));
-    return true;
-  } catch (err) {
-    spin.fail(step);
-    console.error(err);
-    return false;
-  }
 }
 
 /**
@@ -210,46 +176,38 @@ export function kebabCase(str) {
 }
 
 /**
- * Fetch an example & place in the `src` directory.
- * @param {string} example     Name of the example, as found in our GitHub repo.
+ * Updates the example sources.
+ * @param {string} example     Name of the example.
  * @param {string} name        Destination dir name.
  * @param {string} lang        ts or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function extractExample(example, name, lang) {
-  const step = 'Extract example';
+export async function updateExampleSources(example, name, lang) {
+  const step = 'Prepare example sources';
   const spin = ora(`${step}...`).start();
 
   try {
-    const TEMP = '.temp-dir';
-    const examplePath = `examples/${example}/${lang}/src`;
-
-    if (process.env.CI) {
-      shell.mkdir('-p', path.join(TEMP, examplePath));
-      shell.cp('-r', `${examplePath}/.`, path.join(TEMP, examplePath));
-    } else {
-      const src = 'github:o1-labs/zkapp-cli#main';
-
-      // Note: Extract will overwrite any existing dir's contents. That's ok here.
-      await gittar.extract(src, TEMP, {
-        filter(path) {
-          return path.includes(examplePath);
-        },
-      });
-    }
+    const examplePath = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      'examples',
+      example,
+      lang,
+      'src'
+    );
 
     // Example not found. Delete the project template & temp dir to clean up.
-    if (isEmpty(TEMP)) {
+    if (isEmpty(examplePath)) {
       spin.fail(step);
       console.error(chalk.red('Example not found'));
-      shell.rm('-r', `${process.cwd()}/${name}`, TEMP);
       return false;
     }
 
     // Delete the project template's `src` & use the example's `src` instead.
-    shell.rm('-r', `${name}/src`);
-    shell.mv(`${TEMP}/${examplePath}`, `${name}/src`);
-    shell.rm('-r', TEMP);
+    const srcPath = path.resolve(name, 'src');
+    shell.rm('-r', srcPath);
+    fs.cpSync(`${examplePath}/`, `${srcPath}/`, { recursive: true });
     spin.succeed(chalk.green(step));
     return true;
   } catch (err) {
