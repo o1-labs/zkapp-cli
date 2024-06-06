@@ -426,10 +426,23 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
-  let newNextConfig = nextConfig.replace(
+  let newNextConfig = `import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+`;
+  newNextConfig += nextConfig.replace(
     /^};(.*?)$/gm, // Search for the last '};' in the file.
     `
-  webpack(config) {
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
+      };
+    }
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
@@ -451,7 +464,7 @@ async function scaffoldNext(projectName) {
         ],
       },
     ];
-  }
+  },
 };`
   );
 
@@ -549,7 +562,7 @@ async function scaffoldNext(projectName) {
     );
 
     let newNextConfig = nextConfig.replace(
-      '  }\n};',
+      '  },\n};',
       `  },
   images: {
     unoptimized: true,
@@ -560,7 +573,7 @@ async function scaffoldNext(projectName) {
    * when deployed to GitHub Pages. The assetPrefix needs to be added manually to any assets
    * if they're not loaded by Next.js' automatic handling (for example, in CSS files or in a <img> element).
    * The 'ghp-postbuild.js' script in this project prepends the repo name to asset urls in the built css files
-   * after runing 'npm run deploy'.
+   * after running 'npm run deploy'.
    */
   basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : '', // update if your repo name changes for 'npm run deploy' to work correctly
   assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : '', // update if your repo name changes for 'npm run deploy' to work correctly
@@ -573,7 +586,7 @@ async function scaffoldNext(projectName) {
     return config;`
     );
 
-    // update papage extensions
+    // update page extensions
     newNextConfig = newNextConfig.replace(
       'reactStrictMode: false,',
       `reactStrictMode: false,
