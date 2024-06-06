@@ -327,15 +327,11 @@ export function getZkAppSmartContractNameFromAlias(
 
 export async function checkSmartContractsFilesystem(
   path: string,
-  checkKeysExistence: boolean,
   listFilesystemFn: CLITestEnvironment['ls'],
   existsOnFilesystemFn: CLITestEnvironment['exists']
 ): Promise<void> {
   expect(await existsOnFilesystemFn(path)).toBe(true);
   expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
-  if (checkKeysExistence) {
-    expect(await existsOnFilesystemFn(`${path}/keys`)).toBe(true);
-  }
   expect(await existsOnFilesystemFn(`${path}/config.json`)).toBe(true);
   expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
 }

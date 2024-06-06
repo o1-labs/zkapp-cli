@@ -3,3 +3,29 @@
 
 # System
 .DS_Store
+
+# Ignore the following only in the root directory
+/.git
+/.github
+/.husky
+/playwright.config.ts
+/jest.config.js
+/.prettierrc
+/.prettierignore
+/.npmignore
+/.gitignore
+/.gitattributes
+/.eslintrc
+/.eslintignore
+/tsconfig.json
+/src/lib/**/*.test.js
+/src/lib/**/*.test.ts
+/update-changelog.sh
+
+# Allow everything within the templates/project-ts
+!/templates/project-ts/**
+
+# Ignore the following globally
+node_modules
+coverage
+tests

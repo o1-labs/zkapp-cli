@@ -1,5 +1,8 @@
-# TypeScript files
+# Source files
 src
+
+node_modules
+coverage
 
 # Editor
 .vscode

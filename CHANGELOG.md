@@ -17,7 +17,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
-## [0.21.4](https://github.com/o1-labs/zkapp-cli/compare/0.21.3...0.21.4) - 2024-05-21
+## [0.21.5](https://github.com/o1-labs/zkapp-cli/compare/0.21.4...0.21.5) - 2024-06-06
+
+### Changed
+
+- Improved the NPM packaging and changed the way sources are fetched during the project generation. [#662](https://github.com/o1-labs/zkapp-cli/pull/662)
+  - Generic project and example templates are now fetched from the locally installed `zkapp-cli` package path (local file system copy).
+
+## [0.21.4](https://github.com/o1-labs/zkapp-cli/compare/0.21.3...0.21.4) - 2024-06-06
 
 ### Fixed
 
