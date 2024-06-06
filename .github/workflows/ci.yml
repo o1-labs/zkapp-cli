@@ -1,11 +1,10 @@
-#
-# ci.yml
-#
-# Run tests for all pushed commits and opened pull requests on Github.
-#
+# This workflow will run common unit tests, and then run the Sudoku and TicTacToe examples unit tests if the common unit tests pass.
 
 name: CI
-on: [push, pull_request]
+on:
+  push: {}
+  pull_request: {}
+  workflow_dispatch: {}
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -90,28 +89,3 @@ jobs:
           npm run start
         env:
           CI: true
-  publish:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    # TODO: Add successful e2e smoke testing to preconditions after the https://github.com/o1-labs/zkapp-cli/issues/615 is resolved
-    needs: [ci, sudoku-example, tictactoe-example]
-    strategy:
-      matrix:
-        node: [18]
-    steps:
-      - name: Set up NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Git checkout
-        uses: actions/checkout@v4
-      - name: NPM ci & build
-        run: |
-          npm ci
-          npm run build --if-present
-      - name: Publish to NPM if version has changed
-        uses: JS-DevTools/npm-publish@v1
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-        env:
-          INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}

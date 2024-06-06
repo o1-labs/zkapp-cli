@@ -1,3 +1,5 @@
+# This workflow will run the 'Smoke E2E tests' only when the 'CI' workflow completes successfully.
+
 name: Smoke E2E tests
 on:
   workflow_run:
