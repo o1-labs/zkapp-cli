@@ -40,7 +40,6 @@ export async function project({ name, ui }) {
     shell.exit(1);
   }
 
-  const lang = 'ts';
   let res;
   if (!ui) {
     try {
@@ -122,7 +121,7 @@ export async function project({ name, ui }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await setupProject(shell.pwd().toString(), lang))) {
+  if (!(await setupProject(shell.pwd().toString()))) {
     shell.exit(1);
   }
 

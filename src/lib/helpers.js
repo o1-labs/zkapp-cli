@@ -49,10 +49,10 @@ async function step(str, fn) {
 /**
  * Sets up the new project from the template.
  * @param {string} destination Destination dir path.
- * @param {string} lang        ts or js
+ * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function setupProject(destination, lang) {
+export async function setupProject(destination, lang = 'ts') {
   const currentDir = shell.pwd().toString();
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
   const templatePath = path.resolve(

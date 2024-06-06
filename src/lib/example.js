@@ -53,13 +53,12 @@ export async function example(example) {
   }
 
   const dir = findUniqueDir(example);
-  const lang = 'ts';
   const isWindows = process.platform === 'win32';
 
-  if (!(await setupProject(path.join(shell.pwd().toString(), dir), lang))) {
+  if (!(await setupProject(path.join(shell.pwd().toString(), dir)))) {
     shell.exit(1);
   }
-  if (!(await updateExampleSources(example, dir, lang))) {
+  if (!(await updateExampleSources(example, dir))) {
     shell.exit(1);
   }
 
@@ -179,10 +178,10 @@ export function kebabCase(str) {
  * Updates the example sources.
  * @param {string} example     Name of the example.
  * @param {string} name        Destination dir name.
- * @param {string} lang        ts or js
+ * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function updateExampleSources(example, name, lang) {
+export async function updateExampleSources(example, name, lang = 'ts') {
   const step = 'Update example sources';
   const spin = ora(`${step}...`).start();
 
