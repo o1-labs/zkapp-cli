@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import { spawnSync } from 'child_process';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
-import gittar from 'gittar';
 import ora from 'ora';
 import path from 'path';
 import shell from 'shelljs';
@@ -14,6 +13,7 @@ import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
 import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
 import Constants from './constants.js';
+import { setupProject } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
@@ -121,7 +121,9 @@ export async function project({ name, ui }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await fetchProjectTemplate())) shell.exit(1);
+  if (!(await setupProject(shell.pwd().toString()))) {
+    shell.exit(1);
+  }
 
   await step(
     'NPM install',
@@ -149,50 +151,6 @@ export async function project({ name, ui }) {
 
   console.log(chalk.green(str));
   process.exit(0);
-}
-
-/**
- * Fetch project template.
- * @returns {Promise<boolean>} - True if successful; false if not.
- */
-async function fetchProjectTemplate() {
-  const projectName = 'project-ts';
-
-  const step = 'Set up project';
-  const spin = ora({ text: `${step}...`, discardStdin: true }).start();
-
-  try {
-    const src = 'github:o1-labs/zkapp-cli#main';
-    await gittar.fetch(src, { force: true });
-
-    // Note: Extract will overwrite any existing dir's contents. Ensure
-    // destination does not exist before this.
-    const TEMP = '.gittar-temp-dir';
-    await gittar.extract(src, TEMP, {
-      filter(path) {
-        return path.includes(`templates/${projectName}/`);
-      },
-    });
-
-    // Copy files into current working dir
-    shell.cp(
-      '-r',
-      `${path.join(TEMP, 'templates', projectName)}${path.sep}.`,
-      '.'
-    );
-    shell.rm('-r', TEMP);
-
-    // Create a keys dir because it's not part of the project scaffolding given
-    // we have `keys` in our .gitignore.
-    shell.mkdir('keys');
-
-    spin.succeed(chalk.green(step));
-    return true;
-  } catch (err) {
-    spin.fail(step);
-    console.error(err);
-    return false;
-  }
 }
 
 /**
@@ -426,10 +384,23 @@ async function scaffoldNext(projectName) {
     'utf8'
   );
 
-  let newNextConfig = nextConfig.replace(
+  let newNextConfig = `import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+`;
+  newNextConfig += nextConfig.replace(
     /^};(.*?)$/gm, // Search for the last '};' in the file.
     `
-  webpack(config) {
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
+      };
+    }
     config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
@@ -451,7 +422,7 @@ async function scaffoldNext(projectName) {
         ],
       },
     ];
-  }
+  },
 };`
   );
 
@@ -549,7 +520,7 @@ async function scaffoldNext(projectName) {
     );
 
     let newNextConfig = nextConfig.replace(
-      '  }\n};',
+      '  },\n};',
       `  },
   images: {
     unoptimized: true,
@@ -560,7 +531,7 @@ async function scaffoldNext(projectName) {
    * when deployed to GitHub Pages. The assetPrefix needs to be added manually to any assets
    * if they're not loaded by Next.js' automatic handling (for example, in CSS files or in a <img> element).
    * The 'ghp-postbuild.js' script in this project prepends the repo name to asset urls in the built css files
-   * after runing 'npm run deploy'.
+   * after running 'npm run deploy'.
    */
   basePath: process.env.NODE_ENV === 'production' ? '/${projectName}' : '', // update if your repo name changes for 'npm run deploy' to work correctly
   assetPrefix: process.env.NODE_ENV === 'production' ? '/${projectName}/' : '', // update if your repo name changes for 'npm run deploy' to work correctly
@@ -573,7 +544,7 @@ async function scaffoldNext(projectName) {
     return config;`
     );
 
-    // update papage extensions
+    // update page extensions
     newNextConfig = newNextConfig.replace(
       'reactStrictMode: false,',
       `reactStrictMode: false,
