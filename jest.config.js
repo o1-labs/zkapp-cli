@@ -1,4 +1,5 @@
 export default {
+  transform: {},
   testMatch: ['**/src/**/*.test.js'],
   collectCoverage: true,
   coverageDirectory: 'coverage',

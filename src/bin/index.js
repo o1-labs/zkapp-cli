@@ -157,7 +157,7 @@ function systemCli() {
     command: ['system', 'sys', 's'],
     describe: 'Show system info',
     builder: {},
-    handler: () => system(),
+    handler: async () => await system(),
   };
 }
 
