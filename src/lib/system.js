@@ -1,6 +1,12 @@
 import envinfo from 'envinfo';
 import { execSync } from 'node:child_process';
 
+// Public API
+export default system;
+
+// Private API
+export { getInstalledNpmPackageVersion };
+
 async function system() {
   const installedO1jsVersion = getInstalledNpmPackageVersion({
     packageName: 'o1js',
@@ -52,6 +58,3 @@ function getInstalledNpmPackageVersion(
     return undefined;
   }
 }
-
-export default system;
-export { getInstalledNpmPackageVersion }; // Exported for testing purposes only.
