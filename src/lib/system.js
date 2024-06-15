@@ -28,7 +28,6 @@ async function system() {
     },
     { showNotFound: true }
   );
-
   env = env.replace(
     'o1js: Not Found',
     `o1js: ${installedO1jsVersion || 'Not Found (not in a project)'}`
