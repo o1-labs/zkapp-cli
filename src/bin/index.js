@@ -10,7 +10,7 @@ import config from '../lib/config.js';
 import Constants from '../lib/constants.js';
 import { deploy } from '../lib/deploy.js';
 import { example } from '../lib/example.js';
-import { file } from '../lib/file.js';
+import file from '../lib/file.js';
 import {
   lightnetExplorer,
   lightnetFollowLogs,

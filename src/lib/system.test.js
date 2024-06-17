@@ -20,7 +20,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 
   execSync.mockImplementation(() => {
     return JSON.stringify({
@@ -44,6 +44,10 @@ beforeEach(() => {
     npmGlobalPackages:
       zkapp-cli: Not Found
   `);
+});
+
+afterEach(() => {
+  jest.restoreAllMocks();
 });
 
 describe('system()', () => {
