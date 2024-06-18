@@ -1,11 +1,11 @@
 import chalk from 'chalk';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import path from 'node:path';
 import url from 'node:url';
+import util from 'node:util';
 import ora from 'ora';
-import path from 'path';
 import shell from 'shelljs';
-import util from 'util';
 import Constants from './constants.js';
 import step, { setupProject } from './helpers.js';
 
