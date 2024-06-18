@@ -1,5 +1,5 @@
-import { homedir } from 'os';
-import path from 'path';
+import { homedir } from 'node:os';
+import path from 'node:path';
 
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType

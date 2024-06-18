@@ -2,8 +2,8 @@
 
 import chalk from 'chalk';
 import fs from 'fs-extra';
-import path from 'path';
-import url from 'url';
+import path from 'node:path';
+import url from 'node:url';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import config from '../lib/config.js';

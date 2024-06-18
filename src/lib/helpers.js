@@ -1,9 +1,9 @@
 import { parse as acornParse } from 'acorn';
 import { simple as simpleAcornWalk } from 'acorn-walk';
 import chalk from 'chalk';
-import net from 'net';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
+import net from 'node:net';
 import path from 'node:path';
 import url from 'node:url';
 import ora from 'ora';
