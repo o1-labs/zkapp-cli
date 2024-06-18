@@ -10,7 +10,7 @@ import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step, { checkLocalPortsAvailability } from './helpers.js';
+import step, { checkLocalPortsAvailability, isDirEmpty } from './helpers.js';
 
 const debug = createDebug('zk:lightnet');
 const debugLog = (formatter, ...args) => {
@@ -231,10 +231,7 @@ export async function lightnetStop({ saveLogs, cleanUp }) {
     );
     console.log('Done\n');
   } else {
-    if (
-      fs.existsSync(lightnetLogsDir) &&
-      fs.readdirSync(lightnetLogsDir).length === 0
-    ) {
+    if (fs.existsSync(lightnetLogsDir) && isDirEmpty(lightnetLogsDir)) {
       debugLog('Removing file or dir %s\n\n\n\n', lightnetLogsDir);
       fs.removeSync(lightnetLogsDir);
     }

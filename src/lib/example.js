@@ -7,7 +7,7 @@ import util from 'node:util';
 import ora from 'ora';
 import shell from 'shelljs';
 import Constants from './constants.js';
-import step, { setupProject } from './helpers.js';
+import step, { isDirEmpty, setupProject } from './helpers.js';
 
 // Public API
 export default example;
@@ -16,7 +16,6 @@ export default example;
 export {
   addStartScript,
   findUniqueDir,
-  isEmpty,
   kebabCase,
   replaceInFile,
   setProjectName,
@@ -200,7 +199,7 @@ async function updateExampleSources(example, name, lang = 'ts') {
     );
 
     // Example not found. Delete the project template & temp dir to clean up.
-    if (isEmpty(examplePath)) {
+    if (isDirEmpty(examplePath)) {
       spin.fail(step);
       console.error(chalk.red('Example not found'));
       return false;
@@ -219,10 +218,6 @@ async function updateExampleSources(example, name, lang = 'ts') {
     console.error(err);
     return false;
   }
-}
-
-function isEmpty(path) {
-  return fs.readdirSync(path).length === 0;
 }
 
 /**

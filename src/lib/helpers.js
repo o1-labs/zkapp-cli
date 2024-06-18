@@ -16,6 +16,7 @@ export default step;
 export {
   checkLocalPortsAvailability,
   findIfClassExtendsOrImplementsSmartContract,
+  isDirEmpty,
   isMinaGraphQlEndpointAvailable,
   setupProject,
 };
@@ -176,8 +177,16 @@ async function checkLocalPortsAvailability(ports) {
 }
 
 /**
+ * Checks if a directory is empty.
+ * @param {string} path The path to the directory to check.
+ * @returns {boolean} True if the directory is empty, false otherwise.
+ */
+function isDirEmpty(path) {
+  return fs.readdirSync(path).length === 0;
+}
+
+/**
  * Finds all classes that extend or implement the 'SmartContract' class from 'o1js'.
- *
  * @param {string} entryFilePath - The path of the entry file.
  * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
  */
@@ -208,7 +217,6 @@ function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
 
 /**
  * Builds a class hierarchy map based on the provided file path.
- *
  * @param {string} filePath - The path to the file containing the class declarations.
  * @returns {Object} - The class hierarchy map, where keys are class names and values are objects containing class information.
  */
@@ -254,7 +262,6 @@ function buildClassHierarchy(filePath) {
 
 /**
  * Resolves the imports in the given file path and returns the import mappings.
- *
  * @param {string} filePath - The path of the file to resolve imports for.
  * @returns {Object} - The import mappings where the keys are the local names and the values are objects with the resolved paths and module names.
  */
@@ -285,7 +292,6 @@ function resolveImports(filePath) {
 
 /**
  * Resolves the path of a module based on the provided module name and base path.
- *
  * @param {string} moduleName - The name of the module to resolve.
  * @param {string} basePath - The base path to resolve the module path relative to.
  * @returns {string|null} - The resolved module path, or null if the module is not found or is a built-in module.
@@ -331,7 +337,6 @@ function resolveModulePath(moduleName, basePath) {
 
 /**
  * Checks if a class inherits from a target class by traversing the class hierarchy.
- *
  * @param {string} className - The name of the class to check.
  * @param {string} targetClass - The name of the target class to check inheritance against.
  * @param {Object} classesMap - A map of class names to class information.
