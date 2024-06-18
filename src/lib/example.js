@@ -7,7 +7,22 @@ import path from 'path';
 import shell from 'shelljs';
 import util from 'util';
 import Constants from './constants.js';
-import { setupProject } from './helpers.js';
+import step, { setupProject } from './helpers.js';
+
+// Public API
+export default example;
+
+// Private API
+export {
+  addStartScript,
+  findUniqueDir,
+  isEmpty,
+  kebabCase,
+  replaceInFile,
+  setProjectName,
+  titleCase,
+  updateExampleSources,
+};
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +36,7 @@ const shellExec = util.promisify(shell.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {Promise<void>}
  */
-export async function example(example) {
+async function example(example) {
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
     shell.exit(1);
@@ -65,20 +80,24 @@ export async function example(example) {
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   shell.cd(dir);
 
-  await step('Initialize Git repo', 'git init -q');
+  await step('Initialize Git repo', async () => {
+    await shellExec('git init -q');
+  });
 
-  await step(
-    'NPM install',
-    `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
-  );
+  await step('NPM install', async () => {
+    await shellExec(
+      `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+    );
+  });
 
   // process.cwd() is full path to user's terminal + path/to/name.
   await setProjectName(process.cwd());
 
-  await step(
-    'Git init commit',
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
+  await step('Git init commit', async () => {
+    await shellExec(
+      'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+    );
+  });
 
   const str =
     `\nSuccess!\n` +
@@ -98,28 +117,12 @@ export async function example(example) {
 }
 
 /**
- * Helper for any steps that need to call a shell command.
- * @param {string} step Name of step to show user
- * @param {string} cmd  Shell command to execute.
- * @returns {Promise<void>}
- */
-export async function step(step, cmd) {
-  const spin = ora(`${step}...`).start();
-  try {
-    await shellExec(cmd);
-    spin.succeed(chalk.green(step));
-  } catch (err) {
-    spin.fail(step);
-  }
-}
-
-/**
  * Step to replace placeholder names in the project with the properly-formatted
  * version of the user-supplied name as specified via `zk project <name>`
  * @param {string} projDir Full path to terminal dir + path/to/name
  * @returns {Promise<void>}
  */
-export async function setProjectName(projDir) {
+async function setProjectName(projDir) {
   const step = 'Set project name';
   const spin = ora(`${step}...`).start();
 
@@ -157,20 +160,20 @@ function addStartScript(file) {
  * @param {string} a    Old text.
  * @param {string} b    New text.
  */
-export function replaceInFile(file, a, b) {
+function replaceInFile(file, a, b) {
   let content = fs.readFileSync(file, 'utf8');
   content = content.replace(a, b);
   fs.writeFileSync(file, content);
 }
 
-export function titleCase(str) {
+function titleCase(str) {
   return str
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
     .join(' ');
 }
 
-export function kebabCase(str) {
+function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
 }
 
@@ -181,7 +184,7 @@ export function kebabCase(str) {
  * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function updateExampleSources(example, name, lang = 'ts') {
+async function updateExampleSources(example, name, lang = 'ts') {
   const step = 'Update example sources';
   const spin = ora(`${step}...`).start();
 
@@ -218,7 +221,7 @@ export async function updateExampleSources(example, name, lang = 'ts') {
   }
 }
 
-export function isEmpty(path) {
+function isEmpty(path) {
   return fs.readdirSync(path).length === 0;
 }
 
@@ -229,7 +232,7 @@ export function isEmpty(path) {
  * @param {number} i   Counter for the recursive function.
  * @return {string}    An unused directory name.
  */
-export function findUniqueDir(str, i = 0) {
+function findUniqueDir(str, i = 0) {
   const dir = str + (i ? i : '');
   if (fs.existsSync(dir)) {
     return findUniqueDir(str, ++i);

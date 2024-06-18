@@ -9,6 +9,26 @@ import url from 'node:url';
 import ora from 'ora';
 import shell from 'shelljs';
 
+// Public API
+export default step;
+
+// Public API
+export {
+  checkLocalPortsAvailability,
+  findIfClassExtendsOrImplementsSmartContract,
+  isMinaGraphQlEndpointAvailable,
+  setupProject,
+};
+
+// Private API
+export {
+  buildClassHierarchy,
+  checkClassInheritance,
+  checkLocalPortAvailability,
+  resolveImports,
+  resolveModulePath,
+};
+
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,9 +48,10 @@ const acornOptions = {
  * @template T
  * @param {string} step  Name of step to show user.
  * @param {() => Promise<T>} fn  An async function to execute.
+ * @param {boolean} [exitOnError=true]  Whether to exit on error with the exit code other than 0.
  * @returns {Promise<T>}
  */
-async function step(str, fn) {
+async function step(str, fn, exitOnError = true) {
   // discardStdin prevents Ora from accepting input that would be passed to a
   // subsequent command, like a y/n confirmation step, which would be dangerous.
   const spin = ora({ text: `${str}...`, discardStdin: true }).start();
@@ -42,7 +63,9 @@ async function step(str, fn) {
     spin.fail(str);
     console.error('  ' + chalk.red(err)); // maintain expected indentation
     console.log(err);
-    process.exit(1);
+    if (exitOnError) {
+      process.exit(1);
+    }
   }
 }
 
@@ -52,7 +75,7 @@ async function step(str, fn) {
  * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function setupProject(destination, lang = 'ts') {
+async function setupProject(destination, lang = 'ts') {
   const currentDir = shell.pwd().toString();
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
   const templatePath = path.resolve(
@@ -97,7 +120,7 @@ export async function setupProject(destination, lang = 'ts') {
  * @param {endpoint} The GraphQL endpoint to check.
  * @returns {Promise<boolean>} Whether the endpoint is available.
  */
-export async function isMinaGraphQlEndpointAvailable(endpoint) {
+async function isMinaGraphQlEndpointAvailable(endpoint) {
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -115,7 +138,7 @@ export async function isMinaGraphQlEndpointAvailable(endpoint) {
  * @param {number} port The port number to check.
  * @returns {Promise<{port: number, busy: boolean}>} A promise that resolves with an object containing the port number and a boolean indicating if the port is busy.
  */
-export async function checkLocalPortAvailability(port) {
+async function checkLocalPortAvailability(port) {
   return new Promise((resolve) => {
     const server = net.createServer();
     server.listen(port, '127.0.0.1');
@@ -134,7 +157,7 @@ export async function checkLocalPortAvailability(port) {
  * @param {number[]} ports An array of port numbers to check.
  * @returns {Promise<{error: boolean, message: string}>} A promise that resolves with an object containing an error flag and a message indicating the result.
  */
-export async function checkLocalPortsAvailability(ports) {
+async function checkLocalPortsAvailability(ports) {
   const checks = ports.map((port) => checkLocalPortAvailability(port));
   const results = await Promise.all(checks);
   const busyPorts = results
@@ -158,7 +181,7 @@ export async function checkLocalPortsAvailability(ports) {
  * @param {string} entryFilePath - The path of the entry file.
  * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
  */
-export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
+function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
   const classesMap = buildClassHierarchy(entryFilePath);
   const importMappings = resolveImports(entryFilePath);
   const smartContractClasses = [];
@@ -402,5 +425,3 @@ function checkClassInheritance(
 
   return false;
 }
-
-export default step;
