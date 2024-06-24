@@ -7,7 +7,7 @@ import util from 'node:util';
 import ora from 'ora';
 import shell from 'shelljs';
 import Constants from './constants.js';
-import step, { isDirEmpty, setupProject } from './helpers.js';
+import { isDirEmpty, setupProject, step } from './helpers.js';
 
 // Public API
 export default example;
@@ -228,7 +228,7 @@ async function updateExampleSources(example, name, lang = 'ts') {
  * @return {string}    An unused directory name.
  */
 function findUniqueDir(str, i = 0) {
-  const dir = str + (i ? i : '');
+  const dir = str + (i || '');
   if (fs.existsSync(dir)) {
     return findUniqueDir(str, ++i);
   }

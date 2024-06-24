@@ -10,15 +10,13 @@ import ora from 'ora';
 import shell from 'shelljs';
 
 // Public API
-export default step;
-
-// Public API
 export {
   checkLocalPortsAvailability,
   findIfClassExtendsOrImplementsSmartContract,
   isDirEmpty,
   isMinaGraphQlEndpointAvailable,
   setupProject,
+  step,
 };
 
 // Private API

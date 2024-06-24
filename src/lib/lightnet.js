@@ -10,7 +10,7 @@ import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step, { checkLocalPortsAvailability, isDirEmpty } from './helpers.js';
+import { checkLocalPortsAvailability, isDirEmpty, step } from './helpers.js';
 
 const debug = createDebug('zk:lightnet');
 const debugLog = (formatter, ...args) => {

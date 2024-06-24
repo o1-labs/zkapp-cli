@@ -52,23 +52,6 @@ afterEach(() => {
 
 describe('system()', () => {
   it('should log system information with package versions', async () => {
-    jest.mock('./system.js', () => {
-      const originalModule = jest.requireActual('./system.js');
-      return {
-        __esModule: true,
-        default: originalModule.default,
-        getInstalledNpmPackageVersion: jest
-          .fn()
-          .mockImplementation(({ packageName, isGlobal }) => {
-            if (packageName === 'o1js' && !isGlobal) {
-              return '1.2.3';
-            } else if (packageName === 'zkapp-cli' && isGlobal) {
-              return '4.5.6';
-            }
-            return undefined;
-          }),
-      };
-    });
     const { default: system } = await import('./system.js');
     const consoleLogSpy = jest
       .spyOn(console, 'log')

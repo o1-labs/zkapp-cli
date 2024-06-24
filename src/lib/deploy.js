@@ -8,8 +8,9 @@ import path from 'path';
 import { getBorderCharacters, table } from 'table';
 import util from 'util';
 import { readDeployAliasesConfig } from './config.js';
-import step, {
+import {
   findIfClassExtendsOrImplementsSmartContract,
+  step,
 } from './helpers.js';
 
 const log = console.log;
