@@ -1,6 +1,8 @@
+#
 # This workflow will publish the package to NPM when the following conditions are met:
 #  - The workflow run was triggered by the successful completion of the 'Smoke E2E tests' workflow
 #  - The target branch is 'origin/main'
+#
 
 name: Publish to NPM
 on:

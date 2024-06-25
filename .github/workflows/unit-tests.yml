@@ -1,6 +1,8 @@
+#
 # This workflow will run common unit tests, and then run the Sudoku and TicTacToe examples unit tests if the common unit tests pass.
+#
 
-name: CI
+name: Unit tests
 on:
   push: {}
   pull_request: {}
