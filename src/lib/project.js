@@ -1,23 +1,30 @@
 import chalk from 'chalk';
-import { spawnSync } from 'child_process';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import { spawnSync } from 'node:child_process';
+import path from 'node:path';
+import url from 'node:url';
+import util from 'node:util';
 import ora from 'ora';
-import path from 'path';
 import shell from 'shelljs';
-import url from 'url';
-import util from 'util';
 import customNextIndex from '../lib/ui/next/customNextIndex.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
 import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
 import Constants from './constants.js';
-import { setupProject } from './helpers.js';
+import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
+
+// Public API
+export default project;
+
+// Private API
+export { message, prefix, scaffoldNext, scaffoldNuxt, scaffoldSvelte };
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const shellExec = util.promisify(shell.exec);
 const isWindows = process.platform === 'win32';
 
@@ -29,7 +36,7 @@ const isWindows = process.platform === 'win32';
  * @param {string} argv.ui - The name of the UI framework to use.
  * @return {Promise<void>}
  */
-export async function project({ name, ui }) {
+async function project({ name, ui }) {
   if (fs.existsSync(name)) {
     console.error(chalk.red(`Directory already exists. Not proceeding`));
     shell.exit(1);
@@ -105,16 +112,19 @@ export async function project({ name, ui }) {
 
       // Use `install`, not `ci`, b/c these won't have package-lock.json yet.
       shell.cd('ui');
-      await step(
-        'UI: NPM install',
-        `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
-      );
+      await step('UI: NPM install', async () => {
+        await shellExec(
+          `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+        );
+      });
       shell.cd('..');
     }
   }
 
   // Initialize .git in the root, whether monorepo or not.
-  await step('Initialize Git repo', 'git init -q');
+  await step('Initialize Git repo', async () => {
+    await shellExec('git init -q');
+  });
 
   // Scaffold smart contract project
   if (ui) {
@@ -125,22 +135,28 @@ export async function project({ name, ui }) {
     shell.exit(1);
   }
 
-  await step(
-    'NPM install',
-    `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
-  );
+  await step('Set project name', async () => {
+    setProjectName(process.cwd());
+  });
+
+  await step('NPM install', async () => {
+    await shellExec(
+      `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+    );
+  });
 
   // Build the template contract so it can be imported into the ui scaffold
-  await step('NPM build contract', 'npm run build --silent');
-
-  await setProjectName('.', name.split(path.sep).pop());
+  await step('NPM build contract', async () => {
+    await shellExec('npm run build --silent');
+  });
 
   if (ui) shell.cd('..'); // back to project root
 
-  await step(
-    'Git init commit',
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
+  await step('Git init commit', async () => {
+    await shellExec(
+      'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+    );
+  });
 
   const str =
     `\nSuccess!\n` +
@@ -151,67 +167,6 @@ export async function project({ name, ui }) {
 
   console.log(chalk.green(str));
   process.exit(0);
-}
-
-/**
- * Helper for any steps that need to call a shell command.
- * @param {string} step - Name of step to show user
- * @param {string} cmd - Shell command to execute.
- * @returns {Promise<void>}
- */
-export async function step(step, cmd) {
-  const spin = ora({ text: `${step}...`, discardStdin: true }).start();
-  try {
-    await shellExec(cmd);
-    spin.succeed(chalk.green(step));
-  } catch (err) {
-    spin.fail(step);
-    process.exit(1);
-  }
-}
-
-/**
- * Step to replace placeholder names in the project with the properly-formatted
- * version of the user-supplied name as specified via `zk project <name>`
- * @param {string} dir - Path to the dir containing target files to be changed.
- * @param {string} name - User-provided project name.
- * @returns {Promise<void>}
- */
-export async function setProjectName(dir, name) {
-  const step = 'Set project name';
-  const spin = ora(`${step}...`).start();
-
-  replaceInFile(path.join(dir, 'README.md'), 'PROJECT_NAME', titleCase(name));
-  replaceInFile(
-    path.join(dir, 'package.json'),
-    'package-name',
-    kebabCase(name)
-  );
-
-  spin.succeed(chalk.green(step));
-}
-
-/**
- * Helper to replace text in a file.
- * @param {string} file - Path to file
- * @param {string} a - Old text.
- * @param {string} b - New text.
- */
-export function replaceInFile(file, a, b) {
-  let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(a, b);
-  fs.writeFileSync(file, content);
-}
-
-export function titleCase(str) {
-  return str
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
-    .join(' ');
-}
-
-export function kebabCase(str) {
-  return str.toLowerCase().replace(' ', '-');
 }
 
 function scaffoldSvelte() {
@@ -564,12 +519,13 @@ const __dirname = path.dirname(__filename);
     fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
     shell.cd('ui');
-    await step(
-      'COI-ServiceWorker: NPM install',
-      `npm install coi-serviceworker --save > ${
-        isWindows ? 'NUL' : '"/dev/null" 2>&1'
-      }`
-    );
+    await step('COI-ServiceWorker: NPM install', async () => {
+      await shellExec(
+        `npm install coi-serviceworker --save > ${
+          isWindows ? 'NUL' : '"/dev/null" 2>&1'
+        }`
+      );
+    });
 
     shell.cp(
       path.join(

@@ -19,7 +19,7 @@ import {
   lightnetStatus,
   lightnetStop,
 } from '../lib/lightnet.js';
-import { project } from '../lib/project.js';
+import project from '../lib/project.js';
 import system from '../lib/system.js';
 
 const __filename = url.fileURLToPath(import.meta.url);

@@ -58,6 +58,10 @@ jest.unstable_mockModule('./helpers.js', () => ({
   isDirEmpty: jest.fn(),
   setupProject: jest.fn(),
   step: jest.fn(),
+  replaceInFile: jest.fn(),
+  titleCase: jest.fn(),
+  kebabCase: jest.fn(),
+  setProjectName: jest.fn(),
 }));
 
 jest.unstable_mockModule('util', () => ({
@@ -302,100 +306,32 @@ describe('example.js', () => {
     });
   });
 
-  describe('setProjectName()', () => {
-    it('should replace placeholders in README.md and package.json and add start script', async () => {
-      const originalReadmeContent =
-        'This is a README with PROJECT_NAME placeholder';
+  describe('addStartScript()', () => {
+    it('should add start script to package.json', async () => {
       const originalPackageJsonContent = {
         scripts: {
           other: 'command',
         },
-        name: 'package-name',
       };
-      fs.readFileSync.mockImplementation((filePath) => {
-        if (filePath.includes('README.md')) {
-          return originalReadmeContent;
-        }
-        if (filePath.includes('package.json')) {
-          return JSON.stringify(originalPackageJsonContent, null, 2);
-        }
-        return '';
-      });
-      let writtenReadmeContent;
-      let writtenPackageJsonContent;
-      let writtenPackageJsonContentWithScripts;
-      fs.writeFileSync.mockImplementation((filePath, data) => {
-        if (filePath.includes('README.md')) {
-          writtenReadmeContent = data;
-        }
-        if (filePath.includes('package.json')) {
-          writtenPackageJsonContent = data;
-        }
-      });
+      let updatedPackageJsonContent;
+      fs.readJsonSync.mockReturnValue(originalPackageJsonContent);
       fs.writeJsonSync.mockImplementation((filePath, json) => {
         if (filePath.includes('package.json')) {
-          writtenPackageJsonContentWithScripts = JSON.stringify(json, null, 2);
+          updatedPackageJsonContent = json;
         }
       });
-      const { setProjectName } = await import('./example.js');
-
-      await setProjectName('/path/to/project');
-
-      expect(writtenReadmeContent).toContain(
-        'This is a README with Project placeholder'
-      );
-      expect(JSON.parse(writtenPackageJsonContent).name).toBe('project');
-      expect(
-        JSON.parse(writtenPackageJsonContentWithScripts).scripts.start
-      ).toBe('node build/src/run.js');
-    });
-  });
-
-  describe('addStartScript()', () => {
-    it('should add start script to package.json', async () => {
-      const packageJsonContent = { scripts: {} };
-      fs.readJsonSync.mockReturnValue(packageJsonContent);
       const { addStartScript } = await import('./example.js');
 
       addStartScript('/path/to/package.json');
 
-      expect(packageJsonContent.scripts.start).toBe('node build/src/run.js');
       expect(fs.writeJsonSync).toHaveBeenCalledWith(
         '/path/to/package.json',
-        packageJsonContent,
+        updatedPackageJsonContent,
         { spaces: 2 }
       );
-    });
-  });
-
-  describe('replaceInFile()', () => {
-    it('should replace text in file', async () => {
-      fs.readFileSync.mockReturnValue('old text');
-      const { replaceInFile } = await import('./example.js');
-
-      replaceInFile('/path/to/file', 'old text', 'new text');
-
-      expect(fs.readFileSync).toHaveBeenCalledWith('/path/to/file', 'utf8');
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/path/to/file',
-        'new text'
+      expect(updatedPackageJsonContent.scripts.start).toBe(
+        'node build/src/run.js'
       );
-    });
-  });
-
-  describe('titleCase()', () => {
-    it('should convert string to title case', async () => {
-      const { titleCase } = await import('./example.js');
-      const result = titleCase('hello-world');
-      expect(result).toBe('Hello World');
-    });
-  });
-
-  describe('kebabCase()', () => {
-    it('should convert string to kebab case', async () => {
-      const { kebabCase } = await import('./example.js');
-      const result = kebabCase('Hello World');
-      expect(result).toBe('hello-world');
     });
   });
 

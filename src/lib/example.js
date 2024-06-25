@@ -7,21 +7,13 @@ import util from 'node:util';
 import ora from 'ora';
 import shell from 'shelljs';
 import Constants from './constants.js';
-import { isDirEmpty, setupProject, step } from './helpers.js';
+import { isDirEmpty, setProjectName, setupProject, step } from './helpers.js';
 
 // Public API
 export default example;
 
 // Private API
-export {
-  addStartScript,
-  findUniqueDir,
-  kebabCase,
-  replaceInFile,
-  setProjectName,
-  titleCase,
-  updateExampleSources,
-};
+export { addStartScript, findUniqueDir, updateExampleSources };
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -83,14 +75,19 @@ async function example(example) {
     await shellExec('git init -q');
   });
 
+  await step('Set project name', async () => {
+    setProjectName(process.cwd());
+  });
+
+  await step('Update scripts', async () => {
+    addStartScript(path.join(process.cwd(), 'package.json'));
+  });
+
   await step('NPM install', async () => {
     await shellExec(
       `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
     );
   });
-
-  // process.cwd() is full path to user's terminal + path/to/name.
-  await setProjectName(process.cwd());
 
   await step('Git init commit', async () => {
     await shellExec(
@@ -116,34 +113,6 @@ async function example(example) {
 }
 
 /**
- * Step to replace placeholder names in the project with the properly-formatted
- * version of the user-supplied name as specified via `zk project <name>`
- * @param {string} projDir Full path to terminal dir + path/to/name
- * @returns {Promise<void>}
- */
-async function setProjectName(projDir) {
-  const step = 'Set project name';
-  const spin = ora(`${step}...`).start();
-
-  const name = projDir.split(path.sep).pop();
-  replaceInFile(
-    path.join(projDir, 'README.md'),
-    'PROJECT_NAME',
-    titleCase(name)
-  );
-
-  replaceInFile(
-    path.join(projDir, 'package.json'),
-    'package-name',
-    kebabCase(name)
-  );
-
-  addStartScript(path.join(projDir, 'package.json'));
-
-  spin.succeed(chalk.green(step));
-}
-
-/**
  * Helper to add start script to package.json.
  * @param {string} file Path to file
  */
@@ -151,29 +120,6 @@ function addStartScript(file) {
   let packageJsonContent = fs.readJsonSync(file, 'utf8');
   packageJsonContent['scripts']['start'] = 'node build/src/run.js';
   fs.writeJsonSync(file, packageJsonContent, { spaces: 2 });
-}
-
-/**
- * Helper to replace text in a file.
- * @param {string} file Path to file
- * @param {string} a    Old text.
- * @param {string} b    New text.
- */
-function replaceInFile(file, a, b) {
-  let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(a, b);
-  fs.writeFileSync(file, content);
-}
-
-function titleCase(str) {
-  return str
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
-    .join(' ');
-}
-
-function kebabCase(str) {
-  return str.toLowerCase().replace(' ', '-');
 }
 
 /**

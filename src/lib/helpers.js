@@ -15,8 +15,12 @@ export {
   findIfClassExtendsOrImplementsSmartContract,
   isDirEmpty,
   isMinaGraphQlEndpointAvailable,
+  kebabCase,
+  replaceInFile,
+  setProjectName,
   setupProject,
   step,
+  titleCase,
 };
 
 // Private API
@@ -115,6 +119,25 @@ async function setupProject(destination, lang = 'ts') {
 }
 
 /**
+ * Step to replace placeholder names in the project with the properly-formatted version of it
+ * @param {string} projDir Full path to the project directory
+ * @returns {void}
+ */
+function setProjectName(projDir) {
+  const name = projDir.split(path.sep).pop();
+  replaceInFile(
+    path.join(projDir, 'README.md'),
+    'PROJECT_NAME',
+    titleCase(name)
+  );
+  replaceInFile(
+    path.join(projDir, 'package.json'),
+    'package-name',
+    kebabCase(name)
+  );
+}
+
+/**
  * Checks the Mina GraphQL endpoint availability.
  * @param {endpoint} The GraphQL endpoint to check.
  * @returns {Promise<boolean>} Whether the endpoint is available.
@@ -181,6 +204,39 @@ async function checkLocalPortsAvailability(ports) {
  */
 function isDirEmpty(path) {
   return fs.readdirSync(path).length === 0;
+}
+
+/**
+ * Helper to replace text in a file.
+ * @param {string} file  Path to file
+ * @param {string} a  Old text.
+ * @param {string} b  New text.
+ */
+function replaceInFile(file, a, b) {
+  let content = fs.readFileSync(file, 'utf8');
+  content = content.replace(a, b);
+  fs.writeFileSync(file, content);
+}
+
+/**
+ * Converts a string to title case.
+ * @param {string} str The string to convert.
+ * @returns {string} The title case string.
+ */
+function titleCase(str) {
+  return str
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase())
+    .join(' ');
+}
+
+/**
+ * Converts a string to kebab case.
+ * @param {string} str The string to convert.
+ * @returns {string} The kebab case string.
+ */
+function kebabCase(str) {
+  return str.toLowerCase().replace(' ', '-');
 }
 
 /**
