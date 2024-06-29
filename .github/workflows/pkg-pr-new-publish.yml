@@ -10,7 +10,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  pkg-pr-new-o1js:
+  pkg-pr-new:
     strategy:
       matrix:
         node: [20]
