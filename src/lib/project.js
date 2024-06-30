@@ -26,7 +26,6 @@ const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const shellExec = util.promisify(shell.exec);
-const isWindows = process.platform === 'win32';
 
 /**
  * Create a new zkApp project with recommended dir structure, Prettier config,
@@ -37,6 +36,8 @@ const isWindows = process.platform === 'win32';
  * @return {Promise<void>}
  */
 async function project({ name, ui }) {
+  const isWindows = process.platform === 'win32';
+
   if (fs.existsSync(name)) {
     console.error(chalk.red(`Directory already exists. Not proceeding`));
     shell.exit(1);
@@ -99,7 +100,9 @@ async function project({ name, ui }) {
         break;
     }
 
-    ora(chalk.green(`UI: Set up project`)).succeed();
+    if (ui && ui !== 'none') {
+      ora(chalk.green(`UI: Set up project`)).succeed();
+    }
 
     if (ui && ui !== 'empty') {
       // Add o1js as a dependency in the UI project.
@@ -286,23 +289,25 @@ function scaffoldSvelte() {
 }
 
 async function scaffoldNext(projectName) {
-  const ghPagesPrompt = new enquirer.Select({
-    message: (state) =>
-      message(
-        state,
-        'Do you want to set up your project for deployment to GitHub Pages?'
-      ),
-    choices: ['no', 'yes'],
-    prefix: (state) => prefix(state),
-  });
-
-  let useGHPages;
+  let res;
   try {
-    useGHPages = (await ghPagesPrompt.run()) == 'yes';
+    res = await enquirer.prompt({
+      type: 'select',
+      name: 'useGHPages',
+      choices: ['no', 'yes'],
+      message: (state) =>
+        message(
+          state,
+          'Do you want to set up your project for deployment to GitHub Pages?'
+        ),
+      prefix: (state) => prefix(state),
+    });
   } catch (err) {
     // If ctrl+c is pressed it will throw.
     return;
   }
+
+  let useGHPages = res.useGHPages === 'yes';
 
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
@@ -462,6 +467,8 @@ const __dirname = path.dirname(__filename);
   }
 
   if (useGHPages) {
+    const isWindows = process.platform === 'win32';
+
     const nextConfig = fs.readFileSync(
       path.join('ui', 'next.config.mjs'),
       'utf8'

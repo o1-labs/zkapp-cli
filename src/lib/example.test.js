@@ -181,35 +181,38 @@ describe('example.js', () => {
       );
     });
 
-    it('should initialize Git repo and perform npm install with NUL on Windows', async () => {
-      shell.which.mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
-      fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
-      helpers.setupProject.mockResolvedValue(true);
-      helpers.isDirEmpty.mockReturnValue(false);
-      const stepMock = jest.fn(async (name, fn) => {
-        Promise.resolve(fn());
-      });
-      helpers.step.mockImplementation(stepMock);
+    it('should initialize Git repo and perform npm install with NUL redirect on Windows', async () => {
       const originalPlatform = process.platform;
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-      });
-      const { default: example } = await import('./example.js');
+      try {
+        shell.which.mockReturnValue(true);
+        enquirer.prompt.mockResolvedValue({ example: 'example1' });
+        fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
+        helpers.setupProject.mockResolvedValue(true);
+        helpers.isDirEmpty.mockReturnValue(false);
+        const stepMock = jest.fn(async (name, fn) => {
+          Promise.resolve(fn());
+        });
+        helpers.step.mockImplementation(stepMock);
 
-      await example();
+        Object.defineProperty(process, 'platform', {
+          value: 'win32',
+        });
+        const { default: example } = await import('./example.js');
 
-      expect(shell.cd).toHaveBeenCalledWith('example1');
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('git init -q');
-      expect(calls[1][0]).toBe('npm install --silent > NUL');
-      expect(calls[2][0]).toBe(
-        'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-      );
+        await example();
 
-      Object.defineProperty(process, 'platform', {
-        value: originalPlatform,
-      });
+        expect(shell.cd).toHaveBeenCalledWith('example1');
+        const calls = shell.exec.mock.calls;
+        expect(calls[0][0]).toBe('git init -q');
+        expect(calls[1][0]).toBe('npm install --silent > NUL');
+        expect(calls[2][0]).toBe(
+          'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+        );
+      } finally {
+        Object.defineProperty(process, 'platform', {
+          value: originalPlatform,
+        });
+      }
     });
 
     it('should exit with code 0 on success', async () => {
