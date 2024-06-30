@@ -460,8 +460,6 @@ describe('project.js', () => {
       );
     });
 
-    // TODO: Add tests for scaffoldNext, scaffoldNuxt, scaffoldSvelte
-
     it('should perform npm install with NUL redirect on Windows', async () => {
       const originalPlatform = process.platform;
       try {
