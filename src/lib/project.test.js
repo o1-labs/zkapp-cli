@@ -108,6 +108,35 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+function checkProjectSetupNoUi(shellExecCalls) {
+  expect(shellExecCalls[0][0]).toBe('git init -q');
+  expect(shellExecCalls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
+  expect(shellExecCalls[2][0]).toBe('npm run build --silent');
+  expect(shellExecCalls[3][0]).toBe(
+    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+  );
+}
+
+function checkUiProjectSetup(shellExecCalls, isWindows = false) {
+  expect(shellExecCalls[0][0]).toBe(
+    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
+  );
+  expect(shellExecCalls[1][0]).toBe('git init -q');
+  expect(shellExecCalls[2][0]).toBe(
+    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
+  );
+  expect(shellExecCalls[3][0]).toBe('npm run build --silent');
+  expect(shellExecCalls[4][0]).toBe(
+    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+  );
+}
+
+function checkIfProjectSetupSuccessful() {
+  expect(console.log).toHaveBeenCalledWith(
+    expect.stringContaining('Success!\n\nNext steps:')
+  );
+}
+
 describe('project.js', () => {
   describe('project()', () => {
     it('should exit if directory already exists', async () => {
@@ -149,37 +178,39 @@ describe('project.js', () => {
     it('should throw if failed to setup the GH Pages for Next.js UI', async () => {
       fs.existsSync.mockReturnValue(false);
       shell.which.mockReturnValue(true);
-      enquirer.prompt.mockImplementation(() => {
-        throw new Error('prompt');
+      const mockMessage = jest.fn(() => 'Message');
+      const mockPrefix = jest.fn(() => `Prefix`);
+      enquirer.prompt.mockImplementation(async ({ message, prefix }) => {
+        await message(mockMessage);
+        await prefix(mockPrefix);
+        return { ui: 'none' };
       });
       const { default: project } = await import('./project.js');
 
       await expect(
         project({ name: 'test-project', ui: 'next' })
       ).rejects.toThrow();
+      expect(console.error).toHaveBeenCalledWith('red: Aborted');
     });
 
     it('should exit if UI selection throws', async () => {
-      const stepMock = jest.fn(async (name, fn) => {
-        Promise.resolve(fn());
-      });
-      helpers.step.mockImplementation(stepMock);
       fs.existsSync.mockReturnValue(false);
       shell.which.mockReturnValue(true);
-      helpers.setupProject.mockResolvedValue(true);
-      fs.readFileSync.mockImplementation(() => {
-        return '';
-      });
-      fs.readJsonSync.mockReturnValue({ scripts: {} });
-      enquirer.prompt.mockImplementation(() => {
-        throw new Error('prompt');
+      const mockMessage = jest.fn(() => 'Message');
+      const mockPrefix = jest.fn(() => `Prefix`);
+      enquirer.prompt.mockImplementation(async ({ message, prefix }) => {
+        await message(mockMessage);
+        await prefix(mockPrefix);
+        return { ui: 'none' };
       });
       const { default: project } = await import('./project.js');
 
       await project({ name: 'test-project' });
+
+      expect(console.error).toHaveBeenCalledWith('red: Aborted');
     });
 
-    it('should prompt for UI type if not provided (Next.js TS UI)', async () => {
+    it('should prompt for UI type if not provided (Next.js UI, TypeScript)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -223,16 +254,11 @@ describe('project.js', () => {
         message: expect.any(Function),
         prefix: expect.any(Function),
       });
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[1][0]).toBe('git init -q');
-      expect(calls[2][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkUiProjectSetup(shell.exec.mock.calls);
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (Next.js JS UI)', async () => {
+    it('should setup the project (Next.js UI, JavaScript)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -245,7 +271,9 @@ describe('project.js', () => {
         .mockResolvedValueOnce({ useGHPages: 'no' });
       fs.readFileSync.mockImplementation((path) => {
         if (path.includes('tsconfig.json')) {
-          throw new Error('ENOENT');
+          const error = new Error();
+          error.code = 'ENOENT';
+          throw error;
         }
         return '';
       });
@@ -254,12 +282,37 @@ describe('project.js', () => {
 
       await project({ name: 'test-project' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (Next.js TS UI with GH Pages)', async () => {
+    it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
+      const stepMock = jest.fn(async (name, fn) => {
+        Promise.resolve(fn());
+      });
+      helpers.step.mockImplementation(stepMock);
+      fs.existsSync.mockReturnValue(false);
+      shell.which.mockReturnValue(true);
+      helpers.setupProject.mockResolvedValue(true);
+      enquirer.prompt
+        .mockResolvedValueOnce({ ui: 'next' })
+        .mockResolvedValueOnce({ useGHPages: 'no' });
+      fs.readFileSync.mockImplementation((path) => {
+        if (path.includes('tsconfig.json')) {
+          const error = new Error();
+          error.code = 'EACCES';
+          throw error;
+        }
+        return '';
+      });
+      fs.readJsonSync.mockReturnValue({ scripts: {} });
+      const { default: project } = await import('./project.js');
+
+      await project({ name: 'test-project' });
+
+      checkIfProjectSetupSuccessful();
+    });
+
+    it('should setup the project (Next.js UI with GH Pages, TypeScript)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -278,12 +331,10 @@ describe('project.js', () => {
 
       await project({ name: 'test-project' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (Next.js JS UI with GH Pages)', async () => {
+    it('should setup the project (Next.js UI with GH Pages, JavaScript)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -296,7 +347,7 @@ describe('project.js', () => {
         .mockResolvedValueOnce({ useGHPages: 'yes' });
       fs.readFileSync.mockImplementation((path) => {
         if (path.includes('tsconfig.json')) {
-          throw new Error('ENOENT');
+          throw new Error();
         }
         return '';
       });
@@ -305,12 +356,10 @@ describe('project.js', () => {
 
       await project({ name: 'test-project' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (Next.js TS UI with GH Pages and NUL redirect on Windows)', async () => {
+    it('should setup the project (Next.js UI with GH Pages and NUL redirect on Windows)', async () => {
       const originalPlatform = process.platform;
       try {
         Object.defineProperty(process, 'platform', {
@@ -334,9 +383,7 @@ describe('project.js', () => {
 
         await project({ name: 'test-project' });
 
-        expect(console.log).toHaveBeenCalledWith(
-          expect.stringContaining('Success!\n\nNext steps:')
-        );
+        checkIfProjectSetupSuccessful();
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
@@ -344,7 +391,7 @@ describe('project.js', () => {
       }
     });
 
-    it('should setup the project (SvelteKit TS UI)', async () => {
+    it('should setup the project (SvelteKit UI, TypeScript)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -368,20 +415,11 @@ describe('project.js', () => {
         { stdio: 'inherit', shell: true }
       );
       expect(shell.cd).toHaveBeenCalledWith('contracts');
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[1][0]).toBe('git init -q');
-      expect(calls[2][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[3][0]).toBe('npm run build --silent');
-      expect(calls[4][0]).toBe(
-        'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkUiProjectSetup(shell.exec.mock.calls);
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (SvelteKit JS UI)', async () => {
+    it('should setup the project (SvelteKit UI, JavaScript, no logs on error)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -392,7 +430,9 @@ describe('project.js', () => {
       fs.readJsonSync.mockReturnValue({ scripts: {}, dependencies: {} });
       fs.readFileSync.mockImplementation((path) => {
         if (path.includes('tsconfig.json')) {
-          throw new Error('ENOENT');
+          const error = new Error();
+          error.code = 'EACCES';
+          throw error;
         }
         return '';
       });
@@ -400,12 +440,34 @@ describe('project.js', () => {
 
       await project({ name: 'test-project', ui: 'svelte' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (NuxtJS UI, without default Git)', async () => {
+    it('should setup the project (SvelteKit UI, JavaScript)', async () => {
+      const stepMock = jest.fn(async (name, fn) => {
+        Promise.resolve(fn());
+      });
+      helpers.step.mockImplementation(stepMock);
+      fs.existsSync.mockReturnValue(false);
+      shell.which.mockReturnValue(true);
+      helpers.setupProject.mockResolvedValue(true);
+      fs.readJsonSync.mockReturnValue({ scripts: {}, dependencies: {} });
+      fs.readFileSync.mockImplementation((path) => {
+        if (path.includes('tsconfig.json')) {
+          const error = new Error();
+          error.code = 'ENOENT';
+          throw error;
+        }
+        return '';
+      });
+      const { default: project } = await import('./project.js');
+
+      await project({ name: 'test-project', ui: 'svelte' });
+
+      checkIfProjectSetupSuccessful();
+    });
+
+    it('should setup the project (NuxtJS UI, without default Git init)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -427,20 +489,11 @@ describe('project.js', () => {
         shell: true,
       });
       expect(shell.cd).toHaveBeenCalledWith('contracts');
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[1][0]).toBe('git init -q');
-      expect(calls[2][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[3][0]).toBe('npm run build --silent');
-      expect(calls[4][0]).toBe(
-        'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkUiProjectSetup(shell.exec.mock.calls);
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (NuxtJS UI, with default Git)', async () => {
+    it('should setup the project (NuxtJS UI, with default Git init)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -455,9 +508,7 @@ describe('project.js', () => {
 
       await project({ name: 'test-project', ui: 'nuxt' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
     it('should perform npm install with NUL redirect on Windows', async () => {
@@ -487,10 +538,7 @@ describe('project.js', () => {
 
         await project({ name: 'test-project', ui: 'next' });
 
-        const calls = shell.exec.mock.calls;
-        expect(calls[0][0]).toBe('npm install --silent > NUL');
-        expect(calls[1][0]).toBe('git init -q');
-        expect(calls[2][0]).toBe('npm install --silent > NUL');
+        checkUiProjectSetup(shell.exec.mock.calls, true);
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
@@ -510,16 +558,8 @@ describe('project.js', () => {
 
       await project({ name: 'test-project', ui: 'none' });
 
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('git init -q');
-      expect(calls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[2][0]).toBe('npm run build --silent');
-      expect(calls[3][0]).toBe(
-        'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkProjectSetupNoUi(shell.exec.mock.calls);
+      checkIfProjectSetupSuccessful();
     });
 
     it('should setup the project with undefined UI', async () => {
@@ -536,12 +576,10 @@ describe('project.js', () => {
 
       await project({ name: 'test-project' });
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkIfProjectSetupSuccessful();
     });
 
-    it('should setup the project (empty UI)', async () => {
+    it('should setup the project with empty UI', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
       });
@@ -553,16 +591,8 @@ describe('project.js', () => {
 
       await project({ name: 'test-project', ui: 'empty' });
 
-      const calls = shell.exec.mock.calls;
-      expect(calls[0][0]).toBe('git init -q');
-      expect(calls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-      expect(calls[2][0]).toBe('npm run build --silent');
-      expect(calls[3][0]).toBe(
-        'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Success!\n\nNext steps:')
-      );
+      checkProjectSetupNoUi(shell.exec.mock.calls);
+      checkIfProjectSetupSuccessful();
     });
 
     it('should exit with code 1 if setupProject fails', async () => {

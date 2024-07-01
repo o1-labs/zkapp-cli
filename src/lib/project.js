@@ -61,6 +61,7 @@ async function project({ name, ui }) {
       });
     } catch (err) {
       // If ctrl+c is pressed it will throw.
+      console.error(chalk.red('Aborted'));
       return;
     }
 
@@ -304,6 +305,7 @@ async function scaffoldNext(projectName) {
     });
   } catch (err) {
     // If ctrl+c is pressed it will throw.
+    console.error(chalk.red('Aborted'));
     return;
   }
 
