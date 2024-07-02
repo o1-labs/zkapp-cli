@@ -6,7 +6,7 @@ import Client from 'mina-signer';
 import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step, { isMinaGraphQlEndpointAvailable } from './helpers.js';
+import { isMinaGraphQlEndpointAvailable, step } from './helpers.js';
 import prompts from './prompts.js';
 
 const log = console.log;

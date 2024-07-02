@@ -1,5 +1,7 @@
 # zkApp CLI
 
+[![codecov](https://codecov.io/gh/o1-labs/zkapp-cli/graph/badge.svg?token=3ZKW76ISDB)](https://codecov.io/gh/o1-labs/zkapp-cli)
+
 The zkApp CLI allows you to scaffold, write, test, and deploy zkApps (zero knowledge apps) for [Mina Protocol](https://minaprotocol.com/) using recommended best practices.
 
 Apps are written using [o1js](https://docs.minaprotocol.com/en/zkapps/o1js-reference), a TypeScript framework for writing zero knowledge proof-based smart contracts. o1js is automatically included when you create a project using the zkApp CLI.
