@@ -402,7 +402,7 @@ export async function deploy({ alias, yes }) {
         // we need to fail if any answer other than "yes" or "y" is given.
         val = val.toLowerCase();
         if (!(val === 'yes' || val === 'y')) {
-          log('  Aborted. Transaction not sent.');
+          log(chalk.red('\n  Aborted. Transaction not sent.'));
           process.exit(1);
         }
         return val;
@@ -445,6 +445,14 @@ export async function deploy({ alias, yes }) {
 }
 
 async function getContractName(config, build, alias) {
+  if (build.smartContracts.length === 0) {
+    log(
+      chalk.red(
+        `\n  No smart contracts found in the project.\n  Please make sure you have at least one class that extends the o1js \`SmartContract\`.\n  Aborted.`
+      )
+    );
+    process.exit(1);
+  }
   // Identify which smart contract to be deployed for this deploy alias.
   let contractName = chooseSmartContract(config, build, alias);
 

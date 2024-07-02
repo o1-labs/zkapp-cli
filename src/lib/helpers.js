@@ -424,33 +424,35 @@ function checkClassInheritance(
   const classInfo = classesMap[className];
   if (!classInfo) return false;
 
-  // Ensure that the parent class hierarchy is processed
-  if (classInfo.extends && !classesMap[classInfo.extends]) {
-    const parentMapping = importMappings[classInfo.extends];
-    if (parentMapping) {
-      Object.assign(
-        classesMap,
-        buildClassHierarchy(parentMapping.resolvedPath)
-      );
-      importMappings = Object.assign(
-        importMappings,
-        resolveImports(parentMapping.resolvedPath)
-      );
+  // Propagate inheritsFromO1jsSmartContract from parent class
+  if (classInfo.extends) {
+    const parentClassResult = checkClassInheritance(
+      classInfo.extends,
+      targetClass,
+      classesMap,
+      visitedClasses,
+      importMappings
+    );
+
+    // Propagate the inheritsFromO1jsSmartContract flag
+    if (parentClassResult) {
+      classInfo.inheritsFromO1jsSmartContract = true;
     }
   }
 
-  // Check if the class extends the target class from 'o1js'
+  // Check if the class directly extends the target class
   if (
     classInfo.extends === targetClass &&
-    classInfo.inheritsFromO1jsSmartContract
+    importMappings[classInfo.extends]?.moduleName === 'o1js'
   ) {
+    classInfo.inheritsFromO1jsSmartContract = true;
     return true;
   }
 
   // Check each implemented interface
   for (const iface of classInfo.implements) {
     if (
-      (iface === targetClass && classInfo.inheritsFromO1jsSmartContract) ||
+      (iface === targetClass && importMappings[iface]?.moduleName === 'o1js') ||
       checkClassInheritance(
         iface,
         targetClass,
@@ -464,23 +466,29 @@ function checkClassInheritance(
     }
   }
 
-  // If there is no parent class, return false
-  if (!classInfo.extends) return false;
-
-  // Recursively check the parent class
-  const parentClassResult = checkClassInheritance(
-    classInfo.extends,
-    targetClass,
-    classesMap,
-    visitedClasses,
-    importMappings
-  );
-
-  // Propagate the inheritsFromO1jsSmartContract flag
-  if (parentClassResult) {
-    classInfo.inheritsFromO1jsSmartContract = true;
-    return true;
+  // Additional check for imported base class
+  if (importMappings[classInfo.extends]) {
+    const baseClassPath = importMappings[classInfo.extends].resolvedPath;
+    const baseClassMap = buildClassHierarchy(baseClassPath);
+    Object.assign(classesMap, baseClassMap);
+    const baseClassInfo = baseClassMap[classInfo.extends];
+    if (baseClassInfo && baseClassInfo.extends === targetClass) {
+      classInfo.inheritsFromO1jsSmartContract = true;
+      return true;
+    } else if (baseClassInfo) {
+      const parentClassResult = checkClassInheritance(
+        baseClassInfo.extends,
+        targetClass,
+        classesMap,
+        visitedClasses,
+        importMappings
+      );
+      if (parentClassResult) {
+        classInfo.inheritsFromO1jsSmartContract = true;
+        return true;
+      }
+    }
   }
 
-  return false;
+  return classInfo.inheritsFromO1jsSmartContract;
 }
