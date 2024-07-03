@@ -15,7 +15,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # https://github.com/shelljs/shelljs/issues/1133
         node: [18, 20]
         os: [ubuntu-latest]
     services:
@@ -52,7 +51,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # https://github.com/shelljs/shelljs/issues/1133
         node: [18, 20]
         os: [ubuntu-latest]
     services:
@@ -89,7 +87,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # https://github.com/shelljs/shelljs/issues/1133
         node: [18, 20]
         os: [macos-latest]
     steps:
@@ -106,7 +103,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # https://github.com/shelljs/shelljs/issues/1133
         node: [18, 20]
         os: [windows-latest]
     steps:
