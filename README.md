@@ -149,12 +149,12 @@ Respond to the interactive command prompts to build or update a deploy alias.
 
 A deploy alias consists of:
 
-- A self-describing name. This tutorial uses `berkeley`. The deploy alias name can be anything and does not have to match the network name.
-- The Mina GraphQL API URL that defines the network that receives your deploy transaction and broadcasts it to the appropriate Mina network (Testnet, Devnet, Mainnet, and so on)
+- A self-describing name. This tutorial uses `devnet`. The deploy alias name can be anything and does not have to match the network name.
+- The Mina GraphQL API URL that defines the network that receives your deploy transaction and broadcasts it to the appropriate Mina network (Devnet, Mainnet, and so on)
 - The transaction fee (in MINA) to use when deploying
 - Two key pairs:
 
-  - A key pair for the zkApp account. Public and private keys to use in your application are automatically generated in `keys/berkeley.json`.
+  - A key pair for the zkApp account. Public and private keys to use in your application are automatically generated in `keys/devnet.json`.
 
   - A key pair to use as a fee payer account for updates and deployments. Public and private keys are stored on your local computer and can be used across multiple projects.
 
@@ -172,8 +172,6 @@ zk deploy <alias>
 // OR
 zk deploy // shows a list of aliases in your project to choose from
 ```
-
-_**Deployment is supported only to Berkeley Testnet until zkApp programmability is available on Mina Mainnet.**_
 
 After you run `zk config`, the `zk deploy` command allows you to deploy a smart contract to a specified deploy alias.
 

@@ -4,7 +4,7 @@ on:
   pull_request:
   workflow_dispatch: {}
 jobs:
-  against-real-network-on-linux:
+  against-compatible-real-network-on-linux:
     timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     strategy:
@@ -15,7 +15,46 @@ jobs:
         os: [ubuntu-latest]
     services:
       mina-local-network:
-        image: o1labs/mina-local-network:berkeley-latest-lightnet
+        image: o1labs/mina-local-network:compatible-latest-lightnet
+        env:
+          NETWORK_TYPE: 'single-node'
+          PROOF_LEVEL: 'none'
+        ports:
+          - 3085:3085
+          - 5432:5432
+          - 8080:8080
+          - 8181:8181
+          - 8282:8282
+        volumes:
+          - /tmp:/root/logs
+    steps:
+      - name: Wait for Mina network readiness
+        uses: o1-labs/wait-for-mina-network-action@v1
+        with:
+          mina-graphql-port: 8080
+          max-attempts: 60
+          polling-interval-ms: 10000
+      - uses: actions/checkout@v4
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
+        with:
+          node-version: ${{ matrix.node }}
+          os-type: ${{ matrix.os }}
+          shell: bash
+          test-script: 'npm run e2e:test:smoke'
+          artifacts-prefix: 'smoke-e2e-tests'
+  against-master-real-network-on-linux:
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        # https://github.com/shelljs/shelljs/issues/1133
+        node: [18, 20]
+        os: [ubuntu-latest]
+    services:
+      mina-local-network:
+        image: o1labs/mina-local-network:master-latest-lightnet
         env:
           NETWORK_TYPE: 'single-node'
           PROOF_LEVEL: 'none'
