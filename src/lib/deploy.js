@@ -1,19 +1,18 @@
 import chalk from 'chalk';
-import { execSync } from 'child_process';
 import enquirer from 'enquirer';
 import glob from 'fast-glob';
 import findPrefix from 'find-npm-prefix';
 import fs from 'fs-extra';
-import path from 'path';
+import { execSync } from 'node:child_process';
+import path from 'node:path';
+import util from 'node:util';
 import { getBorderCharacters, table } from 'table';
-import util from 'util';
-import { readDeployAliasesConfig } from './config.js';
 import {
   findIfClassExtendsOrImplementsSmartContract,
+  readDeployAliasesConfig,
   step,
 } from './helpers.js';
 
-const log = console.log;
 const DEFAULT_NETWORK_ID = 'testnet';
 const DEFAULT_GRAPHQL = 'https://proxy.devnet.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
@@ -32,12 +31,12 @@ export async function deploy({ alias, yes }) {
   const installedCliVersion = getInstalledCliVersion();
 
   if (!installedCliVersion) {
-    log(
+    console.log(
       chalk.red(
         `Failed to detect the installed zkapp-cli version. This might be possible if you are using Volta or something similar to manage your Node versions.`
       )
     );
-    log(
+    console.log(
       chalk.red(
         'As a workaround, you can install zkapp-cli as a local dependency by running `npm install zkapp-cli`'
       )
@@ -46,21 +45,25 @@ export async function deploy({ alias, yes }) {
   }
 
   if (hasBreakingChanges(installedCliVersion, latestCliVersion)) {
-    log(
+    console.log(
       chalk.red(
         `You are using an earlier zkapp-cli version ${installedCliVersion}.`
       )
     );
-    log(chalk.red(`The current version is ${latestCliVersion}.`));
-    log(chalk.red('Run `npm update -g zkapp-cli && npm install o1js@latest`.'));
+    console.log(chalk.red(`The current version is ${latestCliVersion}.`));
+    console.log(
+      chalk.red('Run `npm update -g zkapp-cli && npm install o1js@latest`.')
+    );
     process.exit(1);
   }
 
   if (!alias) {
     const aliases = Object.keys(config?.deployAliases);
     if (!aliases.length) {
-      log(chalk.red('No deploy aliases found in config.json.'));
-      log(chalk.red('Run `zk config` to add a deploy alias, then try again.'));
+      console.log(chalk.red('No deploy aliases found in config.json.'));
+      console.log(
+        chalk.red('Run `zk config` to add a deploy alias, then try again.')
+      );
       process.exit(1);
     }
 
@@ -92,18 +95,20 @@ export async function deploy({ alias, yes }) {
   alias = alias.toLowerCase();
 
   if (!config.deployAliases[alias]) {
-    log(chalk.red('Deploy alias name not found in config.json.'));
-    log(chalk.red('You can add a deploy alias by running `zk config`.'));
+    console.log(chalk.red('Deploy alias name not found in config.json.'));
+    console.log(
+      chalk.red('You can add a deploy alias by running `zk config`.')
+    );
     process.exit(1);
   }
 
   if (!config.deployAliases[alias].url) {
-    log(
+    console.log(
       chalk.red(
         `No 'url' property is specified for this deploy alias in config.json.`
       )
     );
-    log(chalk.red(`Please correct your config.json and try again.`));
+    console.log(chalk.red(`Please correct your config.json and try again.`));
     process.exit(1);
   }
 
@@ -150,7 +155,7 @@ export async function deploy({ alias, yes }) {
   if (config.deployAliases[alias]?.smartContract !== contractName) {
     config.deployAliases[alias].smartContract = contractName;
     fs.writeJSONSync(`${projectRoot}/config.json`, config, { spaces: 2 });
-    log(
+    console.log(
       `  Your config.json was updated to always use this\n  smart contract when deploying to this deploy alias.`
     );
   }
@@ -181,14 +186,14 @@ export async function deploy({ alias, yes }) {
   );
 
   if (!nodeStatus || nodeStatus.syncStatus === 'OFFLINE') {
-    log(
+    console.log(
       chalk.red(
         `  Transaction relayer node is offline. Please try again or use a different "url" for this deploy alias in your config.json`
       )
     );
     process.exit(1);
   } else if (nodeStatus.syncStatus !== 'SYNCED') {
-    log(
+    console.log(
       chalk.red(
         `  Transaction relayer node is not in a synced state. Its status is "${nodeStatus.syncStatus}".\n  Please try again when the node is synced or use a different "url" for this deploy alias in your config.json`
       )
@@ -208,7 +213,7 @@ export async function deploy({ alias, yes }) {
 
   // If we cannot find the named export log an error message and return early.
   if (smartContractImports && !(contractName in smartContractImports)) {
-    log(
+    console.log(
       chalk.red(
         `  Failed to find the "${contractName}" smart contract in your build directory.\n  Please confirm that your config.json contains the name of the smart \n  contract that you want to deploy using this deploy alias, check that\n  you have exported your smart contract class using a named export and try again.`
       )
@@ -224,7 +229,7 @@ export async function deploy({ alias, yes }) {
   try {
     feepayerPrivateKeyBase58 = fs.readJsonSync(feepayerKeyPath).privateKey;
   } catch (error) {
-    log(
+    console.log(
       chalk.red(
         `  Failed to find the feepayer private key.\n  Please make sure your config.json has the correct 'feepayerKeyPath' property.`
       )
@@ -238,7 +243,7 @@ export async function deploy({ alias, yes }) {
       `${projectRoot}/${config.deployAliases[alias].keyPath}`
     ).privateKey;
   } catch (_) {
-    log(
+    console.log(
       chalk.red(
         `  Failed to find the zkApp private key.\n  Please make sure your config.json has the correct 'keyPath' property.`
       )
@@ -255,7 +260,7 @@ export async function deploy({ alias, yes }) {
 
   // guide user to choose a feepayer account that is different from the zkApp account
   if (feepayerAddress.toBase58() === zkAppAddress.toBase58()) {
-    log(
+    console.log(
       chalk.red(
         `  The feepayer account is the same as the zkApp account.\n  Please use a different feepayer account or generate a new one by executing the 'zk config' command.`
       )
@@ -283,12 +288,12 @@ export async function deploy({ alias, yes }) {
   // Can't include the log message inside the callback b/c it will break
   // the step formatting.
   if (isCached) {
-    log('  Using the cached verification key');
+    console.log('  Using the cached verification key');
   }
 
   let { fee } = config.deployAliases[alias];
   if (!fee) {
-    log(
+    console.log(
       chalk.red(
         `  The "fee" property is not specified for this deploy alias in config.json. Please update your config.json and try again.`
       )
@@ -304,7 +309,7 @@ export async function deploy({ alias, yes }) {
 
   if (!accountResponse?.data?.account) {
     // No account is found, show an error message and return early
-    log(
+    console.log(
       chalk.red(
         `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
@@ -402,7 +407,7 @@ export async function deploy({ alias, yes }) {
         // we need to fail if any answer other than "yes" or "y" is given.
         val = val.toLowerCase();
         if (!(val === 'yes' || val === 'y')) {
-          log(chalk.red('\n  Aborted. Transaction not sent.'));
+          console.log(chalk.red('\n  Aborted. Transaction not sent.'));
           process.exit(1);
         }
         return val;
@@ -427,7 +432,7 @@ export async function deploy({ alias, yes }) {
 
   if (!txn || txn?.kind === 'error') {
     // Note that the thrown error object is already console logged via step().
-    log(chalk.red(getErrorMessage(txn)));
+    console.log(chalk.red(getErrorMessage(txn)));
     process.exit(1);
   }
 
@@ -440,13 +445,13 @@ export async function deploy({ alias, yes }) {
     `\n  as soon as the transaction is included in a block:` +
     `\n  ${getTxnUrl(graphQlUrl, txn)}`;
 
-  log(chalk.green(str));
+  console.log(chalk.green(str));
   process.exit(0);
 }
 
 async function getContractName(config, build, alias) {
   if (build.smartContracts.length === 0) {
-    log(
+    console.log(
       chalk.red(
         `\n  No smart contracts found in the project.\n  Please make sure you have at least one class that extends the o1js \`SmartContract\`.\n  Aborted.`
       )
@@ -488,11 +493,11 @@ async function getContractName(config, build, alias) {
     await step('Choose smart contract', async () => {});
 
     if (config.deployAliases[alias]?.smartContract) {
-      log(
+      console.log(
         `  The '${config.deployAliases[alias]?.smartContract}' smart contract will be used\n  for this deploy alias as specified in config.json.`
       );
     } else {
-      log(
+      console.log(
         `  Only one smart contract exists in the project: ${build.smartContracts[0].className}`
       );
     }

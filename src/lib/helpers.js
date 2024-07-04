@@ -11,11 +11,13 @@ import shell from 'shelljs';
 
 // Public API
 export {
+  capitalize,
   checkLocalPortsAvailability,
   findIfClassExtendsOrImplementsSmartContract,
   isDirEmpty,
   isMinaGraphQlEndpointAvailable,
   kebabCase,
+  readDeployAliasesConfig,
   replaceInFile,
   setProjectName,
   setupProject,
@@ -136,6 +138,28 @@ function setProjectName(projDir) {
     kebabCase(name)
   );
 }
+/**
+ * Reads the deploy aliases configuration from the project root.
+ * @param {string} projectRoot The project root directory.
+ * @returns {Object} The deploy aliases configuration.
+ * @throws {Error} And exits if the configuration file is not found or cannot be read.
+ */
+function readDeployAliasesConfig(projectRoot) {
+  try {
+    const deployAliasesConfig = fs.readJsonSync(`${projectRoot}/config.json`);
+    return deployAliasesConfig;
+  } catch (err) {
+    let str;
+    if (err.code === 'ENOENT') {
+      str = `config.json not found. Make sure you're in a zkApp project directory.`;
+    } else {
+      str = 'Unable to read config.json.';
+      console.error(err);
+    }
+    console.log(chalk.red(str));
+    process.exit(1);
+  }
+}
 
 /**
  * Checks the Mina GraphQL endpoint availability.
@@ -237,6 +261,15 @@ function titleCase(str) {
  */
 function kebabCase(str) {
   return str.toLowerCase().replace(' ', '-');
+}
+
+/**
+ * Converts a string to capitalized case.
+ * @param {string} string The string to convert.
+ * @returns {string} The capitalized string.
+ */
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 /**
