@@ -210,7 +210,7 @@ function lightnetCli() {
               string: true,
               hidden: false,
               choices: Constants.lightnetMinaBranches,
-              default: 'berkeley',
+              default: 'compatible',
               description:
                 'One of the major Mina repository branches the Docker image artifacts were compiled against.',
             },
