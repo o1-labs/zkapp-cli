@@ -108,35 +108,6 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-function checkProjectSetupNoUi(shellExecCalls) {
-  expect(shellExecCalls[0][0]).toBe('git init -q');
-  expect(shellExecCalls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
-  expect(shellExecCalls[2][0]).toBe('npm run build --silent');
-  expect(shellExecCalls[3][0]).toBe(
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
-}
-
-function checkUiProjectSetup(shellExecCalls, isWindows = false) {
-  expect(shellExecCalls[0][0]).toBe(
-    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
-  );
-  expect(shellExecCalls[1][0]).toBe('git init -q');
-  expect(shellExecCalls[2][0]).toBe(
-    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
-  );
-  expect(shellExecCalls[3][0]).toBe('npm run build --silent');
-  expect(shellExecCalls[4][0]).toBe(
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
-}
-
-function checkIfProjectSetupSuccessful() {
-  expect(console.log).toHaveBeenCalledWith(
-    expect.stringContaining('Success!\n\nNext steps:')
-  );
-}
-
 describe('project.js', () => {
   describe('project()', () => {
     it('should exit if directory already exists', async () => {
@@ -766,3 +737,32 @@ describe('project.js', () => {
     });
   });
 });
+
+function checkProjectSetupNoUi(shellExecCalls) {
+  expect(shellExecCalls[0][0]).toBe('git init -q');
+  expect(shellExecCalls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
+  expect(shellExecCalls[2][0]).toBe('npm run build --silent');
+  expect(shellExecCalls[3][0]).toBe(
+    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+  );
+}
+
+function checkUiProjectSetup(shellExecCalls, isWindows = false) {
+  expect(shellExecCalls[0][0]).toBe(
+    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
+  );
+  expect(shellExecCalls[1][0]).toBe('git init -q');
+  expect(shellExecCalls[2][0]).toBe(
+    'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
+  );
+  expect(shellExecCalls[3][0]).toBe('npm run build --silent');
+  expect(shellExecCalls[4][0]).toBe(
+    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+  );
+}
+
+function checkIfProjectSetupSuccessful() {
+  expect(console.log).toHaveBeenCalledWith(
+    expect.stringContaining('Success!\n\nNext steps:')
+  );
+}

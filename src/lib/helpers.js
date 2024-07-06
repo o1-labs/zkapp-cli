@@ -146,8 +146,7 @@ function setProjectName(projDir) {
  */
 function readDeployAliasesConfig(projectRoot) {
   try {
-    const deployAliasesConfig = fs.readJsonSync(`${projectRoot}/config.json`);
-    return deployAliasesConfig;
+    return JSON.parse(fs.readFileSync(`${projectRoot}/config.json`, 'utf8'));
   } catch (err) {
     let str;
     if (err.code === 'ENOENT') {

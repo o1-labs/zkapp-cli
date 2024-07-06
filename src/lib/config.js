@@ -222,7 +222,10 @@ async function createDeployAlias(projectRoot, deployAliasesConfig) {
       feepayerKeyPair = await savedKeyPairStep(alternateCachedFeepayerAlias);
       break;
     default:
-      break;
+      console.log(
+        chalk.red(`Invalid fee payer option: ${feepayer ?? 'none'}.`)
+      );
+      process.exit(1);
   }
 
   await createZkAppKeyPairAndSaveDeployAliasConfig({
