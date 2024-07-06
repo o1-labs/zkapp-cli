@@ -14,6 +14,7 @@ export {
   sanitizeCustomNetworkId,
 };
 
+/* istanbul ignore next */
 const prompts = {
   deployAliasPrompts: (config) => [
     {
