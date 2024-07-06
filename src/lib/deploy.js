@@ -13,6 +13,29 @@ import {
   step,
 } from './helpers.js';
 
+// Public API
+export default deploy;
+
+// Private API
+export {
+  chooseSmartContract,
+  findSmartContracts,
+  findZkProgramFile,
+  generateVerificationKey,
+  getAccountQuery,
+  getContractName,
+  getErrorMessage,
+  getInstalledCliVersion,
+  getLatestCliVersion,
+  getTxnUrl,
+  getZkProgram,
+  getZkProgramNameArg,
+  hasBreakingChanges,
+  removeJsonQuotes,
+  sendGraphQL,
+  sendZkAppQuery,
+};
+
 const DEFAULT_NETWORK_ID = 'testnet';
 const DEFAULT_GRAPHQL = 'https://proxy.devnet.minaexplorer.com/graphql'; // The endpoint used to interact with the network
 
@@ -23,7 +46,7 @@ const DEFAULT_GRAPHQL = 'https://proxy.devnet.minaexplorer.com/graphql'; // The 
  * @param {string} yes     Run non-interactively. I.e. skip confirmation steps.
  * @return {Promise<void>} Sends tx to a relayer, if confirmed by user.
  */
-export async function deploy({ alias, yes }) {
+async function deploy({ alias, yes }) {
   // Get project root directory, so that the CLI command can be executed anywhere within the project.
   const projectRoot = await findPrefix(process.cwd());
   const config = readDeployAliasesConfig(projectRoot);
@@ -598,7 +621,9 @@ async function generateVerificationKey(
   }
 }
 
-// Get the specified blockchain explorer url with txn hash
+/**
+ * Get the specified blockchain explorer url with txn hash
+ */
 function getTxnUrl(graphQlUrl, txn) {
   const hostName = new URL(graphQlUrl).hostname;
   const txnBroadcastServiceName = hostName
@@ -613,7 +638,9 @@ function getTxnUrl(graphQlUrl, txn) {
   return `Transaction hash: ${txn.data.sendZkapp.zkapp.hash}`;
 }
 
-// Query npm registry to get the latest CLI version.
+/**
+ * Query npm registry to get the latest CLI version.
+ */
 async function getLatestCliVersion() {
   return await fetch('https://registry.npmjs.org/-/package/zkapp-cli/dist-tags')
     .then((response) => response.json())
@@ -647,14 +674,13 @@ function getInstalledCliVersion() {
   return localCli;
 }
 
-/*
+/**
  * While o1js and the zkApp CLI have a major version of 0,
  * a change of the minor version represents a breaking change.
  * When o1js and the zkApp CLI have a major version of 1 or higher,
  * changes to the major version of the zkApp CLI will represent
  * breaking changes, following semver.
- *
- **/
+ */
 function hasBreakingChanges(installedVersion, latestVersion) {
   const installedVersionArr = installedVersion
     ?.split('.')
@@ -677,8 +703,7 @@ function hasBreakingChanges(installedVersion, latestVersion) {
  * @param {string} path The glob pattern--e.g. `build/**\/*.js`
  * @returns {Promise<array>} The user-specified names of the classes that extend or implement o1js `SmartContract`, e.g. ['Foo', 'Bar']
  */
-
-export async function findSmartContracts(path) {
+async function findSmartContracts(path) {
   if (process.platform === 'win32') {
     path = path.replaceAll('\\', '/');
   }
@@ -700,9 +725,9 @@ export async function findSmartContracts(path) {
  * @param {object} config  The config.json in object format.
  * @param {object} deploy  The build/build.json in object format.
  * @param {string} deployAliasName The deploy alias name.
- * @returns {string}       The smart contract name.
+ * @returns {string} The smart contract name.
  */
-export function chooseSmartContract(config, deploy, deployAliasName) {
+function chooseSmartContract(config, deploy, deployAliasName) {
   // If the deploy alias in config.json has a smartContract specified, use it.
   if (config.deployAliases[deployAliasName]?.smartContract) {
     return config.deployAliases[deployAliasName]?.smartContract;
@@ -718,8 +743,10 @@ export function chooseSmartContract(config, deploy, deployAliasName) {
   return '';
 }
 
-// Finds the the user defined name argument of the ZkProgram that is verified in a smart contract
-// https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+/**
+ * Finds the the user defined name argument of the ZkProgram that is verified in a smart contract
+ * https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
+ */
 function getZkProgramNameArg(message) {
   let zkProgramNameArg = null;
 
@@ -775,8 +802,7 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
  * Find and import the ZkProgram.
  * @param {string}    projectRoot    The root directory path of the smart contract
  * @param {string}    zkProgramNameArg The user-specified ZkProgram name argument https://github.com/o1-labs/o1js/blob/7f1745a48567bdd824d4ca08c483b4f91e0e3786/src/examples/zkprogram/program.ts#L16.
- * @returns {Promise<object>}          The ZkProgram.
- *
+ * @returns {Promise<object>}   The ZkProgram.
  */
 async function getZkProgram(projectRoot, zkProgramNameArg) {
   let { zkProgramFile, zkProgramVarName } = await findZkProgramFile(
