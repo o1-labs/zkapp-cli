@@ -184,17 +184,23 @@ async function isMinaGraphQlEndpointAvailable(endpoint) {
  * @returns {Promise<{port: number, busy: boolean}>} A promise that resolves with an object containing the port number and a boolean indicating if the port is busy.
  */
 async function checkLocalPortAvailability(port) {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-    server.listen(port, '127.0.0.1');
-    server.on('listening', () => {
-      server.close();
-      resolve({ port, busy: false });
-    });
-    server.on('error', () => {
-      resolve({ port, busy: true });
+  const addresses = ['127.0.0.1', 'localhost'];
+  const checks = addresses.map((host) => {
+    return new Promise((resolve) => {
+      const server = net.createServer();
+      server.listen(port, host);
+      server.on('listening', () => {
+        server.close();
+        resolve({ port, host, busy: false });
+      });
+      server.on('error', () => {
+        resolve({ port, host, busy: true });
+      });
     });
   });
+  const results = await Promise.all(checks);
+  const isBusy = results.some((result) => result.busy);
+  return { port, busy: isBusy };
 }
 
 /**

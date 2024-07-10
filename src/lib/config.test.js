@@ -37,12 +37,6 @@ jest.unstable_mockModule('node:fs', () => ({
   },
 }));
 
-jest.unstable_mockModule('node:fs', () => ({
-  default: {
-    readFileSync: jest.fn(),
-  },
-}));
-
 jest.unstable_mockModule('o1js', () => ({
   Lightnet: {
     acquireKeyPair: jest.fn(),
@@ -125,7 +119,9 @@ describe('config.js', () => {
   describe('config()', () => {
     it('should warn if no deploy aliases available during listing', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       const { default: config } = await import('./config.js');
 
       await config({ list: true });
@@ -139,7 +135,12 @@ describe('config.js', () => {
     it('should list deploy aliases', async () => {
       findPrefix.mockResolvedValue('/project/root');
       nodeFs.readFileSync.mockReturnValue(
-        '{ "deployAliases": { "testAlias1": { "url": "https://zkapp1.xyz", "smartContract": "Add" }, "testAlias2": {} } }'
+        JSON.stringify({
+          deployAliases: {
+            testAlias1: { url: 'https://zkapp1.xyz', smartContract: 'Add' },
+            testAlias2: {},
+          },
+        })
       );
       const { default: config } = await import('./config.js');
 
@@ -160,7 +161,11 @@ describe('config.js', () => {
         })
       );
       nodeFs.readFileSync.mockReturnValue(
-        '{ "deployAliases": { "testAlias1": { "url": "https://zkapp1.xyz", "smartContract": "Add" } } }'
+        JSON.stringify({
+          deployAliases: {
+            testAlias1: { url: 'https://zkapp1.xyz', smartContract: 'Add' },
+          },
+        })
       );
       findPrefix.mockResolvedValue('/project/root');
       jest.spyOn(Lightnet, 'acquireKeyPair').mockResolvedValue({
@@ -204,7 +209,11 @@ describe('config.js', () => {
         })
       );
       nodeFs.readFileSync.mockReturnValue(
-        '{ "deployAliases": { "testAlias1": { "url": "https://zkapp1.xyz", "smartContract": "Add" } } }'
+        JSON.stringify({
+          deployAliases: {
+            testAlias1: { url: 'https://zkapp1.xyz', smartContract: 'Add' },
+          },
+        })
       );
       findPrefix.mockResolvedValue('/project/root');
       fs.existsSync.mockReturnValue(true);
@@ -243,7 +252,11 @@ describe('config.js', () => {
         })
       );
       nodeFs.readFileSync.mockReturnValue(
-        '{ "deployAliases": { "lightnet1": { "url": "https://zkapp1.xyz", "smartContract": "Add" } } }'
+        JSON.stringify({
+          deployAliases: {
+            lightnet1: { url: 'https://zkapp1.xyz', smartContract: 'Add' },
+          },
+        })
       );
       findPrefix.mockResolvedValue('/project/root');
       jest.spyOn(Lightnet, 'acquireKeyPair').mockResolvedValue({
@@ -285,7 +298,11 @@ describe('config.js', () => {
         throw new Error('Network error');
       });
       nodeFs.readFileSync.mockReturnValue(
-        '{ "deployAliases": { "testAlias1": { "url": "https://zkapp1.xyz", "smartContract": "Add" } } }'
+        JSON.stringify({
+          deployAliases: {
+            testAlias1: { url: 'https://zkapp1.xyz', smartContract: 'Add' },
+          },
+        })
       );
       findPrefix.mockResolvedValue('/project/root');
       const { default: config } = await import('./config.js');
@@ -301,7 +318,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (no fee payer cache, create one)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
@@ -321,7 +340,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (no fee payer cache, recover one)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
@@ -344,7 +365,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (with default fee payer cache)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue(['testAlias1.json']);
       fs.readJsonSync.mockImplementation((path) => {
         if (path.endsWith('.json')) {
@@ -378,7 +401,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (with another fee payer cache)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue(['testAlias1.json', 'testAlias2.json']);
       fs.readJsonSync.mockImplementation((path) => {
         if (path.endsWith('.json')) {
@@ -412,7 +437,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (with other fee payer cache option, recover one)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue(['testAlias1.json']);
       fs.readJsonSync.mockImplementation((path) => {
         if (path.endsWith('.json')) {
@@ -446,7 +473,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (with other fee payer cache option, create one)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue(['testAlias1.json']);
       fs.readJsonSync.mockImplementation((path) => {
         if (path.endsWith('.json')) {
@@ -480,7 +509,9 @@ describe('config.js', () => {
 
     it('should create the deploy alias (ENOENT while reading fee payer cache)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockImplementation(() => {
         const error = new Error();
         error.code = 'ENOENT';
@@ -504,7 +535,9 @@ describe('config.js', () => {
 
     it('should not create the deploy alias (exit if no fee payer choice made)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
@@ -530,7 +563,9 @@ describe('config.js', () => {
 
     it('should not create the deploy alias (exit if no deploy alias given)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         // deployAliasName: 'testAlias1',
@@ -554,7 +589,9 @@ describe('config.js', () => {
         };
       });
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
@@ -572,7 +609,9 @@ describe('config.js', () => {
 
     it('should not create the deploy alias (exit if no fee given)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
@@ -590,7 +629,9 @@ describe('config.js', () => {
 
     it('should not create the deploy alias (exit if no fee payer alias given)', async () => {
       findPrefix.mockResolvedValue('/project/root');
-      nodeFs.readFileSync.mockReturnValue('{ "deployAliases": {} }');
+      nodeFs.readFileSync.mockReturnValue(
+        JSON.stringify({ deployAliases: {} })
+      );
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',

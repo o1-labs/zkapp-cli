@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import util from 'node:util';
 import { getBorderCharacters, table } from 'table';
+import { dynamicImport } from './dynamicImportHelper.js';
 import {
   findIfClassExtendsOrImplementsSmartContract,
   readDeployAliasesConfig,
@@ -90,9 +91,10 @@ async function deploy({ alias, yes }) {
       process.exit(1);
     }
 
+    /* istanbul ignore next */
     const deployAliasResponse = await enquirer.prompt({
       type: 'select',
-      name: 'network',
+      name: 'name',
       choices: aliases,
       message: (state) => {
         // Makes the step text green upon success, else uses reset.
@@ -112,7 +114,7 @@ async function deploy({ alias, yes }) {
           : chalk.red(state.symbols.cross);
       },
     });
-    alias = deployAliasResponse.network;
+    alias = deployAliasResponse.name;
   }
 
   alias = alias.toLowerCase();
@@ -125,14 +127,15 @@ async function deploy({ alias, yes }) {
     process.exit(1);
   }
 
-  if (!config.deployAliases[alias].url) {
+  if (!config.deployAliases[alias]?.url) {
     console.log(
-      chalk.red(
+      chalk.yellow(
         `No 'url' property is specified for this deploy alias in config.json.`
       )
     );
-    console.log(chalk.red(`Please correct your config.json and try again.`));
-    process.exit(1);
+    console.log(
+      chalk.yellow(`The default (${DEFAULT_GRAPHQL}) one will be used instead.`)
+    );
   }
 
   await step('Build project', async () => {
@@ -189,7 +192,7 @@ async function deploy({ alias, yes }) {
   if (process.platform === 'win32') {
     o1jsImportPath = 'file://' + o1jsImportPath;
   }
-  let { PrivateKey, Mina, AccountUpdate } = await import(o1jsImportPath);
+  let { PrivateKey, Mina, AccountUpdate } = await dynamicImport(o1jsImportPath);
 
   // We need to default to the testnet networkId if none is specified for this deploy alias in config.json
   // This is to ensure the backward compatibility.
@@ -232,7 +235,7 @@ async function deploy({ alias, yes }) {
     smartContractImportPath = 'file://' + smartContractImportPath;
   }
   // Attempt to import the smart contract class to deploy from the user's file.
-  const smartContractImports = await import(smartContractImportPath);
+  const smartContractImports = await dynamicImport(smartContractImportPath);
 
   // If we cannot find the named export log an error message and return early.
   if (smartContractImports && !(contractName in smartContractImports)) {
@@ -343,6 +346,7 @@ async function deploy({ alias, yes }) {
   let transaction = await step('Build transaction', async () => {
     let tx = await Mina.transaction(
       { sender: feepayerAddress, fee },
+      /* istanbul ignore next */
       async () => {
         AccountUpdate.fundNewAccount(feepayerAddress);
         let zkapp = new zkApp(zkAppAddress);
@@ -396,6 +400,7 @@ async function deploy({ alias, yes }) {
     confirm = 'yes';
   } else {
     // This is verbose, but creates ideal UX steps--expected colors & symbols.
+    /* istanbul ignore next */
     let res = await enquirer.prompt({
       type: 'input',
       name: 'confirm',
@@ -446,15 +451,10 @@ async function deploy({ alias, yes }) {
   // Send tx to the relayer.
   const txn = await step('Send to network', async () => {
     const zkAppMutation = sendZkAppQuery(transactionJson);
-    try {
-      return await sendGraphQL(graphQlUrl, zkAppMutation);
-    } catch (error) {
-      return error;
-    }
+    return await sendGraphQL(graphQlUrl, zkAppMutation);
   });
 
   if (!txn || txn?.kind === 'error') {
-    // Note that the thrown error object is already console logged via step().
     console.log(chalk.red(getErrorMessage(txn)));
     process.exit(1);
   }
@@ -487,6 +487,7 @@ async function getContractName(config, build, alias) {
   // If no smart contract is specified for this deploy alias in config.json &
   // 2+ smart contracts exist in build.json, ask which they want to use.
   if (!contractName) {
+    /* istanbul ignore next */
     const contractNameResponse = await enquirer.prompt({
       type: 'select',
       name: 'contractName',
@@ -712,7 +713,7 @@ async function findSmartContracts(path) {
 
   for (const file of files) {
     const result = findIfClassExtendsOrImplementsSmartContract(file);
-    if (result) {
+    if (result && result.length > 0) {
       smartContracts.push(...result);
     }
   }
@@ -815,7 +816,7 @@ async function getZkProgram(projectRoot, zkProgramNameArg) {
       ? `file://${projectRoot}/build/src/${zkProgramFile}`
       : `${projectRoot}/build/src/${zkProgramFile}`;
 
-  const zkProgramImports = await import(zkProgramImportPath);
+  const zkProgramImports = await dynamicImport(zkProgramImportPath);
   const zkProgram = zkProgramImports[zkProgramVarName];
 
   return zkProgram;
