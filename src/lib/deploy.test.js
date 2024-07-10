@@ -1271,10 +1271,247 @@ describe('deploy.js', () => {
       expect(zkApp.compile).toHaveBeenCalledWith(zkAppAddress);
       expect(result).toEqual({ isCached: false, verificationKey: undefined });
     });
+
+    it('should init cache', async () => {
+      const zkApp = {
+        digest: jest.fn().mockResolvedValue('digest'),
+        compile: jest
+          .fn()
+          .mockResolvedValue({ verificationKey: 'verificationKey' }),
+      };
+      const cache = {};
+      fs.readJsonSync.mockReturnValue(cache);
+      const { generateVerificationKey } = await import('./deploy.js');
+
+      const result = await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        false
+      );
+
+      expect(zkApp.compile).toHaveBeenCalledWith(zkAppAddress);
+      expect(result).toEqual({
+        isCached: false,
+        verificationKey: 'verificationKey',
+      });
+    });
+
+    it('should import and compile zkProgram', async () => {
+      const zkApp = {
+        digest: jest.fn().mockResolvedValue('digest'),
+        compile: jest
+          .fn()
+          .mockResolvedValue({ verificationKey: 'verificationKey' }),
+      };
+      const cache = {
+        TestContract: {
+          digest: 'digest',
+          verificationKey: 'cachedVerificationKey',
+          zkProgram: 'myZkProgram',
+        },
+        myZkProgram: {},
+      };
+      fs.readJsonSync.mockReturnValue(cache);
+      const zkProgramMock = {
+        name: 'myZkProgram',
+        digest: jest.fn().mockResolvedValue('digest1'),
+        compile: jest.fn(),
+      };
+      glob.mockResolvedValue(['/some/path/file1.js']);
+      fs.readFileSync.mockReturnValue(
+        `
+          const myVar = ZkProgram({
+            name: 'myZkProgram'
+          });
+        `
+      );
+      jest.spyOn(path, 'basename').mockReturnValue('file1.js');
+      dynamicImport.mockResolvedValue({ myVar: zkProgramMock });
+      const { generateVerificationKey } = await import('./deploy.js');
+
+      const result = await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        false
+      );
+
+      expect(fs.writeJSONSync).toHaveBeenCalledWith(
+        `${projectRoot}/build/cache.json`,
+        {
+          TestContract: {
+            digest: 'digest',
+            verificationKey: 'cachedVerificationKey',
+            zkProgram: 'myZkProgram',
+          },
+          myZkProgram: {
+            digest: 'digest1',
+          },
+        },
+        { spaces: 2 }
+      );
+      expect(result).toEqual({
+        isCached: false,
+        verificationKey: 'cachedVerificationKey',
+      });
+    });
+
+    it('should set zkProgramNameArg based on ZkProgram that smart contract verifies', async () => {
+      const zkApp = {
+        digest: jest.fn().mockResolvedValue('newDigest'),
+        compile: jest
+          .fn()
+          .mockRejectedValue(
+            new Error(
+              'depends on TestContract, but we cannot find compilation output for myZkProgram'
+            )
+          ),
+      };
+      const cache = {
+        TestContract: { digest: 'oldDigest', verificationKey: 'cachedKey' },
+      };
+      fs.readJsonSync.mockReturnValue(cache);
+      const { generateVerificationKey } = await import('./deploy.js');
+
+      const result = await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        false
+      );
+
+      expect(zkApp.compile).toHaveBeenCalledWith(zkAppAddress);
+      expect(result).toEqual({ isCached: false, verificationKey: undefined });
+    });
+
+    it('should import and compile zkProgram if smart contract to deploy verifies it', async () => {
+      const zkApp = {
+        digest: jest.fn().mockResolvedValue('digest'),
+        compile: jest
+          .fn()
+          .mockResolvedValue({ verificationKey: 'verificationKey' }),
+      };
+      const cache = {
+        TestContract: {
+          digest: 'digest',
+          verificationKey: 'cachedVerificationKey',
+          zkProgram: 'myZkProgram',
+        },
+        myZkProgram: {},
+      };
+      fs.readJsonSync.mockReturnValue(cache);
+      const zkProgramMock = {
+        name: 'myZkProgram',
+        digest: jest.fn().mockResolvedValue('digest1'),
+        compile: jest.fn(),
+      };
+      glob.mockResolvedValue(['/some/path/file1.js']);
+      fs.readFileSync.mockReturnValue(
+        `
+          const myVar = ZkProgram({
+            name: 'myZkProgram'
+          });
+        `
+      );
+      jest.spyOn(path, 'basename').mockReturnValue('file1.js');
+      dynamicImport.mockResolvedValue({ myVar: zkProgramMock });
+      const { generateVerificationKey } = await import('./deploy.js');
+
+      const result = await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        true
+      );
+
+      expect(fs.writeJSONSync).toHaveBeenCalledWith(
+        `${projectRoot}/build/cache.json`,
+        {
+          TestContract: {
+            digest: 'digest',
+            verificationKey: 'verificationKey',
+            zkProgram: 'myZkProgram',
+          },
+          myZkProgram: {
+            digest: 'digest1',
+          },
+        },
+        { spaces: 2 }
+      );
+      expect(result).toEqual({
+        isCached: false,
+        verificationKey: 'verificationKey',
+      });
+    });
+
+    it('should import and compile zkProgram if smart contract to deploy verifies it', async () => {
+      const zkApp = {
+        digest: jest.fn().mockResolvedValue('digest'),
+        compile: jest
+          .fn()
+          .mockResolvedValue({ verificationKey: 'verificationKey' }),
+      };
+      const cache = {
+        TestContract: {
+          digest: 'digest',
+          verificationKey: 'cachedVerificationKey',
+          zkProgram: 'myZkProgram',
+        },
+        myZkProgram: null,
+      };
+      fs.readJsonSync.mockReturnValue(cache);
+      const zkProgramMock = {
+        name: 'myZkProgram',
+        digest: jest.fn().mockResolvedValue('digest1'),
+        compile: jest.fn(),
+      };
+      glob.mockResolvedValue(['/some/path/file1.js']);
+      fs.readFileSync.mockReturnValue(
+        `
+          const myVar = ZkProgram({
+            name: 'myZkProgram'
+          });
+        `
+      );
+      jest.spyOn(path, 'basename').mockReturnValue('file1.js');
+      dynamicImport.mockResolvedValue({ myVar: zkProgramMock });
+      const { generateVerificationKey } = await import('./deploy.js');
+
+      const result = await generateVerificationKey(
+        projectRoot,
+        contractName,
+        zkApp,
+        zkAppAddress,
+        true
+      );
+
+      expect(fs.writeJSONSync).toHaveBeenCalledWith(
+        `${projectRoot}/build/cache.json`,
+        {
+          TestContract: {
+            digest: 'digest',
+            verificationKey: 'verificationKey',
+            zkProgram: 'myZkProgram',
+          },
+          myZkProgram: {
+            digest: 'digest1',
+          },
+        },
+        { spaces: 2 }
+      );
+      expect(result).toEqual({
+        isCached: false,
+        verificationKey: 'verificationKey',
+      });
+    });
   });
 });
 
-// Helper functions
 async function setupCommonMocks() {
   findPrefix.mockResolvedValue('/project/root');
   jest.spyOn(global, 'fetch').mockImplementation(() =>
