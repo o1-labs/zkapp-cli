@@ -70,7 +70,6 @@ jest.unstable_mockModule('ora', () => ({
 
 jest.unstable_mockModule('mina-signer', () => ({
   default: class {
-    constructor() {}
     genKeys = jest
       .fn()
       .mockReturnValue({ publicKey: 'publicKey', privateKey: 'privateKey' });
