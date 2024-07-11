@@ -3,14 +3,74 @@ import createDebug from 'debug';
 import decompress from 'decompress';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import path from 'node:path';
 import opener from 'opener';
 import ora from 'ora';
-import path from 'path';
 import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
 import { checkLocalPortsAvailability, isDirEmpty, step } from './helpers.js';
+
+// Public API
+export {
+  lightnetExplorer,
+  lightnetFollowLogs,
+  lightnetSaveLogs,
+  lightnetStart,
+  lightnetStatus,
+  lightnetStop,
+};
+
+// Private API
+export {
+  checkDockerEngineAvailability,
+  copyContainerLogToHost,
+  dockerContainerIdMatchesConfig,
+  downloadExplorerRelease,
+  executeCmd,
+  fetchExplorerReleases,
+  generateLogsDirPath,
+  getAvailableDockerEngineResources,
+  getBlockchainNetworkReadinessMaxAttempts,
+  getCurrentExplorerVersion,
+  getDockerContainerId,
+  getDockerContainerStartupCmdPorts,
+  getDockerContainerState,
+  getDockerContainerVolume,
+  getLocalExplorerVersions,
+  getLogFilePaths,
+  getProcessToLogFileMapping,
+  getRequiredDockerContainerPorts,
+  handleDockerContainerPresence,
+  handleExplorerReleasePresence,
+  handleStartCommandChecks,
+  handleStopCommandChecks,
+  handleYesNoConfirmation,
+  isEnoughDockerEngineResourcesAvailable,
+  launchExplorer,
+  printBlockchainNetworkProperties,
+  printCmdDebugLog,
+  printDockerContainerProcessesLogPaths,
+  printExplorerVersions,
+  printExtendedDockerContainerState,
+  printUsefulUrls,
+  printZkAppSnippet,
+  processArchiveNodeApiLogs,
+  processMultiNodeLogs,
+  processSingleNodeLogs,
+  promptForDockerContainerProcess,
+  removeDanglingDockerImages,
+  removeDockerContainer,
+  removeDockerVolume,
+  saveDockerContainerProcessesLogs,
+  secondsToHms,
+  shellExec,
+  stopDockerContainer,
+  streamDockerContainerFileContent,
+  updateCurrentExplorerVersion,
+  waitForBlockchainNetworkReadiness,
+};
 
 const debug = createDebug('zk:lightnet');
 const debugLog = (formatter, ...args) => {
@@ -79,7 +139,7 @@ if (process.platform === 'win32') {
  * @param {string}  argv.minaLogLevel - Mina processes logging level to use.
  * @returns {Promise<void>}
  */
-export async function lightnetStart({
+async function lightnetStart({
   mode,
   type,
   proofLevel,
@@ -180,7 +240,7 @@ export async function lightnetStart({
  * @param {boolean} argv.cleanUp - Whether to perform the clean up.
  * @returns {Promise<void>}
  */
-export async function lightnetStop({ saveLogs, cleanUp }) {
+async function lightnetStop({ saveLogs, cleanUp }) {
   let logsDir = null;
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
@@ -244,9 +304,7 @@ export async function lightnetStop({ saveLogs, cleanUp }) {
  * @param {boolean} preventDockerEngineAvailabilityCheck - Whether to prevent the Docker Engine availability check.
  * @returns {Promise<void>}
  */
-export async function lightnetStatus(
-  preventDockerEngineAvailabilityCheck = false
-) {
+async function lightnetStatus(preventDockerEngineAvailabilityCheck = false) {
   if (!preventDockerEngineAvailabilityCheck) {
     await checkDockerEngineAvailability();
   }
@@ -292,7 +350,7 @@ export async function lightnetStatus(
  * Saves the lightweight Mina blockchain network Docker container processes logs to the host file system.
  * @returns {Promise<void>}
  */
-export async function lightnetSaveLogs() {
+async function lightnetSaveLogs() {
   let logsDir = null;
   await checkDockerEngineAvailability();
   if (
@@ -335,7 +393,7 @@ export async function lightnetSaveLogs() {
  * @param {string}  argv.process - The name of the Docker container process to follow the logs of.
  * @returns {Promise<void>}
  */
-export async function lightnetFollowLogs({ process }) {
+async function lightnetFollowLogs({ process }) {
   await checkDockerEngineAvailability();
   const isDockerContainerRunning =
     fs.existsSync(lightnetConfigFile) &&
@@ -371,7 +429,7 @@ export async function lightnetFollowLogs({ process }) {
  * @param {boolean} argv.list - Whether to list the available versions of the lightweight Mina explorer.
  * @returns {Promise<void>}
  */
-export async function lightnetExplorer({ use, list }) {
+async function lightnetExplorer({ use, list }) {
   if (list) {
     await printExplorerVersions();
   } else {
