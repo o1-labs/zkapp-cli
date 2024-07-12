@@ -1098,7 +1098,12 @@ async function waitForBlockchainNetworkReadiness(mode) {
   while (blockchainSyncAttempt <= maxAttempts && !blockchainIsReady) {
     blockchainIsReady =
       (await checkEndpoint(Constants.lightnetMinaDaemonGraphQlEndpoint)) ||
-      (await checkEndpoint('http://localhost:8080/graphql'));
+      (await checkEndpoint(
+        Constants.lightnetMinaDaemonGraphQlEndpoint.replace(
+          '127.0.0.1',
+          'localhost'
+        )
+      ));
     if (!blockchainIsReady) {
       debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
       await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
