@@ -3,7 +3,6 @@ import { simple as simpleAcornWalk } from 'acorn-walk';
 import chalk from 'chalk';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
-import net from 'node:net';
 import path from 'node:path';
 import url from 'node:url';
 import ora from 'ora';
@@ -12,10 +11,8 @@ import shell from 'shelljs';
 // Public API
 export {
   capitalize,
-  checkLocalPortsAvailability,
   findIfClassExtendsOrImplementsSmartContract,
   isDirEmpty,
-  isMinaGraphQlEndpointAvailable,
   kebabCase,
   readDeployAliasesConfig,
   replaceInFile,
@@ -29,7 +26,6 @@ export {
 export {
   buildClassHierarchy,
   checkClassInheritance,
-  checkLocalPortAvailability,
   resolveImports,
   resolveModulePath,
 };
@@ -157,72 +153,6 @@ function readDeployAliasesConfig(projectRoot) {
     }
     console.log(chalk.red(str));
     process.exit(1);
-  }
-}
-
-/**
- * Checks the Mina GraphQL endpoint availability.
- * @param {endpoint} The GraphQL endpoint to check.
- * @returns {Promise<boolean>} Whether the endpoint is available.
- */
-async function isMinaGraphQlEndpointAvailable(endpoint) {
-  try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: '{ syncStatus }' }),
-    });
-    return !!response.ok;
-  } catch (_) {
-    return false;
-  }
-}
-
-/**
- * Checks if a single port is available.
- * @param {number} port The port number to check.
- * @returns {Promise<{port: number, busy: boolean}>} A promise that resolves with an object containing the port number and a boolean indicating if the port is busy.
- */
-async function checkLocalPortAvailability(port) {
-  const addresses = ['127.0.0.1', 'localhost'];
-  const checks = addresses.map((host) => {
-    return new Promise((resolve) => {
-      const server = net.createServer();
-      server.listen(port, host);
-      server.on('listening', () => {
-        server.close();
-        resolve({ port, host, busy: false });
-      });
-      server.on('error', () => {
-        resolve({ port, host, busy: true });
-      });
-    });
-  });
-  const results = await Promise.all(checks);
-  const isBusy = results.some((result) => result.busy);
-  return { port, busy: isBusy };
-}
-
-/**
- * Checks multiple ports for availability and identifies any that are not.
- * @param {number[]} ports An array of port numbers to check.
- * @returns {Promise<{error: boolean, message: string}>} A promise that resolves with an object containing an error flag and a message indicating the result.
- */
-async function checkLocalPortsAvailability(ports) {
-  const checks = ports.map((port) => checkLocalPortAvailability(port));
-  const results = await Promise.all(checks);
-  const busyPorts = results
-    .filter((result) => result.busy)
-    .map((result) => result.port);
-  if (busyPorts.length > 0) {
-    return {
-      error: true,
-      message:
-        `The following local ports are required but unavailable at this time: ${busyPorts.join(', ')}`.trim() +
-        '\nYou can close applications that use these ports and try again.',
-    };
-  } else {
-    return { error: false };
   }
 }
 

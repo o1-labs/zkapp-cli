@@ -1,5 +1,7 @@
+// Helpers extracted to improve testability.
+
 /**
- * Dynamic import helper extracted to improve testability.
+ * Imports module dynamically.
  * @param {string} modulePath - Path to the module to import
  * @returns {Promise} - Promise that resolves to the module
  */

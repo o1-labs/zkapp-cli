@@ -10,7 +10,8 @@ import semver from 'semver';
 import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import { checkLocalPortsAvailability, isDirEmpty, step } from './helpers.js';
+import { isDirEmpty, step } from './helpers.js';
+import { checkLocalPortsAvailability } from './networkHelpers.js';
 
 // Public API
 export {
@@ -1073,45 +1074,43 @@ async function waitForBlockchainNetworkReadiness(mode) {
   };
   const debugMessage =
     'Blockchain network readiness check attempt #%d, retrying in %d seconds...';
-  while (blockchainSyncAttempt <= maxAttempts && !blockchainIsReady) {
+
+  const checkEndpoint = async (url) => {
     try {
-      const response = await fetch(
-        Constants.lightnetMinaDaemonGraphQlEndpoint,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(syncStatusGraphQlQuery),
-        }
-      );
-      if (!response.ok) {
-        debugLog(
-          debugMessage,
-          blockchainSyncAttempt,
-          pollingIntervalMs / 1_000
-        );
-        await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
-      } else {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(syncStatusGraphQlQuery),
+      });
+      if (response.ok) {
         const responseJson = await response.json();
         if (responseJson?.data?.syncStatus === 'SYNCED') {
-          blockchainIsReady = true;
-        } else {
-          await new Promise((resolve) =>
-            setTimeout(resolve, pollingIntervalMs)
-          );
+          return true;
         }
       }
     } catch (error) {
       debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
       await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
     }
-    blockchainSyncAttempt++;
+    return false;
+  };
+
+  while (blockchainSyncAttempt <= maxAttempts && !blockchainIsReady) {
+    blockchainIsReady =
+      (await checkEndpoint(Constants.lightnetMinaDaemonGraphQlEndpoint)) ||
+      (await checkEndpoint('http://localhost:8080/graphql'));
+    if (!blockchainIsReady) {
+      debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
+      await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
+      blockchainSyncAttempt++;
+    }
   }
   if (!blockchainIsReady) {
     const statusColored = chalk.red.bold('is not ready');
     console.log(
       '\n\nMaximum blockchain network readiness check attempts reached.' +
         `\nThe blockchain network ${statusColored}.` +
-        '\nPlease consider to cleaning up the environment by executing:\n\n' +
+        '\nPlease consider cleaning up the environment by executing:\n\n' +
         chalk.green.bold('zk lightnet stop') +
         '\n'
     );
