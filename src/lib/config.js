@@ -7,7 +7,7 @@ import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
 import { readDeployAliasesConfig, step } from './helpers.js';
-import { isMinaGraphQlEndpointAvailable } from './networkHelpers.js';
+import { isMinaGraphQlEndpointAvailable } from './network-helpers.js';
 import { prompts } from './prompts.js';
 
 // Public API

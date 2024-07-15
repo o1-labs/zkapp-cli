@@ -11,7 +11,7 @@ import shell from 'shelljs';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
 import { isDirEmpty, step } from './helpers.js';
-import { checkLocalPortsAvailability } from './networkHelpers.js';
+import { checkLocalPortsAvailability } from './network-helpers.js';
 
 // Public API
 export {
@@ -43,6 +43,7 @@ export {
   getLogFilePaths,
   getProcessToLogFileMapping,
   getRequiredDockerContainerPorts,
+  getSystemQuotes,
   handleDockerContainerPresence,
   handleExplorerReleasePresence,
   handleStartCommandChecks,
@@ -114,18 +115,7 @@ const commonServicesPorts = [8080, 8181];
 const archivePorts = [5432, 8282];
 const singleNodePorts = [3085];
 const multiNodePorts = [4001, 4006, 5001, 6001];
-let quotes = "'";
-let escapeQuotes = '';
-if (process.platform === 'win32') {
-  quotes = '"';
-  const { code } = shell.exec('Get-ChildItem', { silent: true });
-  // Is it PowerShell?
-  if (code == 0) {
-    escapeQuotes = '\\`';
-  } else {
-    escapeQuotes = '\\"';
-  }
-}
+const { quotes, escapeQuotes } = getSystemQuotes();
 
 /**
  * Starts the lightweight Mina blockchain network Docker container.
@@ -203,6 +193,8 @@ async function lightnetStart({
       minaBranch,
       archive,
       sync,
+      pull,
+      minaLogLevel,
     };
     debugLog(
       'Updating file %s with JSON content: %O',
@@ -735,6 +727,7 @@ function getProcessToLogFileMapping({ mode, archive }) {
 }
 
 async function promptForDockerContainerProcess(processToLogFileMapping) {
+  /* istanbul ignore next */
   const response = await enquirer.prompt({
     type: 'select',
     name: 'selectedProcess',
@@ -840,6 +833,7 @@ async function handleDockerContainerPresence() {
 }
 
 async function handleYesNoConfirmation(message) {
+  /* istanbul ignore next */
   const res = await enquirer.prompt({
     type: 'select',
     name: 'proceed',
@@ -948,7 +942,7 @@ async function streamDockerContainerFileContent(containerName, filePath) {
 async function saveDockerContainerProcessesLogs() {
   const logsDir = generateLogsDirPath();
   try {
-    await fs.ensureDir(logsDir);
+    fs.ensureDirSync(logsDir);
     const { mode, archive } = fs.readJSONSync(lightnetConfigFile);
     const logFilePaths = getLogFilePaths(mode);
     if (mode === 'single-node') {
@@ -998,6 +992,7 @@ async function processSingleNodeLogs(logFilePaths, logsDir) {
         ContainerLogFilesPrefix.SINGLE_NODE
       );
     } catch (error) {
+      /* istanbul ignore next */
       debugLog('%o', error);
     }
   }
@@ -1012,6 +1007,7 @@ async function processMultiNodeLogs(logFilePaths, logsDir) {
         ContainerLogFilesPrefix.MULTI_NODE
       );
     } catch (error) {
+      /* istanbul ignore next */
       debugLog('%o', error);
     }
   }
@@ -1025,6 +1021,7 @@ async function processArchiveNodeApiLogs(logsDir) {
       ContainerLogFilesPrefix.SINGLE_NODE
     );
   } catch (error) {
+    /* istanbul ignore next */
     debugLog('%o', error);
   }
 }
@@ -1429,4 +1426,21 @@ async function executeCmd(command, silent = true) {
   const { code, stdout, stderr } = await shellExec(command, { silent });
   printCmdDebugLog(command, stdout, stderr);
   return { code, stdout, stderr };
+}
+
+function getSystemQuotes() {
+  let quotes = "'";
+  let escapeQuotes = '';
+  if (process.platform === 'win32') {
+    quotes = '"';
+    const { code } = shell.exec('Get-ChildItem', { silent: true });
+    // Is it PowerShell?
+    if (code == 0) {
+      escapeQuotes = '\\`';
+    } else {
+      escapeQuotes = '\\"';
+    }
+  }
+
+  return { quotes, escapeQuotes };
 }

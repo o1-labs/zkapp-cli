@@ -85,7 +85,7 @@ jest.unstable_mockModule('ora', () => ({
   }),
 }));
 
-jest.unstable_mockModule('./dynamicImportHelper.js', () => ({
+jest.unstable_mockModule('./dynamic-import-helper.js', () => ({
   dynamicImport: jest.fn(),
 }));
 
@@ -114,7 +114,7 @@ beforeAll(async () => {
   glob = (await import('fast-glob')).default;
   findPrefix = (await import('find-npm-prefix')).default;
   nodeFs = (await import('node:fs')).default;
-  dynamicImport = (await import('./dynamicImportHelper.js')).dynamicImport;
+  dynamicImport = (await import('./dynamic-import-helper.js')).dynamicImport;
 });
 
 beforeEach(() => {

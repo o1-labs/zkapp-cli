@@ -7,9 +7,9 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import util from 'node:util';
 import { getBorderCharacters, table } from 'table';
-import { dynamicImport } from './dynamicImportHelper.js';
+import { dynamicImport } from './dynamic-import-helper.js';
 import {
-  findIfClassExtendsOrImplementsSmartContract,
+  findIfClassExtendsSmartContract,
   readDeployAliasesConfig,
   step,
 } from './helpers.js';
@@ -712,7 +712,7 @@ async function findSmartContracts(path) {
   const smartContracts = [];
 
   for (const file of files) {
-    const result = findIfClassExtendsOrImplementsSmartContract(file);
+    const result = findIfClassExtendsSmartContract(file);
     if (result && result.length > 0) {
       smartContracts.push(...result);
     }

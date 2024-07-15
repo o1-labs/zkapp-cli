@@ -11,7 +11,7 @@ import shell from 'shelljs';
 // Public API
 export {
   capitalize,
-  findIfClassExtendsOrImplementsSmartContract,
+  findIfClassExtendsSmartContract,
   isDirEmpty,
   kebabCase,
   readDeployAliasesConfig,
@@ -208,11 +208,11 @@ function capitalize(string) {
 }
 
 /**
- * Finds all classes that extend or implement the 'SmartContract' class from 'o1js'.
+ * Finds all classes that extend the 'SmartContract' class from 'o1js'.
  * @param {string} entryFilePath - The path of the entry file.
  * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
  */
-function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
+function findIfClassExtendsSmartContract(entryFilePath) {
   const classesMap = buildClassHierarchy(entryFilePath);
   const importMappings = resolveImports(entryFilePath);
   const smartContractClasses = [];
@@ -253,12 +253,8 @@ function buildClassHierarchy(filePath) {
     ClassDeclaration(node) {
       const currentClass = node.id.name;
       const parentClass = node.superClass ? node.superClass.name : null;
-      const implementedInterfaces = node.implements
-        ? node.implements.map((iface) => iface.id.name)
-        : [];
       classesMap[currentClass] = {
         extends: parentClass,
-        implements: implementedInterfaces,
         filePath,
         inheritsFromO1jsSmartContract: false,
       };
@@ -417,23 +413,6 @@ function checkClassInheritance(
     return true;
   }
 
-  // Check each implemented interface
-  for (const iface of classInfo.implements) {
-    if (
-      (iface === targetClass && importMappings[iface]?.moduleName === 'o1js') ||
-      checkClassInheritance(
-        iface,
-        targetClass,
-        classesMap,
-        visitedClasses,
-        importMappings
-      )
-    ) {
-      classInfo.inheritsFromO1jsSmartContract = true;
-      return true;
-    }
-  }
-
   // Additional check for imported base class
   if (importMappings[classInfo.extends]) {
     const baseClassPath = importMappings[classInfo.extends].resolvedPath;
@@ -451,6 +430,7 @@ function checkClassInheritance(
         visitedClasses,
         importMappings
       );
+      /* istanbul ignore next */
       if (parentClassResult) {
         classInfo.inheritsFromO1jsSmartContract = true;
         return true;
