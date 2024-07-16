@@ -95,6 +95,7 @@ let fs,
   path,
   Constants,
   enquirer,
+  table,
   // decompress,
   // opener,
   // semver,
@@ -108,6 +109,7 @@ beforeAll(async () => {
   fs = (await import('fs-extra')).default;
   nodeFs = (await import('node:fs')).default;
   enquirer = (await import('enquirer')).default;
+  table = await import('table');
   // decompress = (await import('decompress')).default;
   // opener = (await import('opener')).default;
   // semver = (await import('semver')).default;
@@ -405,6 +407,48 @@ describe('lightnet.js', () => {
       expect(shell.exit).toHaveBeenCalledWith(1);
       expect(process.exit).toHaveBeenCalledWith(1);
     });
+
+    // TODO: Fix this
+    // it('should exit if waiting for blockchain readiness max attempts reached', async () => {
+    //   const targetMethodParams = {
+    //     mode: 'single-node',
+    //     type: 'fast',
+    //     proofLevel: 'none',
+    //     minaBranch: 'compatible',
+    //     archive: true,
+    //     sync: true,
+    //     pull: true,
+    //     minaLogLevel: 'Trace',
+    //   };
+    //   global.setTimeout = jest.fn((callback) => callback());
+    //   await setupLightnetStartMocks({
+    //     daemon: {
+    //       thrownOnResponse: false,
+    //       okResponse: false,
+    //       status: 'BOOTSTRAPPING',
+    //     },
+    //   });
+    // shell.exit.mockImplementation(() => {
+    //   throw new Error('shell.exit');
+    // });
+    // process.exit.mockImplementation(() => {
+    //   throw new Error('process.exit');
+    // });
+    // const { lightnetStart } = await import('./lightnet.js');
+
+    // await expect(lightnetStart(targetMethodParams)).rejects.toThrow(
+    //   'process.exit'
+    // );
+
+    // jest.runAllTimers();
+    // expect(console.log).toHaveBeenCalledWith(
+    //   expect.stringContaining(
+    //     'Maximum blockchain network readiness check attempts reached.'
+    //   )
+    // );
+    // expect(shell.exit).toHaveBeenCalledWith(1);
+    // expect(process.exit).toHaveBeenCalledWith(1);
+    // });
 
     it('should exit if ports unavailable', async () => {
       const targetMethodParams = {
@@ -891,7 +935,7 @@ describe('lightnet.js', () => {
       );
     });
 
-    it('should handle GraphQL request', async () => {
+    it('should handle correct GraphQL response', async () => {
       setupShellWhichMocks({ isCommandAvailable: true });
       setupShellExecMocks({
         dockerEngine: {
@@ -1057,9 +1101,350 @@ describe('lightnet.js', () => {
     });
   });
 
-  describe('lightnetSaveLogs()', () => {});
+  describe('lightnetSaveLogs()', () => {
+    it('should save the Docker container logs (single-node, archive)', async () => {
+      fs.ensureDirSync.mockImplementation(() => {});
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      const { lightnetSaveLogs } = await import('./lightnet.js');
 
-  describe('lightnetFollowLogs()', () => {});
+      await lightnetSaveLogs();
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)The Docker container processes((.|\n)*)logs((.|\n)*)were preserved at the following path((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should save the Docker container logs (multi-node, archive)', async () => {
+      fs.ensureDirSync.mockImplementation(() => {});
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'multi-node',
+        archive: true,
+      });
+      const { lightnetSaveLogs } = await import('./lightnet.js');
+
+      await lightnetSaveLogs();
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)The Docker container processes((.|\n)*)logs((.|\n)*)were preserved at the following path((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should save the Docker container logs (multi-node, no archive)', async () => {
+      fs.ensureDirSync.mockImplementation(() => {});
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'multi-node',
+        archive: false,
+      });
+      const { lightnetSaveLogs } = await import('./lightnet.js');
+
+      await lightnetSaveLogs();
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)The Docker container processes((.|\n)*)logs((.|\n)*)were preserved at the following path((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should not save logs if there is no Docker container found', async () => {
+      fs.ensureDirSync.mockImplementation(() => {});
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'not-found',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      const { lightnetSaveLogs } = await import('./lightnet.js');
+
+      await lightnetSaveLogs();
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'It is impossible to preserve the logs at the moment!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should not save the Docker container logs in case of issues', async () => {
+      fs.ensureDirSync.mockImplementation(() => {
+        throw new Error('fs.ensureDirSync');
+      });
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      const { lightnetSaveLogs } = await import('./lightnet.js');
+
+      await lightnetSaveLogs();
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Issue happened during the Docker container processes logs preservation!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('lightnetFollowLogs()', () => {
+    it('should stream the Docker container logs (single-node)', async () => {
+      const selectedProcess = 'Mina multi-purpose Daemon';
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      setupEnquirerPromptMocks({
+        selectedProcess,
+      });
+      const { lightnetFollowLogs } = await import('./lightnet.js');
+
+      await lightnetFollowLogs({});
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Use Ctrl+C to stop the file content streaming.'
+        )
+      );
+    });
+
+    it('should stream the Docker container logs (multi-node)', async () => {
+      const selectedProcess = 'Whale BP #1';
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'multi-node',
+        archive: true,
+      });
+      const { lightnetFollowLogs } = await import('./lightnet.js');
+
+      await lightnetFollowLogs({ process: selectedProcess });
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Use Ctrl+C to stop the file content streaming.'
+        )
+      );
+    });
+
+    it('should stream the Docker container logs (multi-node, no archive)', async () => {
+      const selectedProcess = 'Whale BP #1';
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'multi-node',
+        archive: false,
+      });
+      const { lightnetFollowLogs } = await import('./lightnet.js');
+
+      await lightnetFollowLogs({ process: selectedProcess });
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Use Ctrl+C to stop the file content streaming.'
+        )
+      );
+    });
+
+    it('should exit if the Docker container does not exist', async () => {
+      const selectedProcess = 'Mina multi-purpose Daemon';
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'not-found',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: false });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      const { lightnetFollowLogs } = await import('./lightnet.js');
+
+      await expect(
+        lightnetFollowLogs({ process: selectedProcess })
+      ).rejects.toThrow('shell.exit');
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'It is impossible to follow the logs at the moment!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit in case of streaming issues', async () => {
+      const selectedProcess = 'Mina multi-purpose Daemon';
+      setupShellWhichMocks({ isCommandAvailable: true });
+      setupShellExecMocks({
+        dockerEngine: {
+          isCommandAvailable: true,
+          isUpAndRunning: true,
+        },
+        dockerContainer: {
+          id: 'lightnetContainer1',
+          state: 'running',
+          volume: 'lightnetVolume1',
+        },
+      });
+      setupFsExistsSyncMocks({ mainConfigExists: true });
+      setupFsReadJSONSyncMocks({
+        containerId: 'lightnetContainer1',
+        mode: 'single-node',
+        archive: true,
+      });
+      jest.spyOn(table, 'getBorderCharacters').mockImplementation(() => {
+        throw new Error('table.getBorderCharacters');
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      process.exit.mockImplementation(() => {
+        throw new Error('process.exit');
+      });
+      const { lightnetFollowLogs } = await import('./lightnet.js');
+
+      await expect(
+        lightnetFollowLogs({ process: selectedProcess })
+      ).rejects.toThrow('process.exit');
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Issue happened while streaming the Docker container file content!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+  });
 
   describe('lightnetExplorer()', () => {});
 
@@ -1171,6 +1556,38 @@ describe('lightnet.js', () => {
       }
     });
   });
+
+  describe('buildDebugLogger()', () => {
+    it('should build debug logger (without namespaces provided)', async () => {
+      delete process.env.DEBUG;
+      const { buildDebugLogger } = await import('./lightnet.js');
+
+      let debugLogger = buildDebugLogger();
+      expect(debugLogger).toBeDefined();
+      debugLogger();
+    });
+
+    it('should build debug logger (with namespaces provided)', async () => {
+      process.env.DEBUG = '*';
+      const { buildDebugLogger } = await import('./lightnet.js');
+
+      let debugLogger = buildDebugLogger();
+      expect(debugLogger).toBeDefined();
+      debugLogger();
+      process.env.DEBUG = 'zk:*';
+      debugLogger = buildDebugLogger();
+      expect(debugLogger).toBeDefined();
+      debugLogger();
+      process.env.DEBUG = 'zk:lightnet';
+      debugLogger = buildDebugLogger();
+      expect(debugLogger).toBeDefined();
+      debugLogger();
+      process.env.DEBUG = 'test';
+      debugLogger = buildDebugLogger();
+      expect(debugLogger).toBeDefined();
+      debugLogger();
+    });
+  });
 });
 
 function setupShellWhichMocks({ isCommandAvailable = true } = {}) {
@@ -1250,7 +1667,8 @@ function setupShellExecMocks({
       cmd.includes('docker image prune -f --filter "dangling=true"') ||
       cmd.includes('docker pull o1labs/mina-local-network') ||
       cmd.includes('docker run') ||
-      cmd.includes('docker cp')
+      cmd.includes('docker cp') ||
+      cmd.includes('docker exec')
     ) {
       callback(0, '', 'stdErr for coverage');
     }

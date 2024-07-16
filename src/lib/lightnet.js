@@ -20,75 +20,63 @@ export {
   lightnetSaveLogs,
   lightnetStart,
   lightnetStatus,
-  lightnetStop,
+  lightnetStop
 };
 
 // Private API
-export {
-  checkDockerEngineAvailability,
-  copyContainerLogToHost,
-  dockerContainerIdMatchesConfig,
-  downloadExplorerRelease,
-  executeCmd,
-  fetchExplorerReleases,
-  generateLogsDirPath,
-  getAvailableDockerEngineResources,
-  getBlockchainNetworkReadinessMaxAttempts,
-  getCurrentExplorerVersion,
-  getDockerContainerId,
-  getDockerContainerStartupCmdPorts,
-  getDockerContainerState,
-  getDockerContainerVolume,
-  getLocalExplorerVersions,
-  getLogFilePaths,
-  getProcessToLogFileMapping,
-  getRequiredDockerContainerPorts,
-  getSystemQuotes,
-  handleDockerContainerPresence,
-  handleExplorerReleasePresence,
-  handleStartCommandChecks,
-  handleStopCommandChecks,
-  handleYesNoConfirmation,
-  isEnoughDockerEngineResourcesAvailable,
-  launchExplorer,
-  printBlockchainNetworkProperties,
-  printCmdDebugLog,
-  printDockerContainerProcessesLogPaths,
-  printExplorerVersions,
-  printExtendedDockerContainerState,
-  printUsefulUrls,
-  printZkAppSnippet,
-  processArchiveNodeApiLogs,
-  processMultiNodeLogs,
-  processSingleNodeLogs,
-  promptForDockerContainerProcess,
-  removeDanglingDockerImages,
-  removeDockerContainer,
-  removeDockerVolume,
-  saveDockerContainerProcessesLogs,
-  secondsToHms,
-  shellExec,
-  stopDockerContainer,
-  streamDockerContainerFileContent,
-  updateCurrentExplorerVersion,
-  waitForBlockchainNetworkReadiness,
-};
+  export {
+    buildDebugLogger,
+    checkDockerEngineAvailability,
+    copyContainerLogToHost,
+    dockerContainerIdMatchesConfig,
+    downloadExplorerRelease,
+    executeCmd,
+    fetchExplorerReleases,
+    generateLogsDirPath,
+    getAvailableDockerEngineResources,
+    getBlockchainNetworkReadinessMaxAttempts,
+    getCurrentExplorerVersion,
+    getDockerContainerId,
+    getDockerContainerStartupCmdPorts,
+    getDockerContainerState,
+    getDockerContainerVolume,
+    getLocalExplorerVersions,
+    getLogFilePaths,
+    getProcessToLogFileMapping,
+    getRequiredDockerContainerPorts,
+    getSystemQuotes,
+    handleDockerContainerPresence,
+    handleExplorerReleasePresence,
+    handleStartCommandChecks,
+    handleStopCommandChecks,
+    handleYesNoConfirmation,
+    isEnoughDockerEngineResourcesAvailable,
+    launchExplorer,
+    printBlockchainNetworkProperties,
+    printCmdDebugLog,
+    printDockerContainerProcessesLogPaths,
+    printExplorerVersions,
+    printExtendedDockerContainerState,
+    printUsefulUrls,
+    printZkAppSnippet,
+    processArchiveNodeApiLogs,
+    processMultiNodeLogs,
+    processSingleNodeLogs,
+    promptForDockerContainerProcess,
+    removeDanglingDockerImages,
+    removeDockerContainer,
+    removeDockerVolume,
+    saveDockerContainerProcessesLogs,
+    secondsToHms,
+    shellExec,
+    stopDockerContainer,
+    streamDockerContainerFileContent,
+    updateCurrentExplorerVersion,
+    waitForBlockchainNetworkReadiness
+  };
 
 const debug = createDebug('zk:lightnet');
-const debugLog = (formatter, ...args) => {
-  if (process.env.DEBUG) {
-    const namespaces = process.env.DEBUG.split(',');
-    if (
-      namespaces.includes('*') ||
-      namespaces.includes('zk:*') ||
-      namespaces.includes('zk:lightnet')
-    ) {
-      // We want to outline the debug output, so we print new line first.
-      console.log('');
-    }
-  }
-  debug(formatter, ...args);
-};
+const debugLog = buildDebugLogger();
 const lightnetConfigFile = path.resolve(
   `${Constants.lightnetWorkDir}/config.json`
 );
@@ -1426,6 +1414,23 @@ async function executeCmd(command, silent = true) {
   const { code, stdout, stderr } = await shellExec(command, { silent });
   printCmdDebugLog(command, stdout, stderr);
   return { code, stdout, stderr };
+}
+
+function buildDebugLogger() {
+  return (formatter, ...args) => {
+    if (process.env.DEBUG) {
+      const namespaces = process.env.DEBUG.split(',');
+      if (
+        namespaces.includes('*') ||
+        namespaces.includes('zk:*') ||
+        namespaces.includes('zk:lightnet')
+      ) {
+        // We want to outline the debug output, so we print new line first.
+        console.log('');
+      }
+    }
+    debug(formatter, ...args);
+  };
 }
 
 function getSystemQuotes() {
