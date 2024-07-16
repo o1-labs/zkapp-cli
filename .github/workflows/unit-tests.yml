@@ -54,6 +54,10 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Git checkout
         uses: actions/checkout@v4
+      - name: Configure Git
+        run: |
+          git config --global user.email "unit-tests@o1labs.org"
+          git config --global user.name "Unit Tests"
       - name: NPM ci, build, & test
         run: |
           npm ci
@@ -79,6 +83,10 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Git checkout
         uses: actions/checkout@v4
+      - name: Configure Git
+        run: |
+          git config --global user.email "unit-tests@o1labs.org"
+          git config --global user.name "Unit Tests"
       - name: NPM ci, build, & test
         run: |
           npm ci
