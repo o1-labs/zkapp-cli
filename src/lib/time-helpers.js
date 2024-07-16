@@ -2,7 +2,7 @@
 
 /**
  * Delays the promise resolution mimicking the `sleep`
- * @param {timeoutMs} Timeout in milliseconds to delay promise resolution.
+ * @param {timeoutMs} Timeout in milliseconds to delay the promise resolution for.
  */
 /* istanbul ignore next */
 export async function sleep(timeoutMs) {
