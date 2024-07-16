@@ -4,6 +4,8 @@ jest.unstable_mockModule('chalk', () => {
   const createChainedMock = (color) => {
     const mockFn = jest.fn((text) => `${color}: ${text}`);
     mockFn.bold = jest.fn((text) => `bold ${color}: ${text}`);
+    mockFn.green = jest.fn((text) => `green ${color}: ${text}`);
+    mockFn.green.bold = jest.fn((text) => `green bold ${color}: ${text}`);
     return mockFn;
   };
 
@@ -19,9 +21,13 @@ jest.unstable_mockModule('chalk', () => {
   };
 });
 
-jest.unstable_mockModule('debug', () => ({ default: () => jest.fn() }));
+jest.unstable_mockModule('debug', () => ({
+  default: () => jest.fn(),
+}));
 
-jest.unstable_mockModule('decompress', () => ({ default: () => jest.fn() }));
+jest.unstable_mockModule('decompress', () => ({
+  default: jest.fn(),
+}));
 
 jest.unstable_mockModule('enquirer', () => ({
   default: {
@@ -41,6 +47,7 @@ jest.unstable_mockModule('fs-extra', () => ({
     statSync: jest.fn(),
     writeFileSync: jest.fn(),
     writeJSONSync: jest.fn(),
+    moveSync: jest.fn(),
   },
 }));
 
@@ -50,7 +57,9 @@ jest.unstable_mockModule('node:fs', () => ({
   },
 }));
 
-jest.unstable_mockModule('opener', () => ({ default: () => jest.fn() }));
+jest.unstable_mockModule('opener', () => ({
+  default: jest.fn(),
+}));
 
 jest.unstable_mockModule('ora', () => ({
   default: () => ({
@@ -59,12 +68,6 @@ jest.unstable_mockModule('ora', () => ({
     fail: jest.fn(),
     warn: jest.fn(),
   }),
-}));
-
-jest.unstable_mockModule('semver', () => ({
-  default: {
-    compare: jest.fn(),
-  },
 }));
 
 jest.unstable_mockModule('shelljs', () => ({
@@ -96,13 +99,14 @@ let fs,
   Constants,
   enquirer,
   table,
-  // decompress,
-  // opener,
-  // semver,
+  decompress,
+  opener,
   networkHelpers,
   shell,
   lightnetConfigFile,
   lightnetLogsDir,
+  lightnetExplorerDir,
+  lightnetExplorerConfigFile,
   secondsToHms;
 
 beforeAll(async () => {
@@ -110,9 +114,8 @@ beforeAll(async () => {
   nodeFs = (await import('node:fs')).default;
   enquirer = (await import('enquirer')).default;
   table = await import('table');
-  // decompress = (await import('decompress')).default;
-  // opener = (await import('opener')).default;
-  // semver = (await import('semver')).default;
+  decompress = (await import('decompress')).default;
+  opener = (await import('opener')).default;
   shell = (await import('shelljs')).default;
   Constants = (await import('./constants.js')).default;
   path = (await import('node:path')).default;
@@ -121,6 +124,8 @@ beforeAll(async () => {
 
   lightnetConfigFile = path.resolve(Constants.lightnetWorkDir, 'config.json');
   lightnetLogsDir = path.resolve(Constants.lightnetWorkDir, 'logs');
+  lightnetExplorerDir = path.resolve(Constants.lightnetWorkDir, 'explorer');
+  lightnetExplorerConfigFile = path.resolve(lightnetExplorerDir, 'config.json');
 });
 
 beforeEach(() => {
@@ -133,6 +138,7 @@ beforeEach(() => {
   };
   jest.spyOn(shell, 'exit').mockImplementation(() => {});
   jest.spyOn(process, 'exit').mockImplementation(() => {});
+  jest.spyOn(table, 'getBorderCharacters').mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -1446,7 +1452,505 @@ describe('lightnet.js', () => {
     });
   });
 
-  describe('lightnetExplorer()', () => {});
+  describe('lightnetExplorer()', () => {
+    // Explorer listing tests
+
+    it('should list the explorer versions (more than permitted limit)', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks();
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.not.stringContaining('No data available yet.')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('v0.0.1')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✓ Yes')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)Only((.|\n)*)5((.|\n)*)most recent versions are shown.((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should list the explorer versions (less than permitted limit)', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks({
+        configFs: {
+          exists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: false,
+          respondWithMoreThanPermitLimit: false,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.not.stringContaining('No data available yet.')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('v0.0.1')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('✓ Yes')
+      );
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)Only((.|\n)*)5((.|\n)*)most recent versions are shown.((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should list the explorer versions (no current config exists)', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks({
+        configFs: {
+          exists: false,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: false,
+          respondWithMoreThanPermitLimit: false,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringContaining('No data available yet.')
+      );
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringContaining('✓ Yes')
+      );
+      expect(console.log).not.toHaveBeenCalledWith(
+        expect.stringMatching(
+          /((.|\n)*)Only((.|\n)*)5((.|\n)*)most recent versions are shown.((.|\n)*)/gi
+        )
+      );
+    });
+
+    it('should list no explorer versions if fetch failed', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks({
+        configFs: {
+          exists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: true,
+          emptyResponse: false,
+          respondWithMoreThanPermitLimit: true,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('No data available yet.')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Warning: Unable to fetch lightweight Mina explorer releases. This may be due to connectivity issues.'
+        )
+      );
+    });
+
+    it('should list no explorer versions if fetch did not succeed', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks({
+        configFs: {
+          exists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: false,
+          status: 500,
+          thrownOnResponse: false,
+          emptyResponse: false,
+          respondWithMoreThanPermitLimit: true,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('No data available yet.')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Warning: Unable to fetch lightweight Mina explorer releases. This may be due to connectivity issues.'
+        )
+      );
+    });
+
+    it('should exit in case of error thrown', async () => {
+      const targetMethodParams = { list: true, use: '' };
+      await setupLightnetExplorerListingMocks({
+        configFs: {
+          exists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: false,
+          status: 500,
+          thrownOnResponse: false,
+          emptyResponse: false,
+          respondWithMoreThanPermitLimit: true,
+        },
+      });
+      jest.spyOn(table, 'getBorderCharacters').mockImplementation(() => {
+        throw new Error('table.getBorderCharacters');
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await expect(lightnetExplorer(targetMethodParams)).rejects.toThrow(
+        'shell.exit'
+      );
+
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Issue happened while fetching the lightweight Mina explorer available versions!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
+    // Explorer usage tests
+
+    it('should download and launch the latest explorer version', async () => {
+      const targetMethodParams = { list: false, use: 'latest' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.3',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: false,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(decompress).toHaveBeenCalled();
+      expect(opener).toHaveBeenCalledWith(expect.stringContaining('file://'));
+      expect(fs.outputJsonSync).toHaveBeenCalledWith(
+        lightnetExplorerConfigFile,
+        { version: 'v0.0.3' },
+        { spaces: 2, flag: 'w' }
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'The lightweight Mina explorer is available at the following path'
+        )
+      );
+    });
+
+    it('should launch the locally available explorer version', async () => {
+      const targetMethodParams = { list: false, use: 'v0.0.2' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.2',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: true,
+          currentVersion: 'v0.0.2',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: true,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).toHaveBeenCalledWith(expect.stringContaining('file://'));
+      expect(fs.outputJsonSync).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'The lightweight Mina explorer is available at the following path'
+        )
+      );
+    });
+
+    it('should launch the explorer and update the config (no previous config exists)', async () => {
+      const targetMethodParams = { list: false, use: 'v0.0.2' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.2',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: true,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      fs.existsSync
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false);
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await lightnetExplorer(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).toHaveBeenCalledWith(expect.stringContaining('file://'));
+      expect(fs.outputJsonSync).toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'The lightweight Mina explorer is available at the following path'
+        )
+      );
+    });
+
+    it('should exit if explorer binary artifact download fails', async () => {
+      const targetMethodParams = { list: false, use: 'latest' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.3',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: false,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: false,
+          status: 500,
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      process.exit.mockImplementation(() => {
+        throw new Error('process.exit');
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await expect(lightnetExplorer(targetMethodParams)).rejects.toThrow(
+        'shell.exit'
+      );
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).not.toHaveBeenCalled();
+      expect(fs.outputJsonSync).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Issue happened while launching the lightweight Mina explorer!'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit if no local nor remote explorer versions available', async () => {
+      const targetMethodParams = { list: false, use: 'v0.0.1' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.1',
+        },
+        configFs: {
+          exists: true,
+          dirExists: false,
+          localVersionExists: false,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: true,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await expect(lightnetExplorer(targetMethodParams)).rejects.toThrow(
+        'shell.exit'
+      );
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).not.toHaveBeenCalled();
+      expect(fs.outputJsonSync).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining('Attempting to use the latest local version.')
+      );
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'No local versions of the lightweight Mina explorer are available. Please check your network connection and try again.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit if no remote explorer versions available', async () => {
+      const targetMethodParams = { list: false, use: 'v0.0.1' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.0.1',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: true,
+          currentVersion: 'v0.0.1',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: true,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await expect(lightnetExplorer(targetMethodParams)).rejects.toThrow(
+        'shell.exit'
+      );
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).not.toHaveBeenCalled();
+      expect(fs.outputJsonSync).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'No lightweight Mina explorer versions are available yet. Please try again later.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit if no remote explorer version to use has been found', async () => {
+      const targetMethodParams = { list: false, use: 'v0.4.2' };
+      await setupLightnetExplorerUsageMocks({
+        configParams: {
+          useVersion: 'v0.4.2',
+        },
+        configFs: {
+          exists: true,
+          dirExists: true,
+          localVersionExists: true,
+          currentVersion: 'v0.4.2',
+        },
+        fetchReleases: {
+          okResponse: true,
+          status: 200,
+          thrownOnResponse: false,
+          emptyResponse: false,
+        },
+        fetchBinary: {
+          okResponse: true,
+          status: 200,
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      const { lightnetExplorer } = await import('./lightnet.js');
+
+      await expect(lightnetExplorer(targetMethodParams)).rejects.toThrow(
+        'shell.exit'
+      );
+
+      jest.runAllTimers();
+      expect(decompress).not.toHaveBeenCalled();
+      expect(opener).not.toHaveBeenCalled();
+      expect(fs.outputJsonSync).not.toHaveBeenCalled();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'The specified version ("v0.4.2") of the lightweight Mina explorer does not exist or is not available for download.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+  });
 
   describe('shellExec()', () => {
     it('should execute command without the options', async () => {
@@ -1709,7 +2213,7 @@ async function setupLightnetStartMocks({
   });
   setupShellWhichMocks({ isCommandAvailable: dockerEngine.isCommandAvailable });
   setupShellExecMocks({ dockerEngine, dockerContainer });
-  jest.spyOn(global, 'fetch').mockImplementation((endpoint, options) => {
+  jest.spyOn(global, 'fetch').mockImplementation((_endpoint, options) => {
     if (daemon.thrownOnResponse) {
       return Promise.reject(new Error('Failed to fetch'));
     } else {
@@ -1769,6 +2273,184 @@ async function setupLightnetStopMocks({
   });
   setupShellWhichMocks({ isCommandAvailable: dockerEngine.isCommandAvailable });
   setupShellExecMocks({ dockerEngine, dockerContainer });
+}
+
+async function setupLightnetExplorerListingMocks({
+  configFs = {
+    exists: true,
+    currentVersion: 'v0.0.1',
+  },
+  fetchReleases = {
+    okResponse: true,
+    status: 200,
+    thrownOnResponse: false,
+    emptyResponse: false,
+    respondWithMoreThanPermitLimit: true,
+  },
+} = {}) {
+  jest.useFakeTimers();
+  fs.existsSync.mockImplementation((_path) => {
+    if (_path.includes(lightnetExplorerConfigFile)) {
+      return configFs.exists;
+    }
+    return false;
+  });
+  fs.readJSONSync.mockImplementation((_path) => {
+    if (_path.includes(lightnetExplorerConfigFile)) {
+      return {
+        version: configFs.currentVersion,
+      };
+    }
+  });
+  jest.spyOn(global, 'fetch').mockImplementation((endpoint) => {
+    if (fetchReleases.thrownOnResponse) {
+      return Promise.reject(new Error('Failed to fetch'));
+    } else {
+      if (endpoint.includes('mina-lightweight-explorer')) {
+        const response = fetchReleases.emptyResponse
+          ? []
+          : fetchReleases.respondWithMoreThanPermitLimit
+            ? [
+                {
+                  name: 'v0.0.1',
+                  published_at: '2024-01-01T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.2',
+                  published_at: '2024-01-02T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.3',
+                  published_at: '2024-01-03T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.4',
+                  published_at: '2024-01-04T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.5',
+                  published_at: '2024-01-05T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.6',
+                  published_at: '2024-01-06T00:00:00Z',
+                  zipball_url: '',
+                },
+              ]
+            : [
+                {
+                  name: 'v0.0.1',
+                  published_at: '2024-01-01T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.2',
+                  published_at: '2024-01-02T00:00:00Z',
+                  zipball_url: '',
+                },
+                {
+                  name: 'v0.0.3',
+                  published_at: '2024-01-03T00:00:00Z',
+                  zipball_url: '',
+                },
+              ];
+        return Promise.resolve({
+          ok: fetchReleases.okResponse,
+          status: fetchReleases.status,
+          json: () => Promise.resolve(response),
+        });
+      }
+    }
+  });
+}
+
+async function setupLightnetExplorerUsageMocks({
+  configParams = {
+    useVersion: 'v0.0.3',
+  },
+  configFs = {
+    exists: true,
+    dirExists: true,
+    localVersionExists: false,
+    currentVersion: 'v0.0.1',
+  },
+  fetchReleases = {
+    okResponse: true,
+    status: 200,
+    thrownOnResponse: false,
+    emptyResponse: false,
+  },
+  fetchBinary = {
+    okResponse: true,
+    status: 200,
+  },
+} = {}) {
+  jest.useFakeTimers();
+  fs.ensureDirSync.mockImplementation(() => {});
+  fs.statSync.mockReturnValue({ isDirectory: () => true });
+  fs.existsSync.mockImplementation((_path) => {
+    if (_path.includes(lightnetExplorerConfigFile)) {
+      return configFs.exists;
+    } else if (_path.endsWith(lightnetExplorerDir)) {
+      return configFs.dirExists;
+    } else if (
+      _path.endsWith(path.resolve(lightnetExplorerDir, configParams.useVersion))
+    ) {
+      return configFs.localVersionExists;
+    }
+    return false;
+  });
+  fs.readdirSync.mockReturnValue(['v0.0.1', 'v0.0.2']);
+  fs.readJSONSync.mockImplementation((_path) => {
+    if (_path.includes(lightnetExplorerConfigFile)) {
+      return {
+        version: configFs.currentVersion,
+      };
+    }
+  });
+  jest.spyOn(global, 'fetch').mockImplementation((endpoint) => {
+    if (fetchReleases.thrownOnResponse) {
+      return Promise.reject(new Error('Failed to fetch'));
+    } else {
+      if (endpoint.includes('mina-lightweight-explorer')) {
+        const response = fetchReleases.emptyResponse
+          ? []
+          : [
+              {
+                name: 'v0.0.3',
+                published_at: '2024-01-03T00:00:00Z',
+                zipball_url: 'zipball_url',
+              },
+              {
+                name: 'v0.0.2',
+                published_at: '2024-01-02T00:00:00Z',
+                zipball_url: 'zipball_url',
+              },
+              {
+                name: 'v0.0.1',
+                published_at: '2024-01-01T00:00:00Z',
+                zipball_url: 'zipball_url',
+              },
+            ];
+        return Promise.resolve({
+          ok: fetchReleases.okResponse,
+          status: fetchReleases.status,
+          json: () => Promise.resolve(response),
+        });
+      } else if (endpoint === 'zipball_url') {
+        return Promise.resolve({
+          ok: fetchBinary.okResponse,
+          status: fetchBinary.status,
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        });
+      }
+    }
+  });
 }
 
 function checkSavedJsonConfig(fsCalls, configFileName, jsonContent) {
