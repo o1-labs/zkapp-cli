@@ -12,6 +12,7 @@ import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
 import { isDirEmpty, step } from './helpers.js';
 import { checkLocalPortsAvailability } from './network-helpers.js';
+import { sleep } from './time-helpers.js';
 
 // Public API
 export {
@@ -1075,7 +1076,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
       }
     } catch (error) {
       debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
-      await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
+      await sleep(pollingIntervalMs);
     }
     return false;
   };
@@ -1091,7 +1092,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
       ));
     if (!blockchainIsReady) {
       debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
-      await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
+      await sleep(pollingIntervalMs);
       blockchainSyncAttempt++;
     }
   }

@@ -93,6 +93,10 @@ jest.unstable_mockModule('./network-helpers.js', () => ({
   checkLocalPortsAvailability: jest.fn(),
 }));
 
+jest.unstable_mockModule('./time-helpers.js', () => ({
+  sleep: jest.fn(),
+}));
+
 let fs,
   nodeFs,
   path,
@@ -414,47 +418,128 @@ describe('lightnet.js', () => {
       expect(process.exit).toHaveBeenCalledWith(1);
     });
 
-    // TODO: Fix this
-    // it('should exit if waiting for blockchain readiness max attempts reached', async () => {
-    //   const targetMethodParams = {
-    //     mode: 'single-node',
-    //     type: 'fast',
-    //     proofLevel: 'none',
-    //     minaBranch: 'compatible',
-    //     archive: true,
-    //     sync: true,
-    //     pull: true,
-    //     minaLogLevel: 'Trace',
-    //   };
-    //   global.setTimeout = jest.fn((callback) => callback());
-    //   await setupLightnetStartMocks({
-    //     daemon: {
-    //       thrownOnResponse: false,
-    //       okResponse: false,
-    //       status: 'BOOTSTRAPPING',
-    //     },
-    //   });
-    // shell.exit.mockImplementation(() => {
-    //   throw new Error('shell.exit');
-    // });
-    // process.exit.mockImplementation(() => {
-    //   throw new Error('process.exit');
-    // });
-    // const { lightnetStart } = await import('./lightnet.js');
+    it('should exit if was waiting for the blockchain readiness for max attempts (not synced response from daemon)', async () => {
+      const targetMethodParams = {
+        mode: 'single-node',
+        type: 'fast',
+        proofLevel: 'none',
+        minaBranch: 'compatible',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      };
+      global.setTimeout = jest.fn(() => jest.fn());
+      await setupLightnetStartMocks({
+        daemon: {
+          thrownOnResponse: false,
+          okResponse: true,
+          status: 'BOOTSTRAPPING',
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      process.exit.mockImplementation(() => {
+        throw new Error('process.exit');
+      });
+      const { lightnetStart } = await import('./lightnet.js');
 
-    // await expect(lightnetStart(targetMethodParams)).rejects.toThrow(
-    //   'process.exit'
-    // );
+      await expect(lightnetStart(targetMethodParams)).rejects.toThrow(
+        'process.exit'
+      );
 
-    // jest.runAllTimers();
-    // expect(console.log).toHaveBeenCalledWith(
-    //   expect.stringContaining(
-    //     'Maximum blockchain network readiness check attempts reached.'
-    //   )
-    // );
-    // expect(shell.exit).toHaveBeenCalledWith(1);
-    // expect(process.exit).toHaveBeenCalledWith(1);
-    // });
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Maximum blockchain network readiness check attempts reached.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit if was waiting for the blockchain readiness for max attempts (bad response from daemon)', async () => {
+      const targetMethodParams = {
+        mode: 'single-node',
+        type: 'fast',
+        proofLevel: 'none',
+        minaBranch: 'compatible',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      };
+      global.setTimeout = jest.fn((callback) => callback());
+      await setupLightnetStartMocks({
+        daemon: {
+          thrownOnResponse: false,
+          okResponse: false,
+          status: 'SYNCED',
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      process.exit.mockImplementation(() => {
+        throw new Error('process.exit');
+      });
+      const { lightnetStart } = await import('./lightnet.js');
+
+      await expect(lightnetStart(targetMethodParams)).rejects.toThrow(
+        'process.exit'
+      );
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Maximum blockchain network readiness check attempts reached.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should exit if was waiting for the blockchain readiness for max attempts (throws on response from daemon)', async () => {
+      const targetMethodParams = {
+        mode: 'single-node',
+        type: 'fast',
+        proofLevel: 'none',
+        minaBranch: 'compatible',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      };
+      global.setTimeout = jest.fn((callback) => callback());
+      await setupLightnetStartMocks({
+        daemon: {
+          thrownOnResponse: true,
+          okResponse: true,
+          status: 'SYNCED',
+        },
+      });
+      shell.exit.mockImplementation(() => {
+        throw new Error('shell.exit');
+      });
+      process.exit.mockImplementation(() => {
+        throw new Error('process.exit');
+      });
+      const { lightnetStart } = await import('./lightnet.js');
+
+      await expect(lightnetStart(targetMethodParams)).rejects.toThrow(
+        'process.exit'
+      );
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Maximum blockchain network readiness check attempts reached.'
+        )
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+      expect(process.exit).toHaveBeenCalledWith(1);
+    });
 
     it('should exit if ports unavailable', async () => {
       const targetMethodParams = {
