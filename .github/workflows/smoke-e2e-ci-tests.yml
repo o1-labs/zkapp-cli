@@ -6,11 +6,11 @@ name: Smoke E2E tests
 on:
   workflow_run:
     workflows: ['Unit tests']
-    types:
-      - completed
+    types: [completed]
+  workflow_dispatch: {}
 jobs:
   against-compatible-real-network-on-linux:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_dispatch' }}
     timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,7 +49,7 @@ jobs:
           test-script: 'npm run e2e:test:smoke'
           artifacts-prefix: 'smoke-e2e-tests'
   against-master-real-network-on-linux:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || github.event_name == 'workflow_dispatch' }}
     timeout-minutes: 30
     runs-on: ${{ matrix.os }}
     strategy:

@@ -8,8 +8,7 @@ name: Publish to NPM
 on:
   workflow_run:
     workflows: ['Smoke E2E tests']
-    types:
-      - completed
+    types: [completed]
 jobs:
   publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' }} && github.ref == 'refs/heads/main'
