@@ -47,12 +47,6 @@ jest.unstable_mockModule('shelljs', () => ({
   },
 }));
 
-jest.unstable_mockModule('./constants.js', () => ({
-  default: {
-    exampleTypes: ['example1', 'example2'],
-  },
-}));
-
 jest.unstable_mockModule('./helpers.js', () => ({
   default: jest.fn(),
   isDirEmpty: jest.fn(),
@@ -99,7 +93,7 @@ describe('example.js', () => {
   describe('example()', () => {
     it('should exit if Git is not installed', async () => {
       shell.which.mockReturnValue(false);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       const { default: example } = await import('./example.js');
 
       await example();
@@ -112,7 +106,7 @@ describe('example.js', () => {
 
     it('should prompt for example type if none is provided', async () => {
       shell.which.mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(true);
       helpers.isDirEmpty.mockReturnValue(false);
@@ -128,14 +122,14 @@ describe('example.js', () => {
         message: expect.any(Function),
         prefix: expect.any(Function),
       });
-      expect(shell.cd).toHaveBeenCalledWith('example1');
+      expect(shell.cd).toHaveBeenCalledWith('sudoku');
       expect(helpers.setupProject).toHaveBeenCalled();
       expect(helpers.step).toHaveBeenCalled();
     });
 
     it('should exit if setupProject fails', async () => {
       shell.which.mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(false);
       const { default: example } = await import('./example.js');
@@ -147,7 +141,7 @@ describe('example.js', () => {
 
     it('should exit if updateExampleSources fails', async () => {
       shell.which.mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(true);
       helpers.isDirEmpty.mockReturnValue(true);
@@ -160,7 +154,7 @@ describe('example.js', () => {
 
     it('should initialize Git repo and perform npm install', async () => {
       shell.which.mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(true);
       helpers.isDirEmpty.mockReturnValue(false);
@@ -172,7 +166,7 @@ describe('example.js', () => {
 
       await example();
 
-      expect(shell.cd).toHaveBeenCalledWith('example1');
+      expect(shell.cd).toHaveBeenCalledWith('sudoku');
       const calls = shell.exec.mock.calls;
       expect(calls[0][0]).toBe('git init -q');
       expect(calls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
@@ -185,7 +179,7 @@ describe('example.js', () => {
       const originalPlatform = process.platform;
       try {
         shell.which.mockReturnValue(true);
-        enquirer.prompt.mockResolvedValue({ example: 'example1' });
+        enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
         fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
         helpers.setupProject.mockResolvedValue(true);
         helpers.isDirEmpty.mockReturnValue(false);
@@ -201,7 +195,7 @@ describe('example.js', () => {
 
         await example();
 
-        expect(shell.cd).toHaveBeenCalledWith('example1');
+        expect(shell.cd).toHaveBeenCalledWith('sudoku');
         const calls = shell.exec.mock.calls;
         expect(calls[0][0]).toBe('git init -q');
         expect(calls[1][0]).toBe('npm install --silent > NUL');
@@ -217,7 +211,7 @@ describe('example.js', () => {
 
     it('should exit with code 0 on success', async () => {
       jest.spyOn(shell, 'which').mockReturnValue(true);
-      enquirer.prompt.mockResolvedValue({ example: 'example1' });
+      enquirer.prompt.mockResolvedValue({ example: 'sudoku' });
       fs.existsSync.mockReturnValueOnce(false).mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(true);
       helpers.isDirEmpty.mockReturnValue(false);
@@ -236,9 +230,9 @@ describe('example.js', () => {
       helpers.isDirEmpty.mockReturnValue(false);
       const { default: example } = await import('./example.js');
 
-      await example('example1');
+      await example('sudoku');
 
-      expect(shell.cd).toHaveBeenCalledWith('example1');
+      expect(shell.cd).toHaveBeenCalledWith('sudoku');
       const calls = shell.exec.mock.calls;
       expect(calls[0][0]).toBe('git init -q');
       expect(calls[1][0]).toBe('npm install --silent > "/dev/null" 2>&1');
@@ -268,19 +262,19 @@ describe('example.js', () => {
       const { default: example } = await import('./example.js');
 
       // Test case when state is submitted and not cancelled
-      enquirer.prompt.mockResolvedValueOnce({ example: 'example1' });
+      enquirer.prompt.mockResolvedValueOnce({ example: 'sudoku' });
       await example();
       const firstCall = enquirer.prompt.mock.calls[0][0];
       expect(firstCall.message(mockState)).toBe('success: Choose an example');
 
       // Test case when state is not submitted
-      enquirer.prompt.mockResolvedValueOnce({ example: 'example1' });
+      enquirer.prompt.mockResolvedValueOnce({ example: 'sudoku' });
       await example();
       const secondCall = enquirer.prompt.mock.calls[1][0];
       expect(secondCall.prefix({ ...mockState, submitted: false })).toBe('?');
 
       // Test case when state is submitted and cancelled
-      enquirer.prompt.mockResolvedValueOnce({ example: 'example1' });
+      enquirer.prompt.mockResolvedValueOnce({ example: 'sudoku' });
       await example();
       const thirdCall = enquirer.prompt.mock.calls[2][0];
       expect(thirdCall.prefix({ ...mockState, cancelled: true })).toBe(
@@ -288,7 +282,7 @@ describe('example.js', () => {
       );
 
       // Test case when state is submitted and not cancelled
-      enquirer.prompt.mockResolvedValueOnce({ example: 'example1' });
+      enquirer.prompt.mockResolvedValueOnce({ example: 'sudoku' });
       await example();
       const fourthCall = enquirer.prompt.mock.calls[3][0];
       expect(fourthCall.prefix(mockState)).toBe('✔');
@@ -300,7 +294,7 @@ describe('example.js', () => {
         cancelled: false,
       };
       chalk.reset = jest.fn((text) => `reset: ${text}`);
-      enquirer.prompt.mockResolvedValueOnce({ example: 'example1' });
+      enquirer.prompt.mockResolvedValueOnce({ example: 'sudoku' });
       await example();
       const fifthCall = enquirer.prompt.mock.calls[4][0];
       expect(fifthCall.message(mockStateReset)).toBe(
@@ -344,7 +338,7 @@ describe('example.js', () => {
       fs.cpSync.mockImplementation(() => {});
       const { updateExampleSources } = await import('./example.js');
 
-      const result = await updateExampleSources('example1', 'dir');
+      const result = await updateExampleSources('sudoku', 'dir');
 
       expect(result).toBe(true);
     });
@@ -353,7 +347,7 @@ describe('example.js', () => {
       helpers.isDirEmpty.mockReturnValue(true);
       const { updateExampleSources } = await import('./example.js');
 
-      const result = await updateExampleSources('example1', 'dir');
+      const result = await updateExampleSources('sudoku', 'dir');
 
       expect(result).toBe(false);
     });
@@ -365,7 +359,7 @@ describe('example.js', () => {
       });
       const { updateExampleSources } = await import('./example.js');
 
-      const result = await updateExampleSources('example1', 'dir');
+      const result = await updateExampleSources('sudoku', 'dir');
 
       expect(result).toBe(false);
       expect(console.error).toHaveBeenCalledWith(new Error('Test error'));
