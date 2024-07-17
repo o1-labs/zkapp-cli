@@ -45,6 +45,7 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
+          mina-branch: 'compatible'
   against-master-real-network-on-linux:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
@@ -81,6 +82,7 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
+          mina-branch: 'master'
   against-mocked-network-on-macos:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
@@ -97,6 +99,7 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
+          mina-branch: 'mocked'
   against-mocked-network-on-windows:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
@@ -113,3 +116,4 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: powershell
+          mina-branch: 'mocked'

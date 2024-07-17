@@ -46,6 +46,7 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
+          mina-branch: 'compatible'
           test-script: 'npm run e2e:test:smoke'
           artifacts-prefix: 'smoke-e2e-tests'
   against-master-real-network-on-linux:
@@ -85,5 +86,6 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
+          mina-branch: 'master'
           test-script: 'npm run e2e:test:smoke'
           artifacts-prefix: 'smoke-e2e-tests'
