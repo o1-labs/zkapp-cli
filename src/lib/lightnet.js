@@ -1076,7 +1076,6 @@ async function waitForBlockchainNetworkReadiness(mode) {
       }
     } catch (error) {
       debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
-      await sleep(pollingIntervalMs);
     }
     return false;
   };
