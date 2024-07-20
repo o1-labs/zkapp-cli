@@ -1074,8 +1074,8 @@ async function waitForBlockchainNetworkReadiness(mode) {
           return true;
         }
       }
-    } catch (error) {
-      debugLog(debugMessage, blockchainSyncAttempt, pollingIntervalMs / 1_000);
+    } catch (_) {
+      // Ignore errors
     }
     return false;
   };
