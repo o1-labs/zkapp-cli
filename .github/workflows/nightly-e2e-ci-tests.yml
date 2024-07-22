@@ -99,7 +99,7 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: bash
-          mina-branch: 'mocked'
+          mina-branch: 'mocked-macos'
   against-mocked-network-on-windows:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
@@ -116,4 +116,4 @@ jobs:
           node-version: ${{ matrix.node }}
           os-type: ${{ matrix.os }}
           shell: powershell
-          mina-branch: 'mocked'
+          mina-branch: 'mocked-windows'
