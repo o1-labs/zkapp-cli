@@ -16,10 +16,10 @@ import Constants from './constants.js';
 import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
 
-// Public API
+// Module external API
 export default project;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export { message, prefix, scaffoldNext, scaffoldNuxt, scaffoldSvelte };
 
 const __filename = url.fileURLToPath(import.meta.url);

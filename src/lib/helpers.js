@@ -8,7 +8,7 @@ import url from 'node:url';
 import ora from 'ora';
 import shell from 'shelljs';
 
-// Public API
+// Module external API
 export {
   capitalize,
   findIfClassExtendsSmartContract,
@@ -22,7 +22,7 @@ export {
   titleCase,
 };
 
-// Private API
+// Module internal API (exported for testing purposes)
 export {
   buildClassHierarchy,
   checkClassInheritance,

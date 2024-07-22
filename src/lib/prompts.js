@@ -3,10 +3,10 @@ import { PrivateKey } from 'o1js';
 import Constants from './constants.js';
 import { capitalize } from './helpers.js';
 
-// Public API
+// Module external API
 export { prompts };
 
-// Private API
+// Module internal API (exported for testing purposes)
 export {
   formatPrefixSymbol,
   getFeepayorChoices,

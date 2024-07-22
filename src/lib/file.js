@@ -2,10 +2,10 @@ import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'node:path';
 
-// Public API
+// Module external API
 export default file;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export { parsePath, pathExists };
 
 /**

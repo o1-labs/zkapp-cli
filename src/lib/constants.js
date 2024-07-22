@@ -49,5 +49,5 @@ const Constants = Object.freeze({
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
 });
 
-// Public API
+// Module external API
 export default Constants;

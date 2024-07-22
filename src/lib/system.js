@@ -1,10 +1,10 @@
 import envinfo from 'envinfo';
 import { execSync } from 'node:child_process';
 
-// Public API
+// Module external API
 export default system;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export { getInstalledNpmPackageVersion };
 
 async function system() {

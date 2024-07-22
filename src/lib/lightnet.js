@@ -14,7 +14,7 @@ import { isDirEmpty, step } from './helpers.js';
 import { checkLocalPortsAvailability } from './network-helpers.js';
 import { sleep } from './time-helpers.js';
 
-// Public API
+// Module external API
 export {
   lightnetExplorer,
   lightnetFollowLogs,
@@ -24,7 +24,7 @@ export {
   lightnetStop,
 };
 
-// Private API
+// Module internal API (exported for testing purposes)
 export {
   buildDebugLogger,
   checkDockerEngineAvailability,

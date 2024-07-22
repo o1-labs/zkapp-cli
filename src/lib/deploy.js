@@ -14,10 +14,10 @@ import {
   step,
 } from './helpers.js';
 
-// Public API
+// Module external API
 export default deploy;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export {
   chooseSmartContract,
   findSmartContracts,

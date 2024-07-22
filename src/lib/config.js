@@ -10,10 +10,10 @@ import { readDeployAliasesConfig, step } from './helpers.js';
 import { isMinaGraphQlEndpointAvailable } from './network-helpers.js';
 import { prompts } from './prompts.js';
 
-// Public API
+// Module external API
 export default config;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export {
   createDeployAlias,
   createKeyPair,

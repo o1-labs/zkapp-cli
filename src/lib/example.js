@@ -9,10 +9,10 @@ import shell from 'shelljs';
 import Constants from './constants.js';
 import { isDirEmpty, setProjectName, setupProject, step } from './helpers.js';
 
-// Public API
+// Module external API
 export default example;
 
-// Private API
+// Module internal API (exported for testing purposes)
 export { addStartScript, findUniqueDir, updateExampleSources };
 
 const __filename = url.fileURLToPath(import.meta.url);
