@@ -1,5 +1,5 @@
 #
-# https://github.com/stackblitz-labs/pkg.pr.new
+# Continuous releases with the https://github.com/stackblitz-labs/pkg.pr.new
 #
 
 name: Continuous releases on pkg-pr-new

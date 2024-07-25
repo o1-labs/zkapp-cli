@@ -1,0 +1,215 @@
+#
+# This workflow will run unit tests, smoke e2e tests and attempt to publish package to NPM.
+#
+
+name: Test and publish to NPM
+on:
+  push: {}
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  common-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: NPM ci, build, & test
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run coverage
+          cd templates/project-ts
+          npm install || true
+          npm run test
+        env:
+          CI: true
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: zkapp-cli
+          verbose: true
+          handle_no_reports_found: true
+          fail_ci_if_error: false
+
+  sudoku-example-unit-tests:
+    runs-on: ubuntu-latest
+    needs: [common-unit-tests]
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: Configure Git
+        run: |
+          git config --global user.email "unit-tests@o1labs.org"
+          git config --global user.name "Unit Tests"
+      - name: NPM ci, build, & test
+        run: |
+          npm ci
+          npm run build --if-present
+          npm link
+          zk example sudoku
+          cd sudoku
+          npm run test
+          npm run build
+          npm run start
+        env:
+          CI: true
+
+  tictactoe-example-unit-tests:
+    runs-on: ubuntu-latest
+    needs: [common-unit-tests]
+    strategy:
+      matrix:
+        node: [18]
+    steps:
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: Configure Git
+        run: |
+          git config --global user.email "unit-tests@o1labs.org"
+          git config --global user.name "Unit Tests"
+      - name: NPM ci, build, & test
+        run: |
+          npm ci
+          npm run build --if-present
+          npm link
+          zk example tictactoe
+          cd tictactoe
+          npm run test
+          npm run build
+          npm run start
+        env:
+          CI: true
+
+  smoke-e2e-tests-against-compatible-network:
+    needs: [sudoku-example-unit-tests, tictactoe-example-unit-tests]
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        node: [18, 20]
+        os: [ubuntu-latest]
+    services:
+      mina-local-network:
+        image: o1labs/mina-local-network:compatible-latest-lightnet
+        env:
+          NETWORK_TYPE: 'single-node'
+          PROOF_LEVEL: 'none'
+        ports:
+          - 3085:3085
+          - 5432:5432
+          - 8080:8080
+          - 8181:8181
+          - 8282:8282
+        volumes:
+          - /tmp:/root/logs
+    steps:
+      - name: Wait for Mina network readiness
+        uses: o1-labs/wait-for-mina-network-action@v1
+        with:
+          mina-graphql-port: 8080
+          max-attempts: 60
+          polling-interval-ms: 10000
+      - uses: actions/checkout@v4
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
+        with:
+          node-version: ${{ matrix.node }}
+          os-type: ${{ matrix.os }}
+          shell: bash
+          mina-branch: 'compatible'
+          test-script: 'npm run e2e:test:smoke'
+          artifacts-prefix: 'smoke-e2e-tests'
+
+  smoke-e2e-tests-against-master-network:
+    needs: [sudoku-example-unit-tests, tictactoe-example-unit-tests]
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        node: [18, 20]
+        os: [ubuntu-latest]
+    services:
+      mina-local-network:
+        image: o1labs/mina-local-network:master-latest-lightnet
+        env:
+          NETWORK_TYPE: 'single-node'
+          PROOF_LEVEL: 'none'
+        ports:
+          - 3085:3085
+          - 5432:5432
+          - 8080:8080
+          - 8181:8181
+          - 8282:8282
+        volumes:
+          - /tmp:/root/logs
+    steps:
+      - name: Wait for Mina network readiness
+        uses: o1-labs/wait-for-mina-network-action@v1
+        with:
+          mina-graphql-port: 8080
+          max-attempts: 60
+          polling-interval-ms: 10000
+      - uses: actions/checkout@v4
+      - name: Use shared E2E testing steps
+        uses: ./.github/actions/e2e-shared
+        with:
+          node-version: ${{ matrix.node }}
+          os-type: ${{ matrix.os }}
+          shell: bash
+          mina-branch: 'master'
+          test-script: 'npm run e2e:test:smoke'
+          artifacts-prefix: 'smoke-e2e-tests'
+
+  publish-to-npm:
+    needs:
+      [
+        smoke-e2e-tests-against-compatible-network,
+        smoke-e2e-tests-against-master-network,
+      ]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: NPM ci & build
+        run: |
+          npm ci
+          npm run build --if-present
+      - name: Publish to NPM if version has changed
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          strategy: upgrade
+        env:
+          INPUT_TOKEN: ${{ secrets.NPM_TOKEN }}
