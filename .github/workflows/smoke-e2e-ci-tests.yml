@@ -7,6 +7,8 @@ on:
   workflow_run:
     workflows: ['Unit tests']
     types: [completed]
+  push: {}
+  pull_request: {}
   workflow_dispatch: {}
 jobs:
   against-compatible-real-network-on-linux:
