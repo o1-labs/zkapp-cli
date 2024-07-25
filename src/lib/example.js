@@ -1,13 +1,19 @@
 import chalk from 'chalk';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import path from 'node:path';
 import url from 'node:url';
+import util from 'node:util';
 import ora from 'ora';
-import path from 'path';
 import shell from 'shelljs';
-import util from 'util';
 import Constants from './constants.js';
-import { setupProject } from './helpers.js';
+import { isDirEmpty, setProjectName, setupProject, step } from './helpers.js';
+
+// Module external API
+export default example;
+
+// Module internal API (exported for testing purposes)
+export { addStartScript, findUniqueDir, updateExampleSources };
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +27,7 @@ const shellExec = util.promisify(shell.exec);
  *                       dirs without overwriting existing content, if needed.
  * @return {Promise<void>}
  */
-export async function example(example) {
+async function example(example) {
   if (!shell.which('git')) {
     console.error(chalk.red('Please ensure Git is installed, then try again.'));
     shell.exit(1);
@@ -65,20 +71,29 @@ export async function example(example) {
   // Set dir for shell commands. Doesn't change user's dir in their CLI.
   shell.cd(dir);
 
-  await step('Initialize Git repo', 'git init -q');
+  await step('Initialize Git repo', async () => {
+    await shellExec('git init -q');
+  });
 
-  await step(
-    'NPM install',
-    `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
-  );
+  await step('Set project name', async () => {
+    setProjectName(process.cwd());
+  });
 
-  // process.cwd() is full path to user's terminal + path/to/name.
-  await setProjectName(process.cwd());
+  await step('Update scripts', async () => {
+    addStartScript(path.join(process.cwd(), 'package.json'));
+  });
 
-  await step(
-    'Git init commit',
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
+  await step('NPM install', async () => {
+    await shellExec(
+      `npm install --silent > ${isWindows ? 'NUL' : '"/dev/null" 2>&1'}`
+    );
+  });
+
+  await step('Git init commit', async () => {
+    await shellExec(
+      'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+    );
+  });
 
   const str =
     `\nSuccess!\n` +
@@ -98,50 +113,6 @@ export async function example(example) {
 }
 
 /**
- * Helper for any steps that need to call a shell command.
- * @param {string} step Name of step to show user
- * @param {string} cmd  Shell command to execute.
- * @returns {Promise<void>}
- */
-export async function step(step, cmd) {
-  const spin = ora(`${step}...`).start();
-  try {
-    await shellExec(cmd);
-    spin.succeed(chalk.green(step));
-  } catch (err) {
-    spin.fail(step);
-  }
-}
-
-/**
- * Step to replace placeholder names in the project with the properly-formatted
- * version of the user-supplied name as specified via `zk project <name>`
- * @param {string} projDir Full path to terminal dir + path/to/name
- * @returns {Promise<void>}
- */
-export async function setProjectName(projDir) {
-  const step = 'Set project name';
-  const spin = ora(`${step}...`).start();
-
-  const name = projDir.split(path.sep).pop();
-  replaceInFile(
-    path.join(projDir, 'README.md'),
-    'PROJECT_NAME',
-    titleCase(name)
-  );
-
-  replaceInFile(
-    path.join(projDir, 'package.json'),
-    'package-name',
-    kebabCase(name)
-  );
-
-  addStartScript(path.join(projDir, 'package.json'));
-
-  spin.succeed(chalk.green(step));
-}
-
-/**
  * Helper to add start script to package.json.
  * @param {string} file Path to file
  */
@@ -152,36 +123,13 @@ function addStartScript(file) {
 }
 
 /**
- * Helper to replace text in a file.
- * @param {string} file Path to file
- * @param {string} a    Old text.
- * @param {string} b    New text.
- */
-export function replaceInFile(file, a, b) {
-  let content = fs.readFileSync(file, 'utf8');
-  content = content.replace(a, b);
-  fs.writeFileSync(file, content);
-}
-
-export function titleCase(str) {
-  return str
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.substr(1).toLowerCase())
-    .join(' ');
-}
-
-export function kebabCase(str) {
-  return str.toLowerCase().replace(' ', '-');
-}
-
-/**
  * Updates the example sources.
  * @param {string} example     Name of the example.
  * @param {string} name        Destination dir name.
  * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function updateExampleSources(example, name, lang = 'ts') {
+async function updateExampleSources(example, name, lang = 'ts') {
   const step = 'Update example sources';
   const spin = ora(`${step}...`).start();
 
@@ -197,7 +145,7 @@ export async function updateExampleSources(example, name, lang = 'ts') {
     );
 
     // Example not found. Delete the project template & temp dir to clean up.
-    if (isEmpty(examplePath)) {
+    if (isDirEmpty(examplePath)) {
       spin.fail(step);
       console.error(chalk.red('Example not found'));
       return false;
@@ -218,10 +166,6 @@ export async function updateExampleSources(example, name, lang = 'ts') {
   }
 }
 
-export function isEmpty(path) {
-  return fs.readdirSync(path).length === 0;
-}
-
 /**
  * Given a specified directory name, will return that dir name if it is available,
  * or the next next available dir name with a numeric suffix: <dirName><#>.
@@ -229,8 +173,8 @@ export function isEmpty(path) {
  * @param {number} i   Counter for the recursive function.
  * @return {string}    An unused directory name.
  */
-export function findUniqueDir(str, i = 0) {
-  const dir = str + (i ? i : '');
+function findUniqueDir(str, i = 0) {
+  const dir = str + (i || '');
   if (fs.existsSync(dir)) {
     return findUniqueDir(str, ++i);
   }

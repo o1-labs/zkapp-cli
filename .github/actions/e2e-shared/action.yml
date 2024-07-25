@@ -11,6 +11,10 @@ inputs:
     description: "Shell to use"
     required: true
     default: "bash"
+  mina-branch:
+    description: "Mina repository branch in use"
+    required: true
+    default: "master"
   test-script:
     description: "Test script to run"
     required: false
@@ -51,7 +55,7 @@ runs:
       if: always()
       with:
         if-no-files-found: ignore
-        name: mina-logs-${{ inputs.artifacts-prefix }}-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        name: mina-logs-${{ inputs.artifacts-prefix }}-${{ inputs.mina-branch }}-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: /tmp/*.log
         retention-days: 5
     - name: Upload E2E test artifacts
@@ -60,6 +64,6 @@ runs:
       if: always()
       with:
         if-no-files-found: ignore
-        name: ${{ inputs.artifacts-prefix }}-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
+        name: ${{ inputs.artifacts-prefix }}-${{ inputs.mina-branch }}-report-node${{ inputs.node-version }}-${{ inputs.os-type }}
         path: reports/html-report/
         retention-days: 30

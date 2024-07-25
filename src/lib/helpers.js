@@ -1,13 +1,34 @@
 import { parse as acornParse } from 'acorn';
 import { simple as simpleAcornWalk } from 'acorn-walk';
 import chalk from 'chalk';
-import net from 'net';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
 import path from 'node:path';
 import url from 'node:url';
 import ora from 'ora';
 import shell from 'shelljs';
+
+// Module external API
+export {
+  capitalize,
+  findIfClassExtendsSmartContract,
+  isDirEmpty,
+  kebabCase,
+  readDeployAliasesConfig,
+  replaceInFile,
+  setProjectName,
+  setupProject,
+  step,
+  titleCase,
+};
+
+// Module internal API (exported for testing purposes)
+export {
+  buildClassHierarchy,
+  checkClassInheritance,
+  resolveImports,
+  resolveModulePath,
+};
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,9 +49,10 @@ const acornOptions = {
  * @template T
  * @param {string} step  Name of step to show user.
  * @param {() => Promise<T>} fn  An async function to execute.
+ * @param {boolean} [exitOnError=true]  Whether to exit on error with the exit code other than 0.
  * @returns {Promise<T>}
  */
-async function step(str, fn) {
+async function step(str, fn, exitOnError = true) {
   // discardStdin prevents Ora from accepting input that would be passed to a
   // subsequent command, like a y/n confirmation step, which would be dangerous.
   const spin = ora({ text: `${str}...`, discardStdin: true }).start();
@@ -42,7 +64,9 @@ async function step(str, fn) {
     spin.fail(str);
     console.error('  ' + chalk.red(err)); // maintain expected indentation
     console.log(err);
-    process.exit(1);
+    if (exitOnError) {
+      process.exit(1);
+    }
   }
 }
 
@@ -52,7 +76,7 @@ async function step(str, fn) {
  * @param {string} lang        ts (default) or js
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-export async function setupProject(destination, lang = 'ts') {
+async function setupProject(destination, lang = 'ts') {
   const currentDir = shell.pwd().toString();
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
   const templatePath = path.resolve(
@@ -93,72 +117,102 @@ export async function setupProject(destination, lang = 'ts') {
 }
 
 /**
- * Checks the Mina GraphQL endpoint availability.
- * @param {endpoint} The GraphQL endpoint to check.
- * @returns {Promise<boolean>} Whether the endpoint is available.
+ * Step to replace placeholder names in the project with the properly-formatted version of it
+ * @param {string} projDir Full path to the project directory
+ * @returns {void}
  */
-export async function isMinaGraphQlEndpointAvailable(endpoint) {
+function setProjectName(projDir) {
+  const name = projDir.split(path.sep).pop();
+  replaceInFile(
+    path.join(projDir, 'README.md'),
+    'PROJECT_NAME',
+    titleCase(name)
+  );
+  replaceInFile(
+    path.join(projDir, 'package.json'),
+    'package-name',
+    kebabCase(name)
+  );
+}
+/**
+ * Reads the deploy aliases configuration from the project root.
+ * @param {string} projectRoot The project root directory.
+ * @returns {Object} The deploy aliases configuration.
+ * @throws {Error} And exits if the configuration file is not found or cannot be read.
+ */
+function readDeployAliasesConfig(projectRoot) {
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: '{ syncStatus }' }),
-    });
-    return !!response.ok;
-  } catch (_) {
-    return false;
+    return JSON.parse(fs.readFileSync(`${projectRoot}/config.json`, 'utf8'));
+  } catch (err) {
+    let str;
+    if (err.code === 'ENOENT') {
+      str = `config.json not found. Make sure you're in a zkApp project directory.`;
+    } else {
+      str = 'Unable to read config.json.';
+      console.error(err);
+    }
+    console.log(chalk.red(str));
+    process.exit(1);
   }
 }
 
 /**
- * Checks if a single port is available.
- * @param {number} port The port number to check.
- * @returns {Promise<{port: number, busy: boolean}>} A promise that resolves with an object containing the port number and a boolean indicating if the port is busy.
+ * Checks if a directory is empty.
+ * @param {string} path The path to the directory to check.
+ * @returns {boolean} True if the directory is empty, false otherwise.
  */
-export async function checkLocalPortAvailability(port) {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-    server.listen(port, '127.0.0.1');
-    server.on('listening', () => {
-      server.close();
-      resolve({ port, busy: false });
-    });
-    server.on('error', () => {
-      resolve({ port, busy: true });
-    });
-  });
+function isDirEmpty(path) {
+  return fs.readdirSync(path).length === 0;
 }
 
 /**
- * Checks multiple ports for availability and identifies any that are not.
- * @param {number[]} ports An array of port numbers to check.
- * @returns {Promise<{error: boolean, message: string}>} A promise that resolves with an object containing an error flag and a message indicating the result.
+ * Helper to replace text in a file.
+ * @param {string} file  Path to file
+ * @param {string} a  Old text.
+ * @param {string} b  New text.
  */
-export async function checkLocalPortsAvailability(ports) {
-  const checks = ports.map((port) => checkLocalPortAvailability(port));
-  const results = await Promise.all(checks);
-  const busyPorts = results
-    .filter((result) => result.busy)
-    .map((result) => result.port);
-  if (busyPorts.length > 0) {
-    return {
-      error: true,
-      message:
-        `The following local ports are required but unavailable at this time: ${busyPorts.join(', ')}`.trim() +
-        '\nYou can close applications that use these ports and try again.',
-    };
-  } else {
-    return { error: false };
-  }
+function replaceInFile(file, a, b) {
+  let content = fs.readFileSync(file, 'utf8');
+  content = content.replace(a, b);
+  fs.writeFileSync(file, content);
 }
 
 /**
- * Finds all classes that extend or implement the 'SmartContract' class from 'o1js'.
- *
+ * Converts a string to title case.
+ * @param {string} str The string to convert.
+ * @returns {string} The title case string.
+ */
+function titleCase(str) {
+  return str
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase())
+    .join(' ');
+}
+
+/**
+ * Converts a string to kebab case.
+ * @param {string} str The string to convert.
+ * @returns {string} The kebab case string.
+ */
+function kebabCase(str) {
+  return str.toLowerCase().replace(' ', '-');
+}
+
+/**
+ * Converts a string to capitalized case.
+ * @param {string} string The string to convert.
+ * @returns {string} The capitalized string.
+ */
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Finds all classes that extend the 'SmartContract' class from 'o1js'.
  * @param {string} entryFilePath - The path of the entry file.
  * @returns {Array<Object>} - An array of objects containing the class name and file path of the smart contract classes found.
  */
-export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
+function findIfClassExtendsSmartContract(entryFilePath) {
   const classesMap = buildClassHierarchy(entryFilePath);
   const importMappings = resolveImports(entryFilePath);
   const smartContractClasses = [];
@@ -185,7 +239,6 @@ export function findIfClassExtendsOrImplementsSmartContract(entryFilePath) {
 
 /**
  * Builds a class hierarchy map based on the provided file path.
- *
  * @param {string} filePath - The path to the file containing the class declarations.
  * @returns {Object} - The class hierarchy map, where keys are class names and values are objects containing class information.
  */
@@ -200,12 +253,8 @@ function buildClassHierarchy(filePath) {
     ClassDeclaration(node) {
       const currentClass = node.id.name;
       const parentClass = node.superClass ? node.superClass.name : null;
-      const implementedInterfaces = node.implements
-        ? node.implements.map((iface) => iface.id.name)
-        : [];
       classesMap[currentClass] = {
         extends: parentClass,
-        implements: implementedInterfaces,
         filePath,
         inheritsFromO1jsSmartContract: false,
       };
@@ -231,7 +280,6 @@ function buildClassHierarchy(filePath) {
 
 /**
  * Resolves the imports in the given file path and returns the import mappings.
- *
  * @param {string} filePath - The path of the file to resolve imports for.
  * @returns {Object} - The import mappings where the keys are the local names and the values are objects with the resolved paths and module names.
  */
@@ -262,7 +310,6 @@ function resolveImports(filePath) {
 
 /**
  * Resolves the path of a module based on the provided module name and base path.
- *
  * @param {string} moduleName - The name of the module to resolve.
  * @param {string} basePath - The base path to resolve the module path relative to.
  * @returns {string|null} - The resolved module path, or null if the module is not found or is a built-in module.
@@ -308,7 +355,6 @@ function resolveModulePath(moduleName, basePath) {
 
 /**
  * Checks if a class inherits from a target class by traversing the class hierarchy.
- *
  * @param {string} className - The name of the class to check.
  * @param {string} targetClass - The name of the target class to check inheritance against.
  * @param {Object} classesMap - A map of class names to class information.
@@ -367,23 +413,6 @@ function checkClassInheritance(
     return true;
   }
 
-  // Check each implemented interface
-  for (const iface of classInfo.implements) {
-    if (
-      (iface === targetClass && importMappings[iface]?.moduleName === 'o1js') ||
-      checkClassInheritance(
-        iface,
-        targetClass,
-        classesMap,
-        visitedClasses,
-        importMappings
-      )
-    ) {
-      classInfo.inheritsFromO1jsSmartContract = true;
-      return true;
-    }
-  }
-
   // Additional check for imported base class
   if (importMappings[classInfo.extends]) {
     const baseClassPath = importMappings[classInfo.extends].resolvedPath;
@@ -401,6 +430,7 @@ function checkClassInheritance(
         visitedClasses,
         importMappings
       );
+      /* istanbul ignore next */
       if (parentClassResult) {
         classInfo.inheritsFromO1jsSmartContract = true;
         return true;
@@ -410,5 +440,3 @@ function checkClassInheritance(
 
   return classInfo.inheritsFromO1jsSmartContract;
 }
-
-export default step;

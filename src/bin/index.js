@@ -2,15 +2,15 @@
 
 import chalk from 'chalk';
 import fs from 'fs-extra';
-import path from 'path';
-import url from 'url';
+import path from 'node:path';
+import url from 'node:url';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 import config from '../lib/config.js';
 import Constants from '../lib/constants.js';
-import { deploy } from '../lib/deploy.js';
-import { example } from '../lib/example.js';
-import { file } from '../lib/file.js';
+import deploy from '../lib/deploy.js';
+import example from '../lib/example.js';
+import file from '../lib/file.js';
 import {
   lightnetExplorer,
   lightnetFollowLogs,
@@ -19,7 +19,7 @@ import {
   lightnetStatus,
   lightnetStop,
 } from '../lib/lightnet.js';
-import { project } from '../lib/project.js';
+import project from '../lib/project.js';
 import system from '../lib/system.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
@@ -157,7 +157,7 @@ function systemCli() {
     command: ['system', 'sys', 's'],
     describe: 'Show system info',
     builder: {},
-    handler: () => system(),
+    handler: async () => await system(),
   };
 }
 

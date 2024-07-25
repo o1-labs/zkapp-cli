@@ -1,6 +1,12 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
-import path from 'path';
+import path from 'node:path';
+
+// Module external API
+export default file;
+
+// Module internal API (exported for testing purposes)
+export { parsePath, pathExists };
 
 /**
  * Create `foo.js` and `foo.test.js` in current directory. Warn if destination
@@ -8,7 +14,7 @@ import path from 'path';
  * @param {string} _path Desired file name or `path/to/name`
  * @return {Promise<void>}
  */
-export async function file(_path) {
+async function file(_path) {
   let { userPath, projName } = parsePath(process.cwd(), _path);
 
   // If we're in root dir, and the user didn't specify `src` as part of their
@@ -17,9 +23,8 @@ export async function file(_path) {
     userPath = path.join('src', userPath);
   }
 
-  // TODO: Check if project is TS or JS
-  const ts = true;
-
+  // TODO: https://github.com/o1-labs/zkapp-cli/issues/668
+  const ts = fs.existsSync('tsconfig.json');
   const ext = ts ? 'ts' : 'js';
   const fileName = path.join(userPath, `${projName}.${ext}`);
   const testName = path.join(userPath, `${projName}.test.${ext}`);
@@ -35,8 +40,7 @@ export async function file(_path) {
     process.exit(1);
   }
 
-  // TODO: Add o1js import to fileContent, when it's ready.
-  const fileContent = ``;
+  const fileContent = `import * as o1js from 'o1js';\n`;
   const testContent = `// import { ${projName} } from './${projName}';
 
 describe('${projName}.js', () => {
@@ -61,12 +65,10 @@ describe('${projName}.js', () => {
  *                       E.g. `path/to/name` or `name` (with no path).
  * @returns {{fullPath: string, projName: string, userPath: string}}
  */
-export function parsePath(cwd, _path) {
+function parsePath(cwd, _path) {
   const fullPath = path.join(cwd, _path);
-
   const parts = _path.split(path.sep);
   const projName = parts.pop();
-
   const userPath = parts.length ? path.join(...parts) : '';
 
   return {
@@ -81,7 +83,7 @@ export function parsePath(cwd, _path) {
  * @param {string} path  File name or `path/to/name`.
  * @return {boolean}
  */
-export function pathExists(path) {
+function pathExists(path) {
   let exists;
   if (fs.existsSync(path)) {
     exists = true;

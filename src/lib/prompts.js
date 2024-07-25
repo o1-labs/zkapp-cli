@@ -1,20 +1,20 @@
 import chalk from 'chalk';
 import { PrivateKey } from 'o1js';
 import Constants from './constants.js';
+import { capitalize } from './helpers.js';
 
-function formatPrefixSymbol(state) {
-  // Shows a cyan question mark when not submitted.
-  // Shows a chalk.green check mark when submitted.
-  // Shows a red "x" if ctrl+C is pressed.
+// Module external API
+export { prompts };
 
-  // Can't override the validating prefix or styling unfortunately
-  // https://github.com/enquirer/enquirer/blob/8d626c206733420637660ac7c2098d7de45e8590/lib/prompt.js#L125
-  // if (state.validating) return ''; // use no symbol, instead of pointer
+// Module internal API (exported for testing purposes)
+export {
+  formatPrefixSymbol,
+  getFeepayorChoices,
+  sanitizeAliasName,
+  sanitizeCustomNetworkId,
+};
 
-  if (!state.submitted) return state.symbols.question;
-  return state.cancelled ? chalk.red(state.symbols.cross) : state.symbols.check;
-}
-
+/* istanbul ignore next */
 const prompts = {
   deployAliasPrompts: (config) => [
     {
@@ -274,6 +274,19 @@ const prompts = {
   ],
 };
 
+function formatPrefixSymbol(state) {
+  // Shows a cyan question mark when not submitted.
+  // Shows a chalk.green check mark when submitted.
+  // Shows a red "x" if ctrl+C is pressed.
+
+  // Can't override the validating prefix or styling unfortunately
+  // https://github.com/enquirer/enquirer/blob/8d626c206733420637660ac7c2098d7de45e8590/lib/prompt.js#L125
+  // if (state.validating) return ''; // use no symbol, instead of pointer
+
+  if (!state.submitted) return state.symbols.question;
+  return state.cancelled ? chalk.red(state.symbols.cross) : state.symbols.check;
+}
+
 function getFeepayorChoices(cachedFeepayerAliases) {
   const choices = [
     {
@@ -297,10 +310,6 @@ function getFeepayorChoices(cachedFeepayerAliases) {
   return choices;
 }
 
-function capitalize(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 function sanitizeAliasName(aliasName) {
   return aliasName.toLowerCase().trim().replace(/\s+/g, '-');
 }
@@ -308,5 +317,3 @@ function sanitizeAliasName(aliasName) {
 function sanitizeCustomNetworkId(networkId) {
   return networkId.trim().replace(/\s+/g, '-');
 }
-
-export default prompts;

@@ -6,10 +6,29 @@ import Client from 'mina-signer';
 import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import step, { isMinaGraphQlEndpointAvailable } from './helpers.js';
-import prompts from './prompts.js';
+import { readDeployAliasesConfig, step } from './helpers.js';
+import { isMinaGraphQlEndpointAvailable } from './network-helpers.js';
+import { prompts } from './prompts.js';
 
-const log = console.log;
+// Module external API
+export default config;
+
+// Module internal API (exported for testing purposes)
+export {
+  createDeployAlias,
+  createKeyPair,
+  createKeyPairStep,
+  createLightnetDeployAlias,
+  createZkAppKeyPairAndSaveDeployAliasConfig,
+  getCachedFeepayerAddress,
+  getCachedFeepayerAliases,
+  getExplorerName,
+  printDeployAliasesConfig,
+  printInteractiveDeployAliasConfigSuccessMessage,
+  printLightnetDeployAliasConfigSuccessMessage,
+  recoverKeyPairStep,
+  savedKeyPairStep,
+};
 
 /**
  * Show existing deploy aliases in `config.json` and allow user to add a new
@@ -32,23 +51,6 @@ async function config({ list, lightnet }) {
     return;
   }
   await createDeployAlias(projectRoot, deployAliasesConfig);
-}
-
-export function readDeployAliasesConfig(projectRoot) {
-  try {
-    const deployAliasesConfig = fs.readJsonSync(`${projectRoot}/config.json`);
-    return deployAliasesConfig;
-  } catch (err) {
-    let str;
-    if (err.code === 'ENOENT') {
-      str = `config.json not found. Make sure you're in a zkApp project directory.`;
-    } else {
-      str = 'Unable to read config.json.';
-      console.error(err);
-    }
-    log(chalk.red(str));
-    process.exit(1);
-  }
 }
 
 async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
@@ -125,7 +127,7 @@ async function createDeployAlias(projectRoot, deployAliasesConfig) {
   }
 
   await printDeployAliasesConfig(deployAliasesConfig);
-  log('Enter values to create a deploy alias:');
+  console.log('Enter values to create a deploy alias:');
 
   const {
     deployAliasPrompts,
@@ -217,7 +219,10 @@ async function createDeployAlias(projectRoot, deployAliasesConfig) {
       feepayerKeyPair = await savedKeyPairStep(alternateCachedFeepayerAlias);
       break;
     default:
-      break;
+      console.log(
+        chalk.red(`Invalid fee payer option: ${feepayer ?? 'none'}.`)
+      );
+      process.exit(1);
   }
 
   await createZkAppKeyPairAndSaveDeployAliasConfig({
@@ -262,7 +267,7 @@ async function createZkAppKeyPairAndSaveDeployAliasConfig({
   await step(`Add deploy alias to config.json`, async () => {
     if (!feepayerAlias) {
       // No fee payer alias, return early to prevent creating a deploy alias with invalid fee payer
-      log(chalk.red(`Invalid fee payer alias ${feepayerAlias}" .`));
+      console.log(chalk.red(`Invalid fee payer alias ${feepayerAlias}" .`));
       process.exit(1);
     }
     deployAliasesConfig.deployAliases[deployAliasName] = {
@@ -283,7 +288,7 @@ async function createZkAppKeyPairAndSaveDeployAliasConfig({
 async function createKeyPairStep(feepayerAlias, networkId) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
+    console.log(chalk.red(`Invalid fee payer alias ${feepayerAlias}.`));
     process.exit(1);
   }
   return await step(
@@ -326,11 +331,12 @@ async function recoverKeyPairStep(feepayerKey, feepayerAlias) {
     }
   );
 }
+
 // Returns a cached keypair from a given feepayer alias
 async function savedKeyPairStep(feepayerAlias, address) {
   if (!feepayerAlias) {
     // No fee payer alias, return early to prevent generating key pair with undefined alias
-    log(chalk.red(`Invalid fee payer alias: ${feepayerAlias}.`));
+    console.log(chalk.red(`Invalid fee payer alias: ${feepayerAlias}.`));
     process.exit(1);
   }
   const keyPair = fs.readJsonSync(
@@ -412,7 +418,7 @@ async function printDeployAliasesConfig(deployAliasesConfig) {
   }
   // Print the table. Indented by 2 spaces for alignment in terminal.
   const msg = '\n  ' + table(tableData, tableConfig).replaceAll('\n', '\n  ');
-  log(msg);
+  console.log(msg);
 }
 
 function printInteractiveDeployAliasConfigSuccessMessage(
@@ -431,7 +437,7 @@ function printInteractiveDeployAliasConfigSuccessMessage(
     )}` +
     (explorerName ? `&explorer=${explorerName}` : '') +
     `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
-  log(chalk.green(str));
+  console.log(chalk.green(str));
 }
 
 function printLightnetDeployAliasConfigSuccessMessage(deployAliasName) {
@@ -439,7 +445,5 @@ function printLightnetDeployAliasConfigSuccessMessage(deployAliasName) {
     `\nSuccess!\n` +
     `\nNext steps:` +
     `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
-  log(chalk.green(str));
+  console.log(chalk.green(str));
 }
-
-export default config;

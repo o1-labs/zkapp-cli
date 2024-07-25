@@ -1,3 +1,4 @@
+#
 # Purpose:
 # Automatically bumps the project's patch version bi-weekly on Tuesdays.
 #
@@ -7,8 +8,9 @@
 # - Bumps patch version using `npm version patch`, then creates a new branch 'release/x.x.x'.
 # - Pushes changes and creates a PR to `main` using GitHub CLI.
 # - Can also be triggered manually via `workflow_dispatch`.
-name: Version Bump
+#
 
+name: Version Bump
 on:
   workflow_dispatch: # Allow to manually trigger the workflow
   schedule:

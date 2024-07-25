@@ -1,5 +1,5 @@
-import { homedir } from 'os';
-import path from 'path';
+import { homedir } from 'node:os';
+import path from 'node:path';
 
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
@@ -49,4 +49,5 @@ const Constants = Object.freeze({
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
 });
 
+// Module external API
 export default Constants;

@@ -25,7 +25,7 @@ function createRequestListener(): RequestListener {
     const endIndex: number =
       request.url && request.url.indexOf('?') === -1
         ? request.url.length
-        : request.url?.indexOf('?') ?? 0;
+        : (request.url?.indexOf('?') ?? 0);
     const requestUrl = request.url?.substring(0, endIndex) ?? '';
 
     switch (requestUrl) {
