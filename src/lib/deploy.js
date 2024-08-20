@@ -793,7 +793,13 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
       const [_, zkProgramVarName, nameArg] = match;
 
       if (nameArg === zkProgramNameArg) {
-        return { zkProgramVarName, zkProgramFile: path.basename(file) };
+        return {
+          zkProgramVarName,
+          zkProgramFile: path.relative(
+            buildPath.replace('**/*.js', 'src'),
+            file
+          ),
+        };
       }
     }
   }
