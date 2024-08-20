@@ -61,6 +61,21 @@ jest.unstable_mockModule('node:path', () => ({
     resolve: jest.fn(),
     dirname: jest.fn(),
     sep: '/',
+    relative: jest.fn().mockImplementation((from, to) => {
+      const fromParts = from.split('/');
+      const toParts = to.split('/');
+
+      let commonLength = 0;
+      for (let i = 0; i < Math.min(fromParts.length, toParts.length); i++) {
+        if (fromParts[i] !== toParts[i]) break;
+        commonLength++;
+      }
+
+      const up = fromParts.slice(commonLength).map(() => '..');
+      const down = toParts.slice(commonLength);
+
+      return [...up, ...down].join('/') || '.';
+    }),
   },
 }));
 
@@ -1064,6 +1079,31 @@ describe('deploy.js', () => {
         `
       );
       jest.spyOn(path, 'basename').mockReturnValue('file1.js');
+      dynamicImport.mockResolvedValue({ myVar: zkProgramMock });
+      const { getZkProgram } = await import('./deploy.js');
+
+      const result = await getZkProgram(projectRoot, zkProgramNameArg);
+
+      expect(result).toBe(zkProgramMock);
+      expect(dynamicImport).toHaveBeenCalledWith(
+        `${projectRoot}/build/src/${zkProgramFile}`
+      );
+    });
+
+    it('should return the ZkProgram when found in nested folders', async () => {
+      const projectRoot = '/some/path/';
+      const zkProgramNameArg = 'myZkProgram';
+      const zkProgramFile = 'proofs/file1.js';
+      const zkProgramMock = { name: 'myZkProgram' };
+      glob.mockResolvedValue(['/some/path/file1.js']);
+      fs.readFileSync.mockReturnValue(
+        `
+          const myVar = ZkProgram({
+            name: 'myZkProgram'
+          });
+        `
+      );
+      jest.spyOn(path, 'basename').mockReturnValue('proofs/file1.js');
       dynamicImport.mockResolvedValue({ myVar: zkProgramMock });
       const { getZkProgram } = await import('./deploy.js');
 
