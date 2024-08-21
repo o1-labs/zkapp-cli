@@ -792,8 +792,19 @@ async function findZkProgramFile(buildPath, zkProgramNameArg) {
       // eslint-disable-next-line no-unused-vars
       const [_, zkProgramVarName, nameArg] = match;
 
+      const buildSrcPath = buildPath.replace('**/*.js', 'src');
+      const relativePath = path.relative(buildSrcPath, file);
+
+      const isNested =
+        !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+
+      const zkProgramFile = isNested ? relativePath : path.basename(file);
+
       if (nameArg === zkProgramNameArg) {
-        return { zkProgramVarName, zkProgramFile: path.basename(file) };
+        return {
+          zkProgramVarName,
+          zkProgramFile,
+        };
       }
     }
   }
