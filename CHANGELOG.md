@@ -20,6 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixed
 
 - Fixed zkProgramFile to support nested paths. [#690](https://github.com/o1-labs/zkapp-cli/pull/690)
+- Fixed o1js dependency issue for next js server [#693](https://github.com/o1-labs/zkapp-cli/pull/693)
 
 ## [0.21.5](https://github.com/o1-labs/zkapp-cli/compare/0.21.4...0.21.5) - 2024-06-06
 
