@@ -5,6 +5,7 @@ coverage
 
 # Editor
 .vscode
+.idea
 
 # System
 .DS_Store

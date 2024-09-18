@@ -7,7 +7,9 @@ import url from 'node:url';
 import util from 'node:util';
 import ora from 'ora';
 import shell from 'shelljs';
-import customNextIndex from '../lib/ui/next/customNextIndex.js';
+import customNextPage from '../lib/ui/next/customNextPage.js';
+import customNextLayoutTs from '../lib/ui/next/customNextLayoutTs.js';
+import customNextLayoutJs from '../lib/ui/next/customNextLayoutJs.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
@@ -314,12 +316,12 @@ async function scaffoldNext(projectName) {
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
-    'create-next-app@14.2.3',
+    'create-next-app@14.2.12',
     'ui',
     '--use-npm',
-    '--src-dir',
+    '--no-src-dir',
     '--import-alias "@/*"',
-    '--no-app',
+    '--app',
   ];
 
   spawnSync('npx', args, {
@@ -354,7 +356,7 @@ const __dirname = path.dirname(__filename);
 
 `;
   newNextConfig += nextConfig.replace(
-    /^};(.*?)$/gm, // Search for the last '};' in the file.
+    "};", // Search for the last '};' in the file.
     `
   webpack(config, { isServer }) {
     if (!isServer) {
@@ -398,28 +400,39 @@ const __dirname = path.dirname(__filename);
 
   fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
 
-  const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
+  const pageFileName = useTypescript ? 'page.tsx' : 'page.js';
 
   fs.writeFileSync(
-    path.join('ui', 'src/pages', indexFileName),
-    customNextIndex,
+    path.join('ui', 'app', pageFileName),
+    customNextPage,
     'utf8'
+  );
+
+
+  const layoutFileName = useTypescript ? 'layout.tsx' : 'layout.js';
+
+  fs.writeFileSync(
+      path.join('ui', 'app', layoutFileName),
+      useTypescript ? customNextLayoutTs : customNextLayoutJs,
+      'utf8'
   );
 
   // Adds landing page components directory and files to NextJS project.
   fs.copySync(
     path.join(__dirname, 'ui', 'next', 'components'),
-    path.join('ui', 'src', 'components')
+    path.join('ui', 'components')
   );
 
   // Adds landing page style directory and files to NextJS project.
   fs.copySync(
     path.join(__dirname, 'ui', 'next', 'styles'),
-    path.join('ui', 'src', 'styles')
+    path.join('ui', 'styles')
   );
 
   // Removes create-next-app assets
   fs.emptyDirSync(path.join('ui', 'public'));
+
+  fs.rmSync(path.join('ui', 'app', 'favicon.ico'));
 
   // Adds landing page assets directory and files to NextJS project.
   fs.copySync(
@@ -452,9 +465,14 @@ const __dirname = path.dirname(__filename);
     "jsx": "preserve",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
 `;
