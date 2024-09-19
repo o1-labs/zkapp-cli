@@ -58,7 +58,7 @@ export default function Home() {
           </div>
           <p className={styles.start}>
             Get started by editing
-            <code className={styles.code}> src/pages/index.js</code> or <code className={styles.code}> src/pages/index.tsx</code>
+            <code className={styles.code}> app/page.tsx</code>
           </p>
           <div className={styles.grid}>
             <a
