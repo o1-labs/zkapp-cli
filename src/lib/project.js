@@ -356,8 +356,9 @@ const __dirname = path.dirname(__filename);
 
 `;
   newNextConfig += nextConfig.replace(
-    "};", // Search for the last '};' in the file.
+    '};',
     `
+  reactStrictMode: false,
   webpack(config, { isServer }) {
     if (!isServer) {
       config.resolve.alias = {
@@ -392,11 +393,6 @@ const __dirname = path.dirname(__filename);
 };`
   );
 
-  // This prevents usEffect from running twice on initial mount.
-  newNextConfig = newNextConfig.replace(
-    'reactStrictMode: true',
-    'reactStrictMode: false'
-  );
 
   fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
 
@@ -408,13 +404,12 @@ const __dirname = path.dirname(__filename);
     'utf8'
   );
 
-
   const layoutFileName = useTypescript ? 'layout.tsx' : 'layout.js';
 
   fs.writeFileSync(
-      path.join('ui', 'app', layoutFileName),
-      useTypescript ? customNextLayoutTs : customNextLayoutJs,
-      'utf8'
+    path.join('ui', 'app', layoutFileName),
+    useTypescript ? customNextLayoutTs : customNextLayoutJs,
+    'utf8'
   );
 
   // Adds landing page components directory and files to NextJS project.
@@ -528,12 +523,6 @@ const __dirname = path.dirname(__filename);
     return config;`
     );
 
-    // update page extensions
-    newNextConfig = newNextConfig.replace(
-      'reactStrictMode: false,',
-      `reactStrictMode: false,
-  pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js'],`
-    );
 
     fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
 
@@ -566,42 +555,30 @@ const __dirname = path.dirname(__filename);
     );
     shell.cd('..');
 
-    const appFileName = useTypescript ? '_app.tsx' : '_app.js';
-    const appPagesFileName = useTypescript ? '_app.page.tsx' : '_app.page.js';
-    const indexFileName = useTypescript ? 'index.tsx' : 'index.js';
-    const indexPagesFileName = useTypescript
-      ? 'index.page.tsx'
-      : 'index.page.js';
     const reactCOIServiceWorkerFileName = useTypescript
       ? 'reactCOIServiceWorker.tsx'
       : 'reactCOIServiceWorker.js';
-    shell.mv(
-      path.join('ui', 'src/pages', appFileName),
-      path.join('ui', 'src/pages', appPagesFileName)
-    );
-    shell.mv(
-      path.join('ui', 'src/pages', indexFileName),
-      path.join('ui', 'src/pages', indexPagesFileName)
-    );
 
-    let appFile = fs.readFileSync(
-      path.join('ui', 'src', 'pages', appPagesFileName),
+    const pageFileName = useTypescript ? 'page.tsx' : 'page.js';
+
+    let pageFile = fs.readFileSync(
+      path.join('ui', 'app', pageFileName),
       'utf8'
     );
 
-    appFile = appFile.replace(
+    pageFile = pageFile.replace(
       'export default function',
       `import './reactCOIServiceWorker';
 
 export default function`
     );
     fs.writeFileSync(
-      path.join('ui', 'src', 'pages', appPagesFileName),
-      appFile
+      path.join('ui', 'app', pageFileName),
+      pageFile
     );
 
     fs.writeFileSync(
-      path.join('ui', 'src', 'pages', reactCOIServiceWorkerFileName),
+      path.join('ui', 'app', reactCOIServiceWorkerFileName),
       `export {};
 
 function loadCOIServiceWorker() {

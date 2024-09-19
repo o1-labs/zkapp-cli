@@ -48,7 +48,7 @@ yargs(hideBin(process.argv))
     // chalk.reset is a hack to force the terminal to retain a line break below
     chalk.reset(
       `
-
+LOCAL CLI
          __         _         
         /_ |       | |        
      ___ | |   __ _| |__  ___ 
