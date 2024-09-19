@@ -31,7 +31,6 @@
     "zkapp-cli": "./src/bin/index.js"
   },
   "scripts": {
-    "run": "rm -rf demo && node src/bin/index.js project demo --ui next",
     "clean": "rimraf ./build && rimraf ./reports",
     "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*",

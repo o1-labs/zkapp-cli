@@ -468,7 +468,6 @@ const __dirname = path.dirname(__filename);
   x.type = 'module';
   fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
-
   if (useGHPages) {
     const isWindows = process.platform === 'win32';
 
