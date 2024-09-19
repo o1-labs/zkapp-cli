@@ -414,7 +414,9 @@ const __dirname = path.dirname(__filename);
 
   // Removes create-next-app assets
   fs.emptyDirSync(path.join('ui', 'public'));
-  fs.rmSync(path.join('ui', 'app', 'favicon.ico'));
+  if (fs.existsSync(path.join('ui', 'app', 'favicon.ico'))) {
+    shell.rm('-rf', path.join('ui', 'app', 'favicon.ico'));
+  }
 
   // Adds landing page assets directory and files to NextJS project.
   fs.copySync(
