@@ -331,6 +331,10 @@ async function scaffoldNext(projectName) {
 
   shell.rm('-rf', path.join('ui', '.git')); // Remove NextJS' .git; we will init .git in our monorepo's root.
 
+  // Removes create-next-app assets
+  fs.emptyDirSync(path.join('ui', 'public'));
+  fs.emptyDirSync(path.join('ui', 'app'));
+
   // Read in the NextJS config file and add the middleware.
   const nextConfig = fs.readFileSync(
     path.join('ui', 'next.config.mjs'),
@@ -411,12 +415,6 @@ const __dirname = path.dirname(__filename);
     path.join(__dirname, 'ui', 'next', 'styles'),
     path.join('ui', 'styles')
   );
-
-  // Removes create-next-app assets
-  fs.emptyDirSync(path.join('ui', 'public'));
-  if (fs.existsSync(path.join('ui', 'app', 'favicon.ico'))) {
-    shell.rm('-rf', path.join('ui', 'app', 'favicon.ico'));
-  }
 
   // Adds landing page assets directory and files to NextJS project.
   fs.copySync(
