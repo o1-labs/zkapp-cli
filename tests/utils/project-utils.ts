@@ -47,9 +47,9 @@ export async function zkProject(
     case 'svelte': {
       interactiveDialog = {
         ...interactiveDialog,
-        'Which Svelte app template?': ['arrowDown', 'enter'],
-        'Add type checking with TypeScript?': ['arrowDown', 'enter'],
-        'Select additional options (use arrow keys/space bar)': [
+        'Which template would you like?': ['enter'],
+        'Add type checking with Typescript?': ['enter'],
+        'What would you like to add to your project?': [
           'space',
           'arrowDown',
           'space',
@@ -57,6 +57,9 @@ export async function zkProject(
           'space',
           'arrowDown',
           'space',
+          'enter',
+        ],
+        'Which package manager do you want to install dependencies with?': [
           'enter',
         ],
       };
