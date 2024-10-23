@@ -1,6 +1,13 @@
 export default `
 <script>
   import { onMount } from 'svelte'
+  /**
+   * @typedef {Object} Props
+   * @property {import('svelte').Snippet} [children]
+   */
+
+  /** @type {Props} */
+  let { children } = $props();
   let ctx
   let pixels = []
   let canvas
@@ -131,9 +138,9 @@ export default `
 </style>
 
 <div class="background">
-  <canvas class="background-gradients" width="6" height="6" />
+  <canvas class="background-gradients" width="6" height="6"></canvas>
 </div>
 <div class="container">
-  <slot />
+  {@render children?.()}
 </div>
 `;
