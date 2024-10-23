@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.21.8](https://github.com/o1-labs/zkapp-cli/compare/0.21.7...0.21.8) - 2024-10-23
+
+### Changed
+
+- Svelte project scaffold now uses latest `sv create` and sources migrated to `Svelte 5`. [#701](https://github.com/o1-labs/zkapp-cli/pull/701)
+
 ## [0.21.7](https://github.com/o1-labs/zkapp-cli/compare/0.21.6...0.21.7) - 2024-10-01
 
 ### Changed

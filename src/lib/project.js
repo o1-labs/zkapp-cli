@@ -7,8 +7,8 @@ import url from 'node:url';
 import util from 'node:util';
 import ora from 'ora';
 import shell from 'shelljs';
-import customNextPage from '../lib/ui/next/customNextPage.js';
 import customNextLayout from '../lib/ui/next/customNextLayout.js';
+import customNextPage from '../lib/ui/next/customNextPage.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
@@ -175,8 +175,7 @@ async function project({ name, ui }) {
 }
 
 function scaffoldSvelte() {
-  // `-y` installs the latest version of create-svelte without prompting.
-  spawnSync('npm', ['create', 'svelte@latest', '-y', 'ui'], {
+  spawnSync('npx', ['sv', 'create', 'ui'], {
     stdio: 'inherit',
     shell: true,
   });
