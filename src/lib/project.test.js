@@ -381,11 +381,10 @@ describe('project.js', () => {
 
       expect(shell.mkdir).toHaveBeenCalledWith('-p', 'test-project');
       expect(shell.cd).toHaveBeenCalledWith('test-project');
-      expect(spawnSync).toHaveBeenCalledWith(
-        'npm',
-        ['create', 'svelte@latest', '-y', 'ui'],
-        { stdio: 'inherit', shell: true }
-      );
+      expect(spawnSync).toHaveBeenCalledWith('npx', ['sv', 'create', 'ui'], {
+        stdio: 'inherit',
+        shell: true,
+      });
       expect(shell.cd).toHaveBeenCalledWith('contracts');
       checkUiProjectSetup(shell.exec.mock.calls);
       checkIfProjectSetupSuccessful();
@@ -678,11 +677,10 @@ describe('project.js', () => {
 
       scaffoldSvelte();
 
-      expect(spawnSync).toHaveBeenCalledWith(
-        'npm',
-        ['create', 'svelte@latest', '-y', 'ui'],
-        { stdio: 'inherit', shell: true }
-      );
+      expect(spawnSync).toHaveBeenCalledWith('npx', ['sv', 'create', 'ui'], {
+        stdio: 'inherit',
+        shell: true,
+      });
       expect(fs.writeFileSync).toHaveBeenCalled();
     });
   });
