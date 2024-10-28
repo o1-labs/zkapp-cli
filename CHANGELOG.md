@@ -17,6 +17,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.22.0](https://github.com/o1-labs/zkapp-cli/compare/v0.21.6...v0.22.0) - 2024-10-23
+
+### Changed
+- Release `0.22.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1881) `2.0.0`. 
+  - o1js minor version dependency updated in cli package.json to `^2.*`\*.
+  - o1js minor version peer dependency updated in template/example contract package.json to `^2.*`\*.
+
 ## [0.21.8](https://github.com/o1-labs/zkapp-cli/compare/0.21.7...0.21.8) - 2024-10-23
 
 ### Changed
