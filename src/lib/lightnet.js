@@ -3,6 +3,7 @@ import createDebug from 'debug';
 import decompress from 'decompress';
 import enquirer from 'enquirer';
 import fs from 'fs-extra';
+import dns from 'node:dns';
 import path from 'node:path';
 import opener from 'opener';
 import ora from 'ora';
@@ -75,6 +76,8 @@ export {
   updateCurrentExplorerVersion,
   waitForBlockchainNetworkReadiness,
 };
+
+dns.setDefaultResultOrder('ipv4first');
 
 const debug = createDebug('zk:lightnet');
 const debugLog = buildDebugLogger();
@@ -1068,14 +1071,19 @@ async function waitForBlockchainNetworkReadiness(mode) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(syncStatusGraphQlQuery),
       });
+      debugLog(
+        'The endpoint checking network response was Ok? %s (HTTP status: %s)',
+        response.ok,
+        response.status
+      );
       if (response.ok) {
         const responseJson = await response.json();
         if (responseJson?.data?.syncStatus === 'SYNCED') {
           return true;
         }
       }
-    } catch (_) {
-      // Ignore errors
+    } catch (e) {
+      debugLog('The endpoint checking procedure failed with the error: %s', e);
     }
     return false;
   };
