@@ -15,6 +15,8 @@ import {Add} from "../../contracts";
 // https://minascan.io/devnet/account/B62qnTDEeYtBHBePA4yhCt4TCgDtA4L2CGvK7PirbJyX4pKH8bmtWe5
 const zkAppAddress = "B62qnTDEeYtBHBePA4yhCt4TCgDtA4L2CGvK7PirbJyX4pKH8bmtWe5";
 
+import './reactCOIServiceWorker';
+
 export default function Home() {
   const zkApp = useRef<Add>(new Add(PublicKey.fromBase58(zkAppAddress)));
 
@@ -30,6 +32,11 @@ export default function Home() {
       await fetchAccount({publicKey: zkAppAddress});
       const num = zkApp.current.num.get();
       setContractState(num.toString());
+
+      // Compile the contract so that o1js has the proving key required to execute contract calls
+      console.log("Compiling Add contract to generate proving and verification keys");
+      await Add.compile();
+
       setLoading(false);
     })();
   }, []);
@@ -44,10 +51,6 @@ export default function Home() {
       const walletKey: string = (await mina.requestAccounts())[0];
       console.log("Connected wallet address: " + walletKey);
       await fetchAccount({publicKey: PublicKey.fromBase58(walletKey)});
-
-      // Compile the contract so that o1js has the proving key required to execute contract calls
-      console.log("Compiling Add contract to generate proving and verification keys");
-      await Add.compile();
 
       // Execute a transaction locally on the browser
       const transaction = await Mina.transaction(async () => {
@@ -75,7 +78,7 @@ export default function Home() {
       } else if (e.message.includes("Please create or restore wallet first.")) {
         errorMessage = "Have you created a wallet?";
       } else if (e.message.includes("User rejected the request.")) {
-        errorMessage = "Did you grant the app permission to connect to your wallet?";
+        errorMessage = "Did you grant the app permission to connect?";
       } else {
         errorMessage = "An unknown error occurred.";
       }
@@ -119,20 +122,18 @@ export default function Home() {
             <code className={styles.code}> app/page.tsx</code>
           </p>
           <div className={styles.state}>
-            {error ? (
-              <span className={styles.error}>Error: {error}</span>
-            ) : (
-              <div>
-                <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
-                {loading ?
-                  <div>Loading...</div> :
-                  (transactionLink ?
-                    <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
-                      View Transaction on MinaScan
-                    </a> :
-                    <button onClick={updateZkApp} className={styles.button}>Call Add.update()</button>)}
-              </div>
-            )}
+            <div>
+              <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
+              {error ? (
+                <span className={styles.error}>Error: {error}</span>
+              ) : (loading ?
+                <div>Loading...</div> :
+                (transactionLink ?
+                  <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
+                    View Transaction on MinaScan
+                  </a> :
+                  <button onClick={updateZkApp} className={styles.button}>Call Add.update()</button>))}
+            </div>
           </div>
           <div className={styles.grid}>
             <a
