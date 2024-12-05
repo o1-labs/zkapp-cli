@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.22.2](https://github.com/o1-labs/zkapp-cli/compare/v0.22.1...v0.22.2) - 2024-12-1
+
+### Changed
+
+- Add interactivity to Next.js starter app ui. [#709](https://github.com/o1-labs/zkapp-cli/pull/709)
+
 ## [0.22.1](https://github.com/o1-labs/zkapp-cli/compare/v0.22.0...v0.22.1) - 2024-11-17
 
 ### Changed
