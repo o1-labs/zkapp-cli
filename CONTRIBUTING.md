@@ -1,4 +1,4 @@
-## Contributing
+# Contributing
 
 Welcome to the zkApp CLI open source repository. Thank you for being a part of the Mina ecosystem and for your interest in contributing to the zkApp CLI project.
 
@@ -12,12 +12,11 @@ By contributing, you can help us improve the functionality and user experience o
 
 All contributors agree to respect and follow the Mina Protocol [Code of Conduct](https://github.com/MinaProtocol/mina/blob/develop/CODE_OF_CONDUCT.md).
 
-
 ## Did you find a bug?
 
 To see if others have also experienced the issue:
 
-- Ask questions in the Mina Protocol Discord in the  [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) channel on Mina Protocol Discord. 
+- Ask questions in the Mina Protocol Discord in the [#zkapps-developers](https://discord.com/channels/484437221055922177/915745847692636181) channel on Mina Protocol Discord.
 - Check if the bug was already reported by searching on GitHub under [Issues](https://github.com/o1-labs/zkapp-cli/issues).
 
 If you don't find an open issue addressing the problem, open a new one. Be sure to include a title and clear description, as much relevant information as possible, and the output of the `zk system` command. This information includes your OS, NodeJS, and zkapp-cli versions to help us reproduce the issue.
@@ -56,7 +55,7 @@ Make your changes and commit:
 git push origin <your-branch>
 ```
 
-Create and submit your pull request against the `main` branch. 
+Create and submit your pull request against the `main` branch.
 
 To switch back to the released version of zkApp CLI:
 

@@ -33,7 +33,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Release `0.22.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1881) `2.0.0`. [#702](https://github.com/o1-labs/zkapp-cli/pull/702) 
+- Release `0.22.0` corresponding with o1js [release](https://github.com/o1-labs/o1js/pull/1881) `2.0.0`. [#702](https://github.com/o1-labs/zkapp-cli/pull/702)
   - o1js minor version dependency updated in cli package.json to `^2.*`\*.
   - o1js minor version peer dependency updated in template/example contract package.json to `^2.*`\*.
 
