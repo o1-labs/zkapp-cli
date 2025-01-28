@@ -34,7 +34,7 @@
     "clean": "rimraf ./build && rimraf ./reports",
     "coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "format": "prettier --write --ignore-unknown **/*",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --silent",
     "testw": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --silent",
     "lint": "npm run prettier && npm run prettier-check && npm run eslint && npm run clean",
