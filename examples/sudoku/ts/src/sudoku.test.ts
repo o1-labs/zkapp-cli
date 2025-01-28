@@ -11,7 +11,7 @@ describe('sudoku', () => {
     senderKey: PrivateKey;
 
   beforeEach(async () => {
-    let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
+    const Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
     sender = Local.testAccounts[0];
     senderKey = sender.key;
@@ -27,10 +27,10 @@ describe('sudoku', () => {
     let isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
 
-    let solution = solveSudoku(sudoku);
+    const solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
-    let tx = await Mina.transaction(sender, async () => {
-      let zkApp = new SudokuZkApp(zkAppAddress);
+    const tx = await Mina.transaction(sender, async () => {
+      const zkApp = new SudokuZkApp(zkAppAddress);
       await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(solution!));
     });
     await tx.prove();
@@ -43,15 +43,15 @@ describe('sudoku', () => {
   it('rejects an incorrect solution', async () => {
     await deploy(zkApp, zkAppPrivateKey, sudoku, sender, senderKey);
 
-    let solution = solveSudoku(sudoku);
+    const solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
 
-    let noSolution = cloneSudoku(solution);
+    const noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
     await expect(async () => {
-      let tx = await Mina.transaction(sender, async () => {
-        let zkApp = new SudokuZkApp(zkAppAddress);
+      const tx = await Mina.transaction(sender, async () => {
+        const zkApp = new SudokuZkApp(zkAppAddress);
         await zkApp.submitSolution(
           Sudoku.from(sudoku),
           Sudoku.from(noSolution)
@@ -61,7 +61,7 @@ describe('sudoku', () => {
       await tx.sign([senderKey]).send();
     }).rejects.toThrow(/array contains the numbers 1...9/);
 
-    let isSolved = zkApp.isSolved.get().toBoolean();
+    const isSolved = zkApp.isSolved.get().toBoolean();
     expect(isSolved).toBe(false);
   });
 });
@@ -73,7 +73,7 @@ async function deploy(
   sender: PublicKey,
   senderKey: PrivateKey
 ) {
-  let tx = await Mina.transaction(sender, async () => {
+  const tx = await Mina.transaction(sender, async () => {
     AccountUpdate.fundNewAccount(sender);
     await zkApp.deploy();
     await zkApp.update(Sudoku.from(sudoku));

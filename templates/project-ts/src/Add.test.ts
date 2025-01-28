@@ -8,7 +8,7 @@ import { Add } from './Add';
  * See https://docs.minaprotocol.com/zkapps for more info.
  */
 
-let proofsEnabled = false;
+const proofsEnabled = false;
 
 describe('Add', () => {
   let deployerAccount: Mina.TestPublicKey,

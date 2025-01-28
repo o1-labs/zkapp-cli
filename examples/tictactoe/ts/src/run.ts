@@ -20,7 +20,7 @@ import {
 } from 'o1js';
 import { TicTacToe, Board } from './tictactoe.js';
 
-let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
+const Local = await Mina.LocalBlockchain({ proofsEnabled: false });
 Mina.setActiveInstance(Local);
 const [player1, player2] = Local.testAccounts;
 const player1Key = player1.key;
@@ -52,7 +52,7 @@ console.log('after transaction');
 let b = zkApp.board.get();
 
 console.log('initial state of the zkApp');
-let zkAppState = Mina.getAccount(zkAppPublicKey);
+const zkAppState = Mina.getAccount(zkAppPublicKey);
 
 for (const i in [0, 1, 2, 3, 4, 5, 6, 7]) {
   console.log('state', i, ':', zkAppState?.zkapp?.appState?.[i].toString());
@@ -99,7 +99,7 @@ await makeMove(player1, player1Key, 2, 2);
 b = zkApp.board.get();
 new Board(b).printState();
 
-let isNextPlayer2 = zkApp.nextIsPlayer2.get();
+const isNextPlayer2 = zkApp.nextIsPlayer2.get();
 
 console.log('did someone win?', isNextPlayer2 ? 'Player 1!' : 'Player 2!');
 // cleanup

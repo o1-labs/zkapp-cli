@@ -250,6 +250,15 @@ function lightnetCli() {
               default: 'Trace',
               description: 'Mina processes logging level to use.',
             },
+            'slot-time': {
+              alias: 'o',
+              demand: false,
+              number: true,
+              hidden: false,
+              default: 20_000,
+              description:
+                'The slot time in milliseconds for block production.',
+            },
           },
           async (argv) => await lightnetStart(argv)
         )

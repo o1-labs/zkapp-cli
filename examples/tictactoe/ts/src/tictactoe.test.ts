@@ -17,7 +17,7 @@ describe('tictactoe', () => {
     zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
-    let Local = await Mina.LocalBlockchain({ proofsEnabled: false });
+    const Local = await Mina.LocalBlockchain({ proofsEnabled: false });
     Mina.setActiveInstance(Local);
 
     [player1, player2] = Local.testAccounts;
@@ -62,7 +62,7 @@ describe('tictactoe', () => {
     await txn.sign([player1Key]).send();
 
     // check next player
-    let isNextPlayer2 = zkApp.nextIsPlayer2.get();
+    const isNextPlayer2 = zkApp.nextIsPlayer2.get();
     expect(isNextPlayer2).toEqual(Bool(true));
   });
 });
