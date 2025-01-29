@@ -120,6 +120,7 @@ const { quotes, escapeQuotes } = getSystemQuotes();
  * @param {boolean} argv.sync - Whether to wait for the network to sync.
  * @param {boolean} argv.pull - Whether to pull the latest version of the Docker image from the Docker Hub.
  * @param {string}  argv.minaLogLevel - Mina processes logging level to use.
+ * @param {number}  argv.slotTime - The slot time for block production to use.
  * @returns {Promise<void>}
  */
 async function lightnetStart({
@@ -131,6 +132,7 @@ async function lightnetStart({
   sync,
   pull,
   minaLogLevel,
+  slotTime,
 }) {
   let containerId = null;
   let containerVolume = null;
@@ -164,6 +166,7 @@ async function lightnetStart({
           `--env PROOF_LEVEL="${proofLevel}" ` +
           `--env LOG_LEVEL="${minaLogLevel}" ` +
           `--env RUN_ARCHIVE_NODE="${archive}" ` +
+          `--env SLOT_TIME="${slotTime}" ` +
           getDockerContainerStartupCmdPorts(mode, archive) +
           `o1labs/mina-local-network:${minaBranch}-latest-${
             type === 'fast' ? 'lightnet' : 'devnet'
@@ -187,6 +190,7 @@ async function lightnetStart({
       sync,
       pull,
       minaLogLevel,
+      slotTime,
     };
     debugLog(
       'Updating file %s with JSON content: %O',

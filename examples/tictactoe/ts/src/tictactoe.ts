@@ -36,9 +36,9 @@ class Board {
 
   constructor(serializedBoard: Field) {
     const bits = serializedBoard.toBits(18);
-    let board = [];
+    const board = [];
     for (let i = 0; i < 3; i++) {
-      let row = [];
+      const row = [];
       for (let j = 0; j < 3; j++) {
         const isPlayed = bits[i * 3 + j];
         const player = bits[i * 3 + j + 9];
@@ -50,8 +50,8 @@ class Board {
   }
 
   serialize(): Field {
-    let isPlayed = [];
-    let player = [];
+    const isPlayed = [];
+    const player = [];
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
         isPlayed.push(this.board[i][j].isSome);
@@ -211,7 +211,7 @@ class TicTacToe extends SmartContract {
 
     // 4. get and deserialize the board
     this.board.requireEquals(this.board.get()); // precondition that links this.board.get() to the actual on-chain state
-    let board = new Board(this.board.get());
+    const board = new Board(this.board.get());
 
     // 5. update the board (and the state) with our move
     x.equals(Field(0))

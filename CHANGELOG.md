@@ -17,7 +17,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
-## [0.22.2](https://github.com/o1-labs/zkapp-cli/compare/v0.22.1...v0.22.2) - 2024-12-1
+## [0.22.4](https://github.com/o1-labs/zkapp-cli/compare/v0.22.3...v0.22.4) - 2025-01-29
+
+### Added
+
+- Allow overriding the slot time for lightnet. [#718](https://github.com/o1-labs/zkapp-cli/pull/718)
+
+## [0.22.2](https://github.com/o1-labs/zkapp-cli/compare/v0.22.1...v0.22.2) - 2024-12-01
 
 ### Changed
 

@@ -47,14 +47,14 @@ class SudokuZkApp extends SmartContract {
     sudokuInstance: Sudoku,
     solutionInstance: Sudoku
   ) {
-    let sudoku = sudokuInstance.value;
-    let solution = solutionInstance.value;
+    const sudoku = sudokuInstance.value;
+    const solution = solutionInstance.value;
 
     // first, we check that the passed solution is a valid sudoku
 
     // define helpers
-    let range9 = Array.from({ length: 9 }, (_, i) => i);
-    let oneTo9 = range9.map((i) => Field(i + 1));
+    const range9 = Array.from({ length: 9 }, (_, i) => i);
+    const oneTo9 = range9.map((i) => Field(i + 1));
 
     function assertHas1To9(array: Field[]) {
       oneTo9
@@ -65,19 +65,19 @@ class SudokuZkApp extends SmartContract {
 
     // check all rows
     for (let i = 0; i < 9; i++) {
-      let row = solution[i];
+      const row = solution[i];
       assertHas1To9(row);
     }
     // check all columns
     for (let j = 0; j < 9; j++) {
-      let column = solution.map((row) => row[j]);
+      const column = solution.map((row) => row[j]);
       assertHas1To9(column);
     }
     // check 3x3 squares
     for (let k = 0; k < 9; k++) {
-      let [i0, j0] = divmod(k, 3);
-      let square = range9.map((m) => {
-        let [i1, j1] = divmod(m, 3);
+      const [i0, j0] = divmod(k, 3);
+      const square = range9.map((m) => {
+        const [i1, j1] = divmod(m, 3);
         return solution[3 * i0 + i1][3 * j0 + j1];
       });
       assertHas1To9(square);
@@ -86,8 +86,8 @@ class SudokuZkApp extends SmartContract {
     // next, we check that the solution extends the initial sudoku
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
-        let cell = sudoku[i][j];
-        let solutionCell = solution[i][j];
+        const cell = sudoku[i][j];
+        const solutionCell = solution[i][j];
         // either the sudoku has nothing in it (indicated by a cell value of 0),
         // or it is equal to the solution
         Bool.or(cell.equals(0), cell.equals(solutionCell)).assertTrue(
@@ -97,7 +97,7 @@ class SudokuZkApp extends SmartContract {
     }
 
     // finally, we check that the sudoku is the one that was originally deployed
-    let sudokuHash = this.sudokuHash.getAndRequireEquals();
+    const sudokuHash = this.sudokuHash.getAndRequireEquals();
 
     sudokuInstance
       .hash()
@@ -109,6 +109,6 @@ class SudokuZkApp extends SmartContract {
 }
 
 function divmod(k: number, n: number) {
-  let q = Math.floor(k / n);
+  const q = Math.floor(k / n);
   return [q, k - q * n];
 }

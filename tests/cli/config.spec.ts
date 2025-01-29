@@ -170,7 +170,7 @@ test.describe('zkApp-CLI', () => {
         });
       });
       await test.step('Input field values validation', async () => {
-        let bypassCachedAccountSelectionInteractiveDialog = {
+        const bypassCachedAccountSelectionInteractiveDialog = {
           'Use stored account': ['arrowDown', 'enter'],
         };
 

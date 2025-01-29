@@ -44,16 +44,16 @@ await tx.sign([zkAppPrivateKey, senderKey]).send();
 
 console.log('Is the sudoku solved?', zkApp.isSolved.get().toBoolean());
 
-let solution = solveSudoku(sudoku);
+const solution = solveSudoku(sudoku);
 if (solution === undefined) throw Error('cannot happen');
 
 // submit a wrong solution
-let noSolution = cloneSudoku(solution);
+const noSolution = cloneSudoku(solution);
 noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
 console.log('Submitting wrong solution...');
 try {
-  let tx = await Mina.transaction(sender, async () => {
+  const tx = await Mina.transaction(sender, async () => {
     await zkApp.submitSolution(Sudoku.from(sudoku), Sudoku.from(noSolution));
   });
   await tx.prove();

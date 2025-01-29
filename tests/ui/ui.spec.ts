@@ -37,8 +37,8 @@ test.describe('Users', () => {
       const projectName = crypto.randomUUID();
       const { spawn, cleanup, path } = await prepareEnvironment();
       let devServerProcess: ProcessPromise | undefined; // eslint-disable-line
-      let devServerProcessStdout: string[] = [];
-      let devServerProcessStderr: string[] = [];
+      const devServerProcessStdout: string[] = [];
+      const devServerProcessStderr: string[] = [];
       console.info(`[Test Execution] Path: ${path}`);
 
       try {
