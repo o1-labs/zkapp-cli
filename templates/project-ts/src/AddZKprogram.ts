@@ -18,3 +18,5 @@ export const AddProgram = ZkProgram({
     },
   },
 });
+
+export class AddProgramProof extends ZkProgram.Proof(AddProgram) {}
