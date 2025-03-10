@@ -9,5 +9,12 @@ export const Add = ZkProgram({
 
       async method() {},
     },
+
+    update: {
+      privateInputs: [],
+      async method(state: Field) {
+        state.add(1);
+      },
+    },
   },
 });
