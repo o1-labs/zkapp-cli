@@ -1,6 +1,6 @@
 import { ZkProgram, Field } from 'o1js';
 
-export const Add = ZkProgram({
+export const AddProgram = ZkProgram({
   name: 'add-program',
   publicInput: Field,
   methods: {
