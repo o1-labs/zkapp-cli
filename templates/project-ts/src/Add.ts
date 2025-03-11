@@ -12,6 +12,7 @@ import { AddProgramProof } from './AddZKprogram';
  */
 export class Add extends SmartContract {
   @state(Field) num = State<Field>();
+  @state(Field) zkProgramNum = State<Field>();
 
   init() {
     super.init();
