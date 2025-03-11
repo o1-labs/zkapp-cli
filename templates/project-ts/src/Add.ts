@@ -5,8 +5,9 @@ import { AddProgramProof } from './AddZKprogram';
  * Basic Example
  * See https://docs.minaprotocol.com/zkapps for more info.
  *
- * The Add contract initializes the state variable 'num' to be a Field(1) value by default when deployed.
- * When the 'update' method is called, the Add contract adds Field(2) to its 'num' contract state.
+ * The Add contract verifies a ZKprogram proof and updates a 'num' state variable.
+ * When the 'settleAddProgramState' method is called, the Add contract verifies a
+ * proof from the 'AddZKprogram' and saves the 'num' value to the contract state.
  *
  * This file is safe to delete and replace with your own contract.
  */
