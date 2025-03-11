@@ -14,17 +14,6 @@ export class Add extends SmartContract {
   @state(Field) num = State<Field>();
   @state(Field) zkProgramNum = State<Field>();
 
-  init() {
-    super.init();
-    this.num.set(Field(1));
-  }
-
-  @method async update() {
-    const currentState = this.num.getAndRequireEquals();
-    const newState = currentState.add(2);
-    this.num.set(newState);
-  }
-
   @method async settleAddProgramState(proof: AddProgramProof) {
     proof.verify();
     const addProgramState = proof.publicOutput;
