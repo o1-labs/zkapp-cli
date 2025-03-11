@@ -12,11 +12,10 @@ import { AddProgramProof } from './AddZKprogram';
  */
 export class Add extends SmartContract {
   @state(Field) num = State<Field>();
-  @state(Field) zkProgramNum = State<Field>();
 
   @method async settleAddProgramState(proof: AddProgramProof) {
     proof.verify();
     const addProgramState = proof.publicOutput;
-    this.zkProgramNum.set(addProgramState);
+    this.num.set(addProgramState);
   }
 }
