@@ -25,5 +25,8 @@ export class Add extends SmartContract {
     this.num.set(newState);
   }
 
-  @method async updateAddProgram(proof: AddProgramProof) {}
+  @method async updateAddProgram(proof: AddProgramProof) {
+    const addProgramState = proof.publicOutput;
+    this.zkProgramNum.set(addProgramState);
+  }
 }
