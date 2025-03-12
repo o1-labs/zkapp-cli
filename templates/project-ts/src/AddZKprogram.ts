@@ -13,6 +13,7 @@ export const AddZKprogram = ZkProgram({
         };
       },
     },
+
     update: {
       privateInputs: [SelfProof],
       async method(
@@ -20,8 +21,9 @@ export const AddZKprogram = ZkProgram({
         previousProof: SelfProof<Field, Field>
       ) {
         previousProof.verify();
+        initialState.assertEquals(previousProof.publicInput);
         return {
-          publicOutput: initialState.add(Field(1)),
+          publicOutput: previousProof.publicOutput.add(Field(1)),
         };
       },
     },
