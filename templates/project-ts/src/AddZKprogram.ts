@@ -5,11 +5,19 @@ export const AddZKprogram = ZkProgram({
   publicInput: Field,
   publicOutput: Field,
   methods: {
+    init: {
+      privateInputs: [],
+      async method(initialState: Field) {
+        return {
+          publicOutput: initialState,
+        };
+      },
+    },
     update: {
       privateInputs: [],
       async method(state: Field) {
         return {
-          publicOutput: state.add(1),
+          publicOutput: state.add(Field(1)),
         };
       },
     },
