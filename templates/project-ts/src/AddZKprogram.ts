@@ -14,10 +14,10 @@ export const AddZKprogram = ZkProgram({
       },
     },
     update: {
-      privateInputs: [],
-      async method(state: Field) {
+      privateInputs: [SelfProof],
+      async method(initialState: Field) {
         return {
-          publicOutput: state.add(Field(1)),
+          publicOutput: initialState.add(Field(1)),
         };
       },
     },
