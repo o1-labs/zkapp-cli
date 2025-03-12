@@ -1,6 +1,6 @@
 import { ZkProgram, Field } from 'o1js';
 
-export const AddZKProgram = ZkProgram({
+export const AddZKprogram = ZkProgram({
   name: 'add-program',
   publicInput: Field,
   publicOutput: Field,
@@ -16,4 +16,4 @@ export const AddZKProgram = ZkProgram({
   },
 });
 
-export class AddProgramProof extends ZkProgram.Proof(AddZKProgram) {}
+export class AddProgramProof extends ZkProgram.Proof(AddZKprogram) {}
