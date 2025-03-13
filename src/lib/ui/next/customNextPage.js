@@ -29,10 +29,13 @@ export default function Home() {
       const num = zkApp.current.num.get();
       setContractState(num.toString());
 
-      // Compile the ZKprogram
+      // Compile the zkprogram
       console.log("Compiling AddZKprogram");
-      await AddZKprogram.compile(); 
-           
+      await AddZKprogram.compile();
+      
+      // Initialize the zkprogram with the initial state of the zkapp
+      const init = await AddZKprogram.init(num);
+
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
       await Add.compile();
