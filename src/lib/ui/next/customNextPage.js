@@ -18,6 +18,7 @@ export default function Home() {
 
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
+  const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -92,7 +93,6 @@ export default function Home() {
   }, []);
 
   const updateZKprogram = async () => {
-
   };
 
   return (
