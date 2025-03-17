@@ -30,6 +30,7 @@ export default function Home() {
       await fetchAccount({publicKey: zkAppAddress});
       const num = zkApp.current.num.get();
       setContractState(num.toString());
+      setZkprogramState(num.toString());
 
       // Compile the zkprogram
       console.log("Compiling AddZKprogram");
@@ -100,7 +101,7 @@ export default function Home() {
     setLoading(true);
 
     if (contractState && proof) {
-      const update = await zkProgram.update(contractState, proof);
+      const update = await zkProgram.update(Field(contractState), proof);
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
     }
@@ -166,7 +167,7 @@ export default function Home() {
                 <div>Loading...</div>
               ) : (
                 <button onClick={updateZKprogram} className={styles.button}>
-                  Call Add.update()
+                  Call AddZKprogram.update()
                 </button>
               )}
             </div>
