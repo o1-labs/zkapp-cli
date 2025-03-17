@@ -63,12 +63,12 @@ export default function Home() {
 
       // Execute a transaction locally on the browser
       const transaction = await Mina.transaction(async () => {
-        console.log("Executing Add.update() locally");
-        await zkApp.current.update();
+        console.log("Executing Add.settleState() locally");
+        await zkApp.current.settleState();
       });
 
       // Prove execution of the contract using the proving key
-      console.log("Proving execution of Add.update()");
+      console.log("Proving execution of Add.settleState()");
       await transaction.prove();
 
       // Broadcast the transaction to the Mina network
@@ -152,7 +152,7 @@ export default function Home() {
                   <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
                     View Transaction on MinaScan
                   </a> :
-                  <button onClick={updateZkApp} className={styles.button}>Call Add.update()</button>))}
+                  <button onClick={updateZkApp} className={styles.button}>Call Add.settleState()</button>))}
             </div>
           </div>
           <div className={styles.state}>
