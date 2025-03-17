@@ -97,6 +97,9 @@ export default function Home() {
   }, []);
 
   const updateZKprogram = async () => {
+    setTransactionLink(null);
+    setLoading(true);
+
     if (contractState && proof) {
       const update = await zkProgram.update(contractState, proof);
       setProof(update.proof);
