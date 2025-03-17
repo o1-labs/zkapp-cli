@@ -6,7 +6,7 @@ import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
-import {fetchAccount, Mina, PublicKey} from "o1js";
+import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
 import { Add, AddZKprogram } from "../../contracts";
 
 // We've already deployed the Add contract on testnet at this address
