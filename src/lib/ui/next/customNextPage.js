@@ -97,7 +97,6 @@ export default function Home() {
   }, []);
 
   const updateZKprogram = async () => {
-    setTransactionLink(null);
     setLoading(true);
 
     if (contractState && proof) {
@@ -105,6 +104,7 @@ export default function Home() {
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
     }
+    setLoading(false);  
   };
 
   return (
