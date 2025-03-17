@@ -159,7 +159,7 @@ export default function Home() {
             <div>
               <div>
                 ZKprogram State:{" "}
-                <span className={styles.bold}>{contractState}</span>
+                <span className={styles.bold}>{zkprogramState}</span>
               </div>
               {error ? (
                 <span className={styles.error}>Error: {error}</span>
