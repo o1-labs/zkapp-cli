@@ -99,8 +99,11 @@ export default function Home() {
 
   const updateZKprogram = async () => {
     setLoading(true);
-
+     
     if (contractState && proof) {
+
+      // Call the AddZKprogram update method
+      console.log("Calling AddZKprogram.update");
       const update = await AddZKprogram.update(Field(contractState), proof);
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
