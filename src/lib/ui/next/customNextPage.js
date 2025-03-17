@@ -154,6 +154,23 @@ export default function Home() {
                   <button onClick={updateZkApp} className={styles.button}>Call Add.update()</button>))}
             </div>
           </div>
+          <div className={styles.state}>
+            <div>
+              <div>
+                ZKprogram State:{" "}
+                <span className={styles.bold}>{contractState}</span>
+              </div>
+              {error ? (
+                <span className={styles.error}>Error: {error}</span>
+              ) : loading ? (
+                <div>Loading...</div>
+              ) : (
+                <button onClick={updateZKprogram} className={styles.button}>
+                  Call Add.update()
+                </button>
+              )}
+            </div>
+          </div>          
           <div className={styles.grid}>
             <a
               href="https://docs.minaprotocol.com/zkapps"
