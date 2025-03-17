@@ -32,11 +32,11 @@ export default function Home() {
       setContractState(num.toString());
       setZkprogramState(num.toString());
 
-      // Compile the zkprogram
+      // Compile the AddZKprogram
       console.log("Compiling AddZKprogram");
       await AddZKprogram.compile();
       
-      // Initialize the zkprogram with the initial state of the zkapp
+      // Initialize the AddZKprogram with the initial state of the zkapp
       console.log("Initialize AddZKprogram with intial contract state of zkapp");
       const init = await AddZKprogram.init(num);
       setProof(init.proof);
@@ -64,7 +64,7 @@ export default function Home() {
       // Execute a transaction locally on the browser
       const transaction = await Mina.transaction(async () => {
         console.log("Executing Add.settleState() locally");
-        await zkApp.current.settleState();
+        await zkApp.current.settleState(proof);
       });
 
       // Prove execution of the contract using the proving key
@@ -101,7 +101,7 @@ export default function Home() {
     setLoading(true);
 
     if (contractState && proof) {
-      const update = await zkProgram.update(Field(contractState), proof);
+      const update = await AddZKprogram.update(Field(contractState), proof);
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
     }
