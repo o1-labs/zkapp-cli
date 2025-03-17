@@ -97,11 +97,10 @@ export default function Home() {
     }
   }, []);
 
-  const updateZKprogram = async () => {
+  const updateZKprogram = useCallback(async () => {
     setLoading(true);
      
     if (contractState && proof) {
-
       // Call the AddZKprogram update method
       console.log("Calling AddZKprogram.update");
       const update = await AddZKprogram.update(Field(contractState), proof);
@@ -109,7 +108,7 @@ export default function Home() {
       setZkprogramState(update.proof.publicOutput.toString())
     }
     setLoading(false);  
-  };
+ }, [proof]);
 
   return (
     <>
