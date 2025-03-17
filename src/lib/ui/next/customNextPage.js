@@ -97,6 +97,7 @@ export default function Home() {
     if (contractState && proof) {
       const update = await zkProgram.update(contractState, proof);
       setProof(update.proof);
+      setZkprogramState(update.proof.publicOutput.toString())
     }
   };
 
