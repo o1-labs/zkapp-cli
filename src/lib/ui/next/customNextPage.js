@@ -38,6 +38,8 @@ export default function Home() {
       // Initialize the zkprogram with the initial state of the zkapp
       console.log("Initialize AddZKprogram with intial contract state of zkapp");
       const init = await AddZKprogram.init(num);
+      setProof(init.proof);
+      
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
