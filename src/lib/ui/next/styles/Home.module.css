@@ -75,6 +75,11 @@
   justify-items: center;
 }
 
+.stateContainer {
+  display: flex;
+  flex-direction: row;
+}
+
 .state button {
   display: block;
   margin: .5rem auto 1rem;
