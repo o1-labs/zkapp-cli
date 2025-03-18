@@ -143,35 +143,37 @@ export default function Home() {
             Get started by editing
             <code className={styles.code}> app/page.tsx</code>
           </p>
-          <div className={styles.state}>
-            <div>
-              <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
-              {error ? (
-                <span className={styles.error}>Error: {error}</span>
-              ) : (loading ?
-                <div>Loading...</div> :
-                (transactionLink ?
-                  <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
-                    View Transaction on MinaScan
-                  </a> :
-                  <button onClick={updateZkApp} className={styles.button}>Call Add.settleState()</button>))}
-            </div>
-          </div>
-          <div className={styles.state}>
-            <div>
+          <div className={styles.stateContainer}>
+            <div className={styles.state}>
               <div>
-                ZKprogram State:{" "}
-                <span className={styles.bold}>{zkprogramState}</span>
+                <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
+                {error ? (
+                  <span className={styles.error}>Error: {error}</span>
+                ) : (loading ?
+                  <div>Loading...</div> :
+                  (transactionLink ?
+                    <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
+                      View Transaction on MinaScan
+                    </a> :
+                    <button onClick={updateZkApp} className={styles.button}>Call Add.settleState()</button>))}
               </div>
-              {error ? (
-                <span className={styles.error}>Error: {error}</span>
-              ) : loading ? (
-                <div>Loading...</div>
-              ) : (
-                <button onClick={updateZKprogram} className={styles.button}>
-                  Call AddZKprogram.update()
-                </button>
-              )}
+            </div>
+            <div className={styles.state}>
+              <div>
+                <div>
+                  ZKprogram State:{" "}
+                  <span className={styles.bold}>{zkprogramState}</span>
+                </div>
+                {error ? (
+                  <span className={styles.error}>Error: {error}</span>
+                ) : loading ? (
+                  <div>Loading...</div>
+                ) : (
+                  <button onClick={updateZKprogram} className={styles.button}>
+                    Call AddZKprogram.update()
+                  </button>
+                )}
+              </div>
             </div>
           </div>          
           <div className={styles.grid}>
