@@ -223,6 +223,10 @@
     grid-template-rows: repeat(4, minmax(25%, auto));
   }
 
+  .stateContainer {
+    flex-direction: column;
+  }
+
   .start {
     margin-bottom: 2rem;
     padding-left: 0.5rem;
