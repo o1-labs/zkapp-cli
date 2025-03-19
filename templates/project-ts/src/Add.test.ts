@@ -56,17 +56,13 @@ describe('Add', () => {
 
     expect(proof.publicOutput).toEqual(Field(1));
   });
-  it('correctly updates the num state on the `Add` smart contract', async () => {
+
+  it('correctly settles `AddZKprogram` state on the `Add` smart contract', async () => {
     await localDeploy();
+    await localDeploy();
+    const initialState = Field(1);
+    const init = await AddZKprogram.init(initialState);
 
-    // // update transaction
-    // const txn = await Mina.transaction(senderAccount, async () => {
-    //   await zkApp.settleAddProgramState();
-    // });
-    // await txn.prove();
-    // await txn.sign([senderKey]).send();
-
-    // const updatedNum = zkApp.num.get();
-    // expect(updatedNum).toEqual(Field(3));
+    const update = await AddZKprogram.update(initialState, init.proof);
   });
 });
