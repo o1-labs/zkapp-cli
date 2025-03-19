@@ -59,7 +59,6 @@ describe('Add', () => {
 
   it('correctly settles `AddZKprogram` state on the `Add` smart contract', async () => {
     await localDeploy();
-    await localDeploy();
     const initialState = Field(1);
 
     const init = await AddZKprogram.init(initialState);
