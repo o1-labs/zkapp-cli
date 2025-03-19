@@ -13,7 +13,7 @@
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import fs from 'fs/promises';
-import { Mina, NetworkId, PrivateKey } from 'o1js';
+import { Mina, NetworkId, PrivateKey, Field } from 'o1js';
 import { Add } from './Add.js';
 import { AddZKprogram } from './AddZKprogram.js';
 
@@ -68,11 +68,22 @@ const feepayerAddress = feepayerKey.toPublicKey();
 const zkAppAddress = zkAppKey.toPublicKey();
 const zkApp = new Add(zkAppAddress);
 
+// compile the ZKprogram
+console.log('compile the zkprogram...');
+await AddZKprogram.compile();
+
 // compile the contract to create prover keys
 console.log('compile the contract...');
 await Add.compile();
 
 try {
+  const initialState = Field(1);
+
+  // initialze the ZKprogram
+  const init = await AddZKprogram.init(initialState);
+  // call update on the ZKprogram
+  const update = await AddZKprogram.update(initialState, init.proof);
+
   // call update() and send transaction
   console.log('build transaction and create proof...');
   const tx = await Mina.transaction(
