@@ -61,8 +61,18 @@ describe('Add', () => {
     await localDeploy();
     await localDeploy();
     const initialState = Field(1);
-    const init = await AddZKprogram.init(initialState);
 
+    const init = await AddZKprogram.init(initialState);
     const update = await AddZKprogram.update(initialState, init.proof);
+
+    // settleState transaction
+    const txn = await Mina.transaction(senderAccount, async () => {
+      await zkApp.settleState(update.proof);
+    });
+    await txn.prove();
+    await txn.sign([senderKey]).send();
+
+    const updatedNum = zkApp.num.get();
+    expect(updatedNum).toEqual(Field(2));
   });
 });
