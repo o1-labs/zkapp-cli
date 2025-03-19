@@ -62,18 +62,25 @@ export default function Home() {
       await fetchAccount({publicKey: PublicKey.fromBase58(walletKey)});
 
       // Execute a transaction locally on the browser
-      const transaction = await Mina.transaction(async () => {
-        console.log("Executing Add.settleState() locally");
-        await zkApp.current.settleState(proof);
-      });
+      let hash;
+      if (proof) {
+        const transaction = await Mina.transaction(async () => {
+          console.log("Executing Add.settleState() locally");
+          await zkApp.current.settleState(proof);
+        });
 
-      // Prove execution of the contract using the proving key
-      console.log("Proving execution of Add.settleState()");
-      await transaction.prove();
+        // Prove execution of the contract using the proving key
+        console.log("Proving execution of Add.settleState()");
+        await transaction.prove();
 
-      // Broadcast the transaction to the Mina network
-      console.log("Broadcasting proof of execution to the Mina network");
-      const {hash} = await mina.sendTransaction({transaction: transaction.toJSON()});
+        // Broadcast the transaction to the Mina network
+        console.log("Broadcasting proof of execution to the Mina network");
+        ({ hash } = await mina.sendTransaction({
+          transaction: transaction.toJSON()
+        }));
+      } else {
+        throw Error("Proof passed to Add.settleState is null");
+      }
 
       // display the link to the transaction
       const transactionLink = "https://minascan.io/devnet/tx/" + hash;
