@@ -113,6 +113,8 @@ export default function Home() {
       const update = await AddZKprogram.update(Field(contractState), proof);
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
+    } else {
+      throw Error("Proof and or ContractState passed to AddZKprogram.update is null"); 
     }
     setLoading(false);  
  }, [proof]);
