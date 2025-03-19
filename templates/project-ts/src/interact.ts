@@ -1,7 +1,7 @@
 /**
  * This script can be used to interact with the Add contract, after deploying it.
  *
- * We call the update() method on the contract, create a proof and send it to the chain.
+ * We call the settleState() method on the `Add` contract, create a proof and send it to the chain.
  * The endpoint that we interact with is read from your config.json.
  *
  * This simulates a user interacting with the zkApp from a browser, except that here, sending the transaction happens
@@ -15,6 +15,7 @@
 import fs from 'fs/promises';
 import { Mina, NetworkId, PrivateKey } from 'o1js';
 import { Add } from './Add.js';
+import { AddZKprogram } from './AddZKprogram.js';
 
 // check command line arg
 const deployAlias = process.argv[2];
