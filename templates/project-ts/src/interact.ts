@@ -15,7 +15,7 @@
 import fs from 'fs/promises';
 import { Mina, NetworkId, PrivateKey, Field } from 'o1js';
 import { Add } from './Add.js';
-import { AddZkProgram } from './AddZkProgram.js';
+import { AddZKprogram } from './AddZKprogram.js';
 
 // check command line arg
 const deployAlias = process.argv[2];
@@ -70,7 +70,7 @@ const zkApp = new Add(zkAppAddress);
 
 // compile the ZKprogram
 console.log('compile the zkprogram...');
-await AddZkProgram.compile();
+await AddZKprogram.compile();
 
 // compile the contract to create prover keys
 console.log('compile the contract...');
@@ -80,9 +80,9 @@ try {
   const initialState = Field(1);
 
   // initialze the ZKprogram
-  const init = await AddZkProgram.init(initialState);
+  const init = await AddZKprogram.init(initialState);
   // call update on the ZKprogram
-  const update = await AddZkProgram.update(initialState, init.proof);
+  const update = await AddZKprogram.update(initialState, init.proof);
 
   // call settleState() and send transaction
   console.log('build transaction and create proof...');

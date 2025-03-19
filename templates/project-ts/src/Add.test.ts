@@ -1,6 +1,6 @@
 import { AccountUpdate, Field, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Add } from './Add';
-import { AddZkProgram } from './AddZkProgram';
+import { AddZKprogram } from './AddZKprogram';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -22,7 +22,7 @@ describe('Add', () => {
 
   beforeAll(async () => {
     if (proofsEnabled) {
-      await AddZkProgram.compile();
+      await AddZKprogram.compile();
       await Add.compile();
     }
   });
@@ -49,20 +49,20 @@ describe('Add', () => {
     await txn.sign([deployerKey, zkAppPrivateKey]).send();
   }
 
-  it('initilaizes the  `AddZkProgram`', async () => {
+  it('initilaizes the  `AddZKprogram`', async () => {
     await localDeploy();
 
-    const { proof } = await AddZkProgram.init(Field(1));
+    const { proof } = await AddZKprogram.init(Field(1));
 
     expect(proof.publicOutput).toEqual(Field(1));
   });
 
-  it('correctly settles `AddZkProgram` state on the `Add` smart contract', async () => {
+  it('correctly settles `AddZKprogram` state on the `Add` smart contract', async () => {
     await localDeploy();
     const initialState = Field(1);
 
-    const init = await AddZkProgram.init(initialState);
-    const update = await AddZkProgram.update(initialState, init.proof);
+    const init = await AddZKprogram.init(initialState);
+    const update = await AddZKprogram.update(initialState, init.proof);
 
     // settleState transaction
     const txn = await Mina.transaction(senderAccount, async () => {

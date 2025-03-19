@@ -1,4 +1,4 @@
 import { Add } from './Add.js';
-import { AddZkProgram } from './AddZkProgram.js';
+import { AddZKprogram } from './AddZKprogram.js';
 
-export { Add, AddZkProgram };
+export { Add, AddZKprogram };

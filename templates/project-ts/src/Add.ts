@@ -1,5 +1,5 @@
 import { Field, SmartContract, state, State, method } from 'o1js';
-import { AddProgramProof } from './AddZkProgram.js';
+import { AddProgramProof } from './AddZKprogram.js';
 
 /**
  * Basic Example
@@ -7,7 +7,7 @@ import { AddProgramProof } from './AddZkProgram.js';
  *
  * The Add contract verifies a ZKprogram proof and updates a 'num' state variable.
  * When the 'settleState' method is called, the Add contract verifies a
- * proof from the 'AddZkProgram' and saves the 'num' value to the contract state.
+ * proof from the 'AddZKprogram' and saves the 'num' value to the contract state.
  *
  * This file is safe to delete and replace with your own contract.
  */
