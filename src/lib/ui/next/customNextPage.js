@@ -95,7 +95,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [proof]);
 
   const updateZKprogram = useCallback(async () => {
     setLoading(true);
