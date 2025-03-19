@@ -49,12 +49,13 @@ describe('Add', () => {
     await txn.sign([deployerKey, zkAppPrivateKey]).send();
   }
 
-  it('generates and deploys the `Add` smart contract', async () => {
+  it('initilaizes the  `AddZKprogram`', async () => {
     await localDeploy();
-    const num = zkApp.num.get();
-    expect(num).toEqual(Field(1));
-  });
 
+    const { proof } = await AddZKprogram.init(Field(1));
+
+    expect(proof.publicOutput).toEqual(Field(1));
+  });
   it('correctly updates the num state on the `Add` smart contract', async () => {
     await localDeploy();
 
