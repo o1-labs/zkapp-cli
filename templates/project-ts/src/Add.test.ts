@@ -1,6 +1,6 @@
 import { AccountUpdate, Field, Mina, PrivateKey, PublicKey } from 'o1js';
 import { Add } from './Add';
-import { AddZKprogram } from './AddZKprogram';
+import { AddZkProgram } from './AddZkProgram';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -22,7 +22,7 @@ describe('Add', () => {
 
   beforeAll(async () => {
     if (proofsEnabled) {
-      await AddZKprogram.compile();
+      await AddZkProgram.compile();
       await Add.compile();
     }
   });
@@ -52,7 +52,7 @@ describe('Add', () => {
   it('initilaizes the  `AddZKprogram`', async () => {
     await localDeploy();
 
-    const { proof } = await AddZKprogram.init(Field(1));
+    const { proof } = await AddZkProgram.init(Field(1));
 
     expect(proof.publicOutput).toEqual(Field(1));
   });
@@ -61,8 +61,8 @@ describe('Add', () => {
     await localDeploy();
     const initialState = Field(1);
 
-    const init = await AddZKprogram.init(initialState);
-    const update = await AddZKprogram.update(initialState, init.proof);
+    const init = await AddZkProgram.init(initialState);
+    const update = await AddZkProgram.update(initialState, init.proof);
 
     // settleState transaction
     const txn = await Mina.transaction(senderAccount, async () => {

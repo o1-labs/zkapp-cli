@@ -7,7 +7,7 @@ import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
 import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
-import { Add, AddZKprogram } from "../../contracts";
+import { Add, AddZkProgram } from "../../contracts";
 
 // We've already deployed the Add contract on testnet at this address
 // https://minascan.io/devnet/account/B62qoptamt2EgyY2UM2WD7UVJRvuuDMxw2cLdENc92iVNm6FwsLX4Fk
@@ -32,13 +32,13 @@ export default function Home() {
       setContractState(num.toString());
       setZkprogramState(num.toString());
 
-      // Compile the AddZKprogram
-      console.log("Compiling AddZKprogram");
-      await AddZKprogram.compile();
+      // Compile the AddZkProgram
+      console.log("Compiling AddZkProgram");
+      await AddZkProgram.compile();
       
-      // Initialize the AddZKprogram with the initial state of the zkapp
-      console.log("Initialize AddZKprogram with intial contract state of zkapp");
-      const init = await AddZKprogram.init(num);
+      // Initialize the AddZkProgram with the initial state of the zkapp
+      console.log("Initialize AddZkProgram with intial contract state of zkapp");
+      const init = await AddZkProgram.init(num);
       setProof(init.proof);
       
 
@@ -108,13 +108,13 @@ export default function Home() {
     setLoading(true);
      
     if (contractState && proof) {
-      // Call the AddZKprogram update method
-      console.log("Calling AddZKprogram.update");
-      const update = await AddZKprogram.update(Field(contractState), proof);
+      // Call the AddZkProgram update method
+      console.log("Calling AddZkProgram.update");
+      const update = await AddZkProgram.update(Field(contractState), proof);
       setProof(update.proof);
       setZkprogramState(update.proof.publicOutput.toString())
     } else {
-      throw Error("Proof and or ContractState passed to AddZKprogram.update is null"); 
+      throw Error("Proof and or ContractState passed to AddZkProgram.update is null"); 
     }
     setLoading(false);  
  }, [proof]);
@@ -179,7 +179,7 @@ export default function Home() {
                   <div>Loading...</div>
                 ) : (
                   <button onClick={updateZKprogram} className={styles.button}>
-                    Call AddZKprogram.update()
+                    Call AddZkProgram.update()
                   </button>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import { ZkProgram, Field, SelfProof, verify } from 'o1js';
 
-export const AddZKprogram = ZkProgram({
+export const AddZkProgram = ZkProgram({
   name: 'add-program',
   publicInput: Field,
   publicOutput: Field,
@@ -30,4 +30,4 @@ export const AddZKprogram = ZkProgram({
   },
 });
 
-export class AddProgramProof extends ZkProgram.Proof(AddZKprogram) {}
+export class AddProgramProof extends ZkProgram.Proof(AddZkProgram) {}

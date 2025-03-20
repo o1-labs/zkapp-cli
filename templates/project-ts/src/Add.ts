@@ -1,5 +1,5 @@
 import { Field, SmartContract, state, State, method } from 'o1js';
-import { AddProgramProof } from './AddZKprogram.js';
+import { AddProgramProof } from './AddZkProgram.js';
 
 /**
  * Basic Example
