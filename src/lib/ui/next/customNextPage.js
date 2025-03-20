@@ -18,7 +18,7 @@ export default function Home() {
 
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
-  const [zkprogramState, setZkprogramState] = useState<string | null>(null);
+  const [zkProgramState, setZkProgramState] = useState<string | null>(null);
   const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,7 +30,7 @@ export default function Home() {
       await fetchAccount({publicKey: zkAppAddress});
       const num = zkApp.current.num.get();
       setContractState(num.toString());
-      setZkprogramState(num.toString());
+      setZkProgramState(num.toString());
 
       // Compile the AddZkProgram
       console.log("Compiling AddZkProgram");
@@ -104,7 +104,7 @@ export default function Home() {
     }
   }, [proof]);
 
-  const updateZKprogram = useCallback(async () => {
+  const updateZkProgram = useCallback(async () => {
     setLoading(true);
      
     if (contractState && proof) {
@@ -112,7 +112,7 @@ export default function Home() {
       console.log("Calling AddZkProgram.update");
       const update = await AddZkProgram.update(Field(contractState), proof);
       setProof(update.proof);
-      setZkprogramState(update.proof.publicOutput.toString())
+      setZkProgramState(update.proof.publicOutput.toString())
     } else {
       throw Error("Proof and or ContractState passed to AddZkProgram.update is null"); 
     }
@@ -170,15 +170,15 @@ export default function Home() {
             <div className={styles.state}>
               <div>
                 <div>
-                  ZKprogram State:{" "}
-                  <span className={styles.bold}>{zkprogramState}</span>
+                  ZkProgram State:{" "}
+                  <span className={styles.bold}>{zkProgramState}</span>
                 </div>
                 {error ? (
                   <span className={styles.error}>Error: {error}</span>
                 ) : loading ? (
                   <div>Loading...</div>
                 ) : (
-                  <button onClick={updateZKprogram} className={styles.button}>
+                  <button onClick={updateZkProgram} className={styles.button}>
                     Call AddZkProgram.update()
                   </button>
                 )}
