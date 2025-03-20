@@ -1,4 +1,4 @@
-import { ZkProgram, Field, SelfProof, verify } from 'o1js';
+import { ZkProgram, Field, SelfProof } from 'o1js';
 
 export const AddZkProgram = ZkProgram({
   name: 'add-program',
