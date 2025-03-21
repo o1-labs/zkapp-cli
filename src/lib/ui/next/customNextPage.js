@@ -10,8 +10,8 @@ import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
 import { Add, AddZkProgram } from "../../contracts";
 
 // We've already deployed the Add contract on testnet at this address
-// https://minascan.io/devnet/account/B62qoptamt2EgyY2UM2WD7UVJRvuuDMxw2cLdENc92iVNm6FwsLX4Fk
-const zkAppAddress = "B62qoptamt2EgyY2UM2WD7UVJRvuuDMxw2cLdENc92iVNm6FwsLX4Fk";
+// https://minascan.io/devnet/account/B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp
+const zkAppAddress = "B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp";
 
 export default function Home() {
   const zkApp = useRef<Add>(new Add(PublicKey.fromBase58(zkAppAddress)));
