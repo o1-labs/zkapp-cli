@@ -13,7 +13,7 @@
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import fs from 'fs/promises';
-import { Mina, NetworkId, PrivateKey, Field } from 'o1js';
+import { Mina, NetworkId, PrivateKey, fetchAccount } from 'o1js';
 import { Add } from './Add.js';
 import { AddZkProgram } from './AddZkProgram.js';
 
@@ -77,6 +77,7 @@ console.log('compile the contract...');
 await Add.compile();
 
 try {
+  await fetchAccount({ publicKey: zkAppAddress });
   const initialState = zkApp.num.get();
 
   // initialze the ZKprogram
