@@ -77,7 +77,7 @@ console.log('compile the contract...');
 await Add.compile();
 
 try {
-  const initialState = Field(1);
+  const initialState = zkApp.num.get();
 
   // initialze the ZKprogram
   const init = await AddZkProgram.init(initialState);
