@@ -16,6 +16,7 @@ export class Add extends SmartContract {
 
   @method async settleState(proof: AddProgramProof) {
     proof.verify();
+    this.num.requireEquals(proof.publicInput);
     const addProgramState = proof.publicOutput;
     this.num.set(addProgramState);
   }
