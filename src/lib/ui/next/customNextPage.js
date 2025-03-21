@@ -164,7 +164,7 @@ export default function Home() {
                     <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
                       View Transaction on MinaScan
                     </a> :
-                    <button onClick={updateZkApp} className={styles.button}>Call Add.settleState()</button>))}
+                    <button onClick={updateZkApp} className={styles.button}>Add.settleState()</button>))}
               </div>
             </div>
             <div className={styles.state}>
@@ -179,7 +179,7 @@ export default function Home() {
                   <div>Loading...</div>
                 ) : (
                   <button onClick={updateZkProgram} className={styles.button}>
-                    Call AddZkProgram.update()
+                    AddZkProgram.update()
                   </button>
                 )}
               </div>
