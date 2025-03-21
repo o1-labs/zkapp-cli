@@ -83,14 +83,15 @@ try {
   // initialze the ZKprogram
   const init = await AddZkProgram.init(initialState);
   // call update on the ZKprogram
-  const update = await AddZkProgram.update(initialState, init.proof);
+  const update1 = await AddZkProgram.update(initialState, init.proof);
+  const update2 = await AddZkProgram.update(initialState, update1.proof);
 
   // call settleState() and send transaction
   console.log('build transaction and create proof...');
   const tx = await Mina.transaction(
     { sender: feepayerAddress, fee },
     async () => {
-      await zkApp.settleState(update.proof);
+      await zkApp.settleState(update2.proof);
     }
   );
   await tx.prove();
