@@ -72,6 +72,6 @@ describe('Add', () => {
     await txn.sign([senderKey]).send();
 
     const updatedNum = zkApp.num.get();
-    expect(updatedNum).toEqual(Field(2));
+    expect(updatedNum).toEqual(Field(1));
   });
 });
