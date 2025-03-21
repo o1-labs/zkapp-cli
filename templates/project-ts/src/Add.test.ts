@@ -21,8 +21,8 @@ describe('Add', () => {
     zkApp: Add;
 
   beforeAll(async () => {
+    await AddZkProgram.compile({ proofsEnabled });
     if (proofsEnabled) {
-      await AddZkProgram.compile();
       await Add.compile();
     }
   });
