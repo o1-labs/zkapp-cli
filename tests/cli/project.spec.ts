@@ -36,13 +36,13 @@ test.describe('zkApp-CLI', () => {
   // Tests for project generation of each UI type
   for (const uiType of Constants.uiTypes) {
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
+      test.skip(
+        os.platform() === 'win32' && uiType === 'nuxt',
+        'Skipping tests in certain conditions.'
+      );
+
       for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
         await test.step(`Project generation and results validation skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
-          test.skip(
-            os.platform() === 'win32' && uiType === 'nuxt',
-            'Skipping tests in certain conditions.'
-          );
-
           const projectName = crypto.randomUUID();
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();
