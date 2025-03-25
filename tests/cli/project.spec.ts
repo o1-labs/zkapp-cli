@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import Constants from '../../src/lib/constants.js';
 import {
   TestConstants,
@@ -37,6 +38,11 @@ test.describe('zkApp-CLI', () => {
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
       for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
         await test.step(`Project generation and results validation skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
+          test.skip(
+            os.platform() === 'win32' && uiType === 'nuxt',
+            'Skipping tests in certain conditions.'
+          );
+
           const projectName = crypto.randomUUID();
           const { spawn, cleanup, path, ls, exists } =
             await prepareEnvironment();

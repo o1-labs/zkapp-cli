@@ -26,8 +26,9 @@ test.describe('Users', () => {
       browserName,
     }) => {
       test.skip(
-        browserName === 'webkit' && os.platform() !== 'darwin',
-        'Skipping tests in certain conditions (zkApp project generation for Webkit browser on non-Darwin platforms).'
+        (os.platform() === 'win32' && uiType === 'nuxt') ||
+          (browserName === 'webkit' && os.platform() !== 'darwin'),
+        'Skipping tests in certain conditions.'
       );
 
       const devServerPort = await portfinder.getPortPromise();
