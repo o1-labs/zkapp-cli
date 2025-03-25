@@ -1,7 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { prepareEnvironment } from '@shimkiv/cli-testing-library';
 import crypto from 'node:crypto';
-import os from 'node:os';
 import Constants from '../../src/lib/constants.js';
 import {
   TestConstants,
@@ -35,13 +34,7 @@ test.describe('zkApp-CLI', () => {
 
   // Tests for project generation of each UI type
   for (const uiType of Constants.uiTypes) {
-    // https://github.com/sveltejs/svelte/issues/8595
     test(`should generate zkApp project with ${uiType.toUpperCase()} UI type, @parallel @smoke @project @${uiType}-ui`, async () => {
-      test.skip(
-        os.platform() === 'win32' && uiType === 'svelte',
-        'Skipping tests that involve zkApp project generation for Svelte UI type on Windows platform due to: ERR_TTY_INIT_FAILED on CI.'
-      );
-
       for (const skipInteractiveSelection of TestConstants.skipInteractiveSelectionOptions) {
         await test.step(`Project generation and results validation skipInteractiveSelection=${skipInteractiveSelection})`, async () => {
           const projectName = crypto.randomUUID();
