@@ -25,11 +25,10 @@ test.describe('Users', () => {
       context,
       browserName,
     }) => {
-      // https://github.com/sveltejs/svelte/issues/8595
       test.skip(
-        (os.platform() === 'win32' && uiType === 'svelte') ||
+        (os.platform() === 'win32' && uiType === 'nuxt') ||
           (browserName === 'webkit' && os.platform() !== 'darwin'),
-        'Skipping tests in certain conditions (zkApp project generation for Svelte UI type on Windows and Webkit browser on non-Darwin platforms).'
+        'Skipping tests in certain conditions.'
       );
 
       const devServerPort = await portfinder.getPortPromise();
