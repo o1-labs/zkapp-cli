@@ -381,10 +381,6 @@ describe('project.js', () => {
 
       expect(shell.mkdir).toHaveBeenCalledWith('-p', 'test-project');
       expect(shell.cd).toHaveBeenCalledWith('test-project');
-      expect(spawnSync).toHaveBeenCalledWith('npx', ['sv', 'create', 'ui'], {
-        stdio: 'inherit',
-        shell: true,
-      });
       expect(shell.cd).toHaveBeenCalledWith('contracts');
       checkUiProjectSetup(shell.exec.mock.calls);
       checkIfProjectSetupSuccessful();
@@ -661,6 +657,7 @@ describe('project.js', () => {
 
   describe('scaffoldSvelte()', () => {
     it('should set up a SvelteKit project', async () => {
+      delete process.env.CI;
       fs.existsSync.mockReturnValue(false);
       shell.cp.mockReturnValue(true);
       fs.readFileSync.mockImplementation((path) => {
@@ -682,6 +679,46 @@ describe('project.js', () => {
         shell: true,
       });
       expect(fs.writeFileSync).toHaveBeenCalled();
+      process.env.CI = true;
+    });
+
+    it('should set up a SvelteKit project in non-interactive mode', async () => {
+      process.env.ZKAPP_CLI_INTEGRATION_TEST = 'true';
+      fs.existsSync.mockReturnValue(false);
+      shell.cp.mockReturnValue(true);
+      fs.readFileSync.mockImplementation((path) => {
+        if (path.includes('tsconfig.json')) {
+          return 'tsconfig.json content';
+        }
+        return '';
+      });
+      fs.writeFileSync.mockImplementation(() => {});
+      fs.copySync.mockReturnValue(true);
+      fs.mkdirsSync.mockReturnValue(true);
+      fs.emptyDirSync.mockReturnValue(true);
+      const { scaffoldSvelte } = await import('./project.js');
+
+      scaffoldSvelte();
+
+      expect(spawnSync).toHaveBeenCalledWith(
+        'npx',
+        [
+          'sv',
+          'create',
+          '--template',
+          'minimal',
+          '--types',
+          'ts',
+          '--no-add-ons',
+          'ui',
+        ],
+        {
+          stdio: 'inherit',
+          shell: true,
+        }
+      );
+      expect(fs.writeFileSync).toHaveBeenCalled();
+      delete process.env.ZKAPP_CLI_INTEGRATION_TEST;
     });
   });
 

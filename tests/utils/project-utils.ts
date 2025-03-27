@@ -44,27 +44,28 @@ export async function zkProject(
       };
       break;
     }
-    case 'svelte': {
-      interactiveDialog = {
-        ...interactiveDialog,
-        'Which template would you like?': ['enter'],
-        'Add type checking with Typescript?': ['enter'],
-        'What would you like to add to your project?': [
-          'space',
-          'arrowDown',
-          'space',
-          'arrowDown',
-          'space',
-          'arrowDown',
-          'space',
-          'enter',
-        ],
-        'Which package manager do you want to install dependencies with?': [
-          'enter',
-        ],
-      };
-      break;
-    }
+    // We are going to skip the interactive dialog for Svelte UI type because of latest `sv` application issues when spawn from other processes.
+    // case 'svelte': {
+    //   interactiveDialog = {
+    //     ...interactiveDialog,
+    //     'Which template would you like?': ['enter'],
+    //     'Add type checking with Typescript?': ['enter'],
+    //     'What would you like to add to your project?': [
+    //       'space',
+    //       'arrowDown',
+    //       'space',
+    //       'arrowDown',
+    //       'space',
+    //       'arrowDown',
+    //       'space',
+    //       'enter',
+    //     ],
+    //     'Which package manager do you want to install dependencies with?': [
+    //       'enter',
+    //     ],
+    //   };
+    //   break;
+    // }
   }
 
   const { exitCode, stdOut, stdErr } = await executeInteractiveCommand({

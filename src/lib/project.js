@@ -175,10 +175,30 @@ async function project({ name, ui }) {
 }
 
 function scaffoldSvelte() {
-  spawnSync('npx', ['sv', 'create', 'ui'], {
-    stdio: 'inherit',
-    shell: true,
-  });
+  if (process.env.CI || process.env.ZKAPP_CLI_INTEGRATION_TEST) {
+    spawnSync(
+      'npx',
+      [
+        'sv',
+        'create',
+        '--template',
+        'minimal',
+        '--types',
+        'ts',
+        '--no-add-ons',
+        'ui',
+      ],
+      {
+        stdio: 'inherit',
+        shell: true,
+      }
+    );
+  } else {
+    spawnSync('npx', ['sv', 'create', 'ui'], {
+      stdio: 'inherit',
+      shell: true,
+    });
+  }
 
   shell.cp(
     path.join(__dirname, 'ui', 'svelte', 'hooks.server.js'),
