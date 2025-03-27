@@ -1,7 +1,7 @@
 /**
  * This script can be used to interact with the Add contract, after deploying it.
  *
- * We call the update() method on the contract, create a proof and send it to the chain.
+ * We call the settleState() method on the `Add` contract, create a proof and send it to the chain.
  * The endpoint that we interact with is read from your config.json.
  *
  * This simulates a user interacting with the zkApp from a browser, except that here, sending the transaction happens
@@ -13,8 +13,9 @@
  * Run with node:     `$ node build/src/interact.js <deployAlias>`.
  */
 import fs from 'fs/promises';
-import { Mina, NetworkId, PrivateKey } from 'o1js';
+import { Mina, NetworkId, PrivateKey, fetchAccount } from 'o1js';
 import { Add } from './Add.js';
+import { AddZkProgram } from './AddZkProgram.js';
 
 // check command line arg
 const deployAlias = process.argv[2];
@@ -67,17 +68,30 @@ const feepayerAddress = feepayerKey.toPublicKey();
 const zkAppAddress = zkAppKey.toPublicKey();
 const zkApp = new Add(zkAppAddress);
 
+// compile the ZKprogram
+console.log('compile the zkprogram...');
+await AddZkProgram.compile();
+
 // compile the contract to create prover keys
 console.log('compile the contract...');
 await Add.compile();
 
 try {
-  // call update() and send transaction
+  await fetchAccount({ publicKey: zkAppAddress });
+  const initialState = zkApp.num.get();
+
+  // initialze the ZKprogram
+  const init = await AddZkProgram.init(initialState);
+  // call update on the ZKprogram
+  const update1 = await AddZkProgram.update(initialState, init.proof);
+  const update2 = await AddZkProgram.update(initialState, update1.proof);
+
+  // call settleState() and send transaction
   console.log('build transaction and create proof...');
   const tx = await Mina.transaction(
     { sender: feepayerAddress, fee },
     async () => {
-      await zkApp.update();
+      await zkApp.settleState(update2.proof);
     }
   );
   await tx.prove();

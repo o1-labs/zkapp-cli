@@ -17,6 +17,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+### Added
+
+- Adds a new ZkProgram default example that is included with CLI generated projects, coupled with a new example template UI that demonstrates an end to end flow of generating proofs with a ZkProgram, and settling the state on Mina. [#725](https://github.com/o1-labs/zkapp-cli/pull/725)
+
+### Changed
+
+- Add.ts default contract modified to verify and settle ZkProgram proofs. Interact.ts and Add.test.ts modified to generate ZkProgram proofs and settle state on Mina [#725](https://github.com/o1-labs/zkapp-cli/pull/725)
+
 ## [0.22.5](https://github.com/o1-labs/zkapp-cli/compare/v0.22.4...v0.22.5) - 2025-02-07
 
 ## [0.22.4](https://github.com/o1-labs/zkapp-cli/compare/v0.22.3...v0.22.4) - 2025-01-29

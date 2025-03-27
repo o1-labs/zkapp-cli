@@ -6,18 +6,20 @@ import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
-import {fetchAccount, Mina, PublicKey} from "o1js";
-import {Add} from "../../contracts";
+import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
+import { Add, AddZkProgram } from "../../contracts";
 
 // We've already deployed the Add contract on testnet at this address
-// https://minascan.io/devnet/account/B62qnTDEeYtBHBePA4yhCt4TCgDtA4L2CGvK7PirbJyX4pKH8bmtWe5
-const zkAppAddress = "B62qnTDEeYtBHBePA4yhCt4TCgDtA4L2CGvK7PirbJyX4pKH8bmtWe5";
+// https://minascan.io/devnet/account/B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp
+const zkAppAddress = "B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp";
 
 export default function Home() {
   const zkApp = useRef<Add>(new Add(PublicKey.fromBase58(zkAppAddress)));
 
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
+  const [zkProgramState, setZkProgramState] = useState<string | null>(null);
+  const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -28,6 +30,17 @@ export default function Home() {
       await fetchAccount({publicKey: zkAppAddress});
       const num = zkApp.current.num.get();
       setContractState(num.toString());
+      setZkProgramState(num.toString());
+
+      // Compile the AddZkProgram
+      console.log("Compiling AddZkProgram");
+      await AddZkProgram.compile();
+      
+      // Initialize the AddZkProgram with the initial state of the zkapp
+      console.log("Initialize AddZkProgram with intial contract state of zkapp");
+      const init = await AddZkProgram.init(num);
+      setProof(init.proof);
+      
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
@@ -49,18 +62,25 @@ export default function Home() {
       await fetchAccount({publicKey: PublicKey.fromBase58(walletKey)});
 
       // Execute a transaction locally on the browser
-      const transaction = await Mina.transaction(async () => {
-        console.log("Executing Add.update() locally");
-        await zkApp.current.update();
-      });
+      let hash;
+      if (proof) {
+        const transaction = await Mina.transaction(async () => {
+          console.log("Executing Add.settleState() locally");
+          await zkApp.current.settleState(proof);
+        });
 
-      // Prove execution of the contract using the proving key
-      console.log("Proving execution of Add.update()");
-      await transaction.prove();
+        // Prove execution of the contract using the proving key
+        console.log("Proving execution of Add.settleState()");
+        await transaction.prove();
 
-      // Broadcast the transaction to the Mina network
-      console.log("Broadcasting proof of execution to the Mina network");
-      const {hash} = await mina.sendTransaction({transaction: transaction.toJSON()});
+        // Broadcast the transaction to the Mina network
+        console.log("Broadcasting proof of execution to the Mina network");
+        ({ hash } = await mina.sendTransaction({
+          transaction: transaction.toJSON()
+        }));
+      } else {
+        throw Error("Proof passed to Add.settleState is null");
+      }
 
       // display the link to the transaction
       const transactionLink = "https://minascan.io/devnet/tx/" + hash;
@@ -82,7 +102,22 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [proof]);
+
+  const updateZkProgram = useCallback(async () => {
+    setLoading(true);
+     
+    if (contractState && proof) {
+      // Call the AddZkProgram update method
+      console.log("Calling AddZkProgram.update");
+      const update = await AddZkProgram.update(Field(contractState), proof);
+      setProof(update.proof);
+      setZkProgramState(update.proof.publicOutput.toString())
+    } else {
+      throw Error("Proof and or ContractState passed to AddZkProgram.update is null"); 
+    }
+    setLoading(false);  
+ }, [proof]);
 
   return (
     <>
@@ -117,20 +152,39 @@ export default function Home() {
             Get started by editing
             <code className={styles.code}> app/page.tsx</code>
           </p>
-          <div className={styles.state}>
-            <div>
-              <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
-              {error ? (
-                <span className={styles.error}>Error: {error}</span>
-              ) : (loading ?
-                <div>Loading...</div> :
-                (transactionLink ?
-                  <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
-                    View Transaction on MinaScan
-                  </a> :
-                  <button onClick={updateZkApp} className={styles.button}>Call Add.update()</button>))}
+          <div className={styles.stateContainer}>
+            <div className={styles.state}>
+              <div>
+                <div>Contract State: <span className={styles.bold}>{contractState}</span></div>
+                {error ? (
+                  <span className={styles.error}>Error: {error}</span>
+                ) : (loading ?
+                  <div>Loading...</div> :
+                  (transactionLink ?
+                    <a href={transactionLink} className={styles.bold} target="_blank" rel="noopener noreferrer">
+                      View Transaction on MinaScan
+                    </a> :
+                    <button onClick={updateZkApp} className={styles.button}>Add.settleState()</button>))}
+              </div>
             </div>
-          </div>
+            <div className={styles.state}>
+              <div>
+                <div>
+                  ZkProgram State:{" "}
+                  <span className={styles.bold}>{zkProgramState}</span>
+                </div>
+                {error ? (
+                  <span className={styles.error}>Error: {error}</span>
+                ) : loading ? (
+                  <div>Loading...</div>
+                ) : (
+                  <button onClick={updateZkProgram} className={styles.button}>
+                    AddZkProgram.update()
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>          
           <div className={styles.grid}>
             <a
               href="https://docs.minaprotocol.com/zkapps"
