@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "module": "es2022",
+    "module": "nodenext", // allow top-level await
     "lib": ["dom", "esnext"],
     "outDir": "./build",
     "rootDir": ".",
