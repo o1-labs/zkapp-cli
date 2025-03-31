@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext", // comply with node + "type": "module"
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
