@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2021", // goal: ship *the most modern syntax* that is supported by *all* browsers that support our Wasm
     "module": "es2022",
     "lib": ["dom", "esnext"],
     "outDir": "./build",
@@ -18,7 +18,7 @@
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": false,
+    "useDefineForClassFields": false
   },
-  "include": ["./src"],
+  "include": ["./src"]
 }
