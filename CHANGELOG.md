@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.22.6](https://github.com/o1-labs/zkapp-cli/compare/0.22.5...0.22.6) - 2025-04-01
+
 ### Added
 
 - Adds a new ZkProgram default example that is included with CLI generated projects, coupled with a new example template UI that demonstrates an end to end flow of generating proofs with a ZkProgram, and settling the state on Mina. [#725](https://github.com/o1-labs/zkapp-cli/pull/725)
