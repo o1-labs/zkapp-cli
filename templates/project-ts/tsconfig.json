@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2021", // goal: ship *the most modern syntax* that is supported by *all* browsers that support our Wasm
-    "module": "es2022",
+    "module": "nodenext", // allow top-level await
     "lib": ["dom", "esnext"],
     "outDir": "./build",
     "rootDir": ".",
