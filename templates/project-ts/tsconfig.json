@@ -11,8 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "moduleResolution": "nodenext", // comply with node + "type": "module"
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true, // needed for decorators used in o1js
+    "emitDecoratorMetadata": true, // needed for decorators used in o1js
     "allowJs": true,
     "declaration": true,
     "sourceMap": true,
