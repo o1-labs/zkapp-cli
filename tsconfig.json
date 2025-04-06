@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "module": "nodenext", // allow top-level await
+    "module": "es2022",
     "lib": ["dom", "esnext"],
     "outDir": "./build",
     "rootDir": ".",
@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext", // comply with node + "type": "module"
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
