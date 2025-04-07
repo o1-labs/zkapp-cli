@@ -1,6 +1,8 @@
 import { Sudoku, SudokuZkApp } from './sudoku.js';
 import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { PrivateKey, PublicKey, Mina, AccountUpdate } from 'o1js';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert';
 
 describe('sudoku', () => {
   let zkApp: SudokuZkApp,
