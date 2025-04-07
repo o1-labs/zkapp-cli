@@ -74,6 +74,6 @@ describe('Add', () => {
     await txn.sign([senderKey]).send();
 
     const updatedNum = zkApp.num.get();
-    expect(updatedNum).toEqual(Field(1));
+    assert.deepStrictEqual(updatedNum, Field(1));
   });
 });
