@@ -22,7 +22,7 @@ describe('Add', () => {
     zkAppPrivateKey: PrivateKey,
     zkApp: Add;
 
-  beforeAll(async () => {
+  before(async () => {
     await AddZkProgram.compile({ proofsEnabled });
     if (proofsEnabled) {
       await Add.compile();
