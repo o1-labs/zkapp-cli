@@ -51,7 +51,7 @@ describe('sudoku', () => {
     const noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    await expect(async () => {
+    await assert.rejects(async () => {
       const tx = await Mina.transaction(sender, async () => {
         const zkApp = new SudokuZkApp(zkAppAddress);
         await zkApp.submitSolution(
@@ -61,7 +61,7 @@ describe('sudoku', () => {
       });
       await tx.prove();
       await tx.sign([senderKey]).send();
-    }).rejects.toThrow(/array contains the numbers 1...9/);
+    }, /array contains the numbers 1...9/);
 
     const isSolved = zkApp.isSolved.get().toBoolean();
     assert.strictEqual(isSolved, false);
