@@ -1,4 +1,4 @@
-import { TicTacToe } from './tictactoe';
+import { TicTacToe } from './tictactoe.js';
 import {
   Field,
   Bool,
