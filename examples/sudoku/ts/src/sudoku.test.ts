@@ -1,5 +1,5 @@
-import { Sudoku, SudokuZkApp } from './sudoku';
-import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
+import { Sudoku, SudokuZkApp } from './sudoku.js';
+import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { PrivateKey, PublicKey, Mina, AccountUpdate } from 'o1js';
 
 describe('sudoku', () => {
