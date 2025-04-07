@@ -18,7 +18,8 @@
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": false // ensure correct behaviour of class fields with decorators
+    "useDefineForClassFields": false, // ensure correct behaviour of class fields with decorators
+    "importHelpers": true // bundle optimization to reduce size
   },
   "include": ["./src"]
 }
