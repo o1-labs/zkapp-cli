@@ -56,7 +56,7 @@ describe('Add', () => {
 
     const { proof } = await AddZkProgram.init(Field(1));
 
-    expect(proof.publicOutput).toEqual(Field(1));
+    assert.deepStrictEqual(proof.publicOutput, Field(1));
   });
 
   it('correctly settles `AddZKprogram` state on the `Add` smart contract', async () => {
