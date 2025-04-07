@@ -8,6 +8,8 @@ import {
   AccountUpdate,
   Signature,
 } from 'o1js';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert';
 
 describe('tictactoe', () => {
   let player1: Mina.TestPublicKey,
