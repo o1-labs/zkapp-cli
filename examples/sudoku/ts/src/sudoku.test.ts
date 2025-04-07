@@ -27,7 +27,7 @@ describe('sudoku', () => {
     await deploy(zkApp, zkAppPrivateKey, sudoku, sender, senderKey);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(false);
+    assert.strictEqual(isSolved, false);
 
     const solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -39,7 +39,7 @@ describe('sudoku', () => {
     await tx.sign([senderKey]).send();
 
     isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(true);
+    assert.strictEqual(isSolved, true);
   });
 
   it('rejects an incorrect solution', async () => {
@@ -64,7 +64,7 @@ describe('sudoku', () => {
     }).rejects.toThrow(/array contains the numbers 1...9/);
 
     const isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(false);
+    assert.strictEqual(isSolved, false);
   });
 });
 
