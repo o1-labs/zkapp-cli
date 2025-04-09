@@ -11,7 +11,7 @@ import assert from 'node:assert';
  * See https://docs.minaprotocol.com/zkapps for more info.
  */
 
-const proofsEnabled = false;
+const proofsEnabled = true;
 
 describe('Add', () => {
   let deployerAccount: Mina.TestPublicKey,
