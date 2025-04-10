@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+### Changed
+
+- Replaces Jest with the native Node test runner in default project and examples. The tsconfig was updated to support all features in o1js and to be compatible with projects like mina attestatons. [#728](https://github.com/o1-labs/zkapp-cli/pull/728)
+
+## [0.22.6](https://github.com/o1-labs/zkapp-cli/compare/v0.22.5...v0.22.6) - 2025-04-09
+
 ### Added
 
 - Adds a new ZkProgram default example that is included with CLI generated projects, coupled with a new example template UI that demonstrates an end to end flow of generating proofs with a ZkProgram, and settling the state on Mina. [#725](https://github.com/o1-labs/zkapp-cli/pull/725)
