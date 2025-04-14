@@ -224,7 +224,9 @@ function scaffoldSvelte() {
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "useDefineForClassFields": false, 
+    "importHelpers": true,
   },
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
@@ -464,6 +466,8 @@ const __dirname = path.dirname(__filename);
     "incremental": true,
     "resolveJsonModule": true,
     "jsx": "preserve",
+    "useDefineForClassFields": false, 
+    "importHelpers": true,
     "paths": {
       "@/*": ["./src/*"]
     },
