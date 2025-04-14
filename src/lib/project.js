@@ -208,7 +208,7 @@ function scaffoldSvelte() {
   const customTsConfig = `{
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2021",
     "module": "es2022",
     "lib": ["dom", "esnext"],
     "strict": true,
@@ -443,7 +443,7 @@ const __dirname = path.dirname(__filename);
 
   const tsconfig = `{
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2021",
     "module": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "strict": true,
