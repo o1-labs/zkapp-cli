@@ -13,3 +13,8 @@ let cacheObj = {
   files : [],
 }
 
+fs.readdirSync(cache_directory).forEach((file_name: string) => {
+  if (!file_name.endsWith('.header')) {
+    cacheObj['files'].push(file_name);
+  }
+});
