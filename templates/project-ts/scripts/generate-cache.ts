@@ -6,4 +6,8 @@ const cache_directory = 'cache';
 
 const cache = Cache.FileSystem(cache_directory);
 
-const { verificationKey } = await Add.compile({ cache})
+const { verificationKey } = await Add.compile({ cache});
+
+let cacheObj = {
+  files : []
+}
