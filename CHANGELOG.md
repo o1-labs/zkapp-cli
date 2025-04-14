@@ -17,9 +17,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.22.7](https://github.com/o1-labs/zkapp-cli/compare/v0.22.6...v0.22.7) - 2025-04-13
+
 ### Changed
 
-- Replaces Jest with the native Node test runner in default project and examples. The tsconfig was updated to support all features in o1js and to be compatible with projects like mina attestatons. [#728](https://github.com/o1-labs/zkapp-cli/pull/728)
+- Replaces Jest with the native Node test runner in default project and examples. The template tsconfig was updated to support all features in o1js and to be compatible with projects like mina attestatons. [#728](https://github.com/o1-labs/zkapp-cli/pull/728)
 
 ## [0.22.6](https://github.com/o1-labs/zkapp-cli/compare/v0.22.5...v0.22.6) - 2025-04-09
 
