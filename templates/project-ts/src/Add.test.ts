@@ -1,6 +1,8 @@
 import { AccountUpdate, Field, Mina, PrivateKey, PublicKey } from 'o1js';
-import { Add } from './Add';
-import { AddZkProgram } from './AddZkProgram';
+import { Add } from './Add.js';
+import { AddZkProgram } from './AddZkProgram.js';
+import { describe, it, before, beforeEach } from 'node:test';
+import assert from 'node:assert';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -20,7 +22,7 @@ describe('Add', () => {
     zkAppPrivateKey: PrivateKey,
     zkApp: Add;
 
-  beforeAll(async () => {
+  before(async () => {
     await AddZkProgram.compile({ proofsEnabled });
     if (proofsEnabled) {
       await Add.compile();
@@ -54,7 +56,7 @@ describe('Add', () => {
 
     const { proof } = await AddZkProgram.init(Field(1));
 
-    expect(proof.publicOutput).toEqual(Field(1));
+    assert.deepStrictEqual(proof.publicOutput, Field(1));
   });
 
   it('correctly settles `AddZKprogram` state on the `Add` smart contract', async () => {
@@ -72,6 +74,6 @@ describe('Add', () => {
     await txn.sign([senderKey]).send();
 
     const updatedNum = zkApp.num.get();
-    expect(updatedNum).toEqual(Field(1));
+    assert.deepStrictEqual(updatedNum, Field(1));
   });
 });
