@@ -9,6 +9,7 @@ const cache = Cache.FileSystem(cache_directory);
 
 const { verificationKey } = await Add.compile({ cache});
 
+const jsonCacheFile = cache.json;
 let cacheObj = {
   files : [],
 }
@@ -18,3 +19,4 @@ fs.readdirSync(cache_directory).forEach((file_name: string) => {
     cacheObj['files'].push(file_name);
   }
 });
+
