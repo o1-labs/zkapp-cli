@@ -20,7 +20,13 @@ fs.readdirSync(cache_directory).forEach((file_name: string) => {
   }
 });
 
-fs.writeFile(
-  jsonCacheFile,
-  JSON.stringify(cacheObj)
-);
+try {
+  fs.writeFile(
+    jsonCacheFile,
+    JSON.stringify(cacheObj)
+  );
+  console.log('JSON cached object successfully saved ');
+} catch (error) {
+  console.error('Error writing JSON file:', error);
+
+}
