@@ -20,3 +20,7 @@ fs.readdirSync(cache_directory).forEach((file_name: string) => {
   }
 });
 
+fs.writeFile(
+  jsonCacheFile,
+  JSON.stringify(cacheObj)
+);
