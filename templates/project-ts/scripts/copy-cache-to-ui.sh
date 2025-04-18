@@ -5,3 +5,6 @@ if [ ! -d ../../ui/public/cache/ ]; then
 fi
 cp `ls | grep -v README.md` ../../ui/public/cache/
 
+cd ../../
+
+cp contracts/cache/cache.json ui/app/
