@@ -120,6 +120,9 @@ export default function Home() {
     setLoading(false);  
  }, [proof]);
 
+ const fetchFiles =()=> {
+  }
+
   return (
     <>
       <Head>
