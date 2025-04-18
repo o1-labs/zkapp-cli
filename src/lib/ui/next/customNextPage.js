@@ -8,6 +8,7 @@ import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
 import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
 import { Add, AddZkProgram } from "../../contracts";
+import cacheJSONList from "./cache.json";
 
 // We've already deployed the Add contract on testnet at this address
 // https://minascan.io/devnet/account/B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp
