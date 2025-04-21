@@ -149,6 +149,14 @@ const FileSystem = (files: any) => ({
   if (currentId !== uniqueId) {
     return undefined;
   }
+
+  if (dataType === "string") {
+  console.log("found in cache:", { persistentId, uniqueId, dataType });
+
+  return new TextEncoder().encode(files[persistentId].data);
+}
+}
+
 });
 
   return (
