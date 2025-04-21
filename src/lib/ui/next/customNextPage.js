@@ -140,21 +140,25 @@ export default function Home() {
 
 const FileSystem = (files: any) => ({
   read({ persistentId, uniqueId, dataType }: any) {
-  if (!files[persistentId]) {
-    return undefined;
-  }
+    if (!files[persistentId]) {
+      return undefined;
+    }
 
-  const currentId = files[persistentId].header;
+    const currentId = files[persistentId].header;
 
-  if (currentId !== uniqueId) {
-    return undefined;
-  }
+    if (currentId !== uniqueId) {
+      return undefined;
+    }
 
-  if (dataType === "string") {
-  console.log("found in cache:", { persistentId, uniqueId, dataType });
+    if (dataType === "string") {
+    console.log("found in cache:", { persistentId, uniqueId, dataType });
 
-  return new TextEncoder().encode(files[persistentId].data);
-}
+    return new TextEncoder().encode(files[persistentId].data);
+  },
+
+  write({ persistentId, uniqueId, dataType }: any, data: any) {
+    console.log({ persistentId, uniqueId, dataType });
+  },
 }
 
 });
