@@ -45,7 +45,8 @@ export default function Home() {
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
-      await Add.compile();
+      const cacheFiles = await fetchFiles();
+      await Add.compile({ cache: FileSystem(cacheFiles) });
 
       setLoading(false);
     })();
