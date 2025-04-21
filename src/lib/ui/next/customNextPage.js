@@ -137,6 +137,10 @@ export default function Home() {
     return acc;
   }, {});
 }
+
+const FileSystem = (files: any) => ({
+  
+});
   return (
     <>
       <Head>
