@@ -143,6 +143,12 @@ const FileSystem = (files: any) => ({
   if (!files[persistentId]) {
     return undefined;
   }
+
+  const currentId = files[persistentId].header;
+
+  if (currentId !== uniqueId) {
+    return undefined;
+  }
 });
 
   return (
