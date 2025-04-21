@@ -140,7 +140,9 @@ export default function Home() {
 
 const FileSystem = (files: any) => ({
   read({ persistentId, uniqueId, dataType }: any) {
-
+  if (!files[persistentId]) {
+    return undefined;
+  }
 });
 
   return (
