@@ -122,7 +122,12 @@ export default function Home() {
 
  const fetchFiles = () => {
   const cacheList = cacheJSONList;
-
+    const cacheListPromises = cacheList.files.map(async (file) => {
+    const [header, data] = await Promise.all([
+      fetch(`/cache/${file}.header`).then((res) => res.text()),
+      fetch(`/cache/${file}`).then((res) => res.text()),
+    ]);
+    return { file, header, data };
   });
   return (
     <>
