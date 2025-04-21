@@ -120,9 +120,10 @@ export default function Home() {
     setLoading(false);  
  }, [proof]);
 
- const fetchFiles =()=> {
-  }
+ const fetchFiles = () => {
+  const cacheList = cacheJSONList;
 
+  });
   return (
     <>
       <Head>
