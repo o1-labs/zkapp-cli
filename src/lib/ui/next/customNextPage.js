@@ -129,6 +129,9 @@ export default function Home() {
     ]);
     return { file, header, data };
   });
+
+  const cacheList = await Promise.all(cacheListPromises);
+}
   return (
     <>
       <Head>
