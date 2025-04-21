@@ -131,6 +131,11 @@ export default function Home() {
   });
 
   const cacheList = await Promise.all(cacheListPromises);
+
+  return cacheList.reduce((acc: any, { file, header, data }) => {
+    acc[file] = { file, header, data };
+    return acc;
+  }, {});
 }
   return (
     <>
