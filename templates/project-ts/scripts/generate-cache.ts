@@ -6,13 +6,15 @@ const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
 
 const cache_directory = 'cache';
 
-const cache = Cache.FileSystem(cache_directory);
+const cache: Cache = Cache.FileSystem(cache_directory);
 
 await AddZkProgram.compile({ cache });
 await Add.compile({ cache});
 
-const jsonCacheFile = cache.json;
-let cacheObj = {
+type CacheList = {
+  files: string[];
+};
+let cacheObj: CacheList = {
   files : [],
 }
 
@@ -21,6 +23,8 @@ fs.readdirSync(cache_directory).forEach((fileName: string) => {
     cacheObj['files'].push(fileName);
   }
 });
+
+const jsonCacheFile = cache.json;
 
 try {
   fs.writeFile(
