@@ -27,7 +27,7 @@ fs.readdirSync(cache_directory).forEach((fileName: string) => {
 const jsonCacheFile = cache.json;
 
 try {
-  fs.writeFile(
+  await writeFile(
     jsonCacheFile,
     JSON.stringify(cacheObj)
   );
