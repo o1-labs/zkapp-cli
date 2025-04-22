@@ -2,6 +2,7 @@ import { Cache } from 'o1js';
 import fs from 'fs-extra';
 
 const { Add } = await import('../build/src/Add.js');
+const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
 
 const cache_directory = 'cache';
 
