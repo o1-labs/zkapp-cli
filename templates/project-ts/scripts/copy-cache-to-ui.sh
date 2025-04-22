@@ -7,4 +7,4 @@ cp `ls | grep -v README.md` ../../ui/public/cache/
 
 cd ../../
 
-cp contracts/cache/cache.json ui/app/
+cp contracts/cache.json ui/app/
