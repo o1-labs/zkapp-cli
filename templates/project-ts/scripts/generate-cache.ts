@@ -1,5 +1,5 @@
 import { Cache } from 'o1js';
-import { readdir, writeFile } from 'fs/promises';
+import fs from 'fs/promises';
 
 const { Add } = await import('../build/src/Add.js');
 const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
@@ -18,16 +18,18 @@ let cacheObj: CacheList = {
   files : [],
 }
 
-fs.readdirSync(cache_directory).forEach((fileName: string) => {
+const files = await fs.readdir(cache_directory);
+for (const fileName of files) {
   if (!fileName.endsWith('.header')) {
     cacheObj['files'].push(fileName);
   }
-});
+}
+
 
 const jsonCacheFile = cache.json;
 
 try {
-  await writeFile(
+  await fs.writeFile(
     jsonCacheFile,
     JSON.stringify(cacheObj)
   );
