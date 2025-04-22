@@ -31,7 +31,7 @@ const jsonCacheFile = cache.json;
 try {
   await fs.writeFile(
     jsonCacheFile,
-    JSON.stringify(cacheObj)
+    JSON.stringify(cacheObj, null, 2)
   );
   console.log('JSON cached object successfully saved ');
 } catch (error) {
