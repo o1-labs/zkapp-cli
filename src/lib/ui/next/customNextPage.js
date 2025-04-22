@@ -35,7 +35,7 @@ export default function Home() {
 
       // Compile the AddZkProgram
       console.log("Compiling AddZkProgram");
-      await AddZkProgram.compile();
+      await AddZkProgram.compile(cache: FileSystem(cacheFiles));
       
       // Initialize the AddZkProgram with the initial state of the zkapp
       console.log("Initialize AddZkProgram with intial contract state of zkapp");
