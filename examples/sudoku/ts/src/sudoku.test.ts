@@ -1,6 +1,8 @@
-import { Sudoku, SudokuZkApp } from './sudoku';
-import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib';
+import { Sudoku, SudokuZkApp } from './sudoku.js';
+import { cloneSudoku, generateSudoku, solveSudoku } from './sudoku-lib.js';
 import { PrivateKey, PublicKey, Mina, AccountUpdate } from 'o1js';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert';
 
 describe('sudoku', () => {
   let zkApp: SudokuZkApp,
@@ -25,7 +27,7 @@ describe('sudoku', () => {
     await deploy(zkApp, zkAppPrivateKey, sudoku, sender, senderKey);
 
     let isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(false);
+    assert.strictEqual(isSolved, false);
 
     const solution = solveSudoku(sudoku);
     if (solution === undefined) throw Error('cannot happen');
@@ -37,7 +39,7 @@ describe('sudoku', () => {
     await tx.sign([senderKey]).send();
 
     isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(true);
+    assert.strictEqual(isSolved, true);
   });
 
   it('rejects an incorrect solution', async () => {
@@ -49,7 +51,7 @@ describe('sudoku', () => {
     const noSolution = cloneSudoku(solution);
     noSolution[0][0] = (noSolution[0][0] % 9) + 1;
 
-    await expect(async () => {
+    await assert.rejects(async () => {
       const tx = await Mina.transaction(sender, async () => {
         const zkApp = new SudokuZkApp(zkAppAddress);
         await zkApp.submitSolution(
@@ -59,10 +61,10 @@ describe('sudoku', () => {
       });
       await tx.prove();
       await tx.sign([senderKey]).send();
-    }).rejects.toThrow(/array contains the numbers 1...9/);
+    }, /array contains the numbers 1...9/);
 
     const isSolved = zkApp.isSolved.get().toBoolean();
-    expect(isSolved).toBe(false);
+    assert.strictEqual(isSolved, false);
   });
 });
 

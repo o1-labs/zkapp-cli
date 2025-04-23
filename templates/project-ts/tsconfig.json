@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "es2022",
+    "target": "es2021", // goal: ship *the most modern syntax* that is supported by *all* browsers that support our Wasm
+    "module": "nodenext", // allow top-level await
     "lib": ["dom", "esnext"],
     "outDir": "./build",
     "rootDir": ".",
@@ -10,15 +10,17 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
+    "moduleResolution": "nodenext", // comply with node + "type": "module"
+    "experimentalDecorators": true, // needed for decorators used in o1js
+    "emitDecoratorMetadata": true, // needed for decorators used in o1js
+    "allowJs": true, // to use JSDoc in some places where TS would be too cumbersome
     "declaration": true,
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false, // ensure correct behaviour of class fields with decorators
+    "importHelpers": true, // bundle optimization to reduce size
+    "baseUrl": "." // base directory for module resolution
   },
   "include": ["./src"]
 }

@@ -1,4 +1,4 @@
-import { TicTacToe } from './tictactoe';
+import { TicTacToe } from './tictactoe.js';
 import {
   Field,
   Bool,
@@ -8,6 +8,8 @@ import {
   AccountUpdate,
   Signature,
 } from 'o1js';
+import { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert';
 
 describe('tictactoe', () => {
   let player1: Mina.TestPublicKey,
@@ -37,7 +39,7 @@ describe('tictactoe', () => {
     await txn.prove();
     await txn.sign([zkAppPrivateKey, player1Key]).send();
     const board = zkApp.board.get();
-    expect(board).toEqual(Field(0));
+    assert.deepStrictEqual(board, Field(0));
   });
 
   it('deploys tictactoe & accepts a correct move', async () => {
@@ -63,6 +65,6 @@ describe('tictactoe', () => {
 
     // check next player
     const isNextPlayer2 = zkApp.nextIsPlayer2.get();
-    expect(isNextPlayer2).toEqual(Bool(true));
+    assert.deepStrictEqual(isNextPlayer2, Bool(true));
   });
 });

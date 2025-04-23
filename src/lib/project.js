@@ -208,7 +208,7 @@ function scaffoldSvelte() {
   const customTsConfig = `{
   "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2021",
     "module": "es2022",
     "lib": ["dom", "esnext"],
     "strict": true,
@@ -224,7 +224,9 @@ function scaffoldSvelte() {
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "useDefineForClassFields": false, 
+    "importHelpers": true,
   },
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	//
@@ -443,7 +445,7 @@ const __dirname = path.dirname(__filename);
 
   const tsconfig = `{
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2021",
     "module": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "strict": true,
@@ -464,6 +466,8 @@ const __dirname = path.dirname(__filename);
     "incremental": true,
     "resolveJsonModule": true,
     "jsx": "preserve",
+    "useDefineForClassFields": false, 
+    "importHelpers": true,
     "paths": {
       "@/*": ["./src/*"]
     },
