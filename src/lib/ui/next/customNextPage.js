@@ -34,8 +34,9 @@ export default function Home() {
       setZkProgramState(num.toString());
 
       // Compile the AddZkProgram
+      const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
-      await AddZkProgram.compile(cache: FileSystem(cacheFiles));
+      await AddZkProgram.compile({ cache: FileSystem(cacheFiles) });
       
       // Initialize the AddZkProgram with the initial state of the zkapp
       console.log("Initialize AddZkProgram with intial contract state of zkapp");
@@ -45,7 +46,6 @@ export default function Home() {
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
-      const cacheFiles = await fetchFiles();
       await Add.compile({ cache: FileSystem(cacheFiles) });
 
       setLoading(false);
