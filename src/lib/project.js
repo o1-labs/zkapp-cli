@@ -154,8 +154,19 @@ async function project({ name, ui }) {
   await step('NPM build contract', async () => {
     await shellExec('npm run build --silent');
   });
+  if (ui === 'next') {
+    // Get current directory before proceeding
+    const currentDir = shell.pwd().toString();
+    console.log('Current directory:', currentDir);
 
-  if (ui) shell.cd('..'); // back to project root
+    // shell.cd('..'); // Move back to project root
+
+    await shellExec('npx tsx contracts/scripts/generate-cache.ts');
+  } else if (ui) {
+    shell.cd('..'); // Move back to project root for other UI types
+  }
+
+  // if (ui) shell.cd('..'); // back to project root
 
   await step('Git init commit', async () => {
     await shellExec(
