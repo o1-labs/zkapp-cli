@@ -154,13 +154,18 @@ async function project({ name, ui }) {
   await step('NPM build contract', async () => {
     await shellExec('npm run build --silent');
   });
-  if (ui === 'next') {
-    // Get current directory before proceeding
-    const currentDir = shell.pwd().toString();
-    console.log('Current directory:', currentDir);
 
+  // Generates a circuit cache in contracts folder and copies a chachelist to UI
+
+  if (ui === 'next') {
     await step('Generate circuit cache for UI', async () => {
       await shellExec('npx tsx scripts/generate-cache.ts');
+    });
+
+    const currentDir = shell.pwd().toString();
+    console.log('Current directory:', currentDir);
+    await step('Copy circuit cachelist to UI', async () => {
+      await shellExec('sh scripts/copy-cache-to-ui.sh');
     });
   } else if (ui) {
     shell.cd('..'); // Move back to project root for other UI types
