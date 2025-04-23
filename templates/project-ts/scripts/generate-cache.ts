@@ -1,7 +1,9 @@
 import { Cache } from 'o1js';
 import fs from 'fs/promises';
 
+// @ts-expect-error - These imports will resolve in the generated project. Remove these comments in your project.
 const { Add } = await import('../build/src/Add.js');
+// @ts-expect-error - These imports will resolve in the generated project. Remove these comments in your project.
 const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
 
 const cache_directory = 'cache';
@@ -9,14 +11,14 @@ const cache_directory = 'cache';
 const cache: Cache = Cache.FileSystem(cache_directory);
 
 await AddZkProgram.compile({ cache });
-await Add.compile({ cache});
+await Add.compile({ cache });
 
 type CacheList = {
   files: string[];
 };
-let cacheObj: CacheList = {
-  files : [],
-}
+const cacheObj: CacheList = {
+  files: [],
+};
 
 const files = await fs.readdir(cache_directory);
 for (const fileName of files) {
@@ -25,16 +27,11 @@ for (const fileName of files) {
   }
 }
 
-
-const jsonCacheFile = cache.json;
+const jsonCacheFile = `cache.json`;
 
 try {
-  await fs.writeFile(
-    jsonCacheFile,
-    JSON.stringify(cacheObj, null, 2)
-  );
+  await fs.writeFile(jsonCacheFile, JSON.stringify(cacheObj, null, 2));
   console.log('JSON cached object successfully saved ');
 } catch (error) {
   console.error('Error writing JSON file:', error);
-
 }
