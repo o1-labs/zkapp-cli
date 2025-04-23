@@ -159,9 +159,9 @@ async function project({ name, ui }) {
     const currentDir = shell.pwd().toString();
     console.log('Current directory:', currentDir);
 
-    // shell.cd('..'); // Move back to project root
-
-    await shellExec('npx tsx contracts/scripts/generate-cache.ts');
+    await step('Generate circuit cache for UI', async () => {
+      await shellExec('npx tsx scripts/generate-cache.ts');
+    });
   } else if (ui) {
     shell.cd('..'); // Move back to project root for other UI types
   }
