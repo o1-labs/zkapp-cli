@@ -163,7 +163,36 @@ async function project({ name, ui }) {
     });
 
     await step('Copy circuit cachelist to UI', async () => {
-      await shellExec('sh scripts/copy-cache-to-ui.sh');
+      //   await shellExec('bash scripts/copy-cache-to-ui.sh');
+      try {
+        const cacheDir = path.join('.', 'cache');
+        const uiPublicCacheDir = path.join('..', 'ui', 'public', 'cache');
+        const cacheJsonSource = 'cache.json';
+        const cacheJsonDest = path.join('..', 'ui', 'app', 'cache.json');
+
+        // Create UI cache directory if it doesn't exist
+        fs.ensureDirSync(uiPublicCacheDir);
+
+        // Copy all files except README.md
+        const files = fs.readdirSync(cacheDir);
+        for (const file of files) {
+          if (file !== 'README.md') {
+            fs.copySync(
+              path.join(cacheDir, file),
+              path.join(uiPublicCacheDir, file)
+            );
+          }
+        }
+
+        // Copy cache.json to ui/app directory
+        if (fs.existsSync(cacheJsonSource)) {
+          fs.copySync(cacheJsonSource, cacheJsonDest);
+        }
+
+        console.log('Cache files copied to UI');
+      } catch (error) {
+        console.error('Error copying cache files:', error);
+      }
     });
   } else if (ui) {
     shell.cd('..'); // Move back to project root for other UI types
