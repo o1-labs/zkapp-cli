@@ -10,7 +10,7 @@ const cache_directory = 'cache';
 
 const cache: Cache = Cache.FileSystem(cache_directory);
 
-await AddZkProgram.compile({ cache });
+await AddZkProgram.compile();
 await Add.compile({ cache });
 
 type CacheList = {
