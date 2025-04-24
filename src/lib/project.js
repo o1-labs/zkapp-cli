@@ -162,8 +162,6 @@ async function project({ name, ui }) {
       await shellExec('npx tsx scripts/generate-cache.ts');
     });
 
-    const currentDir = shell.pwd().toString();
-    console.log('Current directory:', currentDir);
     await step('Copy circuit cachelist to UI', async () => {
       await shellExec('sh scripts/copy-cache-to-ui.sh');
     });
