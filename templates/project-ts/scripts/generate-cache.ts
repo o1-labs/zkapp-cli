@@ -8,6 +8,8 @@ const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
 
 const cache_directory = 'cache';
 
+// Create a file system cache instance pointing to our cache directory
+// This allows o1js to store and retrieve compiled circuit artifacts
 const cache: Cache = Cache.FileSystem(cache_directory);
 
 await AddZkProgram.compile();
