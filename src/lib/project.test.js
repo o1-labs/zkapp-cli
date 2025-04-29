@@ -784,7 +784,11 @@ function checkProjectSetupNoUi(shellExecCalls) {
   );
 }
 
-function checkUiProjectSetup(shellExecCalls, isWindows = false) {
+function checkUiProjectSetup(
+  shellExecCalls,
+  isWindows = false,
+  isNext = false
+) {
   expect(shellExecCalls[0][0]).toBe(
     'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
   );
