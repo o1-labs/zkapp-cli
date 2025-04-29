@@ -226,7 +226,7 @@ describe('project.js', () => {
         message: expect.any(Function),
         prefix: expect.any(Function),
       });
-      checkUiProjectSetup(shell.exec.mock.calls);
+      checkUiProjectSetup(shell.exec.mock.calls, false, true);
       checkIfProjectSetupSuccessful();
     });
 
