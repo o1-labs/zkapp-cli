@@ -1,7 +1,7 @@
 import { Cache } from 'o1js';
 import fs from 'fs/promises';
 
-// @ts-expect-error - These imports will resolve in the generated project. Remove these comments in your project.
+// @ts-expect-error - These imports will resolve in the generated project after the contract is built. Remove these comments in your project.
 const { Add } = await import('../build/src/Add.js');
 // @ts-expect-error - These imports will resolve in the generated project. Remove these comments in your project.
 const { AddZkProgram } = await import('../build/src/AddZkProgram.js');
