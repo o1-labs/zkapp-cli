@@ -13,6 +13,7 @@ const cache_directory = 'cache';
 const cache: Cache = Cache.FileSystem(cache_directory);
 
 await AddZkProgram.compile();
+// Compile the smart contract with the cache enabled
 await Add.compile({ cache });
 
 type CacheList = {
