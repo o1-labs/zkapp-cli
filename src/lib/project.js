@@ -156,12 +156,12 @@ async function project({ name, ui }) {
   });
 
   // Generates a circuit cache in contracts folder and copies a chachelist to UI
-
   if (ui === 'next') {
     await step('Generate circuit cache for UI', async () => {
       await shellExec('npx tsx scripts/generate-cache.ts');
     });
 
+    // Copy the circuit cache to ui/public/cache and the cachelist to ui/app
     await step('Copy circuit cachelist to UI', async () => {
       //   await shellExec('bash scripts/copy-cache-to-ui.sh');
       try {
