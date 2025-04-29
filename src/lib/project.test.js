@@ -505,7 +505,7 @@ describe('project.js', () => {
 
         await project({ name: 'test-project', ui: 'next' });
 
-        checkUiProjectSetup(shell.exec.mock.calls, true);
+        checkUiProjectSetup(shell.exec.mock.calls, true, true);
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
