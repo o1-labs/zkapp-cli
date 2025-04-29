@@ -793,6 +793,7 @@ function checkUiProjectSetup(shellExecCalls, isWindows = false) {
     'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
   );
   expect(shellExecCalls[3][0]).toBe('npm run build --silent');
+  expect(shellExecCalls[4][0]).toBe('npx tsx scripts/generate-cache.ts');
   expect(shellExecCalls[4][0]).toBe(
     'git add . && git commit -m "Init commit" -q -n && git branch -m main'
   );
