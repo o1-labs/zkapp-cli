@@ -269,6 +269,10 @@ describe('project.js', () => {
       fs.ensureDirSync.mockImplementation(() => {});
       fs.readdirSync.mockReturnValue(['file1', 'README.md', 'file2']);
       fs.copySync.mockImplementation(() => {});
+
+      const { default: project } = await import('./project.js');
+
+      await project({ name: 'test-project', ui: 'next' });
     });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
