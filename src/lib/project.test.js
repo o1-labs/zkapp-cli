@@ -257,6 +257,8 @@ describe('project.js', () => {
       checkIfProjectSetupSuccessful();
     });
 
+    it('should copy cache files to UI directory for Next.js projects', async () => {});
+
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
