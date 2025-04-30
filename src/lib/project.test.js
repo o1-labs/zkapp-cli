@@ -273,6 +273,13 @@ describe('project.js', () => {
       const { default: project } = await import('./project.js');
 
       await project({ name: 'test-project', ui: 'next' });
+
+      // Verify files were copied correctly
+      expect(fs.readdirSync).toHaveBeenCalled();
+      expect(fs.copySync).toHaveBeenCalledWith(
+        expect.stringContaining('file1'),
+        expect.stringContaining('file1')
+      );
     });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
