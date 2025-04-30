@@ -257,7 +257,14 @@ describe('project.js', () => {
       checkIfProjectSetupSuccessful();
     });
 
-    it('should copy cache files to UI directory for Next.js projects', async () => {});
+    it('should copy cache files to UI directory for Next.js projects', async () => {
+      const stepMock = jest.fn(async (name, fn) => Promise.resolve(fn()));
+      helpers.step.mockImplementation(stepMock);
+      fs.existsSync.mockReturnValue(false);
+      shell.which.mockReturnValue(true);
+      helpers.setupProject.mockResolvedValue(true);
+      enquirer.prompt.mockResolvedValueOnce({ useGHPages: 'no' });
+    });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
