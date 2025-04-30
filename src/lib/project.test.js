@@ -280,6 +280,11 @@ describe('project.js', () => {
         expect.stringContaining('file1'),
         expect.stringContaining('file1')
       );
+
+      expect(fs.copySync).toHaveBeenCalledWith(
+        expect.stringContaining('file2'),
+        expect.stringContaining('file2')
+      );
     });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
