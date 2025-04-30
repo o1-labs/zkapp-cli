@@ -257,39 +257,6 @@ describe('project.js', () => {
       checkIfProjectSetupSuccessful();
     });
 
-    it('should copy cache files to UI directory for Next.js projects', async () => {
-      const stepMock = jest.fn(async (name, fn) => Promise.resolve(fn()));
-      helpers.step.mockImplementation(stepMock);
-      fs.existsSync.mockReturnValue(false);
-      shell.which.mockReturnValue(true);
-      helpers.setupProject.mockResolvedValue(true);
-      enquirer.prompt.mockResolvedValueOnce({ useGHPages: 'no' });
-
-      // Setup for successful file copying
-      fs.ensureDirSync.mockImplementation(() => {});
-      fs.readdirSync.mockReturnValue(['file1', 'README.md', 'file2']);
-      fs.copySync.mockImplementation(() => {});
-
-      const { default: project } = await import('./project.js');
-
-      await project({ name: 'test-project', ui: 'next' });
-
-      // Verify files were copied correctly
-      expect(fs.readdirSync).toHaveBeenCalled();
-      expect(fs.copySync).toHaveBeenCalledWith(
-        expect.stringContaining('file1'),
-        expect.stringContaining('file1')
-      );
-
-      expect(fs.copySync).toHaveBeenCalledWith(
-        expect.stringContaining('file2'),
-        expect.stringContaining('file2')
-      );
-
-      // Verify cache.json copy was attempted
-      expect(fs.existsSync).toHaveBeenCalledWith('cache.json');
-    });
-
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
       const stepMock = jest.fn(async (name, fn) => {
         Promise.resolve(fn());
@@ -833,7 +800,8 @@ function checkUiProjectSetup(
 
   if (isNext) {
     expect(shellExecCalls[4][0]).toBe('npx tsx scripts/generate-cache.ts');
-    expect(shellExecCalls[5][0]).toBe(
+    expect(shellExecCalls[5][0]).toBe('npx tsx scripts/copy-cache-to-ui.ts');
+    expect(shellExecCalls[6][0]).toBe(
       'git add . && git commit -m "Init commit" -q -n && git branch -m main'
     );
   } else {
