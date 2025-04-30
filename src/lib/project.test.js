@@ -264,6 +264,11 @@ describe('project.js', () => {
       shell.which.mockReturnValue(true);
       helpers.setupProject.mockResolvedValue(true);
       enquirer.prompt.mockResolvedValueOnce({ useGHPages: 'no' });
+
+      // Setup for successful file copying
+      fs.ensureDirSync.mockImplementation(() => {});
+      fs.readdirSync.mockReturnValue(['file1', 'README.md', 'file2']);
+      fs.copySync.mockImplementation(() => {});
     });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
