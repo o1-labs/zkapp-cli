@@ -285,6 +285,9 @@ describe('project.js', () => {
         expect.stringContaining('file2'),
         expect.stringContaining('file2')
       );
+
+      // Verify cache.json copy was attempted
+      expect(fs.existsSync).toHaveBeenCalledWith('cache.json');
     });
 
     it('should setup the project (Next.js UI, JavaScript, no logs on error)', async () => {
