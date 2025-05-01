@@ -21,7 +21,7 @@
     "test": "npm run build && find build/src -name '*.test.js' -exec node --test {} \\;",
     "testw": "npm run build && find build/src -name '*.test.js' -exec node --test --watch {} \\;",
     "lint": "npx eslint src/* --fix",
-    "clean-cache": "rimraf cache/*"
+    "clean-cache": "rimraf cache/* !cache/README.md"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
