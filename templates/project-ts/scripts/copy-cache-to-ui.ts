@@ -51,5 +51,4 @@ async function copyCacheToUI() {
   }
 }
 
-// Using top-level await (requires Node.js v14.8.0 or later)
 await copyCacheToUI();
