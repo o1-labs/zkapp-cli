@@ -155,7 +155,19 @@ async function project({ name, ui }) {
     await shellExec('npm run build --silent');
   });
 
-  if (ui) shell.cd('..'); // back to project root
+  // Generates a circuit cache in contracts folder and copies a chachelist to UI
+  if (ui === 'next') {
+    await step('Generate circuit cache for UI', async () => {
+      await shellExec('npx tsx scripts/generate-cache.ts');
+    });
+
+    // Copy the circuit cache to ui/public/cache and the cachelist to ui/app
+    await step('Copy circuit cachelist to UI', async () => {
+      await shellExec('npx tsx scripts/copy-cache-to-ui.ts');
+    });
+  } else if (ui) {
+    shell.cd('..'); // Move back to project root for other UI types
+  }
 
   await step('Git init commit', async () => {
     await shellExec(
@@ -488,6 +500,8 @@ const __dirname = path.dirname(__filename);
   let x = fs.readJsonSync(path.join('ui', 'package.json'));
   x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
   x.scripts['build'] = 'next build --no-lint';
+  x.scripts['clear-cache'] =
+    'npx rimraf public/cache && npx rimraf app/cache.json && echo "UI Cache cleared successfully!"';
   x.type = 'module';
   fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 

@@ -6,8 +6,9 @@ import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
-import {fetchAccount, Mina, PublicKey, Field, Proof} from "o1js";
+import {fetchAccount, Mina, PublicKey, Field, Proof, Cache} from "o1js";
 import { Add, AddZkProgram } from "../../contracts";
+import cacheJSONList from "./cache.json";
 
 // We've already deployed the Add contract on testnet at this address
 // https://minascan.io/devnet/account/B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp
@@ -33,7 +34,9 @@ export default function Home() {
       setZkProgramState(num.toString());
 
       // Compile the AddZkProgram
+      const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
+      // ZkProgram cache in the browser is currently not fully supported.
       await AddZkProgram.compile();
       
       // Initialize the AddZkProgram with the initial state of the zkapp
@@ -44,7 +47,7 @@ export default function Home() {
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log("Compiling Add contract to generate proving and verification keys");
-      await Add.compile();
+      await Add.compile({ cache: FileSystem(cacheFiles) });
 
       setLoading(false);
     })();
@@ -118,6 +121,51 @@ export default function Home() {
     }
     setLoading(false);  
  }, [proof]);
+
+  const fetchFiles = async () => {
+    const cacheJson = cacheJSONList;
+    const cacheListPromises = cacheJson.files.map(async (file) => {
+      const [header, data] = await Promise.all([
+        fetch(\`/cache/\${file}.header\`).then((res) => res.text()),
+        fetch(\`/cache/\${file}\`).then((res) => res.text()),
+      ]);
+      return { file, header, data };
+    });
+
+    const cacheList = await Promise.all(cacheListPromises);
+
+    return cacheList.reduce((acc: any, { file, header, data }) => {
+      acc[file] = { file, header, data };
+      return acc;
+    }, {});
+  };
+
+  const FileSystem = (files: any): Cache => ({
+    read({ persistentId, uniqueId, dataType }: any) {
+      if (!files[persistentId]) {
+        return undefined;
+      }
+
+      const currentId = files[persistentId].header;
+
+      if (currentId !== uniqueId) {
+        return undefined;
+      }
+
+      if (dataType === "string") {
+        console.log("found in cache:", { persistentId, uniqueId, dataType });
+
+        return new TextEncoder().encode(files[persistentId].data);
+      }
+      return undefined;
+    },
+
+    write({ persistentId, uniqueId, dataType }: any, data: any) {
+      console.log({ persistentId, uniqueId, dataType });
+    },
+
+    canWrite: true
+  });
 
   return (
     <>

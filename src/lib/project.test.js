@@ -226,7 +226,7 @@ describe('project.js', () => {
         message: expect.any(Function),
         prefix: expect.any(Function),
       });
-      checkUiProjectSetup(shell.exec.mock.calls);
+      checkUiProjectSetup(shell.exec.mock.calls, false, true);
       checkIfProjectSetupSuccessful();
     });
 
@@ -505,7 +505,7 @@ describe('project.js', () => {
 
         await project({ name: 'test-project', ui: 'next' });
 
-        checkUiProjectSetup(shell.exec.mock.calls, true);
+        checkUiProjectSetup(shell.exec.mock.calls, true, true);
       } finally {
         Object.defineProperty(process, 'platform', {
           value: originalPlatform,
@@ -784,7 +784,11 @@ function checkProjectSetupNoUi(shellExecCalls) {
   );
 }
 
-function checkUiProjectSetup(shellExecCalls, isWindows = false) {
+function checkUiProjectSetup(
+  shellExecCalls,
+  isWindows = false,
+  isNext = false
+) {
   expect(shellExecCalls[0][0]).toBe(
     'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
   );
@@ -793,9 +797,18 @@ function checkUiProjectSetup(shellExecCalls, isWindows = false) {
     'npm install --silent > ' + (isWindows ? 'NUL' : '"/dev/null" 2>&1')
   );
   expect(shellExecCalls[3][0]).toBe('npm run build --silent');
-  expect(shellExecCalls[4][0]).toBe(
-    'git add . && git commit -m "Init commit" -q -n && git branch -m main'
-  );
+
+  if (isNext) {
+    expect(shellExecCalls[4][0]).toBe('npx tsx scripts/generate-cache.ts');
+    expect(shellExecCalls[5][0]).toBe('npx tsx scripts/copy-cache-to-ui.ts');
+    expect(shellExecCalls[6][0]).toBe(
+      'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+    );
+  } else {
+    expect(shellExecCalls[4][0]).toBe(
+      'git add . && git commit -m "Init commit" -q -n && git branch -m main'
+    );
+  }
 }
 
 function checkIfProjectSetupSuccessful() {
