@@ -501,7 +501,7 @@ const __dirname = path.dirname(__filename);
   x.scripts['ts-watch'] = 'tsc --noEmit --incremental --watch';
   x.scripts['build'] = 'next build --no-lint';
   x.scripts['clear-cache'] =
-    "rm -rf public/cache && rm -f app/cache.json && echo 'UI Cache cleared successfully!'";
+    'rimraf public/cache && rimraf app/cache.json && echo "UI Cache cleared successfully!"';
   x.type = 'module';
   fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
