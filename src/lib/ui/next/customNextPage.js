@@ -36,6 +36,7 @@ export default function Home() {
       // Compile the AddZkProgram
       const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
+      // ZkProgram cache in the browser is currently not fully supported.
       await AddZkProgram.compile();
       
       // Initialize the AddZkProgram with the initial state of the zkapp
