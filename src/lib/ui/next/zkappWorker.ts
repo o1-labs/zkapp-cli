@@ -3,7 +3,14 @@ import * as Comlink from "comlink";
 import { ZkappWorkerAPI } from './zkappWorkerAPI';
 import { Add, AddZkProgram } from "../../contracts";
 
-export const api = {}
+
+export const api = {
+
+async compile() {
+  
+}
+  
+}
 
 // Expose the API to be used by the main thread
 Comlink.expose(api);
