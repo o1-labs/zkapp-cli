@@ -7,7 +7,7 @@ import { Add, AddZkProgram } from "../../contracts";
 export const api = {
 
 async compile() {
-  
+  await Add.compile();
 }
   
 }
