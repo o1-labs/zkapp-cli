@@ -10,7 +10,11 @@ async compile() {
   await AddZkProgram.compile();
   await Add.compile();
 
-}
+},
+
+  async getZkProgramState() {
+    
+  },
   
 }
 
