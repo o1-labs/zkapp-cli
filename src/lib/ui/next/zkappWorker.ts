@@ -5,15 +5,21 @@ import { Add, AddZkProgram } from "../../contracts";
 
 export const api = {
 
+async setActiveInstanceToDevnet() {
+  Mina.setActiveInstance(Mina.Network('https://api.minascan.io/node/devnet/v1/graphql'));
+},  
+
 async compile() {
   await AddZkProgram.compile();
   await Add.compile();
 
 },
 
-  async getContractState() {
-    const currentNum = await Add.current.num.get();
-  },
+async getContractState() {
+  const currentNum = await Add.current.num.get();
+},
+
+async
   
 }
 
