@@ -12,8 +12,8 @@ async compile() {
 
 },
 
-  async getZkProgramState() {
-    
+  async getContractState() {
+    const currentNum = await Add.current.num.get();
   },
   
 }
