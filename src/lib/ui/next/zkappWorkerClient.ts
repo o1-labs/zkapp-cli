@@ -9,5 +9,7 @@ export default class ZkappWorkerClient {
 constructor() {
   // Initialize the worker from the zkappWorker module
   const worker = new Worker(new URL('./zkappWorker.ts', import.meta.url), { type: 'module' });  
+  // Wrap the worker with Comlink to enable direct method invocation
+  this.remoteApi = Comlink.wrap(worker);
 }  
 }
