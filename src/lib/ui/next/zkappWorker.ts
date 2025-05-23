@@ -20,7 +20,8 @@ async fetchAccount(publicKey58: string) {
   return fetchAccount({ publicKey });
 },
 async initContractInstance(publicKey58: string) {
-  
+  const publicKey = PublicKey.fromBase58(publicKey58);
+  const contractInstance = new Add(publicKey);
 },
 async getContractState() {
   const currentNum = await Add.current.num.get();
