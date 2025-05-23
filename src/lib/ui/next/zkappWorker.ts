@@ -31,6 +31,9 @@ async getZkProgramState() {
   const zkProgramState = await AddZkProgram.current.num.get();
 },
 
+async createUpdateTransaction() {
+
+},
   
 }
 
