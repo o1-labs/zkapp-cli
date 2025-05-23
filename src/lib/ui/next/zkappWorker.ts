@@ -27,6 +27,10 @@ async getContractState() {
   const currentNum = await Add.current.num.get();
 },
 
+async getZkProgramState() {
+  
+},
+
   
 }
 
