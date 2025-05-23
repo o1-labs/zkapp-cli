@@ -34,7 +34,9 @@ async getZkProgramState() {
 async createUpdateTransaction() {
 
 },
-  
+async proveTransaction() {
+
+},
 }
 
 // Expose the API to be used by the main thread
