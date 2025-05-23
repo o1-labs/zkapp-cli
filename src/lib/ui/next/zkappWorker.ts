@@ -19,11 +19,13 @@ async fetchAccount(publicKey58: string) {
   const publicKey = PublicKey.fromBase58(publicKey58);
   return fetchAccount({ publicKey });
 },
+async initContractInstance(publicKey58: string) {
+  
+},
 async getContractState() {
   const currentNum = await Add.current.num.get();
 },
 
-async
   
 }
 
