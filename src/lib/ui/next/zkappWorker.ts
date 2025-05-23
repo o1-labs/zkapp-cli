@@ -37,6 +37,9 @@ async createUpdateTransaction() {
 async proveTransaction() {
 
 },
+async getTransactionJSON() {
+  
+},
 }
 
 // Expose the API to be used by the main thread
