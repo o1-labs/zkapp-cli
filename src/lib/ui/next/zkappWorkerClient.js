@@ -1,3 +1,4 @@
+export default
 `
 import { Field } from "o1js";
 import * as Comlink from "comlink";

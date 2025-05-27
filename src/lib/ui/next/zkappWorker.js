@@ -1,3 +1,4 @@
+export default
 `import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
 import * as Comlink from "comlink";
 import type { Add } from "../../contracts/src/Add";
