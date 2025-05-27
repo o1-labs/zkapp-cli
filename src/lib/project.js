@@ -10,6 +10,7 @@ import shell from 'shelljs';
 import customNextLayout from '../lib/ui/next/customNextLayout.js';
 import customNextPage from '../lib/ui/next/customNextPage.js';
 import ZkappWorkerClient from '../lib/ui/next/zkappWorkerClient.js';
+import ZkappWorker from '../lib/ui/next/zkappWorker.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
@@ -17,7 +18,7 @@ import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
 import Constants from './constants.js';
 import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
-import ZkappWorkerClient from './ui/next/zkappWorkerClient.js';
+
 
 // Module external API
 export default project;
@@ -444,6 +445,12 @@ const __dirname = path.dirname(__filename);
   fs.writeFileSync(
     path.join('ui', 'app', 'ZkappWorkerClient.tsx'),
     ZkappWorkerClient,
+    'utf8'
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'app', 'ZkappWorker.tsx'),
+    ZkappWorker,
     'utf8'
   );
 
