@@ -27,9 +27,21 @@ export default function Home() {
   // fetch the zkapp state when the page loads
   useEffect(() => {
     (async () => {
-      Mina.setActiveInstance(Mina.Network('https://api.minascan.io/node/devnet/v1/graphql'));
-      await fetchAccount({publicKey: zkAppAddress});
-      const num = zkApp.current.num.get();
+      console.log("Loading zkApp worker client ...");
+      const zkappWorkerClient = new ZkappWorkerClient();
+      setZkappWorkerClient(zkappWorkerClient);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.log("done Loading zkApp worker client");
+ 
+      console.log("Setting active instance to Devnet..");
+
+      await zkappWorkerClient.setActiveInstanceToDevnet();
+      console.log("Done Setting active instance to Devnet");
+      await zkappWorkerClient.loadContract();
+      await zkappWorkerClient.initZkappInstance(zkAppAddress);
+
+      await zkappWorkerClient.fetchAccount(zkAppAddress);
+      const num = await zkappWorkerClient.getNum();
       setContractState(num.toString());
       setZkProgramState(num.toString());
 
@@ -37,17 +49,24 @@ export default function Home() {
       const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
       // ZkProgram cache in the browser is currently not fully supported.
-      await AddZkProgram.compile();
-      
+      await zkappWorkerClient.compileZkProgram();
+
       // Initialize the AddZkProgram with the initial state of the zkapp
-      console.log("Initialize AddZkProgram with intial contract state of zkapp");
-      const init = await AddZkProgram.init(num);
-      setProof(init.proof);
+      console.log(
+        "Initialize AddZkProgram with intial contract state of zkapp"
+      );
       
+      const init = await zkappWorkerClient.initZkProgram(num.toString());
+      console.log("proof in setup", init.proof);
+      setProof(init.proof);
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
-      console.log("Compiling Add contract to generate proving and verification keys");
-      await Add.compile({ cache: FileSystem(cacheFiles) });
+      console.log(
+        "Compiling Add contract to generate proving and verification keys"
+      );
+
+      const cache = JSON.stringify(FileSystem(cacheFiles));
+      await zkappWorkerClient.compileContract(cache);
 
       setLoading(false);
     })();
