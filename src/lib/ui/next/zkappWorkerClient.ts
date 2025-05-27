@@ -50,4 +50,8 @@ async initZkProgram(num: string) {
   return this.remoteApi.initZkProgram(num);
 }
 
+async createSettleStateTransaction(proof: any) {
+  return this.remoteApi.createSettleStateTransaction(proof);
+}
+
 }
