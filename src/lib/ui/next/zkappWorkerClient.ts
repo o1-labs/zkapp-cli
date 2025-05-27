@@ -24,4 +24,8 @@ async compileZkProgram() {
   return this.remoteApi.compileZkProgram();
 }
 
+async compileContract(test: any) {
+  return this.remoteApi.compileContract(test);
+}
+
 }
