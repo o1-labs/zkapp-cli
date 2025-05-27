@@ -48,8 +48,10 @@ async initZkappInstance(publicKey58: string) {
   const publicKey = PublicKey.fromBase58(publicKey58);
   state.zkappInstance = new state.AddInstance!(publicKey);
 },
-async getContractState() {
-  const currentNum = await Add.current.num.get();
+
+async getNum() {
+  const num = await state.zkappInstance!.num.get();
+  return JSON.stringify(num.toJSON());
 },
 
 async getZkProgramState() {
