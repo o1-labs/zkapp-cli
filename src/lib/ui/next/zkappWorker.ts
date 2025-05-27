@@ -43,9 +43,10 @@ async fetchAccount(publicKey58: string) {
   const publicKey = PublicKey.fromBase58(publicKey58);
   return fetchAccount({ publicKey });
 },
-async initContractInstance(publicKey58: string) {
+
+async initZkappInstance(publicKey58: string) {
   const publicKey = PublicKey.fromBase58(publicKey58);
-  const contractInstance = new Add(publicKey);
+  state.zkappInstance = new state.AddInstance!(publicKey);
 },
 async getContractState() {
   const currentNum = await Add.current.num.get();
