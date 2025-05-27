@@ -16,4 +16,7 @@ constructor() {
 async setActiveInstanceToDevnet() {
   return this.remoteApi.setActiveInstanceToDevnet();
 }
+async loadContract() {
+  return this.remoteApi.loadContract();
+}
 }
