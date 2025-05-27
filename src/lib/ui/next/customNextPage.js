@@ -20,7 +20,8 @@ export default function Home() {
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
   const [zkProgramState, setZkProgramState] = useState<string | null>(null);
-  const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
+  // const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
+  const [proof, setProof] = useState<JsonProof | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
