@@ -5,6 +5,13 @@ import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
+const state = {
+  AddInstance: null as null | typeof Add,
+  zkappInstance: null as null | Add,
+  AddZkProgramInstance: null as null | typeof AddZkProgram,
+  transaction: null as null | Transaction
+};
+
 export const api = {
 
 async setActiveInstanceToDevnet() {
