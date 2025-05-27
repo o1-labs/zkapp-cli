@@ -79,8 +79,8 @@ async createSettleStateTransaction(proof: any) {
 async createUpdateTransaction() {
 
 },
-async proveTransaction() {
-
+async proveSettleStateTransaction() {
+  await state.transaction!.prove();
 },
 async getTransactionJSON() {
   ``
