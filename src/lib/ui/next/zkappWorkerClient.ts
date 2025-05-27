@@ -32,4 +32,14 @@ async fetchAccount(publicKeyBase58: string) {
   return this.remoteApi.fetchAccount(publicKeyBase58);
 }
 
+async initZkappInstance(publicKeyBase58: string) {
+  return this.remoteApi.initZkappInstance(publicKeyBase58);
+}
+
+async updateZkProgram(contractState: string, proof: any) {
+  return this.remoteApi.updateZkProgram(contractState, proof);
+}
+
+
+
 }
