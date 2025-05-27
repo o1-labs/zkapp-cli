@@ -12,4 +12,8 @@ constructor() {
   // Wrap the worker with Comlink to enable direct method invocation
   this.remoteApi = Comlink.wrap(worker);
 }  
+
+async setActiveInstanceToDevnet() {
+  return this.remoteApi.setActiveInstanceToDevnet();
+}
 }
