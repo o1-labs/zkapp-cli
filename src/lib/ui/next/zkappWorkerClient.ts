@@ -28,4 +28,8 @@ async compileContract(test: any) {
   return this.remoteApi.compileContract(test);
 }
 
+async fetchAccount(publicKeyBase58: string) {
+  return this.remoteApi.fetchAccount(publicKeyBase58);
+}
+
 }
