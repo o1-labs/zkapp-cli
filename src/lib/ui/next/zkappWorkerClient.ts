@@ -54,4 +54,8 @@ async createSettleStateTransaction(proof: any) {
   return this.remoteApi.createSettleStateTransaction(proof);
 }
 
+async proveSettleStateTransaction() {
+  return this.remoteApi.proveSettleStateTransaction();
+}
+
 }
