@@ -46,5 +46,8 @@ async getNum(): Promise<Field> {
   return Field.fromJSON(JSON.parse(result as string));
 }
 
+async initZkProgram(num: string) {
+  return this.remoteApi.initZkProgram(num);
+}
 
 }
