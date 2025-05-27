@@ -69,8 +69,11 @@ async updateZkProgram(contractState: string, proof: any) {
   );
   // return update;
 },
-async getZkProgramState() {
-  const zkProgramState = await AddZkProgram.current.num.get();
+
+async createSettleStateTransaction(proof: any) {
+  state.transaction = await Mina.transaction(async () => {
+    await state.zkappInstance!.settleState(proof);
+  });
 },
 
 async createUpdateTransaction() {
