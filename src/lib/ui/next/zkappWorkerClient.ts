@@ -1,3 +1,4 @@
+import { Field } from "o1js";
 import * as Comlink from "comlink";
 
 export default class ZkappWorkerClient {
@@ -40,6 +41,10 @@ async updateZkProgram(contractState: string, proof: any) {
   return this.remoteApi.updateZkProgram(contractState, proof);
 }
 
+async getNum(): Promise<Field> {
+  const result = await this.remoteApi.getNum();
+  return Field.fromJSON(JSON.parse(result as string));
+}
 
 
 }
