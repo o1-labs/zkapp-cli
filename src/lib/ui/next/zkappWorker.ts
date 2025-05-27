@@ -14,10 +14,14 @@ const state = {
 
 export const api = {
 
-async setActiveInstanceToDevnet() {
-  Mina.setActiveInstance(Mina.Network('https://api.minascan.io/node/devnet/v1/graphql'));
-},  
-
+  async setActiveInstanceToDevnet() {
+    const Network = Mina.Network(
+      "https://api.minascan.io/node/devnet/v1/graphql"
+    );
+    console.log("Devnet network instance configured");
+    Mina.setActiveInstance(Network);
+  },
+  
 async compile() {
   await AddZkProgram.compile();
   await Add.compile();
