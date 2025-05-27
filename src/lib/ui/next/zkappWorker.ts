@@ -1,6 +1,7 @@
-import { Mina, PublicKey, fetchAccount } from 'o1js';
+import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
 import * as Comlink from "comlink";
-import { Add, AddZkProgram } from "../../contracts";
+import type { Add } from "../../contracts/src/Add";
+import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
 
 
 export const api = {
@@ -38,7 +39,7 @@ async proveTransaction() {
 
 },
 async getTransactionJSON() {
-  
+  ``
 },
 }
 
