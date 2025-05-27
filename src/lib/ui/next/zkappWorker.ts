@@ -21,7 +21,16 @@ export const api = {
     console.log("Devnet network instance configured");
     Mina.setActiveInstance(Network);
   },
-  
+
+  async loadContract() {
+    const { Add } = await import("../../contracts/build/src/Add.js");
+    const { AddZkProgram } = await import(
+      "../../contracts/build/src/AddZkProgram.js"
+    );
+    state.AddInstance = Add;
+    state.AddZkProgramInstance = AddZkProgram;
+  },
+    
 async compile() {
   await AddZkProgram.compile();
   await Add.compile();
