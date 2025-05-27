@@ -58,4 +58,8 @@ async proveSettleStateTransaction() {
   return this.remoteApi.proveSettleStateTransaction();
 }
 
+async getTransactionJSON() {
+  return this.remoteApi.getTransactionJSON();
+}
+
 }
