@@ -30,12 +30,14 @@ export const api = {
     state.AddInstance = Add;
     state.AddZkProgramInstance = AddZkProgram;
   },
-    
-async compile() {
-  await AddZkProgram.compile();
-  await Add.compile();
 
-},
+  async compileZkProgram() {
+    await state.AddZkProgramInstance!.compile();
+  },
+  async compileContract(test: any) {
+    const cache = JSON.parse(test);
+    await state.AddInstance!.compile({ cache });
+  },
 
 async fetchAccount(publicKey58: string) {
   const publicKey = PublicKey.fromBase58(publicKey58);
