@@ -19,4 +19,9 @@ async setActiveInstanceToDevnet() {
 async loadContract() {
   return this.remoteApi.loadContract();
 }
+
+async compileZkProgram() {
+  return this.remoteApi.compileZkProgram();
+}
+
 }
