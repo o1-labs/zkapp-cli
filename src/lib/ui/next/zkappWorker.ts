@@ -83,8 +83,8 @@ async proveSettleStateTransaction() {
   await state.transaction!.prove();
 },
 async getTransactionJSON() {
-  ``
-},
+  return state.transaction!.toJSON();
+}
 }
 
 // Expose the API to be used by the main thread
