@@ -81,24 +81,23 @@ export default function Home() {
       const mina = (window as any).mina;
       const walletKey: string = (await mina.requestAccounts())[0];
       console.log("Connected wallet address: " + walletKey);
-      await fetchAccount({publicKey: PublicKey.fromBase58(walletKey)});
 
+      // await fetchAccount({ publicKey: PublicKey.fromBase58(walletKey) });
+      await zkappWorkerClient!.fetchAccount(walletKey);
       // Execute a transaction locally on the browser
       let hash;
       if (proof) {
-        const transaction = await Mina.transaction(async () => {
-          console.log("Executing Add.settleState() locally");
-          await zkApp.current.settleState(proof);
-        });
-
+ 
+        await zkappWorkerClient!.createSettleStateTransaction(proof);
         // Prove execution of the contract using the proving key
         console.log("Proving execution of Add.settleState()");
-        await transaction.prove();
+        await zkappWorkerClient!.proveSettleStateTransaction();
 
         // Broadcast the transaction to the Mina network
+        const transactionJSON = await zkappWorkerClient!.getTransactionJSON();
         console.log("Broadcasting proof of execution to the Mina network");
         ({ hash } = await mina.sendTransaction({
-          transaction: transaction.toJSON()
+          transaction: transactionJSON
         }));
       } else {
         throw Error("Proof passed to Add.settleState is null");
@@ -111,7 +110,11 @@ export default function Home() {
       console.error(e.message);
       let errorMessage = "";
 
-      if (e.message.includes("Cannot read properties of undefined (reading 'requestAccounts')")) {
+      if (
+        e.message.includes(
+          "Cannot read properties of undefined (reading 'requestAccounts')"
+        )
+      ) {
         errorMessage = "Is Auro installed?";
       } else if (e.message.includes("Please create or restore wallet first.")) {
         errorMessage = "Have you created a wallet?";
