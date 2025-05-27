@@ -1,3 +1,4 @@
+`
 import { Field } from "o1js";
 import * as Comlink from "comlink";
 
@@ -62,4 +63,4 @@ async getTransactionJSON() {
   return this.remoteApi.getTransactionJSON();
 }
 
-}
+}`
