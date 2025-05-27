@@ -76,12 +76,10 @@ async createSettleStateTransaction(proof: any) {
   });
 },
 
-async createUpdateTransaction() {
-
-},
 async proveSettleStateTransaction() {
   await state.transaction!.prove();
 },
+
 async getTransactionJSON() {
   return state.transaction!.toJSON();
 }
