@@ -131,18 +131,23 @@ export default function Home() {
 
   const updateZkProgram = useCallback(async () => {
     setLoading(true);
-     
+
     if (contractState && proof) {
-      // Call the AddZkProgram update method
       console.log("Calling AddZkProgram.update");
-      const update = await AddZkProgram.update(Field(contractState), proof);
+     
+      const update = await zkappWorkerClient!.updateZkProgram(
+        contractState,
+        proof.toJSON()
+      );
       setProof(update.proof);
-      setZkProgramState(update.proof.publicOutput.toString())
+      setZkProgramState(update.proof.publicOutput.toString());
     } else {
-      throw Error("Proof and or ContractState passed to AddZkProgram.update is null"); 
+      throw Error(
+        "Proof and or ContractState passed to AddZkProgram.update is null"
+      );
     }
-    setLoading(false);  
- }, [proof]);
+    setLoading(false);
+  }, [proof]);
 
   const fetchFiles = async () => {
     const cacheJson = cacheJSONList;
