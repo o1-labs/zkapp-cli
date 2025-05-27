@@ -3,6 +3,7 @@ import * as Comlink from "comlink";
 import type { Add } from "../../contracts/src/Add";
 import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
 
+type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 export const api = {
 
