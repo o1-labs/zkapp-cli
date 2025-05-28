@@ -19,7 +19,6 @@ import Constants from './constants.js';
 import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
 
-
 // Module external API
 export default project;
 
@@ -168,8 +167,7 @@ async function project({ name, ui }) {
     await step('Copy circuit cachelist to UI', async () => {
       await shellExec('npx tsx scripts/copy-cache-to-ui.ts');
     });
-await shellExec('npm install comlink --save');
-
+    await shellExec('npm install comlink --save');
   } else if (ui) {
     shell.cd('..'); // Move back to project root for other UI types
   }
