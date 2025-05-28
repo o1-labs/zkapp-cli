@@ -1,5 +1,4 @@
-export default
-`import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
+export default `import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
 import * as Comlink from "comlink";
 import type { Add } from "../../contracts/src/Add";
 import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
@@ -87,4 +86,4 @@ async getTransactionJSON() {
 }
 
 // Expose the API to be used by the main thread
-Comlink.expose(api);`
+Comlink.expose(api);`;
