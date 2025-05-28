@@ -16,8 +16,9 @@ import ZkappWorkerClient from "./zkappWorkerClient";
 const zkAppAddress = "B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp";
 
 export default function Home() {
-  const zkApp = useRef<Add>(new Add(PublicKey.fromBase58(zkAppAddress)));
-
+  
+  const [zkappWorkerClient, setZkappWorkerClient] =
+  useState<null | ZkappWorkerClient>(null); 
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
   const [zkProgramState, setZkProgramState] = useState<string | null>(null);
