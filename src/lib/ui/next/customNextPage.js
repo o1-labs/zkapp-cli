@@ -57,9 +57,9 @@ export default function Home() {
         "Initialize AddZkProgram with intial contract state of zkapp"
       );
       
-      const init = await zkappWorkerClient.initZkProgram(num.toString());
-      console.log("proof in setup", init.proof);
-      setProof(init.proof);
+      const initProof = await zkappWorkerClient.initZkProgram(num.toString());
+      console.log("proof in setup", initProof);
+      setProof(initProof);
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
       console.log(
