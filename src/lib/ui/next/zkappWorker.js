@@ -62,8 +62,7 @@ async getNum() {
 
 async updateZkProgram(contractState: string, proof: any) {
   const updateProof = proof;
-  // const proof = JSON.parse(previousProof); // Ensure contractState is valid JSON
-  // const update = await AddZkProgram.update(Field(contractState), proof);
+
   const update = await state.AddZkProgramInstance!.update(
     Field(contractState),
     proof
