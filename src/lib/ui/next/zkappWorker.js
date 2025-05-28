@@ -35,8 +35,8 @@ export const api = {
   async compileZkProgram() {
     await state.AddZkProgramInstance!.compile();
   },
-  async compileContract(test: any) {
-    const cache = JSON.parse(test);
+  async compileContract(cacheJSON: any) {
+    const cache = JSON.parse(cacheJSON);
     await state.AddInstance!.compile({ cache });
   },
 
