@@ -51,8 +51,8 @@ async initZkappInstance(publicKey58: string) {
 },
 
 async initZkProgram(num: string) {
-  const proof = await state.AddZkProgramInstance!.init(Field(num));
-  return proof;
+  const init = await state.AddZkProgramInstance!.init(Field(num));
+  return init.proof.toJSON();
 },
 
 async getNum() {
