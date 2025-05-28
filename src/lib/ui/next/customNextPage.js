@@ -134,14 +134,13 @@ export default function Home() {
     setLoading(true);
 
     if (contractState && proof) {
-      console.log("Calling AddZkProgram.update");
-     
-      const update = await zkappWorkerClient!.updateZkProgram(
+      const updateProof = await zkappWorkerClient!.updateZkProgram(
         contractState,
-        proof.toJSON()
+        proof
       );
-      setProof(update.proof);
-      setZkProgramState(update.proof.publicOutput.toString());
+
+      setProof(updateProof);
+      setZkProgramState(updateProof.publicOutput.toString());
     } else {
       throw Error(
         "Proof and or ContractState passed to AddZkProgram.update is null"
