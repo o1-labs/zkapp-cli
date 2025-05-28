@@ -38,7 +38,7 @@ async initZkappInstance(publicKeyBase58: string) {
   return this.remoteApi.initZkappInstance(publicKeyBase58);
 }
 
-async updateZkProgram(contractState: string, proof: any) {
+async updateZkProgram(contractState: string, proof: JsonProof) {
   return this.remoteApi.updateZkProgram(contractState, proof);
 }
 
@@ -51,7 +51,7 @@ async initZkProgram(num: string) {
   return this.remoteApi.initZkProgram(num);
 }
 
-async createSettleStateTransaction(proof: any) {
+async createSettleStateTransaction(proof: JsonProof) {
   return this.remoteApi.createSettleStateTransaction(proof);
 }
 
