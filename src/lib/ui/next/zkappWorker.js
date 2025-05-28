@@ -66,7 +66,8 @@ async updateZkProgram(contractState: string, proof: any) {
     Field(contractState),
     previousProof
   );
-  // return update;
+
+  return update.proof.toJSON();
 },
 
 async createSettleStateTransaction(proof: any) {
