@@ -1,4 +1,4 @@
-export default `import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
+export default `import { Mina, PublicKey, fetchAccount, Field, JsonProof } from 'o1js';
 import * as Comlink from "comlink";
 import { AddProgramProof } from "../../contracts/src/AddZkProgram";
 import type { Add } from "../../contracts/src/Add";
@@ -60,7 +60,7 @@ async getNum() {
   return JSON.stringify(num.toJSON());
 },
 
-async updateZkProgram(contractState: string, proof: any) {
+async updateZkProgram(contractState: string, proof: JsonProof) {
   const previousProof = await AddProgramProof.fromJSON(proof);
   const update = await state.AddZkProgramInstance!.update(
     Field(contractState),
@@ -70,7 +70,7 @@ async updateZkProgram(contractState: string, proof: any) {
   return update.proof.toJSON();
 },
 
-async createSettleStateTransaction(proof: any) {
+async createSettleStateTransaction(proof: JsonProof) {
   state.transaction = await Mina.transaction(async () => {
     await state.zkappInstance!.settleState(proof);
   });
