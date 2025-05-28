@@ -71,8 +71,9 @@ async updateZkProgram(contractState: string, proof: JsonProof) {
 },
 
 async createSettleStateTransaction(proof: JsonProof) {
+  const zkProgramProof = await AddProgramProof.fromJSON(proof);
   state.transaction = await Mina.transaction(async () => {
-    await state.zkappInstance!.settleState(proof);
+    await state.zkappInstance!.settleState(zkProgramProof);
   });
 },
 
