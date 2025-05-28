@@ -61,11 +61,10 @@ async getNum() {
 },
 
 async updateZkProgram(contractState: string, proof: any) {
-  const updateProof = proof;
-
+  const previousProof = await AddProgramProof.fromJSON(proof);
   const update = await state.AddZkProgramInstance!.update(
     Field(contractState),
-    proof
+    previousProof
   );
   // return update;
 },
