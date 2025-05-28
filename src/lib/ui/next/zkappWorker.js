@@ -1,5 +1,6 @@
 export default `import { Mina, PublicKey, fetchAccount, Field } from 'o1js';
 import * as Comlink from "comlink";
+import { AddProgramProof } from "../../contracts/src/AddZkProgram";
 import type { Add } from "../../contracts/src/Add";
 import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
 
