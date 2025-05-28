@@ -443,13 +443,13 @@ const __dirname = path.dirname(__filename);
   );
 
   fs.writeFileSync(
-    path.join('ui', 'app', 'ZkappWorkerClient.tsx'),
+    path.join('ui', 'app', 'ZkappWorkerClient.ts'),
     ZkappWorkerClient,
     'utf8'
   );
 
   fs.writeFileSync(
-    path.join('ui', 'app', 'ZkappWorker.tsx'),
+    path.join('ui', 'app', 'ZkappWorker.ts'),
     ZkappWorker,
     'utf8'
   );
