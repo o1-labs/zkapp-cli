@@ -520,6 +520,10 @@ const __dirname = path.dirname(__filename);
   x.scripts['clear-cache'] =
     'npx rimraf public/cache && npx rimraf app/cache.json && echo "UI Cache cleared successfully!"';
   x.type = 'module';
+  // Add comlink to dependencies
+  if (!x.dependencies) x.dependencies = {};
+  x.dependencies['comlink'] = '^4.4.2';
+
   fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
   if (useGHPages) {
