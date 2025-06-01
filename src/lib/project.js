@@ -167,9 +167,6 @@ async function project({ name, ui }) {
     await step('Copy circuit cachelist to UI', async () => {
       await shellExec('npx tsx scripts/copy-cache-to-ui.ts');
     });
-    // Navigate to the ui directory before installing comlink
-    shell.cd('../ui');
-    await shellExec('npm install comlink --save');
   } else if (ui) {
     shell.cd('..'); // Move back to project root for other UI types
   }
