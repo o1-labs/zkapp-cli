@@ -80,9 +80,9 @@ export const api = {
   async compileZkProgram() {
     await state.AddZkProgramInstance!.compile();
   },
-  async compileContract(cacheJSON: any) {
-    const cache = JSON.parse(cacheJSON);
-    await state.AddInstance!.compile({ cache });
+  async compileContract() {
+    const cacheFiles = await fetchFiles();
+    await state.AddInstance!.compile({ cache: FileSystem(cacheFiles) });
   },
 
 async fetchAccount(publicKey58: string) {
