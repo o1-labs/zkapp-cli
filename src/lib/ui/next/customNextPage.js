@@ -65,8 +65,7 @@ export default function Home() {
         "Compiling Add contract to generate proving and verification keys"
       );
 
-      const cache = JSON.stringify(FileSystem(cacheFiles));
-      await zkappWorkerClient.compileContract(cache);
+      await zkappWorkerClient.compileContract();
 
       setLoading(false);
     })();
