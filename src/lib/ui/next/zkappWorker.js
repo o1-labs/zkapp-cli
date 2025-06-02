@@ -13,6 +13,26 @@ const state = {
   transaction: null as null | Transaction
 };
 
+const fetchFiles = async () => {
+  const cacheJson = cacheJSONList;
+  const cacheListPromises = cacheJson.files.map(async (file) => {
+  const [header, data] = await Promise.all([
+    fetch(\`/cache/\${file}.header\`).then((res) => res.text()),
+    fetch(\`/cache/\${file}\`).then((res) => res.text())
+    ]);
+    return { file, header, data };
+  });
+
+  const cacheList = await Promise.all(cacheListPromises);
+
+  return cacheList.reduce((acc: any, { file, header, data }) => {
+    acc[file] = { file, header, data };
+    return acc;
+  }, {});
+};
+
+
+
 export const api = {
 
   async setActiveInstanceToDevnet() {
