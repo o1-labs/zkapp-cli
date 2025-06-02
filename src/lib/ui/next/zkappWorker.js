@@ -1,4 +1,4 @@
-export default `import { Mina, PublicKey, fetchAccount, Field, JsonProof } from 'o1js';
+export default `import { Mina, PublicKey, fetchAccount, Field, JsonProof, Cache } from 'o1js';
 import * as Comlink from "comlink";
 import { AddProgramProof } from "../../contracts/src/AddZkProgram";
 import type { Add } from "../../contracts/src/Add";
