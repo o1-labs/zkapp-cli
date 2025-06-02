@@ -26,8 +26,8 @@ async compileZkProgram() {
   return this.remoteApi.compileZkProgram();
 }
 
-async compileContract(cacheJSON: any) {
-  return this.remoteApi.compileContract(cacheJSON);
+async compileContract() {
+  return this.remoteApi.compileContract();
 }
 
 async fetchAccount(publicKeyBase58: string) {
