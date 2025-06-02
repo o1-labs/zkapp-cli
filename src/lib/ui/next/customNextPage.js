@@ -21,7 +21,6 @@ export default function Home() {
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
   const [zkProgramState, setZkProgramState] = useState<string | null>(null);
-  // const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
   const [proof, setProof] = useState<JsonProof | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -59,7 +58,6 @@ export default function Home() {
       );
       
       const initProof = await zkappWorkerClient.initZkProgram(num.toString());
-      console.log("proof in setup", initProof);
       setProof(initProof);
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
