@@ -146,51 +146,6 @@ export default function Home() {
     setLoading(false);
   }, [proof]);
 
-  const fetchFiles = async () => {
-    const cacheJson = cacheJSONList;
-    const cacheListPromises = cacheJson.files.map(async (file) => {
-      const [header, data] = await Promise.all([
-        fetch(\`/cache/\${file}.header\`).then((res) => res.text()),
-        fetch(\`/cache/\${file}\`).then((res) => res.text()),
-      ]);
-      return { file, header, data };
-    });
-
-    const cacheList = await Promise.all(cacheListPromises);
-
-    return cacheList.reduce((acc: any, { file, header, data }) => {
-      acc[file] = { file, header, data };
-      return acc;
-    }, {});
-  };
-
-  const FileSystem = (files: any): Cache => ({
-    read({ persistentId, uniqueId, dataType }: any) {
-      if (!files[persistentId]) {
-        return undefined;
-      }
-
-      const currentId = files[persistentId].header;
-
-      if (currentId !== uniqueId) {
-        return undefined;
-      }
-
-      if (dataType === "string") {
-        console.log("found in cache:", { persistentId, uniqueId, dataType });
-
-        return new TextEncoder().encode(files[persistentId].data);
-      }
-      return undefined;
-    },
-
-    write({ persistentId, uniqueId, dataType }: any, data: any) {
-      console.log({ persistentId, uniqueId, dataType });
-    },
-
-    canWrite: true
-  });
-
   return (
     <>
       <Head>
