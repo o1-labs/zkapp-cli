@@ -7,7 +7,6 @@ import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
 import {JsonProof} from "o1js";
-import cacheJSONList from "./cache.json";
 import ZkappWorkerClient from "./ZkappWorkerClient"
 
 // We've already deployed the Add contract on testnet at this address

@@ -3,6 +3,7 @@ import * as Comlink from "comlink";
 import { AddProgramProof } from "../../contracts/src/AddZkProgram";
 import type { Add } from "../../contracts/src/Add";
 import type { AddZkProgram } from "../../contracts/src/AddZkProgram";
+import cacheJSONList from "./cache.json";
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
