@@ -6,8 +6,7 @@ import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
-import {fetchAccount, Mina, PublicKey, Field, Proof, Cache} from "o1js";
-import { Add, AddZkProgram } from "../../contracts";
+import {JsonProof} from "o1js";
 import cacheJSONList from "./cache.json";
 import ZkappWorkerClient from "./ZkappWorkerClient"
 
