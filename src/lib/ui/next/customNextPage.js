@@ -34,9 +34,7 @@ export default function Home() {
       console.log("done Loading zkApp worker client");
  
       console.log("Setting active instance to Devnet..");
-
       await zkappWorkerClient.setActiveInstanceToDevnet();
-      console.log("Done Setting active instance to Devnet");
       await zkappWorkerClient.loadContract();
       await zkappWorkerClient.initZkappInstance(zkAppAddress);
 
