@@ -46,7 +46,6 @@ export default function Home() {
       setZkProgramState(num.toString());
 
       // Compile the AddZkProgram
-      const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
       // ZkProgram cache in the browser is currently not fully supported.
       await zkappWorkerClient.compileZkProgram();
