@@ -483,7 +483,7 @@ const __dirname = path.dirname(__filename);
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
