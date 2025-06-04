@@ -11,3 +11,6 @@ coverage
 
 # Never commit keys to Git!
 keys
+
+# o1js cache
+cache
