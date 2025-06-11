@@ -6,48 +6,62 @@ import GradientBG from '../components/GradientBG.js';
 import styles from '../styles/Home.module.css';
 import heroMinaLogo from '../public/assets/hero-mina-logo.svg';
 import arrowRightSmall from '../public/assets/arrow-right-small.svg';
-import {fetchAccount, Mina, PublicKey, Field, Proof, Cache} from "o1js";
-import { Add, AddZkProgram } from "../../contracts";
-import cacheJSONList from "./cache.json";
+import {JsonProof} from "o1js";
+import ZkappWorkerClient from "./ZkappWorkerClient"
 
 // We've already deployed the Add contract on testnet at this address
 // https://minascan.io/devnet/account/B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp
 const zkAppAddress = "B62qnfpb1Wz7DrW7279B8nR8m4yY6wGJz4dnbAdkzfeUkpyp8aB9VCp";
 
 export default function Home() {
-  const zkApp = useRef<Add>(new Add(PublicKey.fromBase58(zkAppAddress)));
-
+  
+  const [zkappWorkerClient, setZkappWorkerClient] =
+  useState<null | ZkappWorkerClient>(null); 
   const [transactionLink, setTransactionLink] = useState<string | null>(null);
   const [contractState, setContractState] = useState<string | null>(null);
   const [zkProgramState, setZkProgramState] = useState<string | null>(null);
-  const [proof, setProof] = useState<Proof<Field, Field> | null>(null);
+  const [proof, setProof] = useState<JsonProof | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // fetch the zkapp state when the page loads
   useEffect(() => {
     (async () => {
-      Mina.setActiveInstance(Mina.Network('https://api.minascan.io/node/devnet/v1/graphql'));
-      await fetchAccount({publicKey: zkAppAddress});
-      const num = zkApp.current.num.get();
+      console.log("Loading zkApp worker client ...");
+      const zkappWorkerClient = new ZkappWorkerClient();
+      setZkappWorkerClient(zkappWorkerClient);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      console.log("done Loading zkApp worker client");
+ 
+      console.log("Setting active instance to Devnet..");
+      await zkappWorkerClient.setActiveInstanceToDevnet();
+      await zkappWorkerClient.loadContract();
+      await zkappWorkerClient.initZkappInstance(zkAppAddress);
+
+      await zkappWorkerClient.fetchAccount(zkAppAddress);
+      const num = await zkappWorkerClient.getNum();
       setContractState(num.toString());
       setZkProgramState(num.toString());
 
       // Compile the AddZkProgram
-      const cacheFiles = await fetchFiles();
       console.log("Compiling AddZkProgram");
       // ZkProgram cache in the browser is currently not fully supported.
-      await AddZkProgram.compile();
-      
+      await zkappWorkerClient.compileZkProgram();
+
       // Initialize the AddZkProgram with the initial state of the zkapp
-      console.log("Initialize AddZkProgram with intial contract state of zkapp");
-      const init = await AddZkProgram.init(num);
-      setProof(init.proof);
+      console.log(
+        "Initialize AddZkProgram with intial contract state of zkapp"
+      );
       
+      const initProof = await zkappWorkerClient.initZkProgram(num.toString());
+      setProof(initProof);
 
       // Compile the contract so that o1js has the proving key required to execute contract calls
-      console.log("Compiling Add contract to generate proving and verification keys");
-      await Add.compile({ cache: FileSystem(cacheFiles) });
+      console.log(
+        "Compiling Add contract to generate proving and verification keys"
+      );
+
+      await zkappWorkerClient.compileContract();
 
       setLoading(false);
     })();
@@ -62,24 +76,23 @@ export default function Home() {
       const mina = (window as any).mina;
       const walletKey: string = (await mina.requestAccounts())[0];
       console.log("Connected wallet address: " + walletKey);
-      await fetchAccount({publicKey: PublicKey.fromBase58(walletKey)});
 
+      // await fetchAccount({ publicKey: PublicKey.fromBase58(walletKey) });
+      await zkappWorkerClient!.fetchAccount(walletKey);
       // Execute a transaction locally on the browser
       let hash;
       if (proof) {
-        const transaction = await Mina.transaction(async () => {
-          console.log("Executing Add.settleState() locally");
-          await zkApp.current.settleState(proof);
-        });
-
+ 
+        await zkappWorkerClient!.createSettleStateTransaction(proof);
         // Prove execution of the contract using the proving key
         console.log("Proving execution of Add.settleState()");
-        await transaction.prove();
+        await zkappWorkerClient!.proveSettleStateTransaction();
 
         // Broadcast the transaction to the Mina network
+        const transactionJSON = await zkappWorkerClient!.getTransactionJSON();
         console.log("Broadcasting proof of execution to the Mina network");
         ({ hash } = await mina.sendTransaction({
-          transaction: transaction.toJSON()
+          transaction: transactionJSON
         }));
       } else {
         throw Error("Proof passed to Add.settleState is null");
@@ -92,7 +105,11 @@ export default function Home() {
       console.error(e.message);
       let errorMessage = "";
 
-      if (e.message.includes("Cannot read properties of undefined (reading 'requestAccounts')")) {
+      if (
+        e.message.includes(
+          "Cannot read properties of undefined (reading 'requestAccounts')"
+        )
+      ) {
         errorMessage = "Is Auro installed?";
       } else if (e.message.includes("Please create or restore wallet first.")) {
         errorMessage = "Have you created a wallet?";
@@ -109,63 +126,22 @@ export default function Home() {
 
   const updateZkProgram = useCallback(async () => {
     setLoading(true);
-     
+
     if (contractState && proof) {
-      // Call the AddZkProgram update method
-      console.log("Calling AddZkProgram.update");
-      const update = await AddZkProgram.update(Field(contractState), proof);
-      setProof(update.proof);
-      setZkProgramState(update.proof.publicOutput.toString())
+      const updateProof = await zkappWorkerClient!.updateZkProgram(
+        contractState,
+        proof
+      );
+
+      setProof(updateProof);
+      setZkProgramState(updateProof.publicOutput.toString());
     } else {
-      throw Error("Proof and or ContractState passed to AddZkProgram.update is null"); 
+      throw Error(
+        "Proof and or ContractState passed to AddZkProgram.update is null"
+      );
     }
-    setLoading(false);  
- }, [proof]);
-
-  const fetchFiles = async () => {
-    const cacheJson = cacheJSONList;
-    const cacheListPromises = cacheJson.files.map(async (file) => {
-      const [header, data] = await Promise.all([
-        fetch(\`/cache/\${file}.header\`).then((res) => res.text()),
-        fetch(\`/cache/\${file}\`).then((res) => res.text()),
-      ]);
-      return { file, header, data };
-    });
-
-    const cacheList = await Promise.all(cacheListPromises);
-
-    return cacheList.reduce((acc: any, { file, header, data }) => {
-      acc[file] = { file, header, data };
-      return acc;
-    }, {});
-  };
-
-  const FileSystem = (files: any): Cache => ({
-    read({ persistentId, uniqueId, dataType }: any) {
-      if (!files[persistentId]) {
-        return undefined;
-      }
-
-      const currentId = files[persistentId].header;
-
-      if (currentId !== uniqueId) {
-        return undefined;
-      }
-
-      if (dataType === "string") {
-        console.log("found in cache:", { persistentId, uniqueId, dataType });
-
-        return new TextEncoder().encode(files[persistentId].data);
-      }
-      return undefined;
-    },
-
-    write({ persistentId, uniqueId, dataType }: any, data: any) {
-      console.log({ persistentId, uniqueId, dataType });
-    },
-
-    canWrite: true
-  });
+    setLoading(false);
+  }, [proof]);
 
   return (
     <>

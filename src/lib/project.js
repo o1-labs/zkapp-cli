@@ -9,6 +9,8 @@ import ora from 'ora';
 import shell from 'shelljs';
 import customNextLayout from '../lib/ui/next/customNextLayout.js';
 import customNextPage from '../lib/ui/next/customNextPage.js';
+import ZkappWorkerClient from '../lib/ui/next/zkappWorkerClient.js';
+import ZkappWorker from '../lib/ui/next/zkappWorker.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
@@ -437,6 +439,18 @@ const __dirname = path.dirname(__filename);
     'utf8'
   );
 
+  fs.writeFileSync(
+    path.join('ui', 'app', 'ZkappWorkerClient.ts'),
+    ZkappWorkerClient,
+    'utf8'
+  );
+
+  fs.writeFileSync(
+    path.join('ui', 'app', 'ZkappWorker.ts'),
+    ZkappWorker,
+    'utf8'
+  );
+
   // Adds landing page components directory and files to NextJS project.
   fs.copySync(
     path.join(__dirname, 'ui', 'next', 'components'),
@@ -469,7 +483,7 @@ const __dirname = path.dirname(__filename);
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
@@ -503,6 +517,10 @@ const __dirname = path.dirname(__filename);
   x.scripts['clear-cache'] =
     'npx rimraf public/cache && npx rimraf app/cache.json && echo "UI Cache cleared successfully!"';
   x.type = 'module';
+  // Add comlink to dependencies
+  if (!x.dependencies) x.dependencies = {};
+  x.dependencies['comlink'] = '^4.4.2';
+
   fs.writeJSONSync(path.join('ui', 'package.json'), x, { spaces: 2 });
 
   if (useGHPages) {

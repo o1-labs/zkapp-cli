@@ -17,6 +17,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.22.9](https://github.com/o1-labs/zkapp-cli/compare/v0.22.8...v0.22.9) - 2025-06-10
+
+### Added
+
+- Adds web workers to the default NextJS UI project generated with the zkapp-CLI. [#734](https://github.com/o1-labs/zkapp-cli/pull/734)
+
 ## [0.22.8](https://github.com/o1-labs/zkapp-cli/compare/v0.22.7...v0.22.8) - 2025-05-8
 
 ### Added
