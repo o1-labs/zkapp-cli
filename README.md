@@ -100,6 +100,49 @@ This command creates a directory containing a new project template, fully set up
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
 - Code style consistency (using Prettier) and linting (using ES Lint) is automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
+## Create a Zeko L2 project
+
+The zkApp CLI supports creating projects optimized for [Zeko L2](https://zeko.io), a high-performance layer 2 solution for Mina Protocol that provides ~10 second finality and higher throughput while maintaining full o1js compatibility.
+
+```sh
+# Create a Zeko L2 project (defaults to devnet)
+zk project my-zeko-app --zeko
+
+# Create a Zeko L2 project with UI framework
+zk project my-zeko-app --zeko --ui next
+
+# Create a Zeko L2 project for specific network
+zk project my-zeko-app --zeko --network devnet    # Development (default)
+zk project my-zeko-app --zeko --network mainnet   # Production (when available)
+```
+
+Zeko L2 projects include:
+
+- **Pre-configured deploy aliases** for Zeko networks
+- **Bridge interaction examples** demonstrating L1 ↔ L2 transfers
+- **Network-optimized settings** for faster development cycles
+- **Full o1js compatibility** - same code works on both L1 and L2
+
+### Configure Zeko L2 deployment
+
+To add Zeko L2 deployment configuration to an existing project:
+
+```sh
+# Add Zeko devnet configuration (default)
+zk config --zeko
+
+# Add Zeko mainnet configuration (when available)
+zk config --zeko --network mainnet
+```
+
+This creates deploy aliases like `zeko-devnet` or `zeko-mainnet` that can be used with the standard deploy command:
+
+```sh
+zk deploy zeko-devnet
+```
+
+**Note**: Zeko mainnet is currently in development. Use `--network devnet` (default) for active development.
+
 ## Create an example project
 
 ```sh

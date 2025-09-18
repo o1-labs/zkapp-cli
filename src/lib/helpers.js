@@ -74,11 +74,19 @@ async function step(str, fn, exitOnError = true) {
  * Sets up the new project from the template.
  * @param {string} destination Destination dir path.
  * @param {string} lang        ts (default) or js
+ * @param {boolean} zeko       Whether to use Zeko L2 template
+ * @param {string} network     Network for Zeko projects (devnet or mainnet)
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-async function setupProject(destination, lang = 'ts') {
+async function setupProject(
+  destination,
+  lang = 'ts',
+  zeko = false,
+  network = 'devnet'
+) {
   const currentDir = shell.pwd().toString();
-  const projectName = lang === 'ts' ? 'project-ts' : 'project';
+  const projectName =
+    lang === 'ts' ? (zeko ? 'project-ts-zeko' : 'project-ts') : 'project';
   const templatePath = path.resolve(
     __dirname,
     '..',
@@ -104,6 +112,12 @@ async function setupProject(destination, lang = 'ts') {
       path.resolve(destDir, '_.npmignore'),
       path.resolve(destDir, '.npmignore')
     );
+
+    // If this is a Zeko project, update the configuration for the specified network
+    if (zeko) {
+      updateZekoTemplateForNetwork(destDir, network);
+    }
+
     spin.succeed(chalk.green(step));
 
     return true;
@@ -439,4 +453,100 @@ function checkClassInheritance(
   }
 
   return classInfo.inheritsFromO1jsSmartContract;
+}
+
+/**
+ * Updates Zeko template configuration for the specified network
+ * @param {string} destDir - Destination directory path
+ * @param {string} network - Network (devnet or mainnet)
+ */
+function updateZekoTemplateForNetwork(destDir, network) {
+  const configPath = path.join(destDir, 'config.json');
+
+  // Update config.json with network-specific settings
+  const networkConfig = {
+    version: 1,
+    deployAliases: {
+      [`zeko-${network}`]: {
+        networkId: 'testnet', // Using testnet for o1js compatibility
+        url:
+          network === 'mainnet'
+            ? 'https://mainnet.zeko.io/graphql'
+            : 'https://devnet.zeko.io/graphql',
+        keyPath: `keys/zeko-${network}.json`,
+        fee: '0.1',
+        feepayerKeyPath: `keys/zeko-${network}.json`,
+        feepayerAlias: `zeko-${network}`,
+      },
+    },
+  };
+
+  fs.writeFileSync(configPath, JSON.stringify(networkConfig, null, 2));
+
+  // Update bridge-example.ts with network-specific endpoints
+  const bridgeExamplePath = path.join(destDir, 'src', 'bridge-example.ts');
+  if (fs.existsSync(bridgeExamplePath)) {
+    let bridgeContent = fs.readFileSync(bridgeExamplePath, 'utf8');
+
+    const zekoEndpoint =
+      network === 'mainnet'
+        ? 'https://mainnet.zeko.io/graphql'
+        : 'https://devnet.zeko.io/graphql';
+
+    const minaEndpoint =
+      network === 'mainnet'
+        ? 'https://api.minascan.io/node/mainnet/v1/graphql'
+        : 'https://api.minascan.io/node/devnet/v1/graphql';
+
+    const minaArchiveEndpoint =
+      network === 'mainnet'
+        ? 'https://api.minascan.io/archive/mainnet/v1/graphql'
+        : 'https://api.minascan.io/archive/devnet/v1/graphql';
+
+    // Replace network endpoints in bridge example
+    bridgeContent = bridgeContent.replace(
+      /mina: 'https:\/\/devnet\.zeko\.io\/graphql'/g,
+      `mina: '${zekoEndpoint}'`
+    );
+    bridgeContent = bridgeContent.replace(
+      /archive: 'https:\/\/devnet\.zeko\.io\/graphql'/g,
+      `archive: '${zekoEndpoint}'`
+    );
+    bridgeContent = bridgeContent.replace(
+      /mina: 'https:\/\/api\.minascan\.io\/node\/devnet\/v1\/graphql'/g,
+      `mina: '${minaEndpoint}'`
+    );
+    bridgeContent = bridgeContent.replace(
+      /archive: 'https:\/\/api\.minascan\.io\/archive\/devnet\/v1\/graphql'/g,
+      `archive: '${minaArchiveEndpoint}'`
+    );
+
+    // Update network display text
+    const networkDisplay = network === 'mainnet' ? 'Mainnet' : 'Devnet';
+    bridgeContent = bridgeContent.replace(
+      /Network ID: testnet \(pointing to Zeko L2\)/g,
+      `Network ID: testnet (pointing to Zeko L2 ${networkDisplay})`
+    );
+    bridgeContent = bridgeContent.replace(
+      /RPC Endpoint: https:\/\/[^']+/g,
+      `RPC Endpoint: ${zekoEndpoint}`
+    );
+    bridgeContent = bridgeContent.replace(
+      /Archive Endpoint: https:\/\/[^']+/g,
+      `Archive Endpoint: ${zekoEndpoint}`
+    );
+
+    fs.writeFileSync(bridgeExamplePath, bridgeContent);
+  }
+
+  // Update interact.ts with network-specific default
+  const interactPath = path.join(destDir, 'src', 'interact.ts');
+  if (fs.existsSync(interactPath)) {
+    let interactContent = fs.readFileSync(interactPath, 'utf8');
+    interactContent = interactContent.replace(
+      /const DEFAULT_NETWORK_ID = '[^']+'/,
+      `const DEFAULT_NETWORK_ID = 'zeko:${network}'`
+    );
+    fs.writeFileSync(interactPath, interactContent);
+  }
 }

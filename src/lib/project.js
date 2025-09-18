@@ -36,9 +36,11 @@ const shellExec = util.promisify(shell.exec);
  * @param {object} argv - The arguments object provided by yargs.
  * @param {string} argv.name - The user's specified project name.
  * @param {string} argv.ui - The name of the UI framework to use.
+ * @param {boolean} argv.zeko - Whether to create a Zeko L2 project.
+ * @param {string} argv.network - Network for Zeko projects (devnet or mainnet).
  * @return {Promise<void>}
  */
-async function project({ name, ui }) {
+async function project({ name, ui, zeko, network = 'devnet' }) {
   const isWindows = process.platform === 'win32';
 
   if (fs.existsSync(name)) {
@@ -85,13 +87,13 @@ async function project({ name, ui }) {
   if (ui) {
     switch (ui) {
       case 'svelte':
-        scaffoldSvelte();
+        scaffoldSvelte(zeko);
         break;
       case 'next':
-        await scaffoldNext(name);
+        await scaffoldNext(name, zeko);
         break;
       case 'nuxt':
-        scaffoldNuxt();
+        scaffoldNuxt(zeko);
         break;
       case 'empty':
         shell.mkdir('ui');
@@ -138,7 +140,7 @@ async function project({ name, ui }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await setupProject(shell.pwd().toString()))) {
+  if (!(await setupProject(shell.pwd().toString(), 'ts', zeko, network))) {
     shell.exit(1);
   }
 
@@ -188,7 +190,7 @@ async function project({ name, ui }) {
   process.exit(0);
 }
 
-function scaffoldSvelte() {
+function scaffoldSvelte(zeko = false) {
   if (process.env.CI || process.env.ZKAPP_CLI_INTEGRATION_TEST) {
     spawnSync(
       'npx',
@@ -325,7 +327,7 @@ function scaffoldSvelte() {
   );
 }
 
-async function scaffoldNext(projectName) {
+async function scaffoldNext(projectName, zeko = false) {
   let res;
   try {
     res = await enquirer.prompt({
@@ -642,7 +644,7 @@ loadCOIServiceWorker();
   }
 }
 
-function scaffoldNuxt() {
+function scaffoldNuxt(zeko = false) {
   spawnSync('npx', ['nuxi', 'init', 'ui'], {
     stdio: 'inherit',
     shell: true,

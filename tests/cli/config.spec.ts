@@ -443,5 +443,75 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
+  test(`should create Zeko deployment alias with devnet network, @serial @smoke @config @zeko`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, execute } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await zkProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Zeko deployment alias creation', async () => {
+        const cliArg = 'config --zeko';
+        const { stdout, stderr, code } = await execute(
+          'zk',
+          cliArg,
+          projectName
+        );
+        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
+        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
+        expect(code).toBe(0);
+
+        // Verify config.json contains Zeko devnet alias
+        const fs = await import('node:fs');
+        const configPath = `${path}/${projectName}/config.json`;
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        expect(config.deployAliases['zeko-devnet']).toBeDefined();
+        expect(config.deployAliases['zeko-devnet'].url).toBe(
+          'https://devnet.zeko.io/graphql'
+        );
+        expect(config.deployAliases['zeko-devnet'].networkId).toBe('testnet');
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should create Zeko deployment alias with mainnet network, @serial @smoke @config @zeko`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, execute } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await zkProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Zeko mainnet deployment alias creation', async () => {
+        const cliArg = 'config --zeko --network mainnet';
+        const { stdout, stderr, code } = await execute(
+          'zk',
+          cliArg,
+          projectName
+        );
+        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
+        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
+        expect(code).toBe(0);
+
+        // Verify config.json contains Zeko mainnet alias
+        const fs = await import('node:fs');
+        const configPath = `${path}/${projectName}/config.json`;
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        expect(config.deployAliases['zeko-mainnet']).toBeDefined();
+        expect(config.deployAliases['zeko-mainnet'].url).toBe(
+          'https://mainnet.zeko.io/graphql'
+        );
+        expect(config.deployAliases['zeko-mainnet'].networkId).toBe('testnet');
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   // TODO: https://github.com/o1-labs/zkapp-cli/issues/582
 });

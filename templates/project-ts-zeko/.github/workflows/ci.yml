@@ -1,0 +1,67 @@
+name: zkApp tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch: {}
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        node: [18, 20]
+        os: [ubuntu-latest]
+    #
+    # Enable the following block if you also want to use the Lightnet in your tests.
+    #
+    # services:
+    #   mina-local-network:
+    #     image: o1labs/mina-local-network:compatible-latest-lightnet
+    #     env:
+    #       NETWORK_TYPE: 'single-node'
+    #       PROOF_LEVEL: 'none'
+    #       LOG_LEVEL: 'Info'
+    #     ports:
+    #       - 3085:3085
+    #       - 5432:5432
+    #       - 8080:8080
+    #       - 8181:8181
+    #       - 8282:8282
+    #     volumes:
+    #       - /tmp:/root/logs
+    steps:
+      #
+      # Enable the following block if you also want to use the Lightnet in your tests.
+      #
+      # - name: Wait for Mina network readiness
+      #   uses: o1-labs/wait-for-mina-network-action@v1
+      #   with:
+      #     mina-graphql-port: 8080
+      #     max-attempts: 60
+      #     polling-interval-ms: 10000
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Git checkout
+        uses: actions/checkout@v4
+      - name: NPM ci, build, & test
+        run: |
+          npm ci
+          npm run build --if-present
+          npm test
+        env:
+          CI: true
+      #
+      # Enable the following block if you also want to use the Lightnet in your tests.
+      #
+      # - name: Upload Mina logs
+      #   uses: actions/upload-artifact@v4
+      #   continue-on-error: true
+      #   if: always()
+      #   with:
+      #     if-no-files-found: ignore
+      #     name: mina-logs-node${{ matrix.node }}-${{ matrix.os }}
+      #     path: /tmp/*.log
+      #     retention-days: 5

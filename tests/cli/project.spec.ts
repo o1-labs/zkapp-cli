@@ -70,4 +70,92 @@ test.describe('zkApp-CLI', () => {
       }
     });
   }
+
+  // Tests for Zeko L2 project generation
+  test(`should generate Zeko L2 zkApp project (devnet default), @parallel @smoke @project @zeko`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, ls, exists } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      const { exitCode, stdOut } = await zkProject(
+        projectName,
+        'none',
+        true,
+        spawn,
+        true, // isZeko
+        'devnet' // network
+      );
+      await checkZkProject(
+        projectName,
+        'none',
+        stdOut,
+        exitCode,
+        ls,
+        exists,
+        true, // isZeko
+        'devnet' // network
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should generate Zeko L2 zkApp project with UI, @parallel @smoke @project @zeko @next-ui`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, ls, exists } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      const { exitCode, stdOut } = await zkProject(
+        projectName,
+        'next',
+        true,
+        spawn,
+        true, // isZeko
+        'devnet' // network
+      );
+      await checkZkProject(
+        projectName,
+        'next',
+        stdOut,
+        exitCode,
+        ls,
+        exists,
+        true, // isZeko
+        'devnet' // network
+      );
+    } finally {
+      await cleanup();
+    }
+  });
+
+  test(`should generate Zeko L2 zkApp project with mainnet network, @parallel @smoke @project @zeko`, async () => {
+    const projectName = crypto.randomUUID();
+    const { spawn, cleanup, path, ls, exists } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      const { exitCode, stdOut } = await zkProject(
+        projectName,
+        'none',
+        true,
+        spawn,
+        true, // isZeko
+        'mainnet' // network
+      );
+      await checkZkProject(
+        projectName,
+        'none',
+        stdOut,
+        exitCode,
+        ls,
+        exists,
+        true, // isZeko
+        'mainnet' // network
+      );
+    } finally {
+      await cleanup();
+    }
+  });
 });

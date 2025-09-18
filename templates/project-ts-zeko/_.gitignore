@@ -1,0 +1,16 @@
+# NodeJS
+build
+node_modules
+coverage
+
+# Editor
+.vscode
+
+# System
+.DS_Store
+
+# Never commit keys to Git!
+keys
+
+# o1js cache
+cache
