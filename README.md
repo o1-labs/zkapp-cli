@@ -119,7 +119,7 @@ zk project my-zeko-app --zeko --network mainnet   # Production (when available)
 Zeko L2 projects include:
 
 - **Pre-configured deploy aliases** for Zeko networks
-- **Bridge interaction examples** demonstrating L1 ↔ L2 transfers
+- **Bridge interaction examples** demonstrating L1 <-> L2 transfers
 - **Network-optimized settings** for faster development cycles
 - **Full o1js compatibility** - same code works on both L1 and L2
 

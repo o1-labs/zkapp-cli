@@ -6,7 +6,7 @@ import Client from 'mina-signer';
 import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import { readDeployAliasesConfig, step } from './helpers.js';
+import { readDeployAliasesConfig, step, configureZekoSupport } from './helpers.js';
 import { isMinaGraphQlEndpointAvailable } from './network-helpers.js';
 import { prompts } from './prompts.js';
 
@@ -19,7 +19,6 @@ export {
   createKeyPair,
   createKeyPairStep,
   createLightnetDeployAlias,
-  createZekoDeployAlias,
   createZkAppKeyPairAndSaveDeployAliasConfig,
   getCachedFeepayerAddress,
   getCachedFeepayerAliases,
@@ -27,7 +26,6 @@ export {
   printDeployAliasesConfig,
   printInteractiveDeployAliasConfigSuccessMessage,
   printLightnetDeployAliasConfigSuccessMessage,
-  printZekoDeployAliasConfigSuccessMessage,
   recoverKeyPairStep,
   savedKeyPairStep,
 };
@@ -55,7 +53,7 @@ async function config({ list, lightnet, zeko, network = 'devnet' }) {
     return;
   }
   if (zeko) {
-    await createZekoDeployAlias(projectRoot, deployAliasesConfig, network);
+    await configureZekoSupport(projectRoot, network);
     return;
   }
   await createDeployAlias(projectRoot, deployAliasesConfig);
@@ -116,91 +114,6 @@ async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
   printLightnetDeployAliasConfigSuccessMessage(deployAliasName);
 }
 
-async function createZekoDeployAlias(
-  projectRoot,
-  deployAliasesConfig,
-  network = 'devnet'
-) {
-  const networkId = 'testnet'; // Using testnet for o1js compatibility, endpoint points to Zeko
-  const deployAliasPrefix = `zeko-${network}`;
-  let nextAliasNumber = 1;
-
-  // Select appropriate endpoint based on network
-  const zekoEndpoint =
-    network === 'mainnet'
-      ? Constants.zekoMainnetEndpoint
-      : Constants.zekoDevnetEndpoint;
-  const zekoArchiveEndpoint =
-    network === 'mainnet'
-      ? Constants.zekoMainnetArchiveEndpoint
-      : Constants.zekoDevnetArchiveEndpoint;
-
-  await step(
-    `Check Zeko ${network} GraphQL endpoint availability`,
-    async () => {
-      const endpointStatus = await isMinaGraphQlEndpointAvailable(zekoEndpoint);
-      if (!endpointStatus) {
-        throw new Error(
-          `Zeko ${network} GraphQL endpoint ${zekoEndpoint} is not available.`
-        );
-      }
-    }
-  );
-
-  while (
-    deployAliasesConfig.deployAliases[`${deployAliasPrefix}${nextAliasNumber}`]
-  ) {
-    nextAliasNumber++;
-  }
-
-  const deployAliasName = `${deployAliasPrefix}${nextAliasNumber}`;
-  const feePayerPath = `${Constants.feePayerCacheDir}/${deployAliasName}.json`;
-
-  if (!fs.existsSync(feePayerPath)) {
-    await step(
-      `Create zkApp fee payer key pair at ${feePayerPath}`,
-      async () => {
-        const zekoNetworkInstance = Mina.Network({
-          networkId,
-          mina: zekoEndpoint,
-          archive: zekoArchiveEndpoint,
-        });
-        Mina.setActiveInstance(zekoNetworkInstance);
-
-        // For Zeko, we'll create a standard key pair
-        // In a production environment, this would integrate with Zeko's account management
-        const keyPair = PrivateKey.random();
-        const publicKey = keyPair.toPublicKey();
-
-        fs.outputJsonSync(
-          feePayerPath,
-          {
-            publicKey: publicKey.toBase58(),
-            privateKey: keyPair.toBase58(),
-          },
-          { spaces: 2 }
-        );
-      }
-    );
-  }
-
-  await createZkAppKeyPairAndSaveDeployAliasConfig({
-    deployAliasesConfig,
-    projectRoot,
-    deployAliasName,
-    networkId,
-    url: zekoEndpoint,
-    explorerUrl:
-      network === 'mainnet'
-        ? 'https://mainnet.zeko.io/explorer'
-        : 'https://devnet.zeko.io/explorer',
-    feePayerPath,
-    fee: '0.1',
-    feepayerAlias: deployAliasName,
-  });
-
-  printZekoDeployAliasConfigSuccessMessage(deployAliasName, network);
-}
 
 async function createDeployAlias(projectRoot, deployAliasesConfig) {
   let isFeepayerCached = false;
@@ -542,19 +455,3 @@ function printLightnetDeployAliasConfigSuccessMessage(deployAliasName) {
   console.log(chalk.green(str));
 }
 
-function printZekoDeployAliasConfigSuccessMessage(
-  deployAliasName,
-  network = 'devnet'
-) {
-  const networkDisplay = network === 'mainnet' ? 'Mainnet' : 'Devnet';
-  const str =
-    `\nSuccess! Zeko L2 ${networkDisplay} deploy alias configured.\n` +
-    `\nZeko L2 Benefits:` +
-    `\n  - ~10 second finality (vs Mina L1's 3-5 minutes)` +
-    `\n  - Higher throughput with unlimited account updates` +
-    `\n  - Full o1js compatibility - same code works on both layers` +
-    `\nNetwork: Zeko ${networkDisplay}` +
-    `\nNext steps:` +
-    `\n  - To deploy zkApp to Zeko L2 ${networkDisplay}, run: \`zk deploy ${deployAliasName}\``;
-  console.log(chalk.green(str));
-}

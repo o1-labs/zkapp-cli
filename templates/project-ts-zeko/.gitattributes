@@ -1,3 +1,0 @@
-# Use line endings appropriate for the system. This prevents Git from
-# complaining about project template line endings when committing on Windows.
-* text=auto eol=lf

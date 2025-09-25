@@ -87,13 +87,13 @@ async function project({ name, ui, zeko, network = 'devnet' }) {
   if (ui) {
     switch (ui) {
       case 'svelte':
-        scaffoldSvelte(zeko);
+        scaffoldSvelte();
         break;
       case 'next':
-        await scaffoldNext(name, zeko);
+        await scaffoldNext(name);
         break;
       case 'nuxt':
-        scaffoldNuxt(zeko);
+        scaffoldNuxt();
         break;
       case 'empty':
         shell.mkdir('ui');
@@ -190,7 +190,7 @@ async function project({ name, ui, zeko, network = 'devnet' }) {
   process.exit(0);
 }
 
-function scaffoldSvelte(zeko = false) {
+function scaffoldSvelte() {
   if (process.env.CI || process.env.ZKAPP_CLI_INTEGRATION_TEST) {
     spawnSync(
       'npx',
@@ -327,7 +327,7 @@ function scaffoldSvelte(zeko = false) {
   );
 }
 
-async function scaffoldNext(projectName, zeko = false) {
+async function scaffoldNext(projectName) {
   let res;
   try {
     res = await enquirer.prompt({
@@ -644,7 +644,7 @@ loadCOIServiceWorker();
   }
 }
 
-function scaffoldNuxt(zeko = false) {
+function scaffoldNuxt() {
   spawnSync('npx', ['nuxi', 'init', 'ui'], {
     stdio: 'inherit',
     shell: true,
