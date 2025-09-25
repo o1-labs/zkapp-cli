@@ -6,7 +6,11 @@ import Client from 'mina-signer';
 import { Lightnet, Mina, PrivateKey, PublicKey } from 'o1js';
 import { getBorderCharacters, table } from 'table';
 import Constants from './constants.js';
-import { readDeployAliasesConfig, step, configureZekoSupport } from './helpers.js';
+import {
+  readDeployAliasesConfig,
+  step,
+  configureZekoSupport,
+} from './helpers.js';
 import { isMinaGraphQlEndpointAvailable } from './network-helpers.js';
 import { prompts } from './prompts.js';
 
@@ -113,7 +117,6 @@ async function createLightnetDeployAlias(projectRoot, deployAliasesConfig) {
   });
   printLightnetDeployAliasConfigSuccessMessage(deployAliasName);
 }
-
 
 async function createDeployAlias(projectRoot, deployAliasesConfig) {
   let isFeepayerCached = false;
@@ -454,4 +457,3 @@ function printLightnetDeployAliasConfigSuccessMessage(deployAliasName) {
     `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
   console.log(chalk.green(str));
 }
-

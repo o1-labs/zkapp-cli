@@ -476,9 +476,10 @@ async function configureZekoSupport(destDir, network) {
   }
 
   // Add Zeko deployment alias
-  const zekoEndpoint = network === 'mainnet'
-    ? 'https://mainnet.zeko.io/graphql'
-    : 'https://devnet.zeko.io/graphql';
+  const zekoEndpoint =
+    network === 'mainnet'
+      ? 'https://mainnet.zeko.io/graphql'
+      : 'https://devnet.zeko.io/graphql';
 
   config.deployAliases[`zeko-${network}`] = {
     networkId: 'testnet', // Using testnet for o1js compatibility
@@ -487,9 +488,10 @@ async function configureZekoSupport(destDir, network) {
     fee: '0.1',
     feepayerKeyPath: `keys/zeko-${network}.json`,
     feepayerAlias: `zeko-${network}`,
-    explorerUrl: network === 'mainnet'
-      ? 'https://mainnet.zeko.io/explorer'
-      : 'https://devnet.zeko.io/explorer',
+    explorerUrl:
+      network === 'mainnet'
+        ? 'https://mainnet.zeko.io/explorer'
+        : 'https://devnet.zeko.io/explorer',
   };
 
   // Write updated config
@@ -497,13 +499,15 @@ async function configureZekoSupport(destDir, network) {
 
   // Create bridge example with network-specific endpoints
   const bridgeExamplePath = path.join(destDir, 'src', 'bridge-example.ts');
-  const minaEndpoint = network === 'mainnet'
-    ? 'https://api.minascan.io/node/mainnet/v1/graphql'
-    : 'https://api.minascan.io/node/devnet/v1/graphql';
+  const minaEndpoint =
+    network === 'mainnet'
+      ? 'https://api.minascan.io/node/mainnet/v1/graphql'
+      : 'https://api.minascan.io/node/devnet/v1/graphql';
 
-  const minaArchiveEndpoint = network === 'mainnet'
-    ? 'https://api.minascan.io/archive/mainnet/v1/graphql'
-    : 'https://api.minascan.io/archive/devnet/v1/graphql';
+  const minaArchiveEndpoint =
+    network === 'mainnet'
+      ? 'https://api.minascan.io/archive/mainnet/v1/graphql'
+      : 'https://api.minascan.io/archive/devnet/v1/graphql';
 
   const bridgeExampleContent = `/**
  * Zeko L2 Bridge Interaction Example
@@ -643,7 +647,8 @@ if (import.meta.url === \`file://\${process.argv[1]}\`) {
   }
 
   // Print success message
-  console.log(chalk.green(`
+  console.log(
+    chalk.green(`
 Zeko L2 ${networkDisplay} configuration added successfully!
 
 Zeko L2 Benefits:
@@ -659,5 +664,6 @@ Added files:
 Next steps:
   - To deploy to Zeko L2 ${networkDisplay}: zk deploy zeko-${network}
   - Run the bridge example: npm run build && node build/src/bridge-example.js
-`));
+`)
+  );
 }
