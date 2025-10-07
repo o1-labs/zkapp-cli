@@ -56,7 +56,7 @@ const FileSystem = (files: any): Cache => ({
     console.log({ persistentId, uniqueId, dataType });
   },
 
-  canWrite: true
+  canWrite: false
 });
 
 export const api = {
