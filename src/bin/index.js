@@ -75,21 +75,6 @@ function projectCli() {
         choices: Constants.uiTypes,
         description: 'Creates an accompanying UI',
       },
-      zeko: {
-        demand: false,
-        boolean: true,
-        hidden: false,
-        default: false,
-        description: 'Create a Zeko L2 optimized project',
-      },
-      network: {
-        demand: false,
-        string: true,
-        hidden: false,
-        choices: ['devnet', 'mainnet'],
-        default: 'devnet',
-        description: 'Target network for Zeko project (devnet or mainnet)',
-      },
     },
     handler: async (argv) => await project(argv),
   };
@@ -106,7 +91,7 @@ function fileCli() {
 
 function configCli() {
   return {
-    command: ['config [list] [lightnet] [zeko]'],
+    command: ['config [list] [lightnet]'],
     describe: 'List or add a new deploy alias',
     builder: {
       list: {
@@ -126,25 +111,6 @@ function configCli() {
         default: false,
         description:
           'Whether to automatically configure the deploy alias compatible with the lightweight Mina blockchain network.',
-      },
-      zeko: {
-        alias: 'z',
-        demand: false,
-        boolean: true,
-        hidden: false,
-        default: false,
-        description:
-          'Whether to automatically configure the deploy alias compatible with Zeko L2 network.',
-      },
-      network: {
-        alias: 'n',
-        demand: false,
-        string: true,
-        hidden: false,
-        choices: ['devnet', 'mainnet'],
-        default: 'devnet',
-        description:
-          'Target network for Zeko configuration (devnet or mainnet)',
       },
     },
     handler: async (argv) => await config(argv),

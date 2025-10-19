@@ -677,7 +677,12 @@ describe('config.js', () => {
 
       printInteractiveDeployAliasConfigSuccessMessage(
         {
-          deployAliases: { testAlias1: { url: 'https://minascan.test.url' } },
+          deployAliases: {
+            testAlias1: {
+              networkId: 'testnet',
+              url: 'https://minascan.test.url',
+            },
+          },
         },
         'testAlias1',
         { publicKey: 'publicKey' }

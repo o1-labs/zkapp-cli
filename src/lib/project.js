@@ -36,11 +36,9 @@ const shellExec = util.promisify(shell.exec);
  * @param {object} argv - The arguments object provided by yargs.
  * @param {string} argv.name - The user's specified project name.
  * @param {string} argv.ui - The name of the UI framework to use.
- * @param {boolean} argv.zeko - Whether to create a Zeko L2 project.
- * @param {string} argv.network - Network for Zeko projects (devnet or mainnet).
  * @return {Promise<void>}
  */
-async function project({ name, ui, zeko, network = 'devnet' }) {
+async function project({ name, ui }) {
   const isWindows = process.platform === 'win32';
 
   if (fs.existsSync(name)) {
@@ -140,7 +138,7 @@ async function project({ name, ui, zeko, network = 'devnet' }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await setupProject(shell.pwd().toString(), 'ts', zeko, network))) {
+  if (!(await setupProject(shell.pwd().toString(), 'ts'))) {
     shell.exit(1);
   }
 

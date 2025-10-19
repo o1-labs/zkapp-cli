@@ -100,48 +100,44 @@ This command creates a directory containing a new project template, fully set up
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
 - Code style consistency (using Prettier) and linting (using ES Lint) is automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
-## Create a Zeko L2 project
+## Deploy to Zeko L2
 
-The zkApp CLI supports creating projects optimized for [Zeko L2](https://zeko.io), a high-performance layer 2 solution for Mina Protocol that provides ~10 second finality and higher throughput while maintaining full o1js compatibility.
+The zkApp CLI supports deploying to [Zeko L2](https://zeko.io), a high-performance layer 2 solution for Mina Protocol that provides faster finality and higher throughput while maintaining full o1js compatibility.
 
-```sh
-# Create a Zeko L2 project (defaults to devnet)
-zk project my-zeko-app --zeko
+Zeko networks are integrated as standard network options in the zkApp CLI. Projects created with `zk project` are network-agnostic and can be deployed to any network (Mina L1 or Zeko L2) by configuring the appropriate deploy alias.
 
-# Create a Zeko L2 project with UI framework
-zk project my-zeko-app --zeko --ui next
+### Configure for Zeko deployment
 
-# Create a Zeko L2 project for specific network
-zk project my-zeko-app --zeko --network devnet    # Development (default)
-zk project my-zeko-app --zeko --network mainnet   # Production (when available)
-```
-
-Zeko L2 projects include:
-
-- **Pre-configured deploy aliases** for Zeko networks
-- **Bridge interaction examples** demonstrating L1 <-> L2 transfers
-- **Network-optimized settings** for faster development cycles
-- **Full o1js compatibility** - same code works on both L1 and L2
-
-### Configure Zeko L2 deployment
-
-To add Zeko L2 deployment configuration to an existing project:
+To deploy to Zeko, create a new deploy alias using `zk config`:
 
 ```sh
-# Add Zeko devnet configuration (default)
-zk config --zeko
-
-# Add Zeko mainnet configuration (when available)
-zk config --zeko --network mainnet
+zk config
 ```
 
-This creates deploy aliases like `zeko-devnet` or `zeko-mainnet` that can be used with the standard deploy command:
+When prompted to **"Choose the target network"**, select **Zeko Devnet** for development and testing.
+
+The Zeko GraphQL endpoint URL is automatically populated based on your network selection. You don't need to manually enter it.
+
+**Note:** Zeko mainnet will be added when it becomes available.
+
+After configuration, deploy using the standard deploy command:
 
 ```sh
-zk deploy zeko-devnet
+zk deploy <your-alias-name>
 ```
 
-**Note**: Zeko mainnet is currently in development. Use `--network devnet` (default) for active development.
+### Network-specific features
+
+- **Auto-populated endpoints**: GraphQL URLs are automatically configured for Zeko Devnet
+- **Network-specific faucets**: The CLI provides the appropriate faucet URL for requesting test MINA
+- **Full o1js compatibility**: The same zkApp code works on both Mina L1 and Zeko L2
+- **Multi-network support**: Configure multiple deploy aliases to deploy the same project to different networks
+
+### Request test MINA
+
+After configuring a Zeko deploy alias, request test MINA from the Zeko faucet:
+
+- **Zeko Faucet**: https://zeko.io/faucet/
 
 ## Create an example project
 

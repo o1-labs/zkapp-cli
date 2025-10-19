@@ -11,7 +11,6 @@ import shell from 'shelljs';
 // Module external API
 export {
   capitalize,
-  configureZekoSupport,
   findIfClassExtendsSmartContract,
   isDirEmpty,
   kebabCase,
@@ -75,16 +74,9 @@ async function step(str, fn, exitOnError = true) {
  * Sets up the new project from the template.
  * @param {string} destination Destination dir path.
  * @param {string} lang        ts (default) or js
- * @param {boolean} zeko       Whether to configure for Zeko L2
- * @param {string} network     Network for Zeko projects (devnet or mainnet)
  * @returns {Promise<boolean>} True if successful; false if not.
  */
-async function setupProject(
-  destination,
-  lang = 'ts',
-  zeko = false,
-  network = 'devnet'
-) {
+async function setupProject(destination, lang = 'ts') {
   const currentDir = shell.pwd().toString();
   const projectName = lang === 'ts' ? 'project-ts' : 'project';
   const templatePath = path.resolve(
@@ -112,11 +104,6 @@ async function setupProject(
       path.resolve(destDir, '_.npmignore'),
       path.resolve(destDir, '.npmignore')
     );
-
-    // If Zeko L2 support is requested, configure the project
-    if (zeko) {
-      await configureZekoSupport(destDir, network);
-    }
 
     spin.succeed(chalk.green(step));
 
@@ -453,217 +440,4 @@ function checkClassInheritance(
   }
 
   return classInfo.inheritsFromO1jsSmartContract;
-}
-
-/**
- * Configures Zeko L2 support for a standard project
- * @param {string} destDir - Destination directory path
- * @param {string} network - Network (devnet or mainnet)
- */
-async function configureZekoSupport(destDir, network) {
-  const networkDisplay = network === 'mainnet' ? 'Mainnet' : 'Devnet';
-  const configPath = path.join(destDir, 'config.json');
-
-  // Read existing config.json
-  let config = {};
-  if (fs.existsSync(configPath)) {
-    config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  }
-
-  // Ensure deployAliases exists
-  if (!config.deployAliases) {
-    config.deployAliases = {};
-  }
-
-  // Add Zeko deployment alias
-  const zekoEndpoint =
-    network === 'mainnet'
-      ? 'https://mainnet.zeko.io/graphql'
-      : 'https://devnet.zeko.io/graphql';
-
-  config.deployAliases[`zeko-${network}`] = {
-    networkId: 'testnet', // Using testnet for o1js compatibility
-    url: zekoEndpoint,
-    keyPath: `keys/zeko-${network}.json`,
-    fee: '0.1',
-    feepayerKeyPath: `keys/zeko-${network}.json`,
-    feepayerAlias: `zeko-${network}`,
-    explorerUrl:
-      network === 'mainnet'
-        ? 'https://mainnet.zeko.io/explorer'
-        : 'https://devnet.zeko.io/explorer',
-  };
-
-  // Write updated config
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
-
-  // Create bridge example with network-specific endpoints
-  const bridgeExamplePath = path.join(destDir, 'src', 'bridge-example.ts');
-  const minaEndpoint =
-    network === 'mainnet'
-      ? 'https://api.minascan.io/node/mainnet/v1/graphql'
-      : 'https://api.minascan.io/node/devnet/v1/graphql';
-
-  const minaArchiveEndpoint =
-    network === 'mainnet'
-      ? 'https://api.minascan.io/archive/mainnet/v1/graphql'
-      : 'https://api.minascan.io/archive/devnet/v1/graphql';
-
-  const bridgeExampleContent = `/**
- * Zeko L2 Bridge Interaction Example
- *
- * This example demonstrates how to interact with Zeko L2 bridge functionality.
- * The bridge enables seamless transfers between Mina L1 and Zeko L2.
- */
-
-import { Mina, PrivateKey, PublicKey, UInt64 } from 'o1js';
-
-// Zeko L2 Network Configuration
-const zekoL2Network = Mina.Network({
-  networkId: 'testnet', // Using testnet for compatibility, actual endpoint points to Zeko
-  mina: '${zekoEndpoint}',
-  archive: '${zekoEndpoint}',
-});
-
-// Mina L1 Network Configuration (for bridge operations)
-const minaL1Network = Mina.Network({
-  networkId: 'testnet',
-  mina: '${minaEndpoint}',
-  archive: '${minaArchiveEndpoint}',
-});
-
-export class ZekoBridgeExample {
-  private userKey: PrivateKey;
-  private userAddress: PublicKey;
-
-  constructor(userPrivateKey: PrivateKey) {
-    this.userKey = userPrivateKey;
-    this.userAddress = userPrivateKey.toPublicKey();
-  }
-
-  /**
-   * Demonstrates deposit from L1 to L2
-   */
-  async depositToL2(amount: UInt64): Promise<void> {
-    console.log('Depositing from Mina L1 to Zeko L2...');
-
-    // Switch to L1 network for deposit
-    Mina.setActiveInstance(minaL1Network);
-
-    // Note: This is a simplified example
-    // Real implementation would use bridge contract interaction
-    console.log(\`Depositing \${amount.toString()} MINA to L2\`);
-    console.log('Deposit transaction would be created here...');
-
-    // After deposit confirmation, switch to L2
-    Mina.setActiveInstance(zekoL2Network);
-    console.log('Deposit completed! Funds available on Zeko L2');
-  }
-
-  /**
-   * Demonstrates withdrawal from L2 to L1
-   */
-  async withdrawToL1(amount: UInt64): Promise<void> {
-    console.log('Withdrawing from Zeko L2 to Mina L1...');
-
-    // Start on L2 network
-    Mina.setActiveInstance(zekoL2Network);
-
-    console.log(\`Withdrawing \${amount.toString()} MINA to L1\`);
-    console.log('Withdrawal transaction would be created here...');
-
-    // Switch to L1 for final settlement
-    Mina.setActiveInstance(minaL1Network);
-    console.log('Withdrawal completed! Funds available on Mina L1');
-  }
-
-  /**
-   * Demonstrates fast L2 transactions
-   */
-  async demonstrateL2Speed(): Promise<void> {
-    console.log('Demonstrating Zeko L2 speed advantages...');
-
-    Mina.setActiveInstance(zekoL2Network);
-
-    console.log('Creating multiple quick transactions...');
-    console.log('- Transaction 1: ~10 seconds to finality');
-    console.log('- Transaction 2: ~10 seconds to finality');
-    console.log('- Transaction 3: ~10 seconds to finality');
-    console.log('Total time: ~30 seconds vs ~15 minutes on L1');
-  }
-
-  /**
-   * Show network information
-   */
-  displayNetworkInfo(): void {
-    console.log('\\nZeko L2 Network Information:');
-    console.log('Network ID: testnet (pointing to Zeko L2 ${networkDisplay})');
-    console.log('RPC Endpoint: ${zekoEndpoint}');
-    console.log('Archive Endpoint: ${zekoEndpoint}');
-    console.log('Finality Time: ~10 seconds');
-    console.log('Throughput: Unlimited account updates per transaction');
-  }
-}
-
-// Example usage
-export async function runBridgeExample(): Promise<void> {
-  console.log('Zeko L2 Bridge Example\\n');
-
-  const userKey = PrivateKey.random();
-  const bridge = new ZekoBridgeExample(userKey);
-
-  bridge.displayNetworkInfo();
-
-  // Simulate bridge operations
-  await bridge.depositToL2(UInt64.from(1000000000)); // 1 MINA
-  await bridge.demonstrateL2Speed();
-  await bridge.withdrawToL1(UInt64.from(500000000)); // 0.5 MINA
-
-  console.log('\\nBridge example completed!');
-  console.log(
-    'This demonstrates the seamless L1 <-> L2 experience Zeko provides.'
-  );
-}
-
-// Run if called directly
-if (import.meta.url === \`file://\${process.argv[1]}\`) {
-  runBridgeExample().catch(console.error);
-}`;
-
-  fs.writeFileSync(bridgeExamplePath, bridgeExampleContent);
-
-  // Update README with Zeko context
-  const readmePath = path.join(destDir, 'README.md');
-  if (fs.existsSync(readmePath)) {
-    let readmeContent = fs.readFileSync(readmePath, 'utf8');
-
-    // Update title and add Zeko benefits
-    readmeContent = readmeContent.replace(
-      /# Mina zkApp: PROJECT_NAME/,
-      `# Zeko L2 zkApp: PROJECT_NAME\n\nThis template uses TypeScript and is configured for Zeko L2 deployment.\n\n## Zeko L2 Benefits\n\n- **~10 second finality** vs Mina L1's 3-5 minutes\n- **Higher throughput** with unlimited account updates per transaction\n- **Full o1js compatibility** - same code works on both L1 and L2\n- **Bridge functionality** for seamless L1 <-> L2 transfers`
-    );
-
-    fs.writeFileSync(readmePath, readmeContent);
-  }
-
-  // Print success message
-  console.log(
-    chalk.green(`
-Zeko L2 ${networkDisplay} configuration added successfully!
-
-Zeko L2 Benefits:
-  - ~10 second finality (vs Mina L1's 3 minutes)
-  - Higher throughput with unlimited account updates
-  - Full o1js compatibility - same code works on both layers
-  - Bridge functionality for seamless L1 <-> L2 transfers
-
-Added files:
-  - src/bridge-example.ts - L1 <-> L2 bridge interaction example
-  - Updated config.json with zeko-${network} deployment alias
-
-Next steps:
-  - To deploy to Zeko L2 ${networkDisplay}: zk deploy zeko-${network}
-  - Run the bridge example: npm run build && node build/src/bridge-example.js
-`)
-  );
 }

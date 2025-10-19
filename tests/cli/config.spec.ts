@@ -443,72 +443,57 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
-  test(`should create Zeko deployment alias with devnet network, @serial @smoke @config @zeko`, async () => {
+  test(`should create Zeko deployment alias with Zeko Devnet network, @serial @smoke @config @zeko`, async () => {
     const projectName = crypto.randomUUID();
-    const { spawn, cleanup, path, execute } = await prepareEnvironment();
+    const networkId = 'zeko-devnet';
+    const deploymentAlias = crypto.randomUUID();
+    const feePayerAlias = crypto.randomUUID();
+    const feePayerAccount = await acquireAvailableAccount();
+    const feePayerMgmtType = 'recover';
+    const transactionFee = '0.1';
+    const { spawn, cleanup, path } = await prepareEnvironment();
     console.info(`[Test Execution] Path: ${path}`);
 
     try {
       await test.step('Project generation', async () => {
         await zkProject(projectName, 'none', true, spawn);
       });
-      await test.step('Zeko deployment alias creation', async () => {
-        const cliArg = 'config --zeko';
-        const { stdout, stderr, code } = await execute(
-          'zk',
-          cliArg,
-          projectName
-        );
-        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
-        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
-        expect(code).toBe(0);
+      await test.step('Zeko Devnet deployment alias creation and validation', async () => {
+        const { exitCode, stdOut } = await zkConfig({
+          processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
+          deploymentAlias,
+          feePayerAlias,
+          feePayerAccount,
+          feePayerMgmtType,
+          minaGraphQlEndpoint: null, // Will be auto-populated
+          transactionFee,
+          interruptProcess: false,
+          runFrom: `./${projectName}`,
+          waitForCompletion: true,
+        });
 
-        // Verify config.json contains Zeko devnet alias
-        const fs = await import('node:fs');
+        // Verify exit code
+        expect(exitCode).toBe(0);
+
+        // Verify config.json contains Zeko devnet alias with auto-populated URL
         const configPath = `${path}/${projectName}/config.json`;
         const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        expect(config.deployAliases['zeko-devnet']).toBeDefined();
-        expect(config.deployAliases['zeko-devnet'].url).toBe(
+        expect(config.deployAliases[deploymentAlias]).toBeDefined();
+        expect(config.deployAliases[deploymentAlias].url).toBe(
           'https://devnet.zeko.io/graphql'
         );
-        expect(config.deployAliases['zeko-devnet'].networkId).toBe('testnet');
+        expect(config.deployAliases[deploymentAlias].networkId).toBe(
+          'zeko-devnet'
+        );
+
+        // Verify faucet message mentions Zeko
+        expect(stdOut.join('\n')).toContain('https://zeko.io/faucet/');
       });
     } finally {
-      await cleanup();
-    }
-  });
-
-  test(`should create Zeko deployment alias with mainnet network, @serial @smoke @config @zeko`, async () => {
-    const projectName = crypto.randomUUID();
-    const { spawn, cleanup, path, execute } = await prepareEnvironment();
-    console.info(`[Test Execution] Path: ${path}`);
-
-    try {
-      await test.step('Project generation', async () => {
-        await zkProject(projectName, 'none', true, spawn);
-      });
-      await test.step('Zeko mainnet deployment alias creation', async () => {
-        const cliArg = 'config --zeko --network mainnet';
-        const { stdout, stderr, code } = await execute(
-          'zk',
-          cliArg,
-          projectName
-        );
-        console.info(`[Config CLI StdOut] zk ${cliArg}: ${stdout}`);
-        console.info(`[Config CLI StdErr] zk ${cliArg}: ${stderr}`);
-        expect(code).toBe(0);
-
-        // Verify config.json contains Zeko mainnet alias
-        const fs = await import('node:fs');
-        const configPath = `${path}/${projectName}/config.json`;
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        expect(config.deployAliases['zeko-mainnet']).toBeDefined();
-        expect(config.deployAliases['zeko-mainnet'].url).toBe(
-          'https://mainnet.zeko.io/graphql'
-        );
-        expect(config.deployAliases['zeko-mainnet'].networkId).toBe('testnet');
-      });
-    } finally {
+      cleanupFeePayerCacheByAlias(feePayerAlias);
+      await releaseAcquiredAccount(feePayerAccount);
       await cleanup();
     }
   });
