@@ -112,8 +112,10 @@ export async function zkConfig(
   };
 
   // Only skip URL prompt if it's a known network AND using default URL (or no URL provided)
-  const shouldSkipUrlPrompt = isKnownNetwork &&
-    (!minaGraphQlEndpoint || minaGraphQlEndpoint === defaultUrlMap[networkId as string]);
+  const shouldSkipUrlPrompt =
+    isKnownNetwork &&
+    (!minaGraphQlEndpoint ||
+      minaGraphQlEndpoint === defaultUrlMap[networkId as string]);
 
   const interactiveDialog = {
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
