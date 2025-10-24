@@ -594,7 +594,7 @@ describe('config.js', () => {
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
-        networkId: 'testnet',
+        networkId: 'unknown-network',
         fee: '0.01',
         feepayer: 'create',
         feepayerAlias: 'feePayerTestAlias1',
