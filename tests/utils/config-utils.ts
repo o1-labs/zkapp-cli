@@ -104,6 +104,17 @@ export async function zkConfig(
   const isKnownNetwork =
     networkId && knownNetworks.includes(networkId as string);
 
+  // Default URLs for known networks
+  const defaultUrlMap: Record<string, string> = {
+    testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
+    mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
+    'zeko-devnet': 'https://devnet.zeko.io/graphql',
+  };
+
+  // Only skip URL prompt if it's a known network AND using default URL (or no URL provided)
+  const shouldSkipUrlPrompt = isKnownNetwork &&
+    (!minaGraphQlEndpoint || minaGraphQlEndpoint === defaultUrlMap[networkId as string]);
+
   const interactiveDialog = {
     'Create a name (can be anything)': [deploymentAlias, 'enter'],
     'Choose the target network': networkId
@@ -112,8 +123,8 @@ export async function zkConfig(
           Constants.networkIds
         )
       : ['enter'],
-    // Only prompt for URL if it's a custom network (not a known network)
-    ...(isKnownNetwork
+    // Only prompt for URL if it's a custom network or using a custom URL with a known network
+    ...(shouldSkipUrlPrompt
       ? {}
       : {
           'Set the Mina GraphQL API URL to deploy to': [
@@ -224,14 +235,15 @@ export function checkZkConfig(options: ZkConfigCommandResults): void {
   cachedFeePayerAccountPath = `${Constants.feePayerCacheDir}/${sanitizedFeePayerAlias}.json`;
 
   // Auto-populate URL for known networks if not provided
+  const defaultUrlMap: Record<string, string> = {
+    testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
+    mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
+    'zeko-devnet': 'https://devnet.zeko.io/graphql',
+  };
+
   let expectedUrl = minaGraphQlEndpoint;
   if (!expectedUrl) {
-    const urlMap: Record<string, string> = {
-      testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
-      mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
-      'zeko-devnet': 'https://devnet.zeko.io/graphql',
-    };
-    expectedUrl = urlMap[networkId as string] || minaGraphQlEndpoint;
+    expectedUrl = defaultUrlMap[networkId as string] || minaGraphQlEndpoint;
   }
 
   expect(JSON.stringify(config)).toEqual(
