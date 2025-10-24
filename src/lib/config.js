@@ -459,6 +459,7 @@ function printInteractiveDeployAliasConfigSuccessMessage(
     )}${explorerName ? `&explorer=${explorerName}` : ''}`;
   } else if (networkId === 'zeko-devnet') {
     faucetMessage = `\n  - Request test MINA at:\n    https://zeko.io/faucet/`;
+    faucetMessage += `\n    (Use address: ${feepayerKeyPair.publicKey})`;
   }
 
   const str =
