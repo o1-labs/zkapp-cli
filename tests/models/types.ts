@@ -145,7 +145,7 @@ export type ConfigOptions = {
   feePayerAlias: string;
   feePayerAccount: Account;
   feePayerMgmtType: string;
-  minaGraphQlEndpoint: string;
+  minaGraphQlEndpoint: string | null;
   transactionFee: string;
   interruptProcess: boolean;
   runFrom: string | undefined;
@@ -166,7 +166,7 @@ export type ZkConfigCommandResults = {
   feePayerAlias: string;
   feePayerAccount: Account;
   feePayerMgmtType: string;
-  minaGraphQlEndpoint: string;
+  minaGraphQlEndpoint: string | null;
   transactionFee: string;
   stdOut: string[];
   exitCode: ExitCode | null;
