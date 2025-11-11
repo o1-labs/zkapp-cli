@@ -19,6 +19,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [0.22.10](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.22.10) - 2025-11-11
 
+### Fixed
+
+- Fixed an issue in the browser cache examples that prevented the cache from being loaded. [#746](https://github.com/o1-labs/zkapp-cli/pull/746)
+
 ## [0.22.9](https://github.com/o1-labs/zkapp-cli/compare/v0.22.8...v0.22.9) - 2025-06-10
 
 ### Added
