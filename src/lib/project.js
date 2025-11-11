@@ -138,7 +138,7 @@ async function project({ name, ui }) {
     shell.mkdir('contracts');
     shell.cd('contracts');
   }
-  if (!(await setupProject(shell.pwd().toString()))) {
+  if (!(await setupProject(shell.pwd().toString(), 'ts'))) {
     shell.exit(1);
   }
 
