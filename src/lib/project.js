@@ -398,6 +398,13 @@ const __dirname = path.dirname(__filename);
         ...config.resolve.alias,
         o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
       };
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        crypto: false,
+        path: false,
+        stream: false,
+      };
     } else {
       config.externals.push('o1js') // https://nextjs.org/docs/app/api-reference/next-config-js/serverExternalPackages
     }
