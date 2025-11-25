@@ -357,6 +357,7 @@ async function scaffoldNext(projectName) {
     '--ts',
     '--import-alias "@/*"',
     '--app',
+    '--no-turbopack',
   ];
 
   spawnSync('npx', args, {
