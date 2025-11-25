@@ -370,22 +370,15 @@ async function scaffoldNext(projectName) {
   fs.emptyDirSync(path.join('ui', 'public'));
   fs.emptyDirSync(path.join('ui', 'app'));
 
-  // Read in the NextJS config file and add the middleware.
-  const nextConfig = fs.readFileSync(
-    path.join('ui', 'next.config.mjs'),
-    'utf8'
-  );
-
-  let newNextConfig = `import path from 'node:path';
+  // Write the NextJS config file with o1js support.
+  const newNextConfig = `import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { NextConfig } from 'next';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-`;
-  newNextConfig += nextConfig.replace(
-    '};',
-    `
+const nextConfig: NextConfig = {
   reactStrictMode: false,
   turbopack: {
     resolveAlias: {
@@ -430,10 +423,12 @@ const __dirname = path.dirname(__filename);
       },
     ];
   },
-};`
-  );
+};
 
-  fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
+export default nextConfig;
+`;
+
+  fs.writeFileSync(path.join('ui', 'next.config.ts'), newNextConfig);
 
   const pageFileName = 'page.tsx';
 
@@ -539,7 +534,7 @@ const __dirname = path.dirname(__filename);
     const isWindows = process.platform === 'win32';
 
     const nextConfig = fs.readFileSync(
-      path.join('ui', 'next.config.mjs'),
+      path.join('ui', 'next.config.ts'),
       'utf8'
     );
 
@@ -547,7 +542,7 @@ const __dirname = path.dirname(__filename);
       `Using project name '${projectName}' as the GitHub repository name.`
     );
     console.log(
-      "Please update it in 'next.config.mjs' and 'pages/reactCOIServiceWorker.tsx' files if this is not correct or if it will be changed.\n"
+      "Please update it in 'next.config.ts' and 'pages/reactCOIServiceWorker.tsx' files if this is not correct or if it will be changed.\n"
     );
 
     let newNextConfig = nextConfig.replace(
@@ -575,7 +570,7 @@ const __dirname = path.dirname(__filename);
     return config;`
     );
 
-    fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
+    fs.writeFileSync(path.join('ui', 'next.config.ts'), newNextConfig);
 
     // Add some scripts to the package.json
     let x = fs.readJsonSync(`ui/package.json`);
