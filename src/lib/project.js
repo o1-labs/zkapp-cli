@@ -17,6 +17,7 @@ import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
 import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
+import svelteTsConfig from '../lib/ui/svelte/tsConfig.js';
 import Constants from './constants.js';
 import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
@@ -221,40 +222,11 @@ function scaffoldSvelte() {
     path.join('ui', 'src')
   );
 
-  const customTsConfig = `{
-  "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": {
-    "target": "es2021",
-    "module": "es2022",
-    "lib": ["dom", "esnext"],
-    "strict": true,
-    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
-    "declaration": true,
-    "sourceMap": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
-    "useDefineForClassFields": false, 
-    "importHelpers": true,
-  },
-  // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
-	//
-	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-	// from the referenced tsconfig.json - TypeScript does not merge them in
-}
-  `;
   let useTypescript = true;
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
     fs.readFileSync(path.join('ui', 'tsconfig.json'));
-    fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), svelteTsConfig);
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
