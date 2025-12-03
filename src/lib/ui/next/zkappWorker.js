@@ -79,6 +79,7 @@ export const api = {
   },
 
   async compileZkProgram() {
+    const cacheFiles = await fetchFiles();
     await state.AddZkProgramInstance!.compile();
   },
   async compileContract() {
