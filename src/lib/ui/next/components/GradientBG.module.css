@@ -129,3 +129,9 @@
   50% { transform: translate(-25%, 10vh) scale(0.8); }
   100% { transform: translate(90vw, 80vh) scale(1.2); }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .gradientBlob {
+    animation: none;
+  }
+}
