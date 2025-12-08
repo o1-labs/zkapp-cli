@@ -114,3 +114,12 @@
   66% { transform: translate(90vw, 20vh) scale(0.6); }
   100% { transform: translate(50vw, 100vh) scale(1.0); }
 }
+
+@keyframes crossScreen4 {
+  0% { transform: translate(-45%, 50vh) scale(0.7); }
+  15% { transform: translate(25vw, -55%) scale(1.4); }
+  35% { transform: translate(85vw, 25vh) scale(0.8); }
+  55% { transform: translate(60vw, 95vh) scale(1.2); }
+  75% { transform: translate(10vw, 65vh) scale(0.9); }
+  100% { transform: translate(-45%, 50vh) scale(0.7); }
+}
