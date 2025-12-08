@@ -90,3 +90,11 @@
   animation: crossScreen5 15s infinite linear;
   animation-delay: -2s;
 }
+
+@keyframes crossScreen1 {
+  0% { transform: translate(-40%, -50%) scale(0.8); }
+  25% { transform: translate(50vw, 20vh) scale(1.2); }
+  50% { transform: translate(80vw, 70vh) scale(0.9); }
+  75% { transform: translate(20vw, 90vh) scale(1.4); }
+  100% { transform: translate(-40%, -50%) scale(0.8); }
+}
