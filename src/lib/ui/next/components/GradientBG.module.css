@@ -48,6 +48,7 @@
   width: 40%;
   height: 50%;
   background: hsla(252, 70%, 67%, 0.8);
+  animation: crossScreen1 20s infinite linear;
 }
 
 .gradientBlob[data-blob="2"] {
@@ -56,6 +57,8 @@
   width: 30%;
   height: 35%;
   background: hsla(162, 94%, 70%, 0.6);
+  animation: crossScreen2 25s infinite linear;
+  animation-delay: -3s;
 }
 
 .gradientBlob[data-blob="3"] {
@@ -64,6 +67,8 @@
   width: 35%;
   height: 40%;
   background: hsla(11, 100%, 62%, 0.8);
+  animation: crossScreen3 18s infinite linear;
+  animation-delay: -6s;
 }
 
 .gradientBlob[data-blob="4"] {
@@ -72,6 +77,8 @@
   width: 45%;
   height: 55%;
   background: hsla(190, 94%, 75%, 0.8);
+  animation: crossScreen4 30s infinite linear;
+  animation-delay: -9s;
 }
 
 .gradientBlob[data-blob="5"] {
