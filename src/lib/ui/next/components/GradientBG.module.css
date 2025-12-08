@@ -98,3 +98,12 @@
   75% { transform: translate(20vw, 90vh) scale(1.4); }
   100% { transform: translate(-40%, -50%) scale(0.8); }
 }
+
+@keyframes crossScreen2 {
+  0% { transform: translate(100vw, -35%) scale(1.1); }
+  20% { transform: translate(30vw, 30vh) scale(0.7); }
+  40% { transform: translate(-30%, 60vh) scale(1.3); }
+  60% { transform: translate(70vw, 10vh) scale(0.9); }
+  80% { transform: translate(10vw, 80vh) scale(1.5); }
+  100% { transform: translate(100vw, -35%) scale(1.1); }
+}
