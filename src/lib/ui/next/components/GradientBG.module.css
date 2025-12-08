@@ -36,3 +36,48 @@
   position: relative;
   min-height: 100vh;
 }
+
+.gradientBlob {
+  position: absolute;
+  border-radius: 20px;
+}
+
+.gradientBlob[data-blob="1"] {
+  left: 0;
+  top: 0;
+  width: 40%;
+  height: 50%;
+  background: hsla(252, 70%, 67%, 0.8);
+}
+
+.gradientBlob[data-blob="2"] {
+  left: 0;
+  top: 0;
+  width: 30%;
+  height: 35%;
+  background: hsla(162, 94%, 70%, 0.6);
+}
+
+.gradientBlob[data-blob="3"] {
+  left: 0;
+  top: 0;
+  width: 35%;
+  height: 40%;
+  background: hsla(11, 100%, 62%, 0.8);
+}
+
+.gradientBlob[data-blob="4"] {
+  left: 0;
+  top: 0;
+  width: 45%;
+  height: 55%;
+  background: hsla(190, 94%, 75%, 0.8);
+}
+
+.gradientBlob[data-blob="5"] {
+  left: 0;
+  top: 0;
+  width: 25%;
+  height: 30%;
+  background: hsla(324, 98%, 50%, 0.7);
+}
