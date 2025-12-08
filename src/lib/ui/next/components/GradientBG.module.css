@@ -87,4 +87,6 @@
   width: 25%;
   height: 30%;
   background: hsla(324, 98%, 50%, 0.7);
+  animation: crossScreen5 15s infinite linear;
+  animation-delay: -2s;
 }
