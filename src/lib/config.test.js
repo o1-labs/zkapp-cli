@@ -594,7 +594,7 @@ describe('config.js', () => {
       fs.readdirSync.mockReturnValue([]);
       enquirer.prompt.mockImplementation(async () => ({
         deployAliasName: 'testAlias1',
-        networkId: 'testnet',
+        networkId: 'unknown-network',
         fee: '0.01',
         feepayer: 'create',
         feepayerAlias: 'feePayerTestAlias1',
@@ -677,7 +677,12 @@ describe('config.js', () => {
 
       printInteractiveDeployAliasConfigSuccessMessage(
         {
-          deployAliases: { testAlias1: { url: 'https://minascan.test.url' } },
+          deployAliases: {
+            testAlias1: {
+              networkId: 'testnet',
+              url: 'https://minascan.test.url',
+            },
+          },
         },
         'testAlias1',
         { publicKey: 'publicKey' }

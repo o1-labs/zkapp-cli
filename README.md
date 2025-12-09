@@ -100,6 +100,45 @@ This command creates a directory containing a new project template, fully set up
   also included. If you push your project to GitHub, GitHub Actions run your tests (named as `*.test.js`) automatically whenever you push a commit or open a pull request.
 - Code style consistency (using Prettier) and linting (using ES Lint) is automatically enforced using Git pre-commit hooks. This requires no configuration and occurs automatically when you commit a change, for example, `git commit -m 'feat: add awesome feature'`.
 
+## Deploy to Zeko L2
+
+The zkApp CLI supports deploying to [Zeko L2](https://zeko.io), a high-performance layer 2 solution for Mina Protocol that provides faster finality and higher throughput while maintaining full o1js compatibility.
+
+Zeko networks are integrated as standard network options in the zkApp CLI. Projects created with `zk project` are network-agnostic and can be deployed to any network (Mina L1 or Zeko L2) by configuring the appropriate deploy alias.
+
+### Configure for Zeko deployment
+
+To deploy to Zeko, create a new deploy alias using `zk config`:
+
+```sh
+zk config
+```
+
+When prompted to **"Choose the target network"**, select **Zeko Devnet** for development and testing.
+
+The Zeko GraphQL endpoint URL is automatically populated based on your network selection. You don't need to manually enter it.
+
+**Note:** Zeko mainnet will be added when it becomes available.
+
+After configuration, deploy using the standard deploy command:
+
+```sh
+zk deploy <your-alias-name>
+```
+
+### Network-specific features
+
+- **Auto-populated endpoints**: GraphQL URLs are automatically configured for Zeko Devnet
+- **Network-specific faucets**: The CLI provides the appropriate faucet URL for requesting test MINA
+- **Full o1js compatibility**: The same zkApp code works on both Mina L1 and Zeko L2
+- **Multi-network support**: Configure multiple deploy aliases to deploy the same project to different networks
+
+### Request test MINA
+
+After configuring a Zeko deploy alias, request test MINA from the Zeko faucet:
+
+- **Zeko Faucet**: https://zeko.io/faucet/
+
 ## Create an example project
 
 ```sh

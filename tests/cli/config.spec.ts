@@ -443,5 +443,60 @@ test.describe('zkApp-CLI', () => {
     }
   });
 
+  test(`should create Zeko deployment alias with Zeko Devnet network, @serial @smoke @config @zeko`, async () => {
+    const projectName = crypto.randomUUID();
+    const networkId = 'zeko-devnet';
+    const deploymentAlias = crypto.randomUUID();
+    const feePayerAlias = crypto.randomUUID();
+    const feePayerAccount = await acquireAvailableAccount();
+    const feePayerMgmtType = 'recover';
+    const transactionFee = '0.1';
+    const { spawn, cleanup, path } = await prepareEnvironment();
+    console.info(`[Test Execution] Path: ${path}`);
+
+    try {
+      await test.step('Project generation', async () => {
+        await zkProject(projectName, 'none', true, spawn);
+      });
+      await test.step('Zeko Devnet deployment alias creation and validation', async () => {
+        const { exitCode, stdOut } = await zkConfig({
+          processHandler: spawn,
+          workDir: `${path}/${projectName}`,
+          networkId,
+          deploymentAlias,
+          feePayerAlias,
+          feePayerAccount,
+          feePayerMgmtType,
+          minaGraphQlEndpoint: null, // Will be auto-populated
+          transactionFee,
+          interruptProcess: false,
+          runFrom: `./${projectName}`,
+          waitForCompletion: true,
+        });
+
+        // Verify exit code
+        expect(exitCode).toBe(0);
+
+        // Verify config.json contains Zeko devnet alias with auto-populated URL
+        const configPath = `${path}/${projectName}/config.json`;
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        expect(config.deployAliases[deploymentAlias]).toBeDefined();
+        expect(config.deployAliases[deploymentAlias].url).toBe(
+          'https://devnet.zeko.io/graphql'
+        );
+        expect(config.deployAliases[deploymentAlias].networkId).toBe(
+          'zeko-devnet'
+        );
+
+        // Verify faucet message mentions Zeko
+        expect(stdOut.join('\n')).toContain('https://zeko.io/faucet/');
+      });
+    } finally {
+      cleanupFeePayerCacheByAlias(feePayerAlias);
+      await releaseAcquiredAccount(feePayerAccount);
+      await cleanup();
+    }
+  });
+
   // TODO: https://github.com/o1-labs/zkapp-cli/issues/582
 });

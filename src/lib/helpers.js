@@ -104,6 +104,7 @@ async function setupProject(destination, lang = 'ts') {
       path.resolve(destDir, '_.npmignore'),
       path.resolve(destDir, '.npmignore')
     );
+
     spin.succeed(chalk.green(step));
 
     return true;
