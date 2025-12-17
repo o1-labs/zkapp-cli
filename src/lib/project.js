@@ -324,7 +324,7 @@ async function scaffoldNext(projectName) {
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
-    'create-next-app@15.5.7',
+    'create-next-app@15.5.9',
     'ui',
     '--use-npm',
     '--no-src-dir',
