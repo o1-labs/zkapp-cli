@@ -17,7 +17,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
-## [0.22.10](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.22.10) - 2025-11-11
+## [0.23.0](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.23.0) - 2025-08-12
+
+### Added
+
+- Add support for Mesa lightnet. [753](https://github.com/o1-labs/zkapp-cli/pull/753)
 
 ### Fixed
 

@@ -8,7 +8,7 @@ import path from 'node:path';
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
- * @typedef {'master' | 'compatible' | 'develop'} LightnetMinaBranch
+ * @typedef {'master' | 'compatible' | 'develop' | 'mesa' } LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
  * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string }}
@@ -22,7 +22,7 @@ const Constants = Object.freeze({
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],
   lightnetProofLevels: ['none', 'full'],
-  lightnetMinaBranches: ['master', 'compatible', 'develop'],
+  lightnetMinaBranches: ['master', 'compatible', 'develop', 'mesa' ],
   lightnetProcessToLogFileMapping: new Map([
     ['Archive-Node-API application', 'logs/archive-node-api.log'],
     ['Mina Archive process', 'logs/archive-node.log,archive/log.txt'],
