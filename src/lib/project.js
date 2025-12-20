@@ -9,12 +9,15 @@ import ora from 'ora';
 import shell from 'shelljs';
 import customNextLayout from '../lib/ui/next/customNextLayout.js';
 import customNextPage from '../lib/ui/next/customNextPage.js';
+import nextConfig from '../lib/ui/next/nextConfig.js';
+import tsConfig from '../lib/ui/next/tsConfig.js';
 import ZkappWorkerClient from '../lib/ui/next/zkappWorkerClient.js';
 import ZkappWorker from '../lib/ui/next/zkappWorker.js';
 import customNuxtIndex from '../lib/ui/nuxt/customNuxtIndex.js';
 import nuxtGradientBackground from '../lib/ui/nuxt/nuxtGradientBackground.js';
 import customLayoutSvelte from '../lib/ui/svelte/customLayoutSvelte.js';
 import customPageSvelte from '../lib/ui/svelte/customPageSvelte.js';
+import svelteTsConfig from '../lib/ui/svelte/tsConfig.js';
 import Constants from './constants.js';
 import { setProjectName, setupProject, step } from './helpers.js';
 import gradientBackground from './ui/svelte/gradientBackground.js';
@@ -219,40 +222,11 @@ function scaffoldSvelte() {
     path.join('ui', 'src')
   );
 
-  const customTsConfig = `{
-  "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": {
-    "target": "es2021",
-    "module": "es2022",
-    "lib": ["dom", "esnext"],
-    "strict": true,
-    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
-    "declaration": true,
-    "sourceMap": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
-    "useDefineForClassFields": false, 
-    "importHelpers": true,
-  },
-  // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
-	//
-	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-	// from the referenced tsconfig.json - TypeScript does not merge them in
-}
-  `;
   let useTypescript = true;
   try {
     // Determine if generated project is a ts project by looking for a tsconfig file
     fs.readFileSync(path.join('ui', 'tsconfig.json'));
-    fs.writeFileSync(path.join('ui', 'tsconfig.json'), customTsConfig);
+    fs.writeFileSync(path.join('ui', 'tsconfig.json'), svelteTsConfig);
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(err);
@@ -350,13 +324,14 @@ async function scaffoldNext(projectName) {
   // set the project name and default flags
   // https://nextjs.org/docs/api-reference/create-next-app#options
   let args = [
-    'create-next-app@14.2.12',
+    'create-next-app@15.5.9',
     'ui',
     '--use-npm',
     '--no-src-dir',
     '--ts',
     '--import-alias "@/*"',
     '--app',
+    '--no-turbopack',
   ];
 
   spawnSync('npx', args, {
@@ -370,58 +345,8 @@ async function scaffoldNext(projectName) {
   fs.emptyDirSync(path.join('ui', 'public'));
   fs.emptyDirSync(path.join('ui', 'app'));
 
-  // Read in the NextJS config file and add the middleware.
-  const nextConfig = fs.readFileSync(
-    path.join('ui', 'next.config.mjs'),
-    'utf8'
-  );
-
-  let newNextConfig = `import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-`;
-  newNextConfig += nextConfig.replace(
-    '};',
-    `
-  reactStrictMode: false,
-  webpack(config, { isServer }) {
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        o1js: path.resolve(__dirname, 'node_modules/o1js/dist/web/index.js'),
-      };
-    } else {
-      config.externals.push('o1js') // https://nextjs.org/docs/app/api-reference/next-config-js/serverExternalPackages
-    }
-    config.experiments = { ...config.experiments, topLevelAwait: true };
-    return config;
-  },
-  // To enable o1js for the web, we must set the COOP and COEP headers.
-  // See here for more information: https://docs.minaprotocol.com/zkapps/how-to-write-a-zkapp-ui#enabling-coop-and-coep-headers
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-        ],
-      },
-    ];
-  },
-};`
-  );
-
-  fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
+  // Write the NextJS config file with o1js support.
+  fs.writeFileSync(path.join('ui', 'next.config.ts'), nextConfig);
 
   const pageFileName = 'page.tsx';
 
@@ -469,46 +394,7 @@ const __dirname = path.dirname(__filename);
     path.join('ui', 'public', 'assets')
   );
 
-  const tsconfig = `{
-  "compilerOptions": {
-    "target": "es2021",
-    "module": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "strict": true,
-    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowJs": true,
-    "declaration": false,
-    "sourceMap": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "incremental": true,
-    "resolveJsonModule": true,
-    "jsx": "preserve",
-    "useDefineForClassFields": false, 
-    "importHelpers": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
-}
-`;
-
-  fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsconfig);
+  fs.writeFileSync(path.join('ui', 'tsconfig.json'), tsConfig);
 
   // Add a script to the package.json
   let x = fs.readJsonSync(path.join('ui', 'package.json'));
@@ -527,7 +413,7 @@ const __dirname = path.dirname(__filename);
     const isWindows = process.platform === 'win32';
 
     const nextConfig = fs.readFileSync(
-      path.join('ui', 'next.config.mjs'),
+      path.join('ui', 'next.config.ts'),
       'utf8'
     );
 
@@ -535,7 +421,7 @@ const __dirname = path.dirname(__filename);
       `Using project name '${projectName}' as the GitHub repository name.`
     );
     console.log(
-      "Please update it in 'next.config.mjs' and 'pages/reactCOIServiceWorker.tsx' files if this is not correct or if it will be changed.\n"
+      "Please update it in 'next.config.ts' and 'pages/reactCOIServiceWorker.tsx' files if this is not correct or if it will be changed.\n"
     );
 
     let newNextConfig = nextConfig.replace(
@@ -563,7 +449,7 @@ const __dirname = path.dirname(__filename);
     return config;`
     );
 
-    fs.writeFileSync(path.join('ui', 'next.config.mjs'), newNextConfig);
+    fs.writeFileSync(path.join('ui', 'next.config.ts'), newNextConfig);
 
     // Add some scripts to the package.json
     let x = fs.readJsonSync(`ui/package.json`);
