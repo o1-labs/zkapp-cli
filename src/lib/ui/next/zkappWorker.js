@@ -79,7 +79,8 @@ export const api = {
   },
 
   async compileZkProgram() {
-    await state.AddZkProgramInstance!.compile();
+    const cacheFiles = await fetchFiles();
+    await state.AddZkProgramInstance!.compile({ cache: FileSystem(cacheFiles) });
   },
   async compileContract() {
     const cacheFiles = await fetchFiles();
