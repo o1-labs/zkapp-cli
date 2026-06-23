@@ -17,6 +17,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## Unreleased
 
+## [0.23.1](https://github.com/o1-labs/zkapp-cli/compare/0.23.0...0.23.1) - 2026-06-23
+
 ### Added
 
 - Adds ZkProgram compilation cache support to the default NextJS UI project. [#755](https://github.com/o1-labs/zkapp-cli/pull/755)
