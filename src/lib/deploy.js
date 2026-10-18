@@ -340,6 +340,15 @@ async function deploy({ alias, yes }) {
         `  Failed to find the fee payer's account on chain.\n  Please make sure the account "${feepayerAddressBase58}" has previously been funded.`
       )
     );
+    if (accountResponse?.kind === 'error') {
+      // Surface the transport/GraphQL error so that a failing lookup can be
+      // distinguished from an account that does not exist.
+      console.log(
+        chalk.red(
+          `  Account lookup failed with: ${util.format(accountResponse.message)}`
+        )
+      );
+    }
     process.exit(1);
   }
 
