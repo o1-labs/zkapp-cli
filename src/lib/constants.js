@@ -4,20 +4,20 @@ import path from 'node:path';
 /**
  * @typedef {'next' | 'svelte' | 'nuxt' | 'empty' | 'none'} UiType
  * @typedef {'sudoku' | 'tictactoe'} ExampleType
- * @typedef {'testnet' | 'mainnet'} NetworkId
+ * @typedef {'testnet' | 'mainnet' | 'zeko-devnet'} NetworkId
  * @typedef {'single-node' | 'multi-node'} LightnetMode
  * @typedef {'fast' | 'real'} LightnetType
  * @typedef {'none' | 'full'} LightnetProofLevel
  * @typedef {'master' | 'compatible' | 'develop' | 'mesa' } LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string, zekoDevnetEndpoint: string, zekoDevnetArchiveEndpoint: string }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
   exampleTypes: ['sudoku', 'tictactoe'],
   feePayerCacheDir: `${homedir()}/.cache/zkapp-cli/keys`,
-  networkIds: ['testnet', 'mainnet'],
+  networkIds: ['testnet', 'mainnet', 'zeko-devnet'],
   lightnetWorkDir: path.resolve(`${homedir()}/.cache/zkapp-cli/lightnet`),
   lightnetModes: ['single-node', 'multi-node'],
   lightnetTypes: ['fast', 'real'],
@@ -47,6 +47,9 @@ const Constants = Object.freeze({
   lightnetMinaDaemonGraphQlEndpoint: 'http://127.0.0.1:8080/graphql',
   lightnetAccountManagerEndpoint: 'http://127.0.0.1:8181',
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
+  zekoDevnetEndpoint: 'https://devnet.zeko.io/graphql',
+  zekoDevnetArchiveEndpoint: 'https://devnet.zeko.io/graphql',
+  // Zeko mainnet to be added when it becomes available
 });
 
 // Module external API

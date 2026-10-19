@@ -142,12 +142,12 @@ export type CommandOptions = {
 export type ConfigOptions = {
   processHandler: CLITestEnvironment['spawn'];
   workDir: string;
-  networkId: NetworkId | undefined;
+  networkId: NetworkId | 'zeko-devnet' | undefined; // Network id comes from mina-signer hence missing zeko-devnet
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;
   feePayerMgmtType: string;
-  minaGraphQlEndpoint: string;
+  minaGraphQlEndpoint: string | null;
   transactionFee: string;
   interruptProcess: boolean;
   runFrom: string | undefined;
@@ -163,12 +163,12 @@ export type CommandResults = {
 
 export type ZkConfigCommandResults = {
   workDir: string;
-  networkId: NetworkId | undefined;
+  networkId: NetworkId | 'zeko-devnet' | undefined;
   deploymentAlias: string;
   feePayerAlias: string;
   feePayerAccount: Account;
   feePayerMgmtType: string;
-  minaGraphQlEndpoint: string;
+  minaGraphQlEndpoint: string | null;
   transactionFee: string;
   stdOut: string[];
   exitCode: ExitCode | null;

@@ -23,12 +23,27 @@ export {
   getCachedFeepayerAddress,
   getCachedFeepayerAliases,
   getExplorerName,
+  getNetworkUrl,
   printDeployAliasesConfig,
   printInteractiveDeployAliasConfigSuccessMessage,
   printLightnetDeployAliasConfigSuccessMessage,
   recoverKeyPairStep,
   savedKeyPairStep,
 };
+
+/**
+ * Get the GraphQL URL for a given network ID
+ * @param {string} networkId - The network ID (testnet, mainnet, zeko-devnet)
+ * @returns {string|null} The GraphQL URL or null if not a known network
+ */
+function getNetworkUrl(networkId) {
+  const urlMap = {
+    testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
+    mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
+    'zeko-devnet': 'https://devnet.zeko.io/graphql',
+  };
+  return urlMap[networkId] || null;
+}
 
 /**
  * Show existing deploy aliases in `config.json` and allow user to add a new
@@ -196,6 +211,11 @@ async function createDeployAlias(projectRoot, deployAliasesConfig) {
     feepayerKey,
     alternateCachedFeepayerAlias,
   } = promptResponse;
+
+  // Auto-populate URL
+  if (!url) {
+    url = getNetworkUrl(networkId);
+  }
 
   if (!deployAliasName || !url || !fee) process.exit(1);
 
@@ -426,16 +446,26 @@ function printInteractiveDeployAliasConfigSuccessMessage(
   deployAliasName,
   feepayerKeyPair
 ) {
+  const networkId =
+    deployAliasesConfig.deployAliases[deployAliasName]?.networkId;
   const explorerName = getExplorerName(
     deployAliasesConfig.deployAliases[deployAliasName]?.url
   );
+
+  let faucetMessage = '';
+  if (networkId === 'testnet') {
+    faucetMessage = `\n  - If this is the testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
+      feepayerKeyPair.publicKey
+    )}${explorerName ? `&explorer=${explorerName}` : ''}`;
+  } else if (networkId === 'zeko-devnet') {
+    faucetMessage = `\n  - Request test MINA at:\n    https://zeko.io/faucet/`;
+    faucetMessage += `\n    (Use address: ${feepayerKeyPair.publicKey})`;
+  }
+
   const str =
     `\nSuccess!\n` +
     `\nNext steps:` +
-    `\n  - If this is the testnet, request tMINA at:\n    https://faucet.minaprotocol.com/?address=${encodeURIComponent(
-      feepayerKeyPair.publicKey
-    )}` +
-    (explorerName ? `&explorer=${explorerName}` : '') +
+    faucetMessage +
     `\n  - To deploy zkApp, run: \`zk deploy ${deployAliasName}\``;
   console.log(chalk.green(str));
 }
