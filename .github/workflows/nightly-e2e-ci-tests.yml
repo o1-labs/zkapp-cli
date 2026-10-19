@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [ubuntu-latest]
     services:
       mina-local-network:
@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [ubuntu-latest]
     services:
       mina-local-network:
@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [macos-latest]
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +106,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [windows-latest]
     steps:
       - uses: actions/checkout@v4

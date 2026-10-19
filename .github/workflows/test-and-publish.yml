@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        node: [18]
+        node: [22]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
@@ -48,7 +48,7 @@ jobs:
     needs: [common-unit-tests]
     strategy:
       matrix:
-        node: [18]
+        node: [22]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
@@ -78,7 +78,7 @@ jobs:
     needs: [common-unit-tests]
     strategy:
       matrix:
-        node: [18]
+        node: [22]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [ubuntu-latest]
     services:
       mina-local-network:
@@ -151,7 +151,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [ubuntu-latest]
     services:
       mina-local-network:
@@ -195,7 +195,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20]
+        node: [22]
     steps:
       - name: Set up NodeJS
         uses: actions/setup-node@v4
