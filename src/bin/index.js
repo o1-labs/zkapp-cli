@@ -170,7 +170,7 @@ function lightnetCli() {
       yargs
         .command(
           [
-            'start [mode] [type] [proof-level] [mina-branch] [archive] [sync] [pull] [mina-log-level]',
+            'start [mode] [type] [proof-level] [mina-version] [archive] [sync] [pull] [mina-log-level]',
           ],
           'Start the lightweight Mina blockchain network Docker container.',
           {
@@ -204,13 +204,21 @@ function lightnetCli() {
               description:
                 '"none" value will make the network faster by disabling the blockchain SNARK proofs.',
             },
+            'mina-version': {
+              demand: false,
+              string: true,
+              hidden: false,
+              default: Constants.lightnetDefaultMinaVersion,
+              description:
+                'The Mina release version the Docker image was built from (for example "4.0.4").\n"latest" value will use the newest stable Mina release.',
+            },
             'mina-branch': {
               alias: 'b',
               demand: false,
               string: true,
-              hidden: false,
+              hidden: true,
               choices: Constants.lightnetMinaBranches,
-              default: 'compatible',
+              deprecated: 'Use --mina-version instead.',
               description:
                 'One of the major Mina repository branches the Docker image artifacts were compiled against.',
             },
