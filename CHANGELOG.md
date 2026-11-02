@@ -21,6 +21,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Adds ZkProgram compilation cache support to the default NextJS UI project. [#755](https://github.com/o1-labs/zkapp-cli/pull/755)
 
+### Changed
+
+- Node.js 22.19.5 or later is now required, by the CLI and by generated projects (`engines.node`), the floor o1js 3.1.0 declares. Node.js 18 and 20 have reached end-of-life. The generated project's CI workflow and this repository's CI workflows now run on Node.js 22 and 24 instead of 18 and 20.
+
 ### Fixed
 
 - E2E tests now fail fast when the CLI exits before an expected interactive prompt, instead of hanging until the CI job timeout.

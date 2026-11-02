@@ -13,7 +13,7 @@ jobs:
   pkg-pr-new:
     strategy:
       matrix:
-        node: [20]
+        node: [22]
     runs-on: [ubuntu-latest]
     steps:
       - name: Checkout repository
