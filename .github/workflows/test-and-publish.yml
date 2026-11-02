@@ -111,7 +111,7 @@ jobs:
       fail-fast: true
       matrix:
         node: [18, 20]
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
     services:
       mina-local-network:
         image: o1labs/mina-local-network:compatible-latest-lightnet
@@ -152,7 +152,7 @@ jobs:
       fail-fast: true
       matrix:
         node: [18, 20]
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
     services:
       mina-local-network:
         image: o1labs/mina-local-network:master-latest-lightnet
