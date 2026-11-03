@@ -156,7 +156,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -185,7 +185,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'real',
         proofLevel: 'full',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -220,7 +220,7 @@ describe('lightnet.js', () => {
         mode: 'multi-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: false,
         sync: true,
         pull: true,
@@ -255,7 +255,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'real',
         proofLevel: 'full',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: false,
@@ -279,12 +279,103 @@ describe('lightnet.js', () => {
       );
     });
 
+    it('should start the Lightnet with an explicit Mina version', async () => {
+      const targetMethodParams = {
+        mode: 'single-node',
+        type: 'fast',
+        proofLevel: 'none',
+        minaVersion: '4.0.4',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      };
+      await setupLightnetStartMocks();
+      const { lightnetStart } = await import('./lightnet.js');
+
+      await lightnetStart(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(shell.exec).toHaveBeenCalledWith(
+        'docker pull o1labs/mina-local-network:4.0.4-lightnet',
+        expect.anything(),
+        expect.any(Function)
+      );
+      expect(shell.exec).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^docker run .*o1labs\/mina-local-network:4\.0\.4-lightnet$/
+        ),
+        expect.anything(),
+        expect.any(Function)
+      );
+      checkSavedJsonConfig(fs.outputJsonSync.mock.calls, lightnetConfigFile, {
+        containerId: 'lightnetContainer1',
+        containerVolume: 'lightnetVolume1',
+        ...targetMethodParams,
+      });
+    });
+
+    it('should start the Lightnet with the deprecated Mina branch option', async () => {
+      const targetMethodParams = {
+        mode: 'single-node',
+        type: 'real',
+        proofLevel: 'full',
+        minaVersion: 'latest',
+        minaBranch: 'compatible',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      };
+      await setupLightnetStartMocks();
+      const { lightnetStart } = await import('./lightnet.js');
+
+      await lightnetStart(targetMethodParams);
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(/"--mina-branch" option is deprecated/)
+      );
+      expect(shell.exec).toHaveBeenCalledWith(
+        'docker pull o1labs/mina-local-network:compatible-latest-devnet',
+        expect.anything(),
+        expect.any(Function)
+      );
+      checkSavedJsonConfig(fs.outputJsonSync.mock.calls, lightnetConfigFile, {
+        containerId: 'lightnetContainer1',
+        containerVolume: 'lightnetVolume1',
+        ...targetMethodParams,
+      });
+    });
+
+    it('should exit if the Mina version is invalid', async () => {
+      await setupLightnetStartMocks();
+      const { lightnetStart } = await import('./lightnet.js');
+
+      await lightnetStart({
+        mode: 'single-node',
+        type: 'fast',
+        proofLevel: 'none',
+        minaVersion: 'not-a-version',
+        archive: true,
+        sync: true,
+        pull: true,
+        minaLogLevel: 'Trace',
+      });
+
+      jest.runAllTimers();
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching(/Invalid Mina version "not-a-version"/)
+      );
+      expect(shell.exit).toHaveBeenCalledWith(1);
+    });
+
     it('should start the Lightnet without syncing with the blockchain', async () => {
       const targetMethodParams = {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: false,
         pull: true,
@@ -313,7 +404,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -345,7 +436,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -378,7 +469,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -423,7 +514,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -464,7 +555,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -505,7 +596,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -546,7 +637,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -592,7 +683,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -626,7 +717,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -666,7 +757,7 @@ describe('lightnet.js', () => {
         mode: 'single-node',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
@@ -699,7 +790,7 @@ describe('lightnet.js', () => {
         mode: 'unknown-mode',
         type: 'fast',
         proofLevel: 'none',
-        minaBranch: 'compatible',
+        minaVersion: 'latest',
         archive: true,
         sync: true,
         pull: true,
