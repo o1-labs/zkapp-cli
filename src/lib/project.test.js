@@ -205,13 +205,14 @@ describe('project.js', () => {
       expect(spawnSync).toHaveBeenCalledWith(
         'npx',
         [
-          'create-next-app@14.2.12',
+          'create-next-app@15.5.9',
           'ui',
           '--use-npm',
           '--no-src-dir',
           '--ts',
           '--import-alias "@/*"',
           '--app',
+          '--no-turbopack',
         ],
         {
           stdio: 'inherit',
@@ -617,13 +618,14 @@ describe('project.js', () => {
       expect(spawnSync).toHaveBeenCalledWith(
         'npx',
         [
-          'create-next-app@14.2.12',
+          'create-next-app@15.5.9',
           'ui',
           '--use-npm',
           '--no-src-dir',
           '--ts',
           '--import-alias "@/*"',
           '--app',
+          '--no-turbopack',
         ],
         {
           stdio: 'inherit',
