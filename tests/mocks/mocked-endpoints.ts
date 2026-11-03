@@ -6,7 +6,7 @@ import http, {
 } from 'node:http';
 import { TestConstants, generateRandomInt } from '../utils/common-utils.js';
 
-const applicationName = '⚡️[Mocked Endpoints Service]';
+const applicationName = '[Mocked Endpoints Service]';
 const host = '127.0.0.1';
 const port = Number(
   process.env.MOCKED_ENDPOINTS_SERVICE_PORT ??

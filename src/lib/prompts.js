@@ -42,10 +42,18 @@ const prompts = {
       name: 'networkId',
       initial: 0, // 0 = testnet, 1 = mainnet, change it to 1 after the HF
       choices: Constants.networkIds
-        .map((networkId) => ({
-          name: capitalize(networkId),
-          value: networkId,
-        }))
+        .map((networkId) => {
+          let displayName;
+          if (networkId === 'zeko-devnet') {
+            displayName = 'Zeko Devnet';
+          } else {
+            displayName = capitalize(networkId);
+          }
+          return {
+            name: displayName,
+            value: networkId,
+          };
+        })
         .concat({
           name: 'Custom network',
           value: 'selectCustom',
@@ -74,7 +82,10 @@ const prompts = {
       },
     },
     {
-      type: 'input',
+      type() {
+        const knownNetworks = ['testnet', 'mainnet', 'zeko-devnet'];
+        return !knownNetworks.includes(this.answers.networkId) ? 'input' : null;
+      },
       name: 'url',
       message: (state) => {
         const style =

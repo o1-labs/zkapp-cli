@@ -16,9 +16,17 @@ export async function zkProject(
   projectName: string,
   uiType: UiType,
   skipInteractiveSelection: boolean,
-  processHandler: CLITestEnvironment['spawn']
+  processHandler: CLITestEnvironment['spawn'],
+  isZeko?: boolean,
+  network?: string
 ): Promise<CommandResults> {
-  const cliArgs = skipInteractiveSelection ? `--ui ${uiType}` : '';
+  let cliArgs = skipInteractiveSelection ? `--ui ${uiType}` : '';
+  if (isZeko) {
+    cliArgs += ' --zeko';
+    if (network && network !== 'devnet') {
+      cliArgs += ` --network ${network}`;
+    }
+  }
   const command = `project ${cliArgs} ${projectName}`.replace(/\s{2,}/g, ' ');
   let interactiveDialog = {};
 
@@ -89,22 +97,35 @@ export async function checkZkProject(
   stdOut: string[],
   exitCode: ExitCode | null,
   listFilesystemFn: CLITestEnvironment['ls'],
-  existsOnFilesystemFn: CLITestEnvironment['exists']
+  existsOnFilesystemFn: CLITestEnvironment['exists'],
+  isZeko?: boolean,
+  network?: string
 ): Promise<void> {
-  const contractsPath = `./${projectName}/contracts`;
+  const contractsPath = isZeko
+    ? `./${projectName}/contracts`
+    : `./${projectName}/contracts`;
   const uiPath = `./${projectName}/ui`;
+  const projectPath = isZeko ? `./${projectName}` : `./${projectName}`;
 
   expect(exitCode).toBe(0);
   expect(stdOut).toContain('Success!');
   expect(stdOut).toContain('Next steps:');
-  expect(await existsOnFilesystemFn(`./${projectName}`)).toBe(true);
+  expect(await existsOnFilesystemFn(projectPath)).toBe(true);
   expect(await existsOnFilesystemFn(`${projectName}/.git`)).toBe(true);
-  expect((await listFilesystemFn(`./${projectName}`)).length).toBeGreaterThan(
-    0
-  );
+  expect((await listFilesystemFn(projectPath)).length).toBeGreaterThan(0);
   expect(
     (await listFilesystemFn(`./${projectName}/.git`)).length
   ).toBeGreaterThan(0);
+
+  // Verify Zeko-specific files and configuration
+  if (isZeko) {
+    await checkZekoProjectSpecific(
+      projectName,
+      network || 'devnet',
+      listFilesystemFn,
+      existsOnFilesystemFn
+    );
+  }
 
   switch (uiType) {
     case 'next':
@@ -147,4 +168,34 @@ async function checkUiFilesystem(
 ): Promise<void> {
   expect((await listFilesystemFn(path)).length).toBeGreaterThan(0);
   expect(await existsOnFilesystemFn(`${path}/package.json`)).toBe(true);
+}
+
+async function checkZekoProjectSpecific(
+  projectName: string,
+  network: string,
+  listFilesystemFn: CLITestEnvironment['ls'],
+  existsOnFilesystemFn: CLITestEnvironment['exists']
+): Promise<void> {
+  const fs = await import('node:fs');
+
+  // Check that README contains Zeko branding
+  const readmePath = `./${projectName}/README.md`;
+  expect(await existsOnFilesystemFn(readmePath)).toBe(true);
+  const readmeContent = fs.readFileSync(readmePath, 'utf8');
+  expect(readmeContent).toContain('Zeko L2');
+
+  // Check that config.json has Zeko endpoints
+  const configPath = `./${projectName}/config.json`;
+  expect(await existsOnFilesystemFn(configPath)).toBe(true);
+  const configContent = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const deployAlias = `zeko-${network}`;
+  expect(configContent.deployAliases[deployAlias]).toBeDefined();
+  expect(configContent.deployAliases[deployAlias].url).toContain('zeko.io');
+
+  // Check that bridge example exists
+  const bridgePath = `./${projectName}/src/bridge-example.ts`;
+  expect(await existsOnFilesystemFn(bridgePath)).toBe(true);
+  const bridgeContent = fs.readFileSync(bridgePath, 'utf8');
+  expect(bridgeContent).toContain('Zeko L2 Bridge');
+  expect(bridgeContent).toContain('zeko.io/graphql');
 }
