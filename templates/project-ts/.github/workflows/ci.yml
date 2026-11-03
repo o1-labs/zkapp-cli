@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [ubuntu-latest]
     #
     # Enable the following block if you also want to use the Lightnet in your tests.
