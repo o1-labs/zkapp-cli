@@ -25,9 +25,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - The project template, the UI scaffolds and the CLI itself now depend on o1js `^3.1.0` (Mesa) instead of `^2.*`. After the Mesa hard fork, the networks only accept transactions and verification keys from o1js 3.x.
 - Node.js 22.19.5 or later is now required, by the CLI and by generated projects (`engines.node`), the floor o1js 3.1.0 declares. Node.js 18 and 20 have reached end-of-life. The generated project's CI workflow and this repository's CI workflows now run on Node.js 22 and 24 instead of 18 and 20.
+- Bumps `@playwright/test` to 1.64.1. Node.js 22.18 and later strip TypeScript types natively and report `.ts` files to loaders with the `module-typescript` format. Playwright 1.51 did not transform such files, so type-only imports without a `.js` extension failed to resolve in E2E tests. Playwright 1.52+ handles that format.
 
 ### Fixed
 
+- `npm run coverage` in a generated project no longer fails: it now runs the native Node.js test runner with `--experimental-test-coverage`, and the unused Jest and Babel leftovers were removed from the template. [#761](https://github.com/o1-labs/zkapp-cli/issues/761)
 - E2E tests now fail fast when the CLI exits before an expected interactive prompt, instead of hanging until the CI job timeout.
 
 ## [0.23.0](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.23.0) - 2025-08-12
