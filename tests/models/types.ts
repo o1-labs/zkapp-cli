@@ -79,6 +79,8 @@ export type Block = {
 
 export type Constants = {
   cliPromptMsDelay: number;
+  cliPromptMsTimeout: number;
+  cliExitPollMsInterval: number;
   minaGraphQlPort: number;
   minaAccountsManagerPort: number;
   mockedEndpointsServicePort: number;

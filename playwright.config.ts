@@ -7,7 +7,9 @@ import { getMockedEndpointsServiceEndpoint } from './tests/utils/network-utils.j
 const config: PlaywrightTestConfig = {
   testDir: './tests',
   outputDir: './reports/test-artifacts',
-  timeout: 180 * 60 * 1000,
+  // Keep this well below the CI job `timeout-minutes` so that a stuck test
+  // fails (and gets reported) instead of being killed with the whole job.
+  timeout: 60 * 60 * 1000,
   expect: {
     timeout: 15 * 1000,
   },

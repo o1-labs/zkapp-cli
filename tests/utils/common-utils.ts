@@ -7,6 +7,8 @@ import { Constants as ConstantsType, KeyPair } from '../models/types.js';
 
 export const TestConstants: ConstantsType = Object.freeze({
   cliPromptMsDelay: 200,
+  cliPromptMsTimeout: 10 * 60 * 1000,
+  cliExitPollMsInterval: 250,
   minaGraphQlPort: 8080,
   minaAccountsManagerPort: 8181,
   mockedEndpointsServicePort: 8383,

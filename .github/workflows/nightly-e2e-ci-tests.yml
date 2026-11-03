@@ -15,8 +15,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
-        os: [ubuntu-latest]
+        node: [22, 24]
+        os: [ubuntu-24.04]
     services:
       mina-local-network:
         image: o1labs/mina-local-network:compatible-latest-lightnet
@@ -52,8 +52,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
-        os: [ubuntu-latest]
+        node: [22, 24]
+        os: [ubuntu-24.04]
     services:
       mina-local-network:
         image: o1labs/mina-local-network:master-latest-lightnet
@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [macos-latest]
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +106,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [18, 20]
+        node: [22, 24]
         os: [windows-latest]
     steps:
       - uses: actions/checkout@v4

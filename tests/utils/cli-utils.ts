@@ -34,7 +34,13 @@ export async function executeInteractiveCommand(
   }
 
   for (const prompt in interactiveDialog) {
-    await waitForText(prompt.replace(/^#+/g, ''));
+    await waitForPrompt(prompt.replace(/^#+/g, ''), {
+      command,
+      waitForText,
+      getExitCode,
+      getStdout,
+      getStderr,
+    });
     const inputs = interactiveDialog[prompt];
     for (const input of inputs) {
       if (TestConstants.specialCliKeys.includes(input)) {
@@ -57,6 +63,59 @@ export async function executeInteractiveCommand(
   const exitCode = getExitCode();
 
   return { exitCode, stdOut, stdErr };
+}
+
+/**
+ * Waits for the CLI to print an interactive prompt.
+ *
+ * `waitForText` from the CLI testing library never settles if the text does not
+ * appear, which turns an early CLI failure into a hang that lasts until the
+ * test (or the CI job) timeout. This wrapper fails fast when the CLI process
+ * exits before the prompt appears, and also enforces an upper bound.
+ */
+async function waitForPrompt(
+  prompt: string,
+  context: {
+    command: string;
+    waitForText: (input: string) => Promise<unknown>;
+    getExitCode: () => number | null;
+    getStdout: () => string[];
+    getStderr: () => string[];
+  }
+): Promise<void> {
+  const { command, waitForText, getExitCode, getStdout, getStderr } = context;
+  const describeOutput = () =>
+    `\nStdOut:\n${getStdout().join('\n')}\nStdErr:\n${getStderr().join('\n')}`;
+  let exitPoller: NodeJS.Timeout | undefined;
+  let timeoutTimer: NodeJS.Timeout | undefined;
+  const processExited = new Promise<never>((_, reject) => {
+    exitPoller = setInterval(() => {
+      const exitCode = getExitCode();
+      if (exitCode !== null) {
+        reject(
+          new Error(
+            `CLI command "${command}" exited with code ${exitCode} before the prompt "${prompt}" appeared.${describeOutput()}`
+          )
+        );
+      }
+    }, TestConstants.cliExitPollMsInterval);
+  });
+  const timedOut = new Promise<never>((_, reject) => {
+    timeoutTimer = setTimeout(() => {
+      reject(
+        new Error(
+          `Timed out after ${TestConstants.cliPromptMsTimeout} ms waiting for the prompt "${prompt}" from the CLI command "${command}".${describeOutput()}`
+        )
+      );
+    }, TestConstants.cliPromptMsTimeout);
+  });
+
+  try {
+    await Promise.race([waitForText(prompt), processExited, timedOut]);
+  } finally {
+    clearInterval(exitPoller);
+    clearTimeout(timeoutTimer);
+  }
 }
 
 export function generateInputsForOptionSelection(

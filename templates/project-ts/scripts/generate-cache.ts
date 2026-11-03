@@ -12,8 +12,8 @@ const cache_directory = 'cache';
 // This allows o1js to store and retrieve compiled circuit artifacts
 const cache: Cache = Cache.FileSystem(cache_directory);
 
-// ZkProgram cache in the browser is currently not fully supported.
-await AddZkProgram.compile();
+// Compile ZkProgram with the cache enabled
+await AddZkProgram.compile({ cache });
 // Compile the smart contract with the cache enabled
 await Add.compile({ cache });
 
