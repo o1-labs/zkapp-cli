@@ -29,6 +29,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- The Next.js UI scaffold now builds on case-sensitive file systems (Linux). The generated `ZkappWorkerClient.ts` loaded `./zkappWorker.ts` while the scaffold writes `ZkappWorker.ts`, so `next build` failed with `Module not found` everywhere except on case-insensitive file systems such as macOS.
 - `npm run coverage` in a generated project no longer fails: it now runs the native Node.js test runner with `--experimental-test-coverage`, and the unused Jest and Babel leftovers were removed from the template. [#761](https://github.com/o1-labs/zkapp-cli/issues/761)
 - E2E tests now fail fast when the CLI exits before an expected interactive prompt, instead of hanging until the CI job timeout.
 
