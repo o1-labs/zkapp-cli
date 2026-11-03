@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- `npm run coverage` in a generated project no longer fails: it now runs the native Node.js test runner with `--experimental-test-coverage`, and the unused Jest and Babel leftovers were removed from the template. [#761](https://github.com/o1-labs/zkapp-cli/issues/761)
 - E2E tests now fail fast when the CLI exits before an expected interactive prompt, instead of hanging until the CI job timeout.
 
 ## [0.23.0](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.23.0) - 2025-08-12
