@@ -110,12 +110,49 @@ const multiNodePorts = [4001, 4006, 5001, 6001];
 const { quotes, escapeQuotes } = getSystemQuotes();
 
 /**
+ * Resolves the Docker image of the lightweight Mina blockchain network.
+ * The image tag is `<minaVersion>-<profile>`, where the profile is `lightnet`
+ * for the "fast" network type and `devnet` for the "real" network type.
+ * The deprecated `minaBranch` argument selects the legacy
+ * `<minaBranch>-latest-<profile>` tag instead.
+ * @param {object} options
+ * @param {string} options.type - The type of lightnet to start ("fast" or "real").
+ * @param {string} [options.minaVersion] - The Mina release version ("latest" or e.g. "4.0.4").
+ * @param {string} [options.minaBranch] - Deprecated. The Mina branch the image was built from.
+ * @returns {string} The fully qualified Docker image name.
+ */
+export function getLightnetDockerImage({ type, minaVersion, minaBranch }) {
+  const profile = type === 'fast' ? 'lightnet' : 'devnet';
+  if (minaBranch) {
+    console.log(
+      chalk.yellow(
+        '\nThe "--mina-branch" option is deprecated and will be removed in a future release.' +
+          '\nPlease use the "--mina-version" option instead (for example "--mina-version latest").\n'
+      )
+    );
+    return `o1labs/mina-local-network:${minaBranch}-latest-${profile}`;
+  }
+  const version = minaVersion ?? Constants.lightnetDefaultMinaVersion;
+  if (version !== 'latest' && semver.valid(version) === null) {
+    console.log(
+      chalk.red(
+        `\nInvalid Mina version "${version}".` +
+          '\nPlease provide either "latest" or a Mina release version like "4.0.4".'
+      )
+    );
+    shell.exit(1);
+  }
+  return `o1labs/mina-local-network:${version}-${profile}`;
+}
+
+/**
  * Starts the lightweight Mina blockchain network Docker container.
  * @param {object}  argv - The arguments object provided by yargs.
  * @param {string}  argv.mode - The mode to start the lightnet in.
  * @param {string}  argv.type - The type of lightnet to start.
  * @param {string}  argv.proofLevel - The proof level to use.
- * @param {string}  argv.minaBranch - The Mina branch to use.
+ * @param {string}  argv.minaVersion - The Mina release version the Docker image was built from ("latest" or e.g. "4.0.4").
+ * @param {string}  [argv.minaBranch] - Deprecated. The Mina branch the Docker image was built from.
  * @param {boolean} argv.archive - Whether to start the Mina Archive process and the Archive-Node-API application.
  * @param {boolean} argv.sync - Whether to wait for the network to sync.
  * @param {boolean} argv.pull - Whether to pull the latest version of the Docker image from the Docker Hub.
@@ -127,6 +164,7 @@ async function lightnetStart({
   mode,
   type,
   proofLevel,
+  minaVersion,
   minaBranch,
   archive,
   sync,
@@ -136,6 +174,7 @@ async function lightnetStart({
 }) {
   let containerId = null;
   let containerVolume = null;
+  const dockerImage = getLightnetDockerImage({ type, minaVersion, minaBranch });
   await checkDockerEngineAvailability();
   await step('Checking prerequisites', async () => {
     await handleStartCommandChecks(lightnetDockerContainerName, mode, archive);
@@ -149,11 +188,7 @@ async function lightnetStart({
   );
   if (pull) {
     await step('Pulling the corresponding Docker image', async () => {
-      await executeCmd(
-        `docker pull o1labs/mina-local-network:${minaBranch}-latest-${
-          type === 'fast' ? 'lightnet' : 'devnet'
-        }`
-      );
+      await executeCmd(`docker pull ${dockerImage}`);
       await removeDanglingDockerImages();
     });
   }
@@ -168,9 +203,7 @@ async function lightnetStart({
           `--env RUN_ARCHIVE_NODE="${archive}" ` +
           `--env SLOT_TIME="${slotTime}" ` +
           getDockerContainerStartupCmdPorts(mode, archive) +
-          `o1labs/mina-local-network:${minaBranch}-latest-${
-            type === 'fast' ? 'lightnet' : 'devnet'
-          }`
+          dockerImage
       );
       containerId = await getDockerContainerId(lightnetDockerContainerName);
       containerVolume = await getDockerContainerVolume(
@@ -185,7 +218,8 @@ async function lightnetStart({
       mode,
       type,
       proofLevel,
-      minaBranch,
+      minaVersion,
+      ...(minaBranch ? { minaBranch } : {}),
       archive,
       sync,
       pull,
@@ -1070,6 +1104,7 @@ async function waitForBlockchainNetworkReadiness(mode) {
 
   const checkEndpoint = async (url) => {
     try {
+      debugLog('Checking blockchain network readiness using endpoint %s', url);
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

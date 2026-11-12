@@ -20,6 +20,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 - Adds ZkProgram compilation cache support to the default NextJS UI project. [#755](https://github.com/o1-labs/zkapp-cli/pull/755)
+- `zk lightnet start --mina-version <version>` selects the Mina release the Lightnet Docker image was built from. `latest` (the default) uses the newest stable Mina release; a release number such as `4.0.4` pins the image.
+
+### Deprecated
+
+- `zk lightnet start --mina-branch` is deprecated. Nightly branch images are not published anymore, so the option only selects legacy image tags. Use `--mina-version` instead.
 
 ### Changed
 
