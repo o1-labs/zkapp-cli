@@ -11,19 +11,21 @@ jest.unstable_mockModule('chalk', () => ({
   },
 }));
 
-let formatPrefixSymbol,
+let prompts,
+  formatPrefixSymbol,
   getDefaultGraphQlEndpoint,
   getFeepayorChoices,
   sanitizeAliasName,
   sanitizeCustomNetworkId;
 
 beforeAll(async () => {
-  const prompts = await import('./prompts.js');
-  formatPrefixSymbol = prompts.formatPrefixSymbol;
-  getDefaultGraphQlEndpoint = prompts.getDefaultGraphQlEndpoint;
-  getFeepayorChoices = prompts.getFeepayorChoices;
-  sanitizeAliasName = prompts.sanitizeAliasName;
-  sanitizeCustomNetworkId = prompts.sanitizeCustomNetworkId;
+  const promptsModule = await import('./prompts.js');
+  prompts = promptsModule.prompts;
+  formatPrefixSymbol = promptsModule.formatPrefixSymbol;
+  getDefaultGraphQlEndpoint = promptsModule.getDefaultGraphQlEndpoint;
+  getFeepayorChoices = promptsModule.getFeepayorChoices;
+  sanitizeAliasName = promptsModule.sanitizeAliasName;
+  sanitizeCustomNetworkId = promptsModule.sanitizeCustomNetworkId;
 });
 
 beforeEach(() => {
@@ -35,6 +37,16 @@ afterEach(() => {
 });
 
 describe('prompts.js', () => {
+  describe('deployAliasPrompts()', () => {
+    it('should suggest the default fee for a new deploy alias', () => {
+      const feePrompt = prompts
+        .deployAliasPrompts({ deployAliases: {} })
+        .find((prompt) => prompt.name === 'fee');
+      expect(feePrompt.initial).toBe('0.1');
+      expect(feePrompt.validate(feePrompt.initial)).toBe(true);
+    });
+  });
+
   describe('getDefaultGraphQlEndpoint()', () => {
     it('should return the default endpoint for the known networks', () => {
       expect(getDefaultGraphQlEndpoint('testnet')).toBe(
