@@ -7,7 +7,18 @@ name: Nightly E2E tests
 on:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: 'Run only the tests that match this Playwright --grep pattern (for example, @nuxt-ui). Empty runs all tests.'
+        required: false
+        default: ''
+        type: string
+      linux-only:
+        description: 'Run only the Linux jobs (skip macOS and Windows).'
+        required: false
+        default: false
+        type: boolean
 jobs:
   against-real-network-on-linux:
     timeout-minutes: 185
@@ -46,7 +57,9 @@ jobs:
           os-type: ${{ matrix.os }}
           shell: bash
           network: 'lightnet'
+          test-script: ${{ inputs.grep && format('npm run e2e:test -- --grep "{0}"', inputs.grep) || 'npm run e2e:test' }}
   against-mocked-network-on-macos:
+    if: ${{ !inputs.linux-only }}
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
@@ -63,7 +76,9 @@ jobs:
           os-type: ${{ matrix.os }}
           shell: bash
           network: 'mocked-macos'
+          test-script: ${{ inputs.grep && format('npm run e2e:test -- --grep "{0}"', inputs.grep) || 'npm run e2e:test' }}
   against-mocked-network-on-windows:
+    if: ${{ !inputs.linux-only }}
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
@@ -80,3 +95,4 @@ jobs:
           os-type: ${{ matrix.os }}
           shell: powershell
           network: 'mocked-windows'
+          test-script: ${{ inputs.grep && format('npm run e2e:test -- --grep "{0}"', inputs.grep) || 'npm run e2e:test' }}
