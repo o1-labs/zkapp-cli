@@ -36,9 +36,9 @@ afterEach(() => {
 
 describe('prompts.js', () => {
   describe('getDefaultGraphQlEndpoint()', () => {
-    it('should return the Minascan endpoint for the known networks', () => {
+    it('should return the default endpoint for the known networks', () => {
       expect(getDefaultGraphQlEndpoint('testnet')).toBe(
-        'https://api.minascan.io/node/devnet/v1/graphql'
+        'https://devnet-plain-1.gcp.o1test.net/graphql'
       );
       expect(getDefaultGraphQlEndpoint('mainnet')).toBe(
         'https://api.minascan.io/node/mainnet/v1/graphql'

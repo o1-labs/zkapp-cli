@@ -50,7 +50,7 @@ const Constants = Object.freeze({
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
   // Mina GraphQL API URL that `zk config` suggests for each known network.
   networkGraphQlEndpoints: Object.freeze({
-    testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
+    testnet: 'https://devnet-plain-1.gcp.o1test.net/graphql',
     mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
   }),
 });
