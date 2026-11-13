@@ -11,7 +11,7 @@ import path from 'node:path';
  * @typedef {'master' | 'compatible' | 'develop' | 'mesa' } LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string, networkGraphQlEndpoints: Record<NetworkId, string> }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
@@ -48,6 +48,11 @@ const Constants = Object.freeze({
   lightnetMinaDaemonGraphQlEndpoint: 'http://127.0.0.1:8080/graphql',
   lightnetAccountManagerEndpoint: 'http://127.0.0.1:8181',
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
+  // Mina GraphQL API URL that `zk config` suggests for each known network.
+  networkGraphQlEndpoints: Object.freeze({
+    testnet: 'https://api.minascan.io/node/devnet/v1/graphql',
+    mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
+  }),
 });
 
 // Module external API

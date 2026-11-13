@@ -12,6 +12,7 @@ jest.unstable_mockModule('chalk', () => ({
 }));
 
 let formatPrefixSymbol,
+  getDefaultGraphQlEndpoint,
   getFeepayorChoices,
   sanitizeAliasName,
   sanitizeCustomNetworkId;
@@ -19,6 +20,7 @@ let formatPrefixSymbol,
 beforeAll(async () => {
   const prompts = await import('./prompts.js');
   formatPrefixSymbol = prompts.formatPrefixSymbol;
+  getDefaultGraphQlEndpoint = prompts.getDefaultGraphQlEndpoint;
   getFeepayorChoices = prompts.getFeepayorChoices;
   sanitizeAliasName = prompts.sanitizeAliasName;
   sanitizeCustomNetworkId = prompts.sanitizeCustomNetworkId;
@@ -33,6 +35,23 @@ afterEach(() => {
 });
 
 describe('prompts.js', () => {
+  describe('getDefaultGraphQlEndpoint()', () => {
+    it('should return the Minascan endpoint for the known networks', () => {
+      expect(getDefaultGraphQlEndpoint('testnet')).toBe(
+        'https://api.minascan.io/node/devnet/v1/graphql'
+      );
+      expect(getDefaultGraphQlEndpoint('mainnet')).toBe(
+        'https://api.minascan.io/node/mainnet/v1/graphql'
+      );
+    });
+
+    it('should return an empty string for a custom or missing network', () => {
+      expect(getDefaultGraphQlEndpoint('my-network')).toBe('');
+      expect(getDefaultGraphQlEndpoint('toString')).toBe('');
+      expect(getDefaultGraphQlEndpoint(undefined)).toBe('');
+    });
+  });
+
   describe('formatPrefixSymbol()', () => {
     it('should return a cyan question mark when not submitted', () => {
       const state = { submitted: false, symbols: { question: '?' } };
