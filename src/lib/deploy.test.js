@@ -588,6 +588,40 @@ describe('deploy.js', () => {
     });
   });
 
+  describe('sendGraphQL() request timeout', () => {
+    it('should abort a request after 20 seconds and not send it again', async () => {
+      jest.useRealTimers();
+      // Run the 20 s request timeout at once. Keep the other timers.
+      const realSetTimeout = global.setTimeout;
+      const setTimeoutSpy = jest
+        .spyOn(global, 'setTimeout')
+        .mockImplementation((callback, delay, ...args) =>
+          realSetTimeout(callback, delay === 20000 ? 0 : delay, ...args)
+        );
+      global.fetch = jest.fn(
+        (url, { signal }) =>
+          new Promise((resolve, reject) => {
+            signal.addEventListener('abort', () =>
+              reject(
+                new DOMException('The operation was aborted.', 'AbortError')
+              )
+            );
+          })
+      );
+      const { sendGraphQL } = await import('./deploy.js');
+
+      const result = await sendGraphQL(
+        'http://test.url',
+        'query { syncStatus }'
+      );
+
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 20000);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(result.kind).toBe('error');
+      expect(result.message.name).toBe('AbortError');
+    });
+  });
+
   describe('sendGraphQL() with a stale keep-alive connection', () => {
     beforeEach(() => {
       jest.useRealTimers();
