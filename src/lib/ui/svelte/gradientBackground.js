@@ -6,64 +6,92 @@ export default `
    * @property {import('svelte').Snippet} [children]
    */
 
+  /** @typedef {{ c: number, min: number, max: number, dir: number }} Range */
+
   /** @type {Props} */
   let { children } = $props();
+  /** @type {CanvasRenderingContext2D} */
   let ctx
+  /** @type {Pixel[]} */
   let pixels = []
+  /** @type {HTMLCanvasElement} */
   let canvas
+  /** @type {number} */
   let animationFrameId
 
-  function Color(h, s, l, a) {
-    this.h = h
-    this.s = s
-    this.l = l
-    this.a = a
+  class Color {
+    /**
+     * @param {number} h
+     * @param {number} s
+     * @param {number} l
+     * @param {number} a
+     */
+    constructor(h, s, l, a) {
+      this.h = h
+      this.s = s
+      this.l = l
+      this.a = a
 
-    this.dir = Math.random() > 0.5 ? -1 : 1
+      this.dir = Math.random() > 0.5 ? -1 : 1
+    }
 
-    this.toString = function () {
+    toString() {
       return (
         'hsla(' + this.h + ', ' + this.s + '%, ' + this.l + '%, ' + this.a + ')'
       )
     }
   }
 
-  function Pixel(x, y, w, h, color) {
-    this.x = {
-      c: x,
-      min: 0,
-      max: canvas.width,
-      dir: Math.random() > 0.5 ? -1 : 1,
+  class Pixel {
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {Color} color
+     */
+    constructor(x, y, w, h, color) {
+      /** @type {Range} */
+      this.x = {
+        c: x,
+        min: 0,
+        max: canvas.width,
+        dir: Math.random() > 0.5 ? -1 : 1,
+      }
+
+      /** @type {Range} */
+      this.y = {
+        c: y,
+        min: 0,
+        max: canvas.height,
+        dir: Math.random() > 0.5 ? -1 : 1,
+      }
+
+      /** @type {Range} */
+      this.w = {
+        c: w,
+        min: 2,
+        max: canvas.width,
+        dir: Math.random() > 0.5 ? -1 : 1,
+      }
+
+      /** @type {Range} */
+      this.h = {
+        c: h,
+        min: 2,
+        max: canvas.height,
+        dir: Math.random() > 0.5 ? -1 : 1,
+      }
+
+      this.color = color
+
+      this.direction = Math.random() > 0.1 ? -1 : 1
+
+      this.velocity = (Math.random() * 100 + 100) * 0.01 * this.direction
     }
-
-    this.y = {
-      c: y,
-      min: 0,
-      max: canvas.height,
-      dir: Math.random() > 0.5 ? -1 : 1,
-    }
-
-    this.w = {
-      c: w,
-      min: 2,
-      max: canvas.width,
-      dir: Math.random() > 0.5 ? -1 : 1,
-    }
-
-    this.h = {
-      c: h,
-      min: 2,
-      max: canvas.height,
-      dir: Math.random() > 0.5 ? -1 : 1,
-    }
-
-    this.color = color
-
-    this.direction = Math.random() > 0.1 ? -1 : 1
-
-    this.velocity = (Math.random() * 100 + 100) * 0.01 * this.direction
   }
 
+  /** @param {Pixel} pixel */
   function updatePixel(pixel) {
     if (pixel.x.c <= pixel.x.min || pixel.x.c >= pixel.x.max) {
       pixel.x.dir *= -1
@@ -92,6 +120,7 @@ export default `
     pixel.h.c += 0.005 * pixel.h.dir
   }
 
+  /** @param {Pixel} pixel */
   function renderPixel(pixel) {
     ctx.restore()
 
@@ -116,8 +145,9 @@ export default `
   }
 
   onMount(() => {
-    canvas = document.querySelector('.background-gradients')
-    ctx = canvas.getContext('2d')
+    const context = canvas.getContext('2d')
+    if (!context) return
+    ctx = context
     ctx.save()
 
     pixels = [
@@ -138,7 +168,7 @@ export default `
 </style>
 
 <div class="background">
-  <canvas class="background-gradients" width="6" height="6"></canvas>
+  <canvas bind:this={canvas} class="background-gradients" width="6" height="6"></canvas>
 </div>
 <div class="container">
   {@render children?.()}
