@@ -38,7 +38,7 @@ export {
 };
 
 const DEFAULT_NETWORK_ID = 'testnet';
-const DEFAULT_GRAPHQL = 'https://api.minascan.io/node/devnet/v1/graphql'; // The endpoint used to interact with the network
+const DEFAULT_GRAPHQL = 'https://devnet-plain-1.gcp.o1test.net/graphql'; // The endpoint used to interact with the network
 
 /**
  * Deploy a smart contract to the specified deploy alias. If no deploy alias param is
