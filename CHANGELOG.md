@@ -37,6 +37,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - The Next.js UI scaffold now builds on case-sensitive file systems (Linux). The generated `ZkappWorkerClient.ts` loaded `./zkappWorker.ts` while the scaffold writes `ZkappWorker.ts`, so `next build` failed with `Module not found` everywhere except on case-insensitive file systems such as macOS.
 - `npm run coverage` in a generated project no longer fails: it now runs the native Node.js test runner with `--experimental-test-coverage`, and the unused Jest and Babel leftovers were removed from the template. [#761](https://github.com/o1-labs/zkapp-cli/issues/761)
 - E2E tests now fail fast when the CLI exits before an expected interactive prompt, instead of hanging until the CI job timeout.
+- The SvelteKit UI scaffold now builds with SvelteKit 3 and Vite 8, which `npx sv create` installs. Before, `npm run build` in the generated `ui` failed with `tsconfig_extends_missing` and `module_removed_lib`, and `npm run check` reported type errors. The generated `tsconfig.json` now extends `$app/tsconfig`, the templates load assets with relative paths instead of the removed `$lib` alias, `hooks.server.js` imports the `Handle` type from `@sveltejs/kit/hooks`, the Vite config uses `optimizeDeps.rolldownOptions` instead of the deprecated `esbuildOptions`, and the invalid Next.js `priority` attribute was removed from `<img>` tags. Reported in [#517](https://github.com/o1-labs/zkapp-cli/pull/517).
 
 ## [0.23.0](https://github.com/o1-labs/zkapp-cli/compare/0.22.9...0.23.0) - 2025-08-12
 

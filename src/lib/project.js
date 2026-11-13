@@ -249,7 +249,7 @@ function scaffoldSvelte() {
     build: {
       target: 'esnext'
     },
-    optimizeDeps: { esbuildOptions: { target: 'esnext' } }
+    optimizeDeps: { rolldownOptions: { transform: { target: 'esnext' } } }
   });`
   );
 

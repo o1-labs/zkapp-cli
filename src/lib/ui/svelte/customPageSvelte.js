@@ -1,7 +1,7 @@
 export default `
 <script>
-  import heroMinaLogo from '$lib/assets/hero-mina-logo.svg'
-  import arrowRightSmall from '$lib/assets/arrow-right-small.svg'
+  import heroMinaLogo from '../lib/assets/hero-mina-logo.svg'
+  import arrowRightSmall from '../lib/assets/arrow-right-small.svg'
   import GradientBG from './GradientBG.svelte'
   import { onMount } from 'svelte'
   import { Mina, PublicKey } from 'o1js'
@@ -42,8 +42,7 @@ export default `
           src={heroMinaLogo}
           alt="Mina Logo"
           width="191"
-          height="174"
-          priority />
+          height="174" />
       </a>
       <p class="tagline">
         built with
@@ -67,8 +66,7 @@ export default `
               src={arrowRightSmall}
               alt="Mina Logo"
               width={16}
-              height={16}
-              priority />
+              height={16} />
           </div>
         </h2>
         <p>Explore zkApps, how to build one, and in-depth references</p>
@@ -85,8 +83,7 @@ export default `
               src={arrowRightSmall}
               alt="Mina Logo"
               width={16}
-              height={16}
-              priority />
+              height={16} />
           </div>
         </h2>
         <p>Learn with step-by-step o1js tutorials</p>
@@ -103,8 +100,7 @@ export default `
               src={arrowRightSmall}
               alt="Mina Logo"
               width={16}
-              height={16}
-              priority />
+              height={16} />
           </div>
         </h2>
         <p>Ask questions on our Discord server</p>
@@ -121,8 +117,7 @@ export default `
               src={arrowRightSmall}
               alt="Mina Logo"
               width={16}
-              height={16}
-              priority />
+              height={16} />
           </div>
         </h2>
         <p>Deploy a zkApp to Testnet</p>

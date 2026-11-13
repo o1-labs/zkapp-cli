@@ -20,7 +20,7 @@
 }
 
 .background::before {
-  background: url('$lib/assets/hash-pattern.png');
+  background: url('../lib/assets/hash-pattern.png');
   z-index: 1;
   -webkit-mask-image: linear-gradient(20deg, #000 25%, transparent);
   mask-image: linear-gradient(20deg, #000 25%, transparent);
@@ -151,7 +151,7 @@
         rgba(45, 45, 45, 0.66),
         rgba(45, 45, 45, 0.66)
       ),
-      url('$lib/assets/button-hover-light.png');
+      url('../lib/assets/button-hover-light.png');
     border: 1px solid #2d2d2d;
     background-size: 100% 100%;
     transform: translateZ(-1px);

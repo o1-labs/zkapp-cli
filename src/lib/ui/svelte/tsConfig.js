@@ -1,15 +1,15 @@
 export default `{
-  "extends": "./.svelte-kit/tsconfig.json",
+  // SvelteKit 3 requires the project to extend its built-in configuration.
+  // It sets the module resolution and the path aliases.
+  "extends": "$app/tsconfig",
   "compilerOptions": {
     "target": "es2021",
-    "module": "es2022",
     "lib": ["dom", "esnext"],
     "strict": true,
     "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
@@ -21,9 +21,7 @@ export default `{
     "useDefineForClassFields": false,
     "importHelpers": true,
   },
-  // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
-  //
-  // If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-  // from the referenced tsconfig.json - TypeScript does not merge them in
+  // TypeScript does not merge "include" from the extended configuration.
+  "include": ["src", "vite.config.ts"]
 }
 `;
