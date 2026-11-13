@@ -842,37 +842,73 @@ async function getZkProgram(projectRoot, zkProgramNameArg) {
   return zkProgram;
 }
 
+// Error codes of a request that failed because the server had closed the
+// connection that `fetch` reused from its keep-alive pool.
+const STALE_CONNECTION_ERROR_CODES = ['UND_ERR_SOCKET', 'ECONNRESET', 'EPIPE'];
+
+/**
+ * Lets the event loop run its timers phase and its I/O poll phase once.
+ * `fetch` then drops the idle keep-alive connections that expired or that the
+ * server closed while a CPU-bound step blocked the event loop.
+ */
+async function letFetchDropStaleConnections() {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
 async function sendGraphQL(graphQLUrl, query) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => {
-    controller.abort();
-  }, 20000); // Default to use 20s as a timeout
-  let response;
-  try {
-    let body = JSON.stringify({ operationName: null, query, variables: {} });
-    response = await fetch(graphQLUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-      signal: controller.signal,
-    });
-    const responseJson = await response.json();
-    if (!response.ok || responseJson?.errors) {
-      return {
-        kind: 'error',
-        statusCode: response.status,
-        statusText: response.statusText,
-        message: responseJson.errors,
-      };
+  // A CPU-bound step between two requests (for example, the verification key
+  // compilation or the transaction proof) blocks the event loop, so `fetch`
+  // cannot expire its idle keep-alive connections. If the server closed such a
+  // connection in the meantime, `fetch` can reuse it, and the request fails
+  // with "other side closed" or EPIPE. To prevent this, let the event loop
+  // run before each request. If it still occurs, send a read-only query once
+  // more on a new connection. A mutation is not sent again, because the node
+  // could apply it twice.
+  const isMutation = query.trim().startsWith('mutation');
+  const maxAttempts = isMutation ? 1 : 2;
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    await letFetchDropStaleConnections();
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, 20000); // Default to use 20s as a timeout
+    try {
+      const body = JSON.stringify({
+        operationName: null,
+        query,
+        variables: {},
+      });
+      const response = await fetch(graphQLUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        signal: controller.signal,
+      });
+      const responseJson = await response.json();
+      if (!response.ok || responseJson?.errors) {
+        return {
+          kind: 'error',
+          statusCode: response.status,
+          statusText: response.statusText,
+          message: responseJson.errors,
+        };
+      }
+      return responseJson;
+    } catch (error) {
+      lastError = error;
+      if (!STALE_CONNECTION_ERROR_CODES.includes(error?.cause?.code)) {
+        break;
+      }
+    } finally {
+      clearTimeout(timer);
     }
-    return responseJson;
-  } catch (error) {
-    clearTimeout(timer);
-    return {
-      kind: 'error',
-      message: error,
-    };
   }
+  return {
+    kind: 'error',
+    message: lastError,
+  };
 }
 
 function sendZkAppQuery(accountUpdatesJson) {
