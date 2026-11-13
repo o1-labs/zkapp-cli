@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import path from 'node:path';
 
 jest.unstable_mockModule('chalk', () => ({
   default: {
@@ -107,6 +108,17 @@ beforeEach(() => {
 afterEach(() => {
   jest.restoreAllMocks();
 });
+
+const nuxiInitArgs = [
+  'nuxi@4.0.3',
+  'init',
+  'ui',
+  '--template',
+  'minimal',
+  '--packageManager',
+  'npm',
+  '--no-gitInit',
+];
 
 describe('project.js', () => {
   describe('project()', () => {
@@ -452,7 +464,7 @@ describe('project.js', () => {
 
       expect(shell.mkdir).toHaveBeenCalledWith('-p', 'test-project');
       expect(shell.cd).toHaveBeenCalledWith('test-project');
-      expect(spawnSync).toHaveBeenCalledWith('npx', ['nuxi', 'init', 'ui'], {
+      expect(spawnSync).toHaveBeenCalledWith('npx', nuxiInitArgs, {
         stdio: 'inherit',
         shell: true,
       });
@@ -649,11 +661,61 @@ describe('project.js', () => {
 
       scaffoldNuxt();
 
-      expect(spawnSync).toHaveBeenCalledWith('npx', ['nuxi', 'init', 'ui'], {
+      expect(spawnSync).toHaveBeenCalledWith('npx', nuxiInitArgs, {
         stdio: 'inherit',
         shell: true,
       });
       expect(fs.writeFileSync).toHaveBeenCalled();
+    });
+
+    it('should use the app/ directory of a Nuxt 4 project', async () => {
+      fs.existsSync.mockImplementation(
+        (p) => p === path.join('ui', 'app', 'app.vue')
+      );
+      fs.readFileSync.mockImplementation(() => '<NuxtWelcome />');
+      fs.writeFileSync.mockImplementation(() => {});
+      const { scaffoldNuxt } = await import('./project.js');
+
+      scaffoldNuxt();
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join('ui', 'app', 'app.vue'),
+        '<NuxtPage />'
+      );
+      const indexPage = fs.writeFileSync.mock.calls.find(
+        ([file]) => file === path.join('ui', 'app', 'pages', 'index.vue')
+      );
+      expect(indexPage[1]).toContain(
+        "await import('../../../contracts/build/src/')"
+      );
+      expect(fs.copySync).toHaveBeenCalledWith(
+        expect.stringContaining(path.join('ui', 'nuxt', 'assets')),
+        path.join('ui', 'app', 'assets')
+      );
+      expect(fs.copySync).toHaveBeenCalledWith(
+        expect.stringContaining(path.join('ui', 'nuxt', 'headers.js')),
+        path.join('ui', 'server', 'middleware', 'headers.js')
+      );
+    });
+
+    it('should use the project root of an earlier Nuxt project', async () => {
+      fs.existsSync.mockReturnValue(false);
+      fs.readFileSync.mockImplementation(() => '<NuxtWelcome />');
+      fs.writeFileSync.mockImplementation(() => {});
+      const { scaffoldNuxt } = await import('./project.js');
+
+      scaffoldNuxt();
+
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
+        path.join('ui', 'app.vue'),
+        '<NuxtPage />'
+      );
+      const indexPage = fs.writeFileSync.mock.calls.find(
+        ([file]) => file === path.join('ui', 'pages', 'index.vue')
+      );
+      expect(indexPage[1]).toContain(
+        "await import('../../contracts/build/src/')"
+      );
     });
   });
 
