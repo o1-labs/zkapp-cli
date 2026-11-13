@@ -11,7 +11,7 @@ import path from 'node:path';
  * @typedef {'master' | 'compatible' | 'develop' | 'mesa' } LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string, defaultDeployAliasFee: string }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string, networkGraphQlEndpoints: Record<NetworkId, string>, defaultDeployAliasFee: string }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
@@ -50,6 +50,11 @@ const Constants = Object.freeze({
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
   // Transaction fee (in MINA) that `zk config` suggests for a new deploy alias.
   defaultDeployAliasFee: '0.1',
+  // Mina GraphQL API URL that `zk config` suggests for each known network.
+  networkGraphQlEndpoints: Object.freeze({
+    testnet: 'https://devnet-plain-1.gcp.o1test.net/graphql',
+    mainnet: 'https://api.minascan.io/node/mainnet/v1/graphql',
+  }),
 });
 
 // Module external API

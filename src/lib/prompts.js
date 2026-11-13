@@ -9,6 +9,7 @@ export { prompts };
 // Module internal API (exported for testing purposes)
 export {
   formatPrefixSymbol,
+  getDefaultGraphQlEndpoint,
   getFeepayorChoices,
   sanitizeAliasName,
   sanitizeCustomNetworkId,
@@ -80,6 +81,10 @@ const prompts = {
         const style =
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Set the Mina GraphQL API URL to deploy to:');
+      },
+      // Suggest the endpoint of the selected network. A custom network has no suggestion.
+      initial() {
+        return getDefaultGraphQlEndpoint(this.state.answers?.networkId);
       },
       prefix: formatPrefixSymbol,
       validate: (val) => {
@@ -274,6 +279,17 @@ const prompts = {
     },
   ],
 };
+
+/**
+ * Returns the Mina GraphQL API URL to suggest for a network ID.
+ * @param {string} [networkId] The network ID that the user selected.
+ * @returns {string} The URL, or an empty string for a custom network.
+ */
+function getDefaultGraphQlEndpoint(networkId) {
+  return Object.hasOwn(Constants.networkGraphQlEndpoints, networkId ?? '')
+    ? Constants.networkGraphQlEndpoints[networkId]
+    : '';
+}
 
 function formatPrefixSymbol(state) {
   // Shows a cyan question mark when not submitted.

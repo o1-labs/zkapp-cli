@@ -13,6 +13,7 @@ jest.unstable_mockModule('chalk', () => ({
 
 let prompts,
   formatPrefixSymbol,
+  getDefaultGraphQlEndpoint,
   getFeepayorChoices,
   sanitizeAliasName,
   sanitizeCustomNetworkId;
@@ -21,6 +22,7 @@ beforeAll(async () => {
   const promptsModule = await import('./prompts.js');
   prompts = promptsModule.prompts;
   formatPrefixSymbol = promptsModule.formatPrefixSymbol;
+  getDefaultGraphQlEndpoint = promptsModule.getDefaultGraphQlEndpoint;
   getFeepayorChoices = promptsModule.getFeepayorChoices;
   sanitizeAliasName = promptsModule.sanitizeAliasName;
   sanitizeCustomNetworkId = promptsModule.sanitizeCustomNetworkId;
@@ -42,6 +44,23 @@ describe('prompts.js', () => {
         .find((prompt) => prompt.name === 'fee');
       expect(feePrompt.initial).toBe('0.1');
       expect(feePrompt.validate(feePrompt.initial)).toBe(true);
+    });
+  });
+
+  describe('getDefaultGraphQlEndpoint()', () => {
+    it('should return the default endpoint for the known networks', () => {
+      expect(getDefaultGraphQlEndpoint('testnet')).toBe(
+        'https://devnet-plain-1.gcp.o1test.net/graphql'
+      );
+      expect(getDefaultGraphQlEndpoint('mainnet')).toBe(
+        'https://api.minascan.io/node/mainnet/v1/graphql'
+      );
+    });
+
+    it('should return an empty string for a custom or missing network', () => {
+      expect(getDefaultGraphQlEndpoint('my-network')).toBe('');
+      expect(getDefaultGraphQlEndpoint('toString')).toBe('');
+      expect(getDefaultGraphQlEndpoint(undefined)).toBe('');
     });
   });
 
