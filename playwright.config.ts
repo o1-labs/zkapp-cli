@@ -9,7 +9,9 @@ const config: PlaywrightTestConfig = {
   outputDir: './reports/test-artifacts',
   // Keep this well below the CI job `timeout-minutes` so that a stuck test
   // fails (and gets reported) instead of being killed with the whole job.
-  timeout: 60 * 60 * 1000,
+  // The slowest tests (zkApp deployment, UI project generation) take about
+  // 4 minutes on Linux. A test and its retry must not use the job budget.
+  timeout: 30 * 60 * 1000,
   expect: {
     timeout: 15 * 1000,
   },
@@ -27,7 +29,13 @@ const config: PlaywrightTestConfig = {
   // Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions.
   use: {
     browserName: 'chromium',
-    actionTimeout: 0,
+    // Without a limit, an action on a page that shows a build error (for
+    // example, a click on a link that is not rendered) waits until the test
+    // timeout.
+    actionTimeout: 2 * 60 * 1000,
+    // The first request to a UI dev server compiles the page (about 70 s for
+    // Next.js on a CI runner).
+    navigationTimeout: 5 * 60 * 1000,
     headless: !!process.env.CI,
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,

@@ -84,7 +84,9 @@ export class LandingPage {
 
   async openQuestionsPage(): Promise<void> {
     const newPage = await this.openLinkInNewTab(this.questionsLink);
-    await this.checkPageTitle(newPage, 'Discord');
+    // The Discord invite page title is the server name ("Mina Protocol"),
+    // and Discord can change it. Check that the link opened Discord.
+    expect(new URL(newPage.url()).hostname).toMatch(/(^|\.)discord\.(com|gg)$/);
   }
 
   async openDeployPage(): Promise<void> {
