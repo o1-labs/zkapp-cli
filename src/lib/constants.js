@@ -11,7 +11,7 @@ import path from 'node:path';
  * @typedef {'master' | 'compatible' | 'develop' | 'mesa' } LightnetMinaBranch
  * @typedef {'Spam' | 'Trace' | 'Debug' | 'Info' | 'Warn' | 'Error' | 'Fatal'} LightnetMinaLogLevel
  *
- * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string }}
+ * @type {{ uiTypes: UiType[], exampleTypes: ExampleType[], feePayerCacheDir: string, networkIds: NetworkId[], lightnetWorkDir: string, lightnetModes: LightnetMode[], lightnetTypes: LightnetType[], lightnetProofLevels: LightnetProofLevel[], lightnetMinaBranches: LightnetMinaBranch[], lightnetDefaultMinaVersion: string, lightnetProcessToLogFileMapping: Map<string, string>, lightnetMinaProcessesLogLevels: LightnetMinaLogLevel[], lightnetMinaDaemonGraphQlEndpoint: string, lightnetAccountManagerEndpoint: string, lightnetArchiveNodeApiEndpoint: string, defaultDeployAliasFee: string }}
  */
 const Constants = Object.freeze({
   uiTypes: ['next', 'svelte', 'nuxt', 'empty', 'none'],
@@ -48,6 +48,8 @@ const Constants = Object.freeze({
   lightnetMinaDaemonGraphQlEndpoint: 'http://127.0.0.1:8080/graphql',
   lightnetAccountManagerEndpoint: 'http://127.0.0.1:8181',
   lightnetArchiveNodeApiEndpoint: 'http://127.0.0.1:8282',
+  // Transaction fee (in MINA) that `zk config` suggests for a new deploy alias.
+  defaultDeployAliasFee: '0.1',
 });
 
 // Module external API

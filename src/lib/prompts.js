@@ -102,6 +102,7 @@ const prompts = {
           state.submitted && !state.cancelled ? chalk.green : chalk.reset;
         return style('Set transaction fee to use when deploying (in MINA):');
       },
+      initial: Constants.defaultDeployAliasFee,
       prefix: formatPrefixSymbol,
       validate: (val) => {
         if (!val || val.trim().length === 0)
