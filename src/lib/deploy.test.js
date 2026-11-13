@@ -277,7 +277,7 @@ describe('deploy.js', () => {
         "yellow: No 'url' property is specified for this deploy alias in config.json."
       );
       expect(console.log).toHaveBeenCalledWith(
-        'yellow: The default (https://proxy.devnet.minaexplorer.com/graphql) one will be used instead.'
+        'yellow: The default (https://api.minascan.io/node/devnet/v1/graphql) one will be used instead.'
       );
       checkSuccessfulDeployment();
     });
