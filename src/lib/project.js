@@ -529,14 +529,36 @@ loadCOIServiceWorker();
 }
 
 function scaffoldNuxt() {
-  spawnSync('npx', ['nuxi', 'init', 'ui'], {
-    stdio: 'inherit',
-    shell: true,
-  });
+  // Pass all `nuxi init` options, so that the command also works in a
+  // non-interactive terminal (CI) and does not ask the user about them.
+  spawnSync(
+    'npx',
+    [
+      `nuxi@${Constants.nuxiVersion}`,
+      'init',
+      'ui',
+      '--template',
+      'minimal',
+      '--packageManager',
+      'npm',
+      '--no-gitInit',
+    ],
+    {
+      stdio: 'inherit',
+      shell: true,
+    }
+  );
 
   if (fs.existsSync(path.join('ui', '.git'))) {
     shell.rm('-rf', path.join('ui', '.git')); // Remove NuxtJS' .git; we will init .git in our monorepo's root.
   }
+
+  // Nuxt 4 keeps the application sources (app.vue, pages, components and
+  // assets) in the `app/` directory, and the `~` alias points to it.
+  // Earlier versions keep them in the project root.
+  const nuxtSrcDir = fs.existsSync(path.join('ui', 'app', 'app.vue'))
+    ? path.join('ui', 'app')
+    : 'ui';
 
   // Add server middleware file to setCOOP and COEP
   fs.mkdirSync(path.join('ui', 'server', 'middleware'), { recursive: true });
@@ -552,7 +574,7 @@ function scaffoldNuxt() {
     `export default defineNuxtConfig({
     vite: {
       build: { target: "esnext" },
-      optimizeDeps: { esbuildOptions: { target: "esnext" } },
+      optimizeDeps: { rolldownOptions: { transform: { target: "esnext" } } },
     },
     css: ['~/assets/styles/globals.css'],
   `
@@ -560,26 +582,38 @@ function scaffoldNuxt() {
 
   fs.writeFileSync(path.join('ui', 'nuxt.config.ts'), newNuxtConfig);
 
-  const appVue = fs.readFileSync(path.join('ui', 'app.vue'), 'utf8');
+  const appVue = fs.readFileSync(path.join(nuxtSrcDir, 'app.vue'), 'utf8');
   // Replace the nuxt welcome page with the index landing page at the root of the nuxt project
   const newAppVue = appVue.replace('Welcome', 'Page');
-  fs.writeFileSync(path.join('ui', 'app.vue'), newAppVue);
+  fs.writeFileSync(path.join(nuxtSrcDir, 'app.vue'), newAppVue);
 
-  fs.mkdirSync(path.join('ui', 'pages'));
+  const pagesDir = path.join(nuxtSrcDir, 'pages');
+  fs.mkdirsSync(pagesDir);
 
-  fs.writeFileSync(path.join('ui', 'pages', 'index.vue'), customNuxtIndex);
+  // The index page imports the smart contracts from the `contracts` directory.
+  const contractsImportPath = path
+    .relative(pagesDir, path.join('contracts', 'build', 'src'))
+    .split(path.sep)
+    .join('/');
+  fs.writeFileSync(
+    path.join(pagesDir, 'index.vue'),
+    customNuxtIndex.replace(
+      "'../../contracts/build/src/'",
+      `'${contractsImportPath}/'`
+    )
+  );
 
-  fs.mkdirsSync(path.join('ui', 'components'));
+  fs.mkdirsSync(path.join(nuxtSrcDir, 'components'));
 
   fs.writeFileSync(
-    path.join('ui', 'components', 'GradientBG.vue'),
+    path.join(nuxtSrcDir, 'components', 'GradientBG.vue'),
     nuxtGradientBackground
   );
 
   // Adds landing page assets directory and files to Nuxt project.
   fs.copySync(
     path.join(__dirname, 'ui', 'nuxt', 'assets'),
-    path.join('ui', 'assets')
+    path.join(nuxtSrcDir, 'assets')
   );
   // Removes nuxt static assets
   fs.emptyDirSync(path.join('ui', 'public'));
