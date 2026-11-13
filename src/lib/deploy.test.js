@@ -534,9 +534,13 @@ describe('deploy.js', () => {
   });
 
   describe('sendGraphQL()', () => {
+    // sendGraphQL() lets the event loop run before each request, so these
+    // tests use real timers.
+    beforeEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should send a GraphQL request and return the response', async () => {
-      jest.useFakeTimers();
-      jest.spyOn(global, 'setTimeout');
       global.fetch = jest.fn(() =>
         Promise.resolve({
           ok: true,
@@ -551,8 +555,7 @@ describe('deploy.js', () => {
     });
 
     it('should handle errors and return error object', async () => {
-      jest.useFakeTimers();
-      jest.spyOn(global, 'setTimeout');
+      jest.spyOn(global, 'clearTimeout');
       global.fetch = jest.fn(() => Promise.reject(new Error('network error')));
       const { sendGraphQL } = await import('./deploy.js');
 
@@ -562,13 +565,12 @@ describe('deploy.js', () => {
         kind: 'error',
         message: new Error('network error'),
       });
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      jest.runAllTimers();
+      // The request timeout timer is cleared.
+      expect(clearTimeout).toHaveBeenCalledTimes(1);
     });
 
     it('should handle failed request and return error object (!response.ok)', async () => {
-      jest.useFakeTimers();
-      jest.spyOn(global, 'setTimeout');
+      jest.spyOn(global, 'clearTimeout');
       global.fetch = jest.fn(() =>
         Promise.resolve({
           ok: false,
@@ -582,8 +584,109 @@ describe('deploy.js', () => {
       expect(result).toEqual({
         kind: 'error',
       });
-      expect(setTimeout).toHaveBeenCalledTimes(1);
-      jest.runAllTimers();
+      expect(clearTimeout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('sendGraphQL() request timeout', () => {
+    it('should abort a request after 20 seconds and not send it again', async () => {
+      jest.useRealTimers();
+      // Run the 20 s request timeout at once. Keep the other timers.
+      const realSetTimeout = global.setTimeout;
+      const setTimeoutSpy = jest
+        .spyOn(global, 'setTimeout')
+        .mockImplementation((callback, delay, ...args) =>
+          realSetTimeout(callback, delay === 20000 ? 0 : delay, ...args)
+        );
+      global.fetch = jest.fn(
+        (url, { signal }) =>
+          new Promise((resolve, reject) => {
+            signal.addEventListener('abort', () =>
+              reject(
+                new DOMException('The operation was aborted.', 'AbortError')
+              )
+            );
+          })
+      );
+      const { sendGraphQL } = await import('./deploy.js');
+
+      const result = await sendGraphQL(
+        'http://test.url',
+        'query { syncStatus }'
+      );
+
+      expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 20000);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(result.kind).toBe('error');
+      expect(result.message.name).toBe('AbortError');
+    });
+  });
+
+  describe('sendGraphQL() with a stale keep-alive connection', () => {
+    beforeEach(() => {
+      jest.useRealTimers();
+    });
+
+    const socketError = () =>
+      new TypeError('fetch failed', {
+        cause: Object.assign(new Error('other side closed'), {
+          code: 'UND_ERR_SOCKET',
+        }),
+      });
+
+    it('should send a query again when the server closed the connection', async () => {
+      global.fetch = jest
+        .fn()
+        .mockRejectedValueOnce(socketError())
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ data: { account: { nonce: '1' } } }),
+        });
+      const { sendGraphQL } = await import('./deploy.js');
+
+      const result = await sendGraphQL(
+        'http://test.url',
+        'query { syncStatus }'
+      );
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ data: { account: { nonce: '1' } } });
+    });
+
+    it('should send a query at most two times', async () => {
+      global.fetch = jest.fn().mockRejectedValue(socketError());
+      const { sendGraphQL } = await import('./deploy.js');
+
+      const result = await sendGraphQL(
+        'http://test.url',
+        'query { syncStatus }'
+      );
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(result.kind).toBe('error');
+      expect(result.message.cause.code).toBe('UND_ERR_SOCKET');
+    });
+
+    it('should not send a mutation again', async () => {
+      global.fetch = jest.fn().mockRejectedValue(socketError());
+      const { sendGraphQL } = await import('./deploy.js');
+
+      const result = await sendGraphQL(
+        'http://test.url',
+        '\n  mutation { sendZkapp(input: {}) { zkapp { id } } }'
+      );
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(result.kind).toBe('error');
+    });
+
+    it('should not send a query again after a different error', async () => {
+      global.fetch = jest.fn().mockRejectedValue(new Error('network error'));
+      const { sendGraphQL } = await import('./deploy.js');
+
+      await sendGraphQL('http://test.url', 'query { syncStatus }');
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1625,7 +1728,9 @@ function setupDeploymentMocks({
   syncStatus,
   isFailedZkAppTxn,
 } = {}) {
-  jest.useFakeTimers();
+  // sendGraphQL() lets the event loop run before each request, so the fake
+  // timers must advance with real time.
+  jest.useFakeTimers({ advanceTimers: true });
   findPrefix.mockResolvedValue('/project/root');
   jest.spyOn(global, 'fetch').mockImplementation(() =>
     Promise.resolve({
