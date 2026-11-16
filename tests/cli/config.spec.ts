@@ -211,7 +211,10 @@ test.describe('zkApp-CLI', () => {
               networkId,
               Constants.networkIds
             ),
-            'Set the Mina GraphQL API URL to deploy to': ['enter'],
+            // The URL prompt suggests the endpoint of the selected network, and
+            // Enter on an empty input accepts it. A whitespace-only input is
+            // validated, so it shows the "required" error.
+            'Set the Mina GraphQL API URL to deploy to': [' ', 'enter'],
             'Url is required.': [' ', 'enter'],
             'Url is required': ['backSpace', 'not-url', 'backSpace', 'enter'],
             'Enter a valid URL.': [
@@ -219,7 +222,8 @@ test.describe('zkApp-CLI', () => {
               minaGraphQlEndpoint,
               'enter',
             ],
-            'Set transaction fee to use when deploying': ['enter'],
+            // The fee prompt suggests a default fee (see the URL prompt above).
+            'Set transaction fee to use when deploying': [' ', 'enter'],
             'Fee is required': [' ', 'enter'],
             'Fee is required.': ['backSpace', ' -1 ', 'enter'],
             "Fee can't be negative": [
