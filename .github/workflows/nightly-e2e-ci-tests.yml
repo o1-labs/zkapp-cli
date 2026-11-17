@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         node: [22, 24]
         os: [ubuntu-24.04]
@@ -63,7 +63,7 @@ jobs:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         node: [22, 24]
         os: [macos-latest]
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 185
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         node: [22, 24]
         os: [windows-latest]
