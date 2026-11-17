@@ -98,8 +98,10 @@ export class LandingPage {
   }
 
   private async checkPageTitle(page: Page, expected: string): Promise<void> {
-    const title = await page.title();
-    expect(title).toContain(expected);
+    // The docs site can show a generic title ("Mina Documentation") first and
+    // set the page title later, so wait for it instead of reading it once.
+    const escaped = expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await expect(page).toHaveTitle(new RegExp(escaped));
   }
 
   private async openLinkInNewTab(locator: Locator): Promise<Page> {
