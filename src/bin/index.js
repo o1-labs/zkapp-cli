@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// Must be imported before any enquirer prompt runs.
+import '../lib/enquirer-keypress-fix.js';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'node:path';
